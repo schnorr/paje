@@ -1,4 +1,8 @@
 2005-02-17  Benhur Stein <benhur@inf.ufsm.br>
+	* General/DataScanner.m: hack to read numbers from trace file in
+	  a locale independent way (solves bug #303193).
+
+2005-02-17  Benhur Stein <benhur@inf.ufsm.br>
 	* Allow files with any extension to be selected in the open file
 	  panel.
 
