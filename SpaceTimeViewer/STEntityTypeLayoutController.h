@@ -35,6 +35,8 @@
     IBOutlet NSMatrix *drawMatrix;
     IBOutlet NSMatrix *highlightMatrix;
     IBOutlet NSForm *fields;
+    IBOutlet NSForm *otherFields;
+    IBOutlet NSBox *otherFieldsBox;
     IBOutlet NSStepper *stepper0;
     IBOutlet NSStepper *stepper1;
     IBOutlet NSButton *switch0;

@@ -595,6 +595,27 @@
     return lineWidth;
 }
 
+
+- (void)setMinValue:(float)val
+{
+    minValue = val;
+}
+
+- (float)minValue
+{
+    return minValue;
+}
+
+- (void)setMaxValue:(float)val
+{
+    maxValue = val;
+}
+
+- (float)maxValue
+{
+    return maxValue;
+}
+
 @end
 
 

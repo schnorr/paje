@@ -463,6 +463,7 @@
     drawingType = [layoutDescriptor drawingType];
     [matrices setHidden:NO];
     [switch0 setHidden:YES];
+    [otherFieldsBox setHidden:YES];
 
     switch (drawingType) {
         case PajeEventDrawingType :
@@ -488,11 +489,22 @@
             field2Value = 0;
             break;
         case PajeVariableDrawingType :
-            field1Name = @"Height:";
-            field2Name = @"Line width:";
-            field1Value = [(STVariableTypeLayout *)layoutDescriptor height];
-            field2Value = [(STVariableTypeLayout *)layoutDescriptor lineWidth];
+            field1Name = nil;
+            //field1Name = @"Height:";
+            //field2Name = @"Line width:";
+            //field1Value = [(STVariableTypeLayout *)layoutDescriptor height];
+            //field2Value = [(STVariableTypeLayout *)layoutDescriptor lineWidth];
+            [[otherFields cellAtIndex:0] setFloatValue:
+                    [(STVariableTypeLayout *)layoutDescriptor height]];
+            [[otherFields cellAtIndex:1] setFloatValue:
+                    [(STVariableTypeLayout *)layoutDescriptor lineWidth]];
+            [[otherFields cellAtIndex:2] setFloatValue:
+                    [(STVariableTypeLayout *)layoutDescriptor minValue]];
+            [[otherFields cellAtIndex:3] setFloatValue:
+                    [(STVariableTypeLayout *)layoutDescriptor maxValue]];
+
             [matrices setHidden:YES];
+            [otherFieldsBox setHidden:NO];
             break;
         case PajeContainerDrawingType :
             field1Name = @"Container Separation:";
@@ -506,6 +518,7 @@
         default:
             NSAssert1(0, @"Invalid drawing type %d", drawingType);
     }
+    if (field1Name != nil) {
     field1 = [fields cellAtIndex:0];
     [field1 setTitle:field1Name];
     [field1 setFloatValue:field1Value];
@@ -526,6 +539,7 @@
         }
         [stepper1 setHidden:YES];
         [[stepper1 superview] setNeedsDisplay:YES];
+    }
     }
     
     [self setupShapeMatrix];
@@ -580,8 +594,16 @@
             [(STLinkTypeLayout *)layoutDescriptor setLineWidth:field1Value];
             break;
         case PajeVariableDrawingType :
-            [(STVariableTypeLayout *)layoutDescriptor setHeight:field1Value];
-            [(STVariableTypeLayout *)layoutDescriptor setLineWidth:field2Value];
+            //[(STVariableTypeLayout *)layoutDescriptor setHeight:field1Value];
+            //[(STVariableTypeLayout *)layoutDescriptor setLineWidth:field2Value];
+            [(STVariableTypeLayout *)layoutDescriptor setHeight:
+                    [[otherFields cellAtIndex:0] floatValue]];
+            [(STVariableTypeLayout *)layoutDescriptor setLineWidth:
+                    [[otherFields cellAtIndex:1] floatValue]];
+            [(STVariableTypeLayout *)layoutDescriptor setMinValue:
+                    [[otherFields cellAtIndex:2] floatValue]];
+            [(STVariableTypeLayout *)layoutDescriptor setMaxValue:
+                    [[otherFields cellAtIndex:3] floatValue]];
             break;
         case PajeContainerDrawingType :
             [(STContainerTypeLayout *)layoutDescriptor

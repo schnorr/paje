@@ -154,11 +154,18 @@
 @interface STVariableTypeLayout : STEntityTypeLayout
 {
     float lineWidth;
+    float minValue;
+    float maxValue;
     // mais coisas
 }
 
 - (void)setLineWidth:(float)val;
 - (float)lineWidth;
+
+- (void)setMinValue:(float)val;
+- (float)minValue;
+- (void)setMaxValue:(float)val;
+- (float)maxValue;
 
 @end
 

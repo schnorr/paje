@@ -248,8 +248,12 @@ do { \
     
     entityType = [layout entityType];
     
-    min = [[filter minValueForEntityType:entityType] floatValue];
-    max = [[filter maxValueForEntityType:entityType] floatValue];
+    min = [layout minValue];
+    max = [layout maxValue];
+    if (max <= min) {
+        min = [[filter minValueForEntityType:entityType] floatValue];
+        max = [[filter maxValueForEntityType:entityType] floatValue];
+    }
 
     if (min != max) {
         scale = -([layout height] - 4) / (max - min);
