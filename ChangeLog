@@ -1,6 +1,8 @@
-2005-01-04  Vincent Danjean <Vincent.Danjean@ens-lyon.org>
+2005-01-04  (1.2.1) Vincent Danjean <Vincent.Danjean@ens-lyon.org>
 
 	* Bump to version 1.2.1 to make a release on objectweb
+	* Version NEED to be set in changelog so that release can be
+	  easily generated
 	
 2004-12-21  Benhur Stein  <benhur@inf.ufsm.br>
 
