@@ -1,3 +1,8 @@
+2004-12-21  Benhur Stein  <benhur@inf.ufsm.br>
+
+	* Paje/PajeController.m: fixed typo in filter name
+	  corrects bug #301134 (reported by Gregory)
+
 2004-12-14  Vincent Danjean <Vincent.Danjean@ens-lyon.org>
 
 	* Bump to version 1.2 to make the first release on objectweb

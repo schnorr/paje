@@ -123,7 +123,7 @@ static PajeController *uniqueController;
     [self loadBundleNamed:@"ContainerFilter"];
     [self loadBundleNamed:@"OrderFilter"];
     [self loadBundleNamed:@"ReductionFilter"];
-    [self loadBundleNamed:@"ImbricationLimitFilter"];
+    [self loadBundleNamed:@"ImbricationFilter"];
 
     [self loadBundleNamed:@"SpaceTimeViewer"];
 }
