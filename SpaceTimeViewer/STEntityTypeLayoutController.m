@@ -154,7 +154,7 @@
     [shapeMatrix renewRows:1 columns:[shapeFunctions count]];
     shapeFunctionsEnumerator = [shapeFunctions objectEnumerator];
     while ((shapeFunction = [shapeFunctionsEnumerator nextObject]) != nil) {
-        NSCell *cell;
+        NSButtonCell *cell;
         imageRep = [[[ShapeImageRep alloc]
                             initWithDrawSelector:@selector(drawShape:)
                                         delegate:self] autorelease];
@@ -169,6 +169,7 @@
         cell = [shapeMatrix cellAtRow:0 column:col];
         [cell setImage:image];
         [cell setRepresentedObject:shapeFunction];
+        [cell setButtonType:NSOnOffButton];
         if (selectedShapeFunction == shapeFunction) {
             [shapeMatrix selectCellAtRow:0 column:col];
         }
@@ -206,8 +207,8 @@
     
     drawFunctionsEnumerator = [drawFunctions objectEnumerator];
     while ((drawFunction = [drawFunctionsEnumerator nextObject]) != nil) {
-        NSCell *drawCell;
-        NSCell *highlightCell;
+        NSButtonCell *drawCell;
+        NSButtonCell *highlightCell;
         imageRep = [[[ShapeImageRep alloc]
                                 initWithDrawSelector:@selector(drawDraw:)
                                             delegate:self] autorelease];
@@ -225,6 +226,8 @@
         [highlightCell setImage:image];
         [drawCell setRepresentedObject:drawFunction];
         [highlightCell setRepresentedObject:drawFunction];
+        [drawCell setButtonType:NSOnOffButton];
+        [highlightCell setButtonType:NSOnOffButton];
         if (selectedDrawFunction == drawFunction) {
             [drawMatrix selectCellAtRow:0 column:col];
         }

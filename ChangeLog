@@ -1,4 +1,8 @@
 2005-01-05  Benhur Stein <benhur@inf.ufsm.br>
+	* SpaceTimeViewer/STEntityTypeLayoutController.m: made highlighting
+	  of selected buttons in "Shapes&Sizes" work again
+
+2005-01-05  Benhur Stein <benhur@inf.ufsm.br>
 	* General/PajeEntityInspector.m: removed debug message
 
 2005-01-05  Benhur Stein <benhur@inf.ufsm.br>
