@@ -1,3 +1,6 @@
+2005-01-05  Benhur Stein <benhur@inf.ufsm.br>
+	* Paje/Paje_main.m, Paje/PajeInfo.plist: Changed Copyright notice
+
 2005-01-04  (1.2.2) Vincent Danjean <Vincent.Danjean@ens-lyon.org>
 
 	* Version NEED to be set in changelog so that release can be
