@@ -1,0 +1,286 @@
+defineps PSInit()
+
+/l {
+% w h x y
+    moveto rlineto
+} def
+
+/arrow {
+% x1 y1 r x2 y2
+2 copy 5 index sub exch 6 index sub     % stack= x1 y1 r x2 y2 y2-y1 x2-x1
+2 copy 0 eq exch 0 eq and 
+{ pop pop pop pop pop pop pop } % do nothing if points are equal
+{
+    atan                                % stack= x1 y1 r x2 y2 angle
+    3 1 roll newpath moveto             % stack= x1 y1 r angle (currpt= x2 y2)
+%    newpath 2 copy moveto
+%    3 index sub exch 4 index sub atan 
+    dup rotate
+    % draw the triangle
+    -7 2.5 rlineto
+    0 -2.5 rlineto currentpoint         % save the point in the middle of the base
+    0 -2.5 rlineto
+    closepath
+    gsave
+      0 setlinejoin stroke
+    grestore
+    fill
+                                        % stack= x1 y1 r angle xm ym
+    moveto                              % the middle of the base
+    dup neg rotate
+    dup 360 add arc gsave stroke grestore fill % draw a dot at base of arrow
+} ifelse
+} def
+
+/a {
+% w h x y
+    moveto
+    2 copy dup mul exch dup mul add sqrt % stack = w h length
+    dup 0 eq
+    {
+        pop pop pop
+    }
+    {
+        3 1 roll                         % stack = l w h
+        exch atan                        % stack = l angle
+        rotate
+        currentpoint                     % stack = l x y
+        3 -1 roll                        % stack = x y l
+        7 sub 0 rmoveto                  % stack = x y ; curr = base of triangle
+        0 2.5 rlineto                    % up
+        7 -2.5 rlineto                   % to arrow tip
+        -7 -2.5 rlineto closepath        % back down and to line
+        1.5 0 360 arc                    % main line and dot at start
+    } ifelse
+} def
+
+/r {   % w h x y  r  -      makes the path of a rectangle
+    moveto                % w h
+    dup 0 exch rlineto    % w h
+    exch 0 rlineto        % h
+    neg 0 exch rlineto
+    closepath
+} def
+
+/rect {
+% x y w h
+    4 copy
+    rectfill
+gsave
+    0 0 0 setrgbcolor
+    rectstroke
+grestore
+} def
+
+/rectcolor {
+% x y w h r g b
+    setrgbcolor
+    4 copy
+    rectfill
+gsave
+    0 0 0 setrgbcolor
+    rectstroke
+grestore
+} def
+
+/hrect {
+% x y w h
+    4 copy
+    4 copy
+    rectfill
+    rectstroke
+gsave
+%    0 0 0 setrgbcolor
+%    [2 3] 0 setdash
+    1 1 1 setrgbcolor
+    rectstroke
+grestore
+} def
+
+/t {
+% w h x y
+    newpath
+    moveto
+    exch dup 2 div          % stack= h w w/2
+    dup 0 rmoveto neg       % stack= h w -w/2
+    3 -1 roll               % stack= w -w/2 h
+    rlineto 0 rlineto
+    closepath
+} def
+
+% draws a pin
+/p {
+% w h x y
+    newpath
+    exch 4 -1 roll          % h y x w
+    2 div dup dup 4 -1 roll % h y w/2 w/2 w/2 x
+    add dup 4 index         % h y w/2 w/2 x+w/2 x+w/2 y
+    moveto                  % h y w/2 w/2 x+w/2
+    5 2 roll                % w/2 x+w/2 h y w/2
+    sub add 3 -1 roll       % x+w/2 y+h-w/2 w/2
+    -90 270 arc
+} def
+
+/triangle {
+% w h x y
+    newpath
+    moveto
+    exch dup 2 div          % stack= h w w/2
+    dup 0 rmoveto neg       % stack= h w -w/2
+    3 -1 roll               % stack= w -w/2 h
+    rlineto 0 rlineto
+    closepath
+    gsave fill grestore
+gsave
+    0 0 0 setrgbcolor
+    stroke
+grestore
+} def
+
+/htriangle {
+% w h x y
+    newpath
+    moveto
+    exch dup 2 div neg      % stack= h w -w/2
+    3 -1 roll               % stack= w -w/2 h
+    rlineto 0 rlineto
+    closepath
+    gsave fill grestore
+%    0.4 0.4 0.4 setrgbcolor
+    0.7 0.7 0.7 setrgbcolor
+    stroke
+} def
+
+endps
+
+
+defineps PSLine(float x, y, w, h)
+    w h x y l
+endps
+
+defineps PSStrokeLine(float x, y, w, h)
+    w h x y l stroke
+endps
+
+defineps PSLineHit(float px, py, x1, y1, x2, y2 | boolean *hit)
+    px py 
+    {
+        x1 y1 x2 y2 setbbox
+        x1 y1 moveto
+        x2 y2 lineto
+    }
+    inustroke
+    hit
+endps
+
+defineps PSoldArrow(float x1, y1, x2, y2)
+%    [2 1] 0 setdash
+    x1 y1 1.5 x2 y2 arrow
+endps
+
+defineps PSArrow(float x, y, w, h)
+%    [2 1] 0 setdash
+    w h x y a
+endps
+
+defineps PSRectcol(float r, g, b, x, y, w, h)
+    x y w h r g b rectcolor
+endps
+
+defineps PSRect(float x, y, w, h)
+    w h x y r
+endps
+
+defineps PSHRect(float x, y, w, h)
+    x y w h hrect
+endps
+
+defineps PSRect2(float x, y, w, h)
+    currentrgbcolor
+    0 0 0 setrgbcolor
+    x y w h rectstroke
+    setrgbcolor
+    x y w h rectfill
+endps
+
+defineps PSPin(float x, y, w, h)
+    w h x y p
+endps
+defineps PSTriangle(float x, y, w, h)
+    w h x y t
+endps
+defineps PSHTriangle(float x, y, w, h)
+    w h x y htriangle
+endps
+defineps PSUTriangle(float xl, xc, xr, yl, yu)
+{
+    ucache
+    xl yl xr yu setbbox
+    xc yl moveto
+    xl yu lineto
+    xr yu lineto
+    closepath
+} cvlit
+endps
+
+defineps PSDrawUserObject(userobject o; float x, y, w, h)
+    gsave
+%    w h scale
+    x y translate
+    o ufill
+    0 setgray
+    o ustroke
+    grestore
+endps
+
+defineps PSTriangleHit(float px, py, x, y, w, h | boolean *hit)
+    px py 
+%    {
+%        x y x w add y h add setbbox
+newpath
+        x y moveto
+        w 2 div neg h rlineto
+        w 0 rlineto
+        closepath
+%    }
+    infill
+    hit
+endps
+
+defineps PSFillAndFrameBlack()
+    gsave
+    fill
+    grestore
+    0 setgray
+    stroke
+endps
+
+defineps PSFillAndFrameWhite()
+    gsave
+    fill
+    grestore
+    1 setgray
+    stroke
+endps
+
+defineps PSFrameWhite()
+    1 setgray
+    stroke
+endps
+
+defineps PSFillAndDashedStrokeBlack()
+    gsave
+    fill
+    grestore
+    0 setgray
+    2 setlinewidth
+    [6 3 3 3 1 6] 0 setdash
+    stroke
+endps
+
+defineps PSDashedStroke()
+    [6 3 3 3 1 6] 0 setdash
+    2 setlinewidth
+    stroke
+endps
+

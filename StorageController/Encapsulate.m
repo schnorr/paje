@@ -1,0 +1,648 @@
+/*
+    Copyright (c) 1998, 1999, 2000, 2001, 2003, 2004 Benhur Stein
+    
+    This file is part of Pajé.
+
+    Pajé is free software; you can redistribute it and/or modify it under
+    the terms of the GNU Lesser General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    Pajé is distributed in the hope that it will be useful, but WITHOUT ANY
+    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+    FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
+    for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with Pajé; if not, write to the Free Software Foundation, Inc.,
+    59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+*/
+  /*
+   * Encapsulate.m
+   *
+   * Component that reads individual events, states and communications
+   * and encapsulates them for grouped access.
+   *
+   * 19970423 BS  creation
+   */
+
+#include "Encapsulate.h"
+#include "../General/TimeList.h"
+#include "../General/MultiEnumerator.h"
+#include "../General/PajeEntity.h"
+#include "../General/Macros.h"
+
+@implementation AnchorFilter
+- (id)initWithController:(PajeTraceController *)c
+{
+    [super initWithController:c];
+    //Assign(selectedContainers, [NSSet set]);
+    Assign(selectedContainers, [[[NSSet alloc] init] autorelease]);
+    selectionStartTime = nil;
+    selectionEndTime = nil;
+    return self;
+}
+
+- (void)dealloc
+{
+    Assign(selectedContainers, nil);
+    Assign(selectionStartTime, nil);
+    Assign(selectionEndTime, nil);
+    [super dealloc];
+}
+
+
+- (void)hideEntityType:(PajeEntityType *)entityType
+{
+}
+
+- (void)hideSelectedContainers
+{
+}
+
+- (void)setSelectedContainers:(NSSet *)containers
+{
+    Assign(selectedContainers, containers);
+    [self containerSelectionChanged];
+}
+
+- (NSSet *)selectedContainers
+{
+    return selectedContainers;
+}
+
+- (void)setSelectionStartTime:(NSDate *)from endTime:(NSDate *)to
+{
+    Assign(selectionStartTime, from);
+    Assign(selectionEndTime, to);
+    [self timeSelectionChanged];
+}
+
+- (NSDate *)selectionStartTime
+{
+    return selectionStartTime;
+}
+
+- (NSDate *)selectionEndTime
+{
+    return selectionEndTime;
+}
+
+- (void)setOrder:(NSArray *)containers
+ofContainersTyped:(PajeEntityType *)containerType
+     inContainer:(PajeContainer *)container
+{
+}
+@end
+
+@implementation Encapsulate
+
+- (id)initWithController:(PajeTraceController *)c
+{
+    [super initWithController:c];
+    
+    traceChanged = NO;
+    timerActive = NO;
+
+    entityLists = [[NSMutableDictionary alloc] init];
+    startTime = nil;
+    endTime = nil;
+    startTimeInMemory = nil;
+    endTimeInMemory = nil;
+
+    [[NSNotificationCenter defaultCenter]
+        addObserver:self
+           selector:@selector(fileSelected:)
+               name:@"PajeFilenameNotification"
+             object:nil];
+
+    return self;
+}
+
+- (void)dealloc
+{
+    [entityLists release];
+    [startTime release];
+    [endTime release];
+    [startTimeInMemory release];
+    [endTimeInMemory release];
+    [rootInstance release];
+
+    [super dealloc];
+}
+
+- (void)reset
+/*"Forget everything that has been done, start all over again."*/
+{
+    traceChanged = YES;
+    if (!timerActive) {
+        [self performSelector:@selector(timeElapsed:) withObject:self afterDelay:0];
+        timerActive = YES;
+    }
+}
+
+- (void)fileSelected:(id)notification
+/*"notification sent by the controller when a new file is selected."*/
+{
+    NSDictionary *userInfo = [notification userInfo];
+
+    startTime = [[userInfo objectForKey:@"StartTime"] retain];
+    endTime = [[userInfo objectForKey:@"EndTime"] retain];
+    startTimeInMemory = [startTime retain];
+    endTimeInMemory = [startTime retain];
+//    [self reset];
+}
+
+- (void)inputEntity:(id)entity
+/*"There's new data in the input port. Encapsulate it."*/
+{
+    [self addEntity:entity];
+    traceChanged = YES;
+
+    if (!timerActive) {
+        [self performSelector:@selector(timeElapsed:)
+                   withObject:self
+                   afterDelay:0.0];
+        timerActive = YES;
+    }
+}
+
+- (void)addEntity:(PajeEntity *)entity
+{
+    PajeEntityType *entityType = [entity entityType];
+    NSMutableDictionary *dict = [entityLists objectForKey:entityType];
+    PajeContainer *container = [entity container];
+    TimeList *list;
+
+    //KLUDGE to identify last date in memory.
+    // (doesn't work if events are not seen)
+    // FIXME this should be calculated on demand
+    if (1 || [entity drawingType] == PajeEventDrawingType) {
+        NSDate *time = [entity lastTime];
+        if(endTimeInMemory == nil || [time isLaterThanDate:endTimeInMemory]) {
+            Assign(endTimeInMemory, time);
+            if(endTime == nil || [time isLaterThanDate:endTime]) {
+                Assign(endTime, time);
+            }
+        }
+        time = [entity firstTime];
+        if(startTimeInMemory == nil || [time isEarlierThanDate:startTimeInMemory]) {
+            Assign(startTimeInMemory, time);
+            if(startTime == nil || [time isEarlierThanDate:startTime]) {
+                Assign(startTime, time);
+            }
+        }
+    }
+    //ENDKLUDGE
+
+    if (!dict) {
+        // unknown entity type -- create a new dict for it
+        dict = [[NSMutableDictionary alloc] init];
+        [entityLists setObject:dict forKey:entityType];
+        [dict release];
+
+        if (rootInstance == nil) {
+            PajeEntity *ent;
+            ent = entity;
+            while (ent != nil && ent != rootInstance) {
+                rootInstance = ent;
+                ent = [ent container];
+            }
+            [rootInstance retain];
+        }
+    }
+
+    list = [dict objectForKey:container];
+
+    if (!list) {
+        // unknown container for this entity type -- create a new list for it
+        list = [[TimeList alloc] init];
+        [dict setObject:list forKey:container];
+        [list release]; // dict is retaining it
+    }
+
+    [list addObject:entity];
+}
+
+- (void)entityChangedEndTime:(id<PajeEntity>)entity
+{
+    PajeEntityType *entityType = [entity entityType];
+    NSMutableDictionary *dict = [entityLists objectForKey:entityType];
+    id container = [entity container];
+    TimeList *list;
+
+    list = [dict objectForKey:container];
+
+    if (!list) {
+        NSLog(@"entity %@ not found (entityChangedEndTime)");
+        return;
+    }
+
+    [list objectChangedEndTime:entity];
+}
+
+
+- (void)send
+/*"notifies that data has changed."*/
+{
+    // only send trace if it is already initialized
+    // (or else space time diagram will think trace has no data, and the
+    // lazy reading will not work well)
+//    if (startTime) {
+        // FIXME should send more specific notification
+        [self hierarchyChanged];
+        traceChanged = NO;
+        [self performSelector:@selector(timeElapsed:) withObject:self afterDelay:0.5];
+        timerActive = YES;
+//    }
+}
+
+- (void)timeElapsed:(id)sender
+/*"Called by the timer; notifies if necessary."*/
+{
+    timerActive = NO;
+    if (traceChanged) {
+        [self send];
+    }
+}
+
+
+- (NSDate *)time { return startTime; }
+
+// time when the trace starts
+- (NSDate *)startTime
+{
+    return startTime;
+}
+
+// time when the trace ends
+- (NSDate *)endTime
+{
+    return endTime;
+}
+
+- (NSDate *)firstTime { return startTime; }
+- (NSDate *)lastTime { return endTime; }
+
+- (NSDate *)startTimeInMemory { return startTimeInMemory; }
+- (NSDate *)endTimeInMemory { return endTimeInMemory; }
+
+- (id)rootInstance
+{
+    return rootInstance;
+}
+
+- (void)verifyStartTime:(NSDate *)start endTime:(NSDate *)end
+{
+    NSDictionary *userInfo = nil;
+    if ([start isEarlierThanDate:startTimeInMemory]
+        && [startTimeInMemory isLaterThanDate:startTime]) {
+        userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+            [start laterDate:startTime], @"StartTime",
+            [end earlierDate:endTime], @"EndTime",
+            nil];
+    } else if ([end isLaterThanDate:endTimeInMemory]
+               && [endTimeInMemory isEarlierThanDate:endTime]) {
+        userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+            [start laterDate:startTime], @"StartTime",
+            [end earlierDate:endTime], @"EndTime",
+            nil];
+    }
+    if (userInfo) {
+        [[NSNotificationCenter defaultCenter]
+                      postNotificationName:@"PajeTraceNotInMemoryNotification"
+                                    object:self
+                                  userInfo:userInfo];
+    }
+}
+
+- (NSArray *)containedTypesForContainerType:(PajeEntityType *)containerType
+{
+    if ([containerType isContainer]) {
+        return [(PajeContainerType *)containerType containedTypes];
+    } else {
+        return [NSArray array];
+    }
+}
+
+- (PajeEntityType *)containerTypeForType:(PajeEntityType *)entityType
+{
+    return [entityType containerType];
+}
+
+- (NSEnumerator *)enumeratorOfEntitiesTyped:(PajeEntityType *)entityType
+                                inContainer:(PajeContainer *)container
+                                   fromTime:(NSDate *)start
+                                     toTime:(NSDate *)end
+{
+    NSDictionary *dict;
+    TimeList *list;
+    NSEnumerator *subcontainerEnum;
+    id subcontainer;
+    MultiEnumerator *multiEnum;
+    PajeEntityType *parentType;
+    
+    [self verifyStartTime:start endTime:end];
+    
+    dict = [entityLists objectForKey:entityType];
+    // if container directly contains entityType's
+    list = [dict objectForKey:container];
+    if (list)
+        return [list timeEnumeratorFromTime:start toTime:end];
+
+    // if container should contain entityType directly, we have no entities!
+    if ([[entityType containerType] isEqual:[container entityType]])
+        return nil;
+    
+    // container does not contain entityType's directly. Try containers in-between.
+    parentType = [entityType containerType];
+    subcontainerEnum = [self enumeratorOfContainersTyped:parentType
+                                             inContainer:container];
+    multiEnum = [MultiEnumerator enumerator];
+    while ((subcontainer = [subcontainerEnum nextObject]) != nil) {
+        list = [dict objectForKey:subcontainer];
+        if (list)
+            [multiEnum addEnumerator:[list timeEnumeratorFromTime:start
+                                                           toTime:end]];
+    }
+    return multiEnum;
+}
+
+
+- (NSEnumerator *)enumeratorOfContainersTyped:(PajeEntityType *)entityType
+                                  inContainer:(PajeContainer *)container
+{
+    NSEnumerator *ienum;
+    PajeContainer *instance;
+    NSMutableArray *instancesInContainer = [NSMutableArray array];
+
+    if ([entityType isContainer]) {
+        PajeContainerType *containerType = (PajeContainerType *)entityType;
+        ienum = [[containerType allInstances] objectEnumerator];
+        while ((instance = [ienum nextObject]) != nil) {
+            if ([instance isContainedBy:container]) {
+                [instancesInContainer addObject:instance];
+            }
+        }
+    }
+//    return [[instancesInContainer sortedArrayUsingSelector:@selector(compare:)]
+//                  objectEnumerator];
+    return [instancesInContainer objectEnumerator];
+}
+
+- (NSNumber *)minValueForEntityType:(PajeEntityType *)entityType
+{
+    if ([entityType respondsToSelector:@selector(minValue)])
+        return [(PajeVariableType *)entityType minValue];
+    else
+        return [NSNumber numberWithInt:0];
+}
+
+- (NSNumber *)maxValueForEntityType:(PajeEntityType *)entityType
+{
+    if ([entityType respondsToSelector:@selector(maxValue)])
+        return [(PajeVariableType *)entityType maxValue];
+    else
+        return [NSNumber numberWithInt:0];
+}
+
+- (NSNumber *)minValueForEntityType:(PajeEntityType *)entityType
+                        inContainer:(PajeContainer *)container
+{
+    if ([container respondsToSelector:@selector(minValueForEntityType:)])
+        return [(id)container minValueForEntityType:entityType];
+    else
+        return [NSNumber numberWithInt:0];
+}
+
+- (NSNumber *)maxValueForEntityType:(PajeEntityType *)entityType
+                        inContainer:(PajeContainer *)container
+{
+    if ([container respondsToSelector:@selector(maxValueForEntityType:)])
+        return [(id)container maxValueForEntityType:entityType];
+    else
+        return [NSNumber numberWithInt:0];
+}
+
+- (NSNumber *)valueForEntity:(PajeEntity *)entity
+{
+    if ([entity respondsToSelector:@selector(value)])
+        return [(id)entity value];
+    else
+        return [NSNumber numberWithInt:0];
+}
+
+- (PajeContainer *)containerForEntity:(id<PajeEntity>)entity;
+{
+    return [entity container];
+}
+- (PajeEntityType *)entityTypeForEntity:(id<PajeEntity>)entity;
+{
+    return [entity entityType];
+}
+- (PajeContainer *)sourceContainerForEntity:(id<PajeLink>)entity;
+{
+    return [entity sourceContainer];
+}
+- (PajeEntityType *)sourceEntityTypeForEntity:(id<PajeLink>)entity;
+{
+    return [entity sourceEntityType];
+}
+- (PajeContainer *)destContainerForEntity:(id<PajeLink>)entity;
+{
+    return [entity destContainer];
+}
+- (PajeEntityType *)destEntityTypeForEntity:(id<PajeLink>)entity;
+{
+    return [entity destEntityType];
+}
+
+- (NSArray *)relatedEntitiesForEntity:(id<PajeEntity>)entity
+{
+    return [entity relatedEntities];
+}
+
+- (NSColor *)colorForEntity:(id<PajeEntity>)entity
+{
+    return [entity color];
+}
+
+- (NSDate *)startTimeForEntity:(id<PajeEntity>)entity;
+{
+    return [entity startTime];
+}
+
+- (NSDate *)endTimeForEntity:(id<PajeEntity>)entity;
+{
+    return [entity endTime];
+}
+
+- (NSDate *)timeForEntity:(id<PajeEntity>)entity
+{
+    return [entity time];
+}
+
+- (PajeDrawingType)drawingTypeForEntity:(id<PajeEntity>)entity
+{
+    return [entity drawingType];
+}
+
+- (NSString *)nameForEntity:(id<PajeEntity>)entity
+{
+    return [entity name];
+}
+
+- (int)imbricationLevelForEntity:(id<PajeEntity>)entity
+{
+    return [entity imbricationLevel];
+}
+
+- (NSString *)descriptionForEntity:(id<PajeEntity>)entity
+{
+    return [NSString stringWithFormat:@"%@ [%@ in %@ %@]",
+        [entity name], [entity entityType],
+        [[entity container] entityType], [entity container]];
+}
+
+- (BOOL)canHighlightEntity:(id<PajeEntity>)entity
+{
+    return YES;
+}
+
+- (NSArray *)fieldNamesForEntity:(id<PajeEntity>)entity
+{
+    return [entity fieldNames];
+}
+
+- (id)valueOfFieldNamed:(NSString *)fieldName
+              forEntity:(id<PajeEntity>)entity
+{
+    return [entity valueOfFieldNamed:fieldName];
+}
+
+
+
+- (NSArray *)allNamesForEntityType:(PajeEntityType *)entityType
+{
+    return [entityType allNames];
+}
+
+- (NSString *)descriptionForEntityType:(PajeEntityType *)entityType
+{
+    return [entityType description];
+}
+
+- (BOOL)isHiddenEntityType:(PajeEntityType *)entityType
+{
+    return NO;
+}
+
+- (PajeDrawingType)drawingTypeForEntityType:(PajeEntityType *)entityType
+{
+    return [entityType drawingType];
+}
+
+- (NSColor *)colorForName:(NSString *)name
+             ofEntityType:(PajeEntityType *)entityType
+{
+    return [entityType colorForName:name];
+}
+
+- (void)setColor:(NSColor *)color
+         forName:(NSString *)name
+    ofEntityType:(PajeEntityType *)entityType
+{
+    [entityType setColor:color forName:name];
+}
+
+- (void)setColor:(NSColor *)color forEntity:(id<PajeEntity>)entity
+{
+    [entity setColor:color];
+}
+
+- (NSColor *)colorForEntityType:(PajeEntityType *)entityType
+{
+    if ([entityType respondsToSelector:@selector(color)])
+        return [entityType color];
+    return [NSColor blackColor];
+}
+
+- (id)valueOfFieldNamed:(NSString *)fieldName
+          forEntityType:(PajeEntityType *)entityType
+{
+    return [entityType valueOfFieldNamed:fieldName];
+}
+
+
+- (void)removeObjectsBeforeTime:(NSDate *)time
+{
+    NSEnumerator *e = [entityLists objectEnumerator];
+    NSMutableDictionary *d;
+
+    if ([time earlierDate:startTimeInMemory] == time)
+        return;
+
+//    NSLog(@"Trace removing before %@", [time description]);
+    while ((d = [e nextObject]) != nil) {
+#if 0
+        //xxx waiting for NSDictionary to implement makeObjectsPerformSelector:
+        [d makeObjectsPerformSelector:@selector(removeObjectsBeforeTime:) withOb
+ject:time];
+#else
+        NSEnumerator *e2 = [d objectEnumerator];
+        TimeList *l;
+        while ((l = [e2 nextObject]) != nil) {
+            [l removeObjectsBeforeTime:time];
+        }
+#endif
+    }
+
+    [time retain];
+    [startTimeInMemory release];
+    startTimeInMemory = time;
+
+    if ([time laterDate:endTimeInMemory] == time) {
+        [endTimeInMemory release];
+        endTimeInMemory = [time retain];
+    }
+}
+
+- (void)removeObjectsAfterTime:(NSDate *)time
+{
+    NSEnumerator *e = [entityLists objectEnumerator];
+    NSMutableDictionary *d;
+
+    if ([time laterDate:endTimeInMemory] == time)
+        return;
+
+//    NSLog(@"Trace removing after %@", [time description]);
+    while ((d = [e nextObject]) != nil) {
+#if 0
+        //xxx waiting for NSDictionary to implement makeObjectsPerformSelector:
+        [d makeObjectsPerformSelector:@selector(removeObjectsAfterTime:) withObj
+ect:time];
+#else
+        NSEnumerator *e2 = [d objectEnumerator];
+        TimeList *l;
+        while ((l = [e2 nextObject]) != nil) {
+            [l removeObjectsAfterTime:time];
+        }
+#endif
+    }
+
+    [time retain];
+    [endTimeInMemory release];
+    endTimeInMemory = time;
+
+    if ([time earlierDate:startTimeInMemory] == time) {
+        [startTimeInMemory release];
+        startTimeInMemory = [time retain];
+    }
+}
+
+- (void)inspectEntity:(id<PajeInspecting>)entity
+{
+    [entity inspect];
+}
+
+@end

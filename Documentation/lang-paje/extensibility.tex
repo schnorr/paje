@@ -1,0 +1,491 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \chapter{Extensibility of Pajé}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+
+The Pajé visualization tool described in this article\footnote{This
+  chapter was published \emph{in: Euro-Par 2000 Parallel Processing,
+    Proc. 6th International Euro-Par Conference}, A.~Bode, W.~Ludwig,
+  T.~Karl, R.~Wism\"uller (r\'ed.), \emph{LNCS}, \emph{1900},
+  Springer, p.~133--140, 2000.} was designed to allow programmers to
+visualize the executions of parallel programs using a potentially
+large number of communicating threads (lightweight processes) evolving
+dynamically.  The visualization of the executions is an essential tool
+to help tuning applications implemented using such a parallel
+programming model.
+
+Visualizing a large number of threads raises a number of problems such
+as coping with the lack of space available on the screen to visualize
+them and understanding such a complex display. The graphical displays
+of most existing visualization tools for parallel programs
+\cite{Heath:1991,upshot,Kranzlmueller:1996:PPV,PALLAS,pablo,ncstrl.gatech_cc//GIT-CC-95-21,ute}
+show the activity of a fixed number of nodes and inter-nodes
+communications; it is only possible to represent the activity of a
+single thread of control on each of the nodes. It is of course
+conceivable to use these systems to visualize the activity of
+multi-threaded nodes, representing each thread as a node.  In this
+case, the number of threads should be fairly limited and should not
+vary during the execution of the program. These visualization tools
+are therefore not adapted to visualize threads whose number varies
+continuously and life-time is often short.  In addition, these tools
+do not support the visualization of local thread synchronizations
+using mutexes or semaphores.
+
+Some tools were designed to display multithreaded
+programs~\cite{HammondKev1995a,gthread}.  However, they support a
+programming model involving a single level of parallelism within a
+node, this node being in general a shared-memory multiprocessor. Our
+programs execute on several nodes: within the same node, threads
+communicate using synchronization primitives; however, threads
+executing on different nodes communicate by message passing. Moreover,
+compared to these systems, Pajé ought to represent a much larger
+number of objects.
+
+The most innovative feature of Pajé is to combine the characteristics
+of interactivity and scalability with extensibility. In contrast with
+passive visualization tools~\cite{Heath:1991,pablo} where parallel
+program entities --- communications, changes in processor states, etc.
+--- are displayed as soon as produced and cannot be interrogated, it
+is possible to inspect all the objects displayed in the current screen
+and to move back in time, displaying past objects again. Scalability
+is the ability to cope with a large number of threads. Extensibility
+is an important characteristic of visualization tools to cope with the
+evolution of parallel programming interfaces and visualization
+techniques. Extensibility gives the possibility to extend the
+environment with new functionalities: processing of new types of
+traces, adding new graphical displays, visualizing new programming
+models, etc.
+
+The interactivity and scalability characteristics of Pajé were
+described in previous articles
+\cite{ChassinS00,ChassinS:2000a,SteinC98}.  This article focuses on
+the extensibility characteristics: modular design easing the addition
+of new modules, semantics independent modules which allow them to be
+used in a large variety of contexts and especially genericity of the
+simulator component of Pajé which gives to application programmers the
+ability to define what they want to visualize and how it must be done.
+
+The organization of this article is the following. The next section
+summarizes the main functionalities of Pajé.  The following section
+describes the extensibility of Pajé before the conclusion.
+
+
+\section{Outline of Pajé}
+\label{sec:Pajé}
+
+Pajé was designed to ease performance debugging of \ath programs by
+visualizing their executions and because no existing visualization
+tool could be used to visualize such multi-threaded programs.
+
+\subsection{\ath: a thread-based parallel programming model}
+\label{sec:ath}
+
+Combining threads and communications is increasingly used to program
+irregular applications, mask communication or I/O latencies, avoid
+communication deadlocks, exploit shared-memory parallelism and
+implement remote memory accesses
+\cite{Fahringer:1995:UTD,FosterKT96,hicss95}.  The
+\ath~\cite{ath0b-europar97} programming model was designed for
+parallel hardware systems composed of shared-memory multi-processor
+nodes connected by a communication network. It exploits two levels of
+parallelism: inter-nodes parallelism and inner parallelism within each
+of the nodes. The first type of parallelism is exploited by a fixed
+number of system-level processes while the second type is implemented
+by a network of communicating threads evolving dynamically. The main
+functionalities of \ath are dynamic local or remote thread creation
+and termination, sharing of memory space between the threads of the
+same node which can synchronize using locks or semaphores, and
+blocking or non-blocking message-passing communications between non
+local threads, using ports. Combining the main functionalities of MPI
+\cite{MPI} with those of \texttt{pthread} compliant libraries, \ath
+can be seen as a ``thread aware'' implementation of MPI.
+
+\subsection{Tracing of parallel programs}
+\label{sec:tracing}
+
+Execution traces are collected during an execution of the observed
+application, using an instrumented version of the \ath\ library. A
+non-intrusive, statistical method is used to estimate a precise global
+time reference \cite{MailletT:1995}. The events are stored in local
+event buffers, which are flushed when full to local event files.  The
+collection of events into a single file is only done after the end of
+the user's application to avoid interfering with it.  Recorded events
+may contain source code information in order to implement source code
+click-back --- from visualization to source code --- and click-forward
+--- from source code to visualization --- in Pajé.
+
+\subsection{Visualization of threads in Pajé}
+\label{s-spacetime}
+
+The visualization of the activity of multi-threaded nodes is mainly
+performed in a diagram combining in a single representation the states
+and communications of each thread(see figure~\ref{f-spacetime}) .
+%
+\makefigure{f-spacetime} {\includegraphics{FIG/spacetime-bact-e-2}}
+{Visualization of an \ath program execution} {Blocked thread states
+  are represented in clear color; runnable states in a dark color. The
+  smaller window shows the inspection of an event.}
+
+\makefigure{f-sema} {\includegraphics{FIG/sema-note-2}} {Visualization of
+  semaphores} {Note the highlighting of a thread blocked state because
+  the mouse pointer is over a semaphore blocked state, and the arrows
+  that show the link between a ``V'' operation in a semaphore and the
+  corresponding unblocking of a thread.}
+%
+The horizontal axis represents time while threads are displayed along
+the vertical axis, grouped by node. The space allocated to each node
+of the parallel system is dynamically adjusted to the number of
+visualized threads of this node.  Communications are represented by
+arrows while the states of threads are displayed by rectangles. Colors
+are used to indicate either the type of a communication, or the
+activity of a thread.  It is not the most compact or scalable
+representation, but it is very convenient for analyzing detailed
+threads relationship, load distribution and masking of communication
+latency.  Pajé deals with the scalability problem of this
+visualization by means of filters, discussed later in
+section~\ref{s-filtering}.
+
+The states of semaphores and locks are represented like the states of
+threads: each possible state is associated with a color, and a
+rectangle of this color is shown in a position corresponding to the
+period of time when the semaphore was in this state. Each lock is
+associated with a color, and a rectangle of this color is drawn close
+to the thread that holds it (see figure~\ref{f-sema}).
+
+\subsection{Interactivity}
+
+Progresses of the simulation are entirely driven by user-controlled
+time displacements: at any time during a simulation, it is possible to
+move forward or backward in time, within the limits of the visualized
+program execution.  In addition, Pajé offers many possible
+interactions to programmers: displayed objects can be inspected to
+obtain all the information available for them (see inspection window
+in figure~\ref{f-spacetime}), identify related objects or check the
+corresponding source code.  Moving the mouse pointer over the
+representation of a blocked thread state highlights the corresponding
+semaphore state, allowing an immediate recognition (see figure
+\ref{f-sema}).  Similarly, all threads blocked in a semaphore are
+highlighted when the pointer is moved over the corresponding state of
+the semaphore.  From the visual representation of an event, it is
+possible to display the corresponding source code line of the parallel
+application being visualized.  Likewise, selecting a line in the
+source code browser highlights the events that have been generated by
+this line.
+
+\subsection{Scalability: filtering of information and zooming capabilities}
+\label{s-filtering}
+
+It is not possible to represent simultaneously all the information
+that can be deduced from the execution traces.  Screen space
+limitation is not the only reason: part of the information may not be
+needed all the time or cannot be represented in a graphical way or can
+have several graphical representations.  Pajé offers several filtering
+and zooming functionalities to help programmers cope with this large
+amount of information to give users a simplified, abstract view of the
+data. Accessing more detailed information can amount to exploding a
+synthetic view into a more detailed view or getting to data that exist
+but have not been used or are not directly related to the
+visualization. Figure~\ref{f-filters-group} examplifies one of the
+filtering facilities provided by Pajé where a single line represents
+the number of active threads of a node and a pie graph the CPU
+activity in the time slice selected in the space-time diagram (see
+\cite{ChassinS00,ChassinS:2000a,Stein:1999}) for more details).
+
+\makefigure{f-filters-group}
+           {\includegraphics{FIG/busy+pie}} {CPU utilization} {Grouping
+           the threads of each node to display the state of the whole
+           system (lighter colors mean more active threads); the
+           pie-chart shows the percentage of the selected time slice
+           spent with each number of active threads in each node.}
+
+\section{Extensibility}
+\label{sec:extensibility}
+
+Extensibility is a key property of a visualization tool. The
+main reason is that a visualization tool being a very complex 
+piece of software costly to implement, its lifetime ought to
+be as long as possible. This will be possible only if the tool
+can cope with the evolutions of parallel programming models ---
+since this domain is still evolving rapidly --- and of the
+visualization techniques. Several characteristics of Pajé were
+designed to provide a high degree of extensibility: modular
+architecture, flexibility of the visualization modules and genericity
+of the simulation module.
+
+
+\subsection{Modular architecture}
+\label{sec:modular}
+
+To favor extensibility, the architecture of Pajé is a data flow graph
+of software modules or components (see figure~\ref{f-diagramme}). It
+is therefore possible to add a new visualization component or adapt to
+a change of trace format by changing the trace reader component
+without changing the remaining of the environment.  This architectural
+choice was inspired by Pablo \cite{pablo}, although the graph of Pajé
+is not purely data-flow for interactivity reasons: it also includes
+control-flow information, generated by the visualization modules to
+process user interactions and triggering the flow of data in the graph
+(see \cite{ChassinS00,ChassinS:2000a,Stein:1999} for more details on
+the implementation of interactivity in Pajé).
+
+\makefigure{f-diagramme}
+           {\includegraphics{FIG/struct-obj-1b-e}} {Example data-flow
+           graph} {The trace reader produces event objects from the
+           data read from disk. These events are used by the simulator
+           to produce more abstract objects, like thread states,
+           communications, etc., traveling on the arcs of the
+           data-flow graph to be used by the other components of the
+           environment.}
+
+
+\subsection{Flexibility of visualization modules}
+\label{sec:flexibility}
+
+The Pajé visualization components have no dependency whatsoever with
+any parallel programming model. Prior to any visualization they
+receive as input the description of the types of the objects to be
+visualized as well as the relations between these objects and the way
+these objects ought to be visualized (see
+figure~\ref{fig:hierarchie1}). The only constraints are the
+hierarchical nature of the type relations between the visualized
+objects and the ability to place each of these objects on the
+time-scale of the visualization. The hierarchical type description is
+used by the visualization components to query objects from the
+preceding components in the graph.
+
+This type description can be changed to adapt to a new programming
+model (see section~\ref{sec:genericity}) or during a visualization, to
+change the visual representation of an object upon request from the
+user. In addition to providing a high versatility for the
+visualization components, this feature is used by the filtering
+components. When a filter is dynamically inserted in a data-flow graph
+--- for example between the simulation and visualization components of
+figure~\ref{f-diagramme} to zoom from a detailed visualization to
+obtain a more global view of the program execution such as
+figure~\ref{f-filters-group} ---, it first sends a type description of
+the hierarchy of objects to be visualized to the following components
+of the data-flow graph.
+
+\makefigure{fig:hierarchie1} {\includegraphics{FIG/hierarchya}} {Use of a
+  simple type hierarchy} {The type hierarchy on the left-hand side of
+  the figure defines the type hierarchical relations between the
+  objects to be visualized and how how these objects should be
+  represented: communications as arrows, thread events as triangles
+  and thread states as rectangles.}
+  
+The type hierarchies used in Pajé are trees whose leaves are called
+\textit{entities}\index{entities} and intermediate nodes
+\textit{containers}\index{containers}. Entities are elementary objects
+that can be displayed such as events, thread states or communications.
+Containers are higher level objects used to structure the type
+hierarchy\index{type hierarchy} (see figure~\ref{fig:hierarchie1}).
+For example: all events occurring in thread~1 of node~0 belong to the
+container ``thread-1-of-node-0''.
+
+
+\subsection{Genericity of Pajé}
+\label{sec:genericity}
+
+The modular structure of Pajé as well as the fact that filter and
+visualization components are independent of any programming model
+makes it ``easy'' for tool developers to add a new component or extend
+an existing one. These characteristics alone would not be sufficient
+to use Pajé to visualize various programming models if the simulation
+component were dependent on the programming model: visualizing a new
+programming model would then require to develop a new simulation
+component, which is still an important programming effort, reserved
+for experienced tool developers.
+
+On the contrary, the generic property of Pajé allows application
+programmers to define \textit{what} they would like to visualize and
+\textit{how} the visualized objects should be represented by Pajé.
+Instead of being computed by a simulation component, designed for a
+specific programming model such as \ath, the type hierarchy of the
+visualized objects (see section~\ref{sec:flexibility}) can be defined
+by inserting several definitions and commands in the trace file (see
+format in chapter~\ref{chap:format}). If --- as it is the case with
+the \ath-0 tracer and as it is assumed in this paper --- the tracer
+(see section~\ref{sec:tracing}) can collect them, these definitions
+and command can be inserted in the application program to be traced
+and visualized.  The simulator uses these definitions to build a new
+data type tree used to relate the objects to be displayed, this tree
+being passed to the following modules of the data flow graph: filters
+and visualization components.
+
+\subsubsection{New data types definition.}
+
+One function call is available to create new types of containers while
+four can be used to create new types of entities which can be events,
+states, links and variables. An ``event''\index{event} is an entity
+representing an instantaneous action. ``States''\index{state} of
+interest are those of containers.  A ``link''\index{link} represents
+some form of connection between a source and a destination container.
+A ``variable''\index{variable} stores the temporal evolution of the
+successive values of a data associated with a container.
+Table~\ref{t:defusertypes} contains the function calls that can be
+used to define new types of containers and entities.
+Figure~\ref{fig:hierarchie2} shows the effect of adding the
+``threads'' container to the type hierarchy of
+figure~\ref{fig:hierarchie1}.
+
+\maketable{t:defusertypes}
+{\small
+\begin{tabular}{|>{\scshape}RL>{\scshape}L|}
+\hline
+\multicolumn{1}{|T}{Result}&
+\multicolumn{1}{T}{Call}&
+\multicolumn{1}{T|}{Parameters}  \\
+\hline
+ctype     & pajeDefineUserContainerType & ctype name                        \\
+\hline
+\hline
+etype     & pajeDefineUserEventType     & ctype name                        \\
+etype     & pajeDefineUserStateType     & ctype name                        \\
+etype     & pajeDefineUserLinkType      & ctype name                        \\
+etype     & pajeDefineUserVariableType  & ctype name                        \\
+\hline
+evalue    & pajeNewUserEntityValue      & etype name                        \\
+\hline
+\end{tabular}
+} {Containers\index{container} and entities\index{entity} types
+definitions} {The argument \textsc{\textsf{ctype}} is the type of the
+father container of the newly defined type, in the type hierarchy (the
+container ``Execution'' being always the root of the tree of types).}
+
+%
+\makefigure{fig:hierarchie2} {\includegraphics{FIG/hierarchyb}}{Adding
+  a container to the type hierarchy\index{type hierarchy} of
+  figure~\ref{fig:hierarchie1}}{}
+  
+\subsubsection{Data generation.}
+
+Several functions can be used to create containers\index{container}
+and entities\index{entity} whose types were defined using
+table~\ref{t:defusertypes} primitives.  Specific functions are used to
+create events, states (and embedded states using \textit{Push} and
+\textit{Pop}), links --- each link being created by one source and one
+destination calls, the coupling between them being performed by the
+simulator when parameters \texttt{container, evalue} and \texttt{key}
+of both source and destination calls match --- and change the values
+of variables (see table~\ref{t:creationuser}).
+%
+\maketable{t:creationuser}
+{\small
+\begin{tabular}{|>{\scshape}RL>{\scshape}L|}
+\hline
+\multicolumn{1}{|T}{Result}&
+\multicolumn{1}{T}{Call}&
+\multicolumn{1}{T|}{Parameters}  \\
+\hline
+container & pajeCreateUserContainer     & ctype name in-container           \\
+          & pajeDestroyUserContainer    & container                         \\
+\hline
+\hline
+          & pajeUserEvent               & etype container evalue comment    \\
+\hline
+          & pajeSetUserState            & etype container evalue comment    \\
+          & pajePushUserState           & etype container evalue comment    \\
+          & pajePopUserState            & etype container comment           \\
+\hline
+          & pajeStartUserLink           & etype container srccontainer      \\
+          &                           & \quad \quad evalue key comment    \\
+          & pajeEndUserLink             & etype container destcontainer     \\
+          &                           & \quad \quad evalue key comment    \\
+\hline
+          & pajeSetUserVariable         & etype container value comment     \\
+          & pajeAddUserVariable         & etype container value comment     \\
+\hline
+\end{tabular}
+} {Creation of containers and entities} {Calls to these functions are
+inserted in the traced application to generate ``user events'' whose
+processing by the Pajé simulator will use the type tree built from the
+containers and entities types definitions done using the functions of
+table~\ref{t:defusertypes}.}
+
+In the example of figure~\ref{f:simpleprogramtraced}, a new event is
+generated for each change of computation phase. This event is
+interpreted by the Pajé simulator component to generate the
+corresponding container state. For example the following call
+indicates that the computation is entering in a ``Local computation''
+phase: \\
+{\small\tt\verb"  pajeSetUserState ( phase_state, node, local_phase, str_iter );"}\\
+The second parameter indicates the container of the state (the
+``node'' whose computation has just been changed).  The last parameter
+is a comment that can be visualized by Pajé. In the example it is used
+to display the current iteration value. The example program of
+figure~\ref{f:simpleprogramtraced} includes the definitions and
+creations of entities ``Computation phase'', allowing the visual
+representation of an \ath program execution to be extended to
+represent the phases of the computation.
+Figure~\ref{f:simpleprogramvisu} includes two space-time diagrams
+visualizing the execution of this example program, without and with
+the definition of the new entities.
+ 
+\codefigurestart{\scriptsize\alltt
+ \textbf{unsigned phase_state, init_phase, local_phase, global_phase;
+ phase_state  = pajeDefineUserStateType( A0_NODE, "Computation phase");
+ init_phase   = pajeNewUserEntityValue( phase_state, "Initialization");
+ local_phase  = pajeNewUserEntityValue( phase_state, "Local computation");
+ global_phase = pajeNewUserEntityValue( phase_state,"Global computation");
+
+ pajeSetUserState ( phase_state, node, init_phase, "" );}
+ initialization();
+ while (!converge) \{
+     iter++;
+     str_iter = itoa (iter);
+     \textbf{pajeSetUserState ( phase_state, node, local_phase, str_iter );}
+     local_computation();
+     send (local_data);
+     receive (remote_data);
+     \textbf{pajeSetUserState ( phase_state, node, global_phase, str_iter );}
+     global_computation();
+ \}
+}\codefigureend{f:simpleprogramtraced}
+{Simplified algorithm of the example program}
+{The five first lines written in bold face contain the generic
+  instructions that have to be passed to Pajé through the trace file,
+  to define a new type of state for the container \texttt{A0\_NODE}.
+  Here it is assumed that the tracer is able to record these
+  instructions in addition to the events of the program (
+  \texttt{pajeSetUserState}).}
+%
+\makefigure{f:simpleprogramvisu} {\includegraphics{FIG/simpleprogram-2}}
+{Visualization of the example program} {The second figure displays the
+  entities ``Computation phases'' defined by the end-user. It is also
+  possible to restrict the visualization to this information alone.}
+
+
+\section{Conclusion}
+\label{sec:conc}
+
+Pajé provides solutions to interactively visualize the execution of
+parallel applications using a varying number of threads communicating
+by shared memory within each node and by message passing between
+different nodes.  The most original feature of the tool is its unique
+combination of extensibility, interactivity and scalability
+properties. Extensibility means that the tool was defined to allow
+tool developers to add new functionalities or extend existing ones
+without having to change the rest of the tool. In addition, it is
+possible to application programmers using the tool to define what they
+wish to visualize and how this should be represented. To our knowledge
+such a generic feature was not present in any previous visualization
+tool for parallel programs executions.
+
+The genericity property of Pajé was used to visualize \ath-1 programs
+executions without having to perform any new development in Pajé.
+\ath-1 is a high level parallel programming model where parallelism is
+expressed by asynchronous task creations whose scheduling is performed
+automatically by the run-time system \cite{a1-europar98,a1-pact98}.
+The runtime system of \ath-1 is implemented using \ath. By extending
+the type hierarchy defined for \ath and inserting few instructions to
+the \ath-1 implementation, it was possible to visualize where the time
+was spent during \ath-1 computations: computing the user program,
+managing the task graph or scheduling the user-defined tasks.
+
+Further developments include simplifying the generic description and
+creation of visual objects, currently more complex when the generic
+simulator is used instead of a specialized one. The generation of
+traces for other thread-based programming models such as Java will
+also be investigated to further validate the flexibility of Pajé.
+

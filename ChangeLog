@@ -1,0 +1,126 @@
+2004-10-18  Benhur Stein <benhur@inf.ufsm.br>
+
+        * **/*.{h,m,tex}: add copyright notice
+
+2004-10-17  Benhur Stein <benhur@inf.ufsm.br>
+
+	* SpaceTime.bproj/DrawView+Drawing.m,ST*.{h,m,gorm}:
+          add support for writing names on events and states
+
+2004-10-12  Benhur Stein <benhur@inf.ufsm.br>
+
+	* PajeSimul/PajeSimul+Events.m
+	  SpaceTime.bproj/DrawView+Drawing.m
+	  SpaceTime.bproj/STController.m
+	  SpaceTime.bproj/STEntityTypeLayout.m
+	  Encapsulate.bproj/Encapsulate.m
+	  General.bproj/PajeType.h
+	  General.bproj/PajeType.m
+	  General.bproj/PajeFilter.h
+	  General.bproj/PajeFilter.m,
+	  PajeEventDecoder/PajeEventDecoder.m
+	  Documentation/lang-paje/typeevent.tex: add support for 'color' type
+	    in event fields; 'Color' field in 'PajeDefineValue';
+	    'Shape' and 'Height' fields in 'PajeDefine<entity>Type';
+	    'Width' field in 'PajeDefineEventType'
+
+2004-10-07  Benhur Stein <benhur@inf.ufsm.br>
+
+	* SpaceTime.bproj: correct limitation of maximum visible size
+
+2004-10-07  Benhur Stein <benhur@inf.ufsm.br>
+
+	* General.bproj/NSDate+Additions.h: correct typo in previous commit
+
+2004-10-07  Benhur Stein <benhur@inf.ufsm.br>
+
+	* SpaceTime.bproj/STEntityTypeLayoutController.m: change order
+	  of types in popup, remove unused field for links in gui, remove
+	  unused code
+	* STEntityTypeLayout.gorm: highlights matrix was not scrolling
+	  and highlighting of events
+
+2004-10-07  Benhur Stein <benhur@inf.ufsm.br>
+
+	* SpaceTime.bproj/{Shape.m,STEntityTypeLayout.m}: correct drawing
+	  and highlighting of events
+
+2004-10-07  Benhur Stein <benhur@inf.ufsm.br>
+
+	* SpaceTime.bproj/DrawView+Positioning.m (rectForEntity:),
+	  SpaceTime.bproj/DrawView.[hm]: sanitize relation between STController
+	      and DrawView; create and use [DrawView timeToX:] method.
+
+2004-10-07  Benhur Stein <benhur@inf.ufsm.br>
+
+	* SpaceTime.bproj/DrawView+Finding.m (rectForEntity:),
+	  SpaceTime.bproj/DrawView+Drawing.m
+	  (drawValuesWithDescriptor:inContainer:fromEnumerator:drawFunction:):
+	      change drawing of values, to include 2-pixel top and bottom
+	      margins
+
+2004-10-07  Benhur Stein <benhur@inf.ufsm.br>
+
+	* General.bproj/NSDate+Additions.[hm]: change NSDate description
+	  to be only the secondsSinceReferenceDate
+
+2004-09-30  Benhur Stein <benhur@inf.ufsm.br>
+
+	* SpaceTime.bproj/STEntityDescriptor.[hm],
+	  SpaceTime.bproj/EntityTypeInspector.{h,m,gorm}:
+	     remove unused classes obsoleted by previous changes (layout)
+
+2004-09-30  Benhur Stein <benhur@inf.ufsm.br>
+	* SpaceTime.bproj/DrawView+Drawing.m
+	  SpaceTime.bproj/DrawView+Finding.m
+	  SpaceTime.bproj/DrawView+Mouse.m
+	  SpaceTime.bproj/DrawView+Positioning.m
+	  SpaceTime.bproj/DrawView.h SpaceTime.bproj/DrawView.m
+	  SpaceTime.bproj/GNUmakefile SpaceTime.bproj/HierarchyRuler.h
+	  SpaceTime.bproj/HierarchyRuler.m
+	  SpaceTime.bproj/STController.h SpaceTime.bproj/STController.m
+	  SpaceTime.bproj/STEntityDescriptor.h
+	  SpaceTime.bproj/STEntityDescriptor.m
+	  SpaceTime.bproj/SpaceTime.gorm/data.classes
+	  SpaceTime.bproj/SpaceTime.gorm/distant.tiff
+	  SpaceTime.bproj/SpaceTime.gorm/near.tiff
+	  SpaceTime.bproj/SpaceTime.gorm/objects.gorm
+	  SpaceTime.bproj/SpaceTime.gorm/toselection.tiff:
+	     make use of new layout classes
+
+2004-09-30  Benhur Stein <benhur@inf.ufsm.br>
+
+	* SpaceTime.bproj/{STEntityTypeLayout.{h,m,gorm},
+	                   STEntityTypeLayoutController.[hm],
+			   Shape.[hm]}: new classes and GUI for layout
+
+2004-09-30  Benhur Stein <benhur@inf.ufsm.br>
+
+	* PajeSimul/PajeSimul+Events.m:
+	  containerOfNumber:type:inEvent: check for wrong type
+
+2004-09-30  Benhur Stein <benhur@inf.ufsm.br>
+
+	* TODO: refresh list of things to do
+
+2004-08-19  Benhur Stein <benhur@inf.ufsm.br>
+
+	* */*.gorm: resaved in old format, compatible with gui 0.9.3
+
+2004-07-26  Benhur Stein <benhur@inf.ufsm.br>
+
+	* many: remove PajeContainerType from PajeFilter.h and change
+	  all places to reflect this
+
+2004-07-26  Benhur Stein <benhur@inf.ufsm.br>
+
+	* General.bproj/PajeFilter.[hm]: remove notifications
+
+2004-07-26  Benhur Stein <benhur@inf.ufsm.br>
+
+	* paje: restarting CVS, near version 1.2
+
+2002-05-10  Benhur Stein  <benhur@inf.ufsm.br>
+
+	* paje: initial version.
+

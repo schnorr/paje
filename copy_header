@@ -1,0 +1,7 @@
+#!/bin/sh
+for f in */*.[hm]
+do
+	mv $f $f.old
+	cat HEADER > $f
+	tail -n +20 $f.old >> $f
+done

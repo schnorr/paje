@@ -1,0 +1,1094 @@
+%*
+%   Copyright 1998, 1999, 2000, 2001, 2003, 2004 Benhur Stein
+%   
+%   This file is part of Pajé.
+%
+%   Pajé is free software; you can redistribute it and/or modify
+%   it under the terms of the GNU General Public License as published by
+%   the Free Software Foundation; either version 2 of the License, or
+%   (at your option) any later version.
+%
+%   Foobar is distributed in the hope that it will be useful,
+%   but WITHOUT ANY WARRANTY; without even the implied warranty of
+%   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%   GNU General Public License for more details.
+%
+%   You should have received a copy of the GNU General Public License
+%   along with Foobar; if not, write to the Free Software
+%   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+%/
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \chapter{Definition of type hierarchies and trace event formats}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcolumntype{T}{>{\sffamily\bfseries\color{white}\columncolor[gray]{.2}}l}
+\newcolumntype{R}{>{\sffamily}r}
+\newcolumntype{L}{>{\sffamily}l}
+\newcolumntype{C}{>{\sffamily}c}
+\newcolumntype{P}{>{\sffamily}p{5cm}}
+
+\section{Introduction}
+\label{sec:traceintro}
+
+A visualization constructed by Pajé is composed of objects organized
+according to a tree type hierarchy whose nodes are called
+\emph{containers}\index{container} and leaves
+\emph{entities}\index{entity} (see \S\ref{sec:genericity}). The Pajé
+data format is self-defined, although it does not comply with the
+SDDF\index{SDDF} format used by Pablo \cite{sddf}. There exists a
+``meta-format'' used to define:
+\begin{itemize}
+\item The format of the instructions defining containers and entities.
+\item The format of the events recorded during the executions of
+  parallel programs.
+\end{itemize}
+
+These definitions are usually inserted in trace files. They can even
+be inserted in the observed programs source files, provided that the
+tracers used to record the events of these programs are able to
+capture a new definition as a ``user-defined'' event (see for example
+figure~\ref{f:simpleprogramtraced}).
+
+Using these definitions, it is possible to define a hierarchy of
+containers and entities adapted for a given programming model or
+language. Definitions of type hierarchies as well as instructions and
+events formats constitute a specialisation of the ``generic'' Pajé
+visualization tool: it has been used so far to visualize distributed
+applications written in Java \cite{OttogaliOSCV:2001} or help to
+perform system monitoring on large sized clusters
+\cite{GuilloudCAS:2001}. 
+
+The organization of this chapter is the following. The next section
+defines the meta format of Pajé used to define the format of type
+definition instructions and events. The following sections describe
+how containers and entities are defined and created. The next section
+is dedicated to the trace events: self definition, recording. The last
+section of this chapter contains a complete example of use of the Pajé
+data format.
+
+\section{Meta format of Pajé}
+\label{sec:file}
+
+A trace file is composed of events.
+An event can be seen as a table composed of named fields, as shown in figure~\ref{f:event:table}. 
+The first event in the figure can represent the sending of a message containing 320 bytes by process 5 to process 3, containing 320 bytes by process 5 to process 3, containing 320 bytes by process 5 to process 3, containing 320 bytes by process 5 to process 3, 3.233222 seconds after the process started executing.
+The second event shows that process 5 unblocked at time 5.123002, and that this happened while executing line 98 of file sync.c.
+Each event has some fields, each of them composed of a name, a type and a value. Generally, there are lots of similar events in a trace file (lots of ``SendMessage'' events, all with the same fields); a typical trace file contains thousands of events of tens of different types.
+Usually, events of the same type have the same fields.
+It is therefore wise, in order to reduce the trace file size, not to put the
+information that is common to many events in each of those events.
+The most common solution is to put only the type of each event and the values of its fields in the trace file. Information on what event types exist and the fields that constitute each of these event types being kept elsewhere.
+In some trace file formats, this information is hardcoded in the trace generator and trace reader, making the trace structure hard to change in order to incorporate new types of events, new data in existing events or to remove unused or unknown data from those events.
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|>{\bf}rll|}
+\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Field Value} \\
+\hline
+EventName     & string    & SendMessage \\
+Time          & timestamp & 3.233222    \\
+ProcessId     & integer   & 5           \\
+Receiver      & integer   & 3           \\
+Size          & integer   & 320         \\
+\hline
+\end{tabular}
+\quad\quad
+\begin{tabular}{|>{\bf}rll|}
+\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Field Value} \\
+\hline
+EventName     & string    & UnblockProcess \\
+Time          & timestamp & 5.123002    \\
+ProcessId     & integer   & 5           \\
+FileName      & string    & sync.c      \\
+LineNumber    & integer   & 98          \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Examples of events}
+\label{f:event:table}
+\end{figure}
+
+A Pajé trace file is self defined, meaning that the event definition information is put inside the trace file itself, much like the SDDF file format used by the Pablo visualization tool \cite{sddf}.
+The file is constituted of two parts: the definition of the events at the beginning of the file followed by the events themselves.
+The definition of events contains the name of each event type and the names and types of each field.
+The second part of the trace file contains the events, with the values associated to each field, in the same order as in the definition.
+The correspondence of an event with its definition is made by means of a number, that must be unique for each event description; this number appears in an event definition and at the beginning of each event contained in the trace file.
+
+The event definition part of a Pajé trace file follows the following format:
+\begin{itemize}
+\item all the lines start with a `\%' character;
+\item each event definition starts with a \%EventDef\index{EventDef}
+  line and terminates with a \%EndEventDef\index{EndEventDef} line;
+\item the \%EventDef line contains the name and the unique number of an
+  event type.  The number (an integer) will be used to identify the event
+  in the second part of the trace file. The choice of this number is
+  left to the user. The numbers given in the definitions below (see
+  \S\ref{sec:containers} and \S\ref{sec:entities}) are thus
+  \textbf{arbitrary}. The name of the event will be put in a field called
+  ``PajeEventName''. There cannot be another field called so. The name is used
+  to identify the type of an event;
+\item the fields of an event are defined between the \%EventDef and
+  the \%EndEventDef lines, one field per line, with the name
+  of the field followed by its type (see below).
+\end{itemize}
+
+The structure of the two events of figure~\ref{f:event:table} are shown in figure~\ref{f:event:def}.
+
+\begin{figure}
+\begin{center}
+\begin{minipage}{5.6cm}
+\begin{verbatim}
+%EventDef SendMessage 21
+%   Time       date
+%   ProcessId  int
+%   Receiver   int
+%   Size       int
+%EndEventDef
+\end{verbatim}
+\end{minipage}
+\quad\quad
+\begin{minipage}{5.6cm}
+\begin{verbatim}
+%EventDef UnblockProcess 17
+%   Time       date
+%   ProcessId  int
+%   LineNumber int
+%   FileName   string
+%EndEventDef
+\end{verbatim}
+\end{minipage}
+\end{center}
+\caption{Examples of event definitions}
+\label{f:event:def}
+\end{figure}
+
+The type of a field can be one of the following:
+\begin{description}
+  \item [date:] for fields that represent dates\index{date}.
+                It's a double precision floating-point number, usually meaning seconds since program start;
+  \item [int:] for fields containing integer numeric values;
+  \item [double:] for fields containing floating-point values;
+  \item [hex:] for fields that represent addresses, in hexadecimal;
+  \item [string:] for strings of characters.
+  \item [color:] for fields that represent colors. A color is a sequence of
+                 three floating-point numbers between 0 and 1, inside double 
+                 quotes (").
+                 The three numbers are the values of red, green and blue
+                 components.
+\end{description}
+
+%Most events are dated. If that is the case, it must be defined with a field
+named ``Time'' of type ``date'', for
+%the date of generation of the event. 
+
+The second part of the trace file contains one event per line, whose 
+fields are separated by spaces or tabs, the first field being the number that
+identifies the event type, followed by the other fields, in the same order that
+they appear in the
+definition of the event. 
+Fields of type string must be inside double quotes (") if they contain space or
+tab characters, or if they are empty.
+
+For example, the two events of figure~\ref{f:event:table} are shown in figure~\ref{f:event}.
+\begin{figure}
+\begin{center}
+\begin{minipage}{5cm}
+\begin{verbatim}
+21 3.233222 5 3 320
+17 5.123002 5 98 sync.c
+\end{verbatim}
+\end{minipage}
+\end{center}
+\caption{Examples of events}
+\label{f:event}
+\end{figure}
+
+In Pajé, event numbers are used only as a means to find the definition
+of an event; they are discarded as soon as an event is read.
+After being read, events are identified by their names.
+Two different definitions can have the same name (and different numbers), making it possible to have, in the same trace file, two events of the same type containing different fields.
+We use this feature to optionally include the source file identification in some
+events. The ``UnblockProcess'' event in the examples above could also be defined without the fields FileName and LineNumber, for use in places where this information is not known or not necessary.
+
+\section{Events treated by the Pajé simulator} %{Pajé "generic" events}
+\label{sec:generic}
+
+A Pajé visualization is best described as a typed hierarchy of objects
+organized as a tree. Elementary objects are the leaves of the tree and
+called ``entities'' while intermediate nodes of the tree are named
+``containers''. 
+Entities are the objects that can be visualized in Pajé's space-time diagram,
+while containers organize the space where those entities are displayed.
+
+Pajé includes a simulator module which builds this hierarchical data
+structure from the elementary event records of the trace files. 
+Pajé has no
+predefined containers or entities. 
+Before an entity can be created and visualized, a hierarchy of container and
+entity types must be defined, and containers must be instantiated.
+
+For example, to visualize the states of threads in a program, one must
+first define the container types ``Program'' and ``Thread'' and the entity
+type ``Thread State''.  One must also define the possible values that
+the entities of type ``Thread State'' can assume (for example,
+``Executing'' and ``Blocked'').  Then, one must instantiate the program
+creating a container of type ``Program'' (called ``Thread Testing
+Program'', for example).  The threads of the program also have to be
+instantiated; they are containers of type ``Thread'', called for example
+``Thread 1''
+and ``Thread 2'', and contained in container ``Thread Testing Program''.
+Only then one is able to create visualizable entities of type ``Thread
+State'', by means of events that represent changes in state, contained
+either in ``Thread 1'' or ``Thread 2''.
+
+
+The events that the Pajé simulator understands can be divided into four classes:
+\begin{itemize}
+
+\item events to define types of containers;
+\item events to define types of entities and possible
+values that entities can have; 
+\item events to instantiate and destroy containers;
+\item events to create visualizable entities.
+\end{itemize}
+
+Typically, the events of the first two classes are in the beginning of a trace
+file, followed by events that instantiate containers, followed by a large number of events creating entities.
+The simulator does
+not impose this order, events of these four classes can be mixed in the trace
+file. The limitation is that an entity or a container cannot be created before
+its type has been defined and its container created.
+
+The four classes of events are discussed in the following sessions.
+
+\subsection{Definition of types of Containers}
+\label{sec:contype}
+
+Containers types are defined with events named ``PajeDefineContainerType''.
+
+\subsubsection*{PajeDefineContainerType\index{PajeDefineContainerType}}
+
+Events of this type (see figure~\ref{f:pajedefinecontainertype}) must contain the fields  ``Name'' and ``ContainerType''.
+It defines a new container type called ``Name'', contained by a previously
+defined container type ``ContainerType'' (or the special container type ``0'' or
+``/'', if this container type is
+the top of the container hierarchy).
+Optionally this event can contain a field ``Alias'' with an alias name to be
+used to identify this container. Aliases are usually short strings used when the
+container name is too big and its use throughout the trace file would increase
+its size.
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|LLL|}
+\hline
+\multicolumn{3}{|T|}{\textsf{\textbf{PajeDefineContainerType}}}\\\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Description}\\
+\hline
+Name          & string or integer & Name of new container type\\
+ContainerType & string or integer & Parent container type\\
+\hline
+Alias         & string or integer & Alternative name of new container type\\
+\hline
+\end{tabular}%
+\end{center}%
+\caption{Fields of PajeDefineContainerType event}
+\label{f:pajedefinecontainertype}
+\end{figure}
+
+For the example in section~\ref{s:generic}, one would need two events (see
+figure~\ref{f:definecontainerexample} to indicate
+that a ``Program'' contains ``Thread''s:
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|LL|}
+\hline
+\textbf{Field Name} & \textbf{Field Value} \\
+\hline
+PajeEventName & PajeDefineContainerType \\
+Name          & Program\\
+ContainerType & /\\
+Alias         & P\\
+\hline
+\end{tabular}%
+\quad%\quad
+\begin{tabular}{|LL|}
+\hline
+\textbf{Field Name} & \textbf{Field Value} \\
+\hline
+PajeEventName & PajeDefineContainerType \\
+Name          & Thread\\
+ContainerType & P \emph{or} Program\\
+Alias         & T\\
+\hline
+\end{tabular}%
+\end{center}%
+\caption{Examples of PajeDefineContainerType events}
+\label{f:definecontainerexample}
+\end{figure}
+
+
+
+
+\subsection{Creation and destruction of containers}
+\label{sec:instant}
+
+Containers are created using the ``PajeCreateContainer'' event, and destroyed using
+the ``PajeDestroyContainer'' event.
+
+\subsubsection*{PajeCreateContainer\index{PajeCreateContainer}}
+
+This event (see figure~\ref{f:pajecreatecontainer} must have the fields
+``Time'', ``Name'', ``Type'' and ``Container''. Optionally
+it can have a field named ``Alias''. The simulation of this event instantiates,
+in the simulation time ``Time'', a
+new container named ``Name'', of type
+``Type'', contained in the preexisting
+container ``Container''.
+The field ``Type'' must have a value corresponding to the ``Name'' or ``Alias''
+of a previous
+PajeDefineContainerType event. The field ``Container'' must have a value
+corresponding to the ``Name'' or ``Alias''
+of a previous PajeCreateContainer event (or ``0'' or ``/'', if on top of the hierarchy).
+This new container can be referenced in future events by the value of its
+``Name'' or ``Alias'' (if it has one) field.
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|LLL|}
+\hline
+\multicolumn{3}{|T|}{\textsf{\textbf{PajeCreateContainer}}}\\\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Description}\\
+\hline
+Time          & date              & Time of creation of container \\
+Name          & string or integer & Name of new container \\
+Type          & string or integer & Type of new container \\
+Container     & string or integer & Parent of new container \\
+\hline
+Alias         & string or integer & Alternative name of new container \\
+\hline
+\end{tabular}%
+\end{center}%
+\caption{Fields of PajeCreateContainer event}
+\label{f:pajecreatecontainer}
+\end{figure}
+
+Figure~\ref{f:createcontainerexample} shows the events necessary to create 
+the containers ``Thread Testing
+Program'' of type ``Program'' and ``Thread 1'' and ``Thread 2'' of
+type ``Thread'', contained by ``Thread Testing Program'', from the example in section~\ref{s:generic}.
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|LL|}
+\hline
+\textbf{Field Name} & \textbf{Field Value} \\
+\hline
+PajeEventName & PajeCreateContainer \\
+Time          & 0\\
+Name          & "Thread Testing Program"\\
+Container     & /\\
+Type          & P\\
+Alias         & TTP\\
+\hline
+\end{tabular}%
+
+%\quad%\quad
+\begin{tabular}{|LL|}
+\hline
+\textbf{Field Name} & \textbf{Field Value} \\
+\hline
+PajeEventName & PajeCreateContainer \\
+Time          & 0.986789\\
+Name          & "Thread 1"\\
+Container     & TTP\\
+Type          & T\\
+Alias         & T1\\
+\hline
+\end{tabular}%
+\quad%\quad
+\begin{tabular}{|LL|}
+\hline
+\textbf{Field Name} & \textbf{Field Value} \\
+\hline
+PajeEventName & PajeCreateContainer \\
+Time          & 1.012332\\
+Name          & "Thread 2"\\
+Container     & TTP\\
+Type          & T\\
+Alias         & T2\\
+\hline
+\end{tabular}%
+\end{center}%
+\caption{Examples of PajeCreateContainer events}
+\label{f:createcontainerexample}
+\end{figure}
+
+
+\subsubsection*{PajeDestroyContainer\index{PajeDestroyContainer}}
+
+Containers can be destroyed using the event named
+``PajeDestroyContainer'' with fields ``Time'', ``Name'' and ``Type'' (see
+figure~\ref{f:pajedestroycontainer}.
+After simulating this event, the container named (or aliased) ``Name'' of type
+``Type'' will be marked as being destroyed at time ``Time''.
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|LLL|}
+\hline
+\multicolumn{3}{|T|}{\textsf{\textbf{PajeDestroyContainer}}}\\\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Description}\\
+\hline
+Time          & date              & Time of destruction of container \\
+Name          & string or integer & Name of container \\
+Type          & string or integer & Type of container \\
+\hline
+\end{tabular}%
+\end{center}%
+\caption{Fields of PajeDestroyContainer event}
+\label{f:pajedestroycontainer}
+\end{figure}
+
+For example, if ``Thread 1'' finishes execution at time 4.34565. it can be
+represented by the event in figure~\ref{f:destroycontainerexample}.
+
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|LL|}
+\hline
+\textbf{Field Name} & \textbf{Field Value} \\
+\hline
+PajeEventName & PajeDestroyContainer \\
+Time          & 4.34565\\
+Name          & "Thread 1"\\
+Type          & T\\
+\hline
+\end{tabular}%
+\end{center}%
+\caption{Example of PajeDestroyContainer event}
+\label{f:destroycontainerexample}
+\end{figure}
+
+
+
+\subsection{Definitions of types of entities}
+\label{sec:entypedef}
+
+Entities are the leaves of the type hierarchy tree of a Pajé
+specialization. There exist four types of entities:
+\begin{itemize}
+\item \textbf{events}\index{event}, used to represent an event that happened in a
+certain point in time, usually displayed as triangles in Pajé's space-time
+diagram;
+\item \textbf{states}\index{state}, used to represent the fact that a certain
+container was in a determined state during a certain amount of time, usually
+displayed as rectangles in Pajé's space-time diagram;
+\item \textbf{links}\index{link}, used to represent a relation between two
+containers that started in a certain time and finished in a possibly different
+time (for example, a communication between two nodes), usually displayed as arrows; and
+\item \textbf{variables}\index{variable}, used to represent the evolution in
+time of a
+certain value associated to a container, displayed as
+graphs in the space-time diagram.
+\end{itemize}
+
+An event of type event, state or link can have a value associated with it, and
+all possible values must be defined before an event with this value can be
+created.
+There are four different events to create an entity type in Pajé,
+``PajeDefineEventType'', ``PajeDefineStateType'', ``PajeDefineLinkType'' and
+``PajeDefineVariableType'' and one event to define a possible value of an
+entity, ``PajeDefineEntityValue''.
+
+\subsubsection*{PajeDefineEventType\index{PajeDefineEventType}}
+
+Entities of this new type represent a remarkable type of event
+recorded during the visualized executions and are displayed as
+triangles in the space-time diagram.  Event types are defined with the
+"PajeDefineEventType" event.
+This event (see figure~\ref{f:pajedefineevent}) contains the
+fields ``Name'' and ``ContainerType''.  It defines a
+new event entity type called ``Name'', subtype of the previously defined
+container type ``ContainerType''. Optionally it can have a field named ``Alias''
+to have an alternative way to identify this type of entity.
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|LLL|}
+\hline
+\multicolumn{3}{|T|}{\textsf{\textbf{PajeDefineEventType}}}\\\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Description}\\
+\hline
+Name          & string or integer & Name of new entity type \\
+ContainerType & string or integer & Type of container of entity\\
+\hline
+Alias         & string or integer & Alternative name of new entity type \\
+Shape         & string            & Name of shape used to represent entities\\
+Height        & integer           & Height of shape, in points\\
+Width         & integer           & Width of shape, in points\\
+\hline
+\end{tabular}%
+\end{center}%
+\caption{Fields of PajeDefineEventType event}
+\label{f:pajedefineevent}
+\end{figure}
+
+\subsubsection*{PajeDefineStateType\index{PajeDefineStateType}}
+
+Entities of this new type will represent ``states'', and are displayed
+as rectangles in the space-time diagram.  The definition contains (see
+figure~\ref{f:pajedefinestate}) the
+fields ``Name'' and ``ContainerType''. Optionally, it can have a field
+``Alias''.
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|LLL|}
+\hline
+\multicolumn{3}{|T|}{\textsf{\textbf{PajeDefineStateType}}}\\\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Description}\\
+\hline
+Name          & string or integer & Name of new entity type \\
+ContainerType & string or integer & Type of container of entity\\
+\hline
+Alias         & string or integer & Alternative name of new entity type \\
+Shape         & string            & Name of shape used to represent entities\\
+Height        & integer           & Height of shape, in points\\
+\hline
+\end{tabular}%
+\end{center}%
+\caption{Fields of PajeDefineStateType event}
+\label{f:pajedefinestate}
+\end{figure}
+
+In the example of \S\ref{sec:instant}, the event in
+figure~\ref{f:definestateexample} could be used to define the entity type that will represent the states of
+the threads of the program.
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|LL|}
+\hline
+\textbf{Field Name} & \textbf{Field Value} \\
+\hline
+PajeEventName & PajeDefineStateType \\
+Name          & "Thread State"\\
+Alias         & S\\
+ContainerType & Thread\\
+\hline
+\end{tabular}%
+\end{center}%
+\caption{Example of PajeDefineStateType event}
+\label{f:definestateexample}
+\end{figure}
+
+
+\subsubsection*{PajeDefineVariableType\index{PajeDefineVariableType}}
+
+Entities of this new type represent variables, whose evolutions are to
+be visualized as graphs during the execution of parallel programs.
+Variables are created with the \texttt{PajeDefineVariableType} event (see
+figure~\ref{f:pajedefinevariable}), containing fields ``Name'',
+``ContainerType'' and optionally ``Alias''.
+Their value represent an attribute of a container, whose value (a
+double) is set by the \texttt{PajeSetVariable} event.
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|LLL|}
+\hline
+\multicolumn{3}{|T|}{\textsf{\textbf{PajeDefineVariableType}}}\\\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Description}\\
+\hline
+Name          & string or integer & Name of new entity type \\
+ContainerType & string or integer & Type of container of entity\\
+\hline
+Alias         & string or integer & Alternative name of new entity type \\
+Height        & integer           & Height of shape, in points\\
+\hline
+\end{tabular}%
+\end{center}%
+\caption{Fields of PajeDefineVariableType event}
+\label{f:pajedefinevariable}
+\end{figure}
+
+\subsubsection*{PajeDefineLinkType\index{PajeDefineLinkType}}
+
+Links are used to display a directed link between two containers such
+as a communication or the identification of a reaction in a container
+corresponding to an action on another one.  The source and destination
+containers must have a common ancestral in the container hierarchy
+(identified by ``Container'' in the events below). Links are usually displayed
+as arrows.
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|LLL|}
+\hline
+\multicolumn{3}{|T|}{\textsf{\textbf{PajeDefineLinkType}}}\\\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Description}\\
+\hline
+Name          & string or integer & Name of new link type \\
+ContainerType & string or integer & Type of common ancestral container \\
+SourceContainerType & string or integer & Type of source container of link\\
+DestContainerType & string or integer & Type of destination container of link\\
+\hline
+Alias         & string or integer & Alternative name of new link type \\
+Shape         & string            & Name of shape used to represent entities\\
+\hline
+\end{tabular}%
+\end{center}%
+\caption{Fields of PajeDefineLinkType event}
+\label{f:pajedefinelink}
+\end{figure}
+
+
+
+\subsubsection*{PajeDefineEntityValue\index{PajeDefineEntityValue}}
+\label{sec:entvaldef}
+
+Contains fields ``Name'', ``EntityType'' and optionally ``Alias''.  Used to give
+names to the possible values of an entity type.  ``Alias''
+will represent the value ``Name'' that entities of type ``EntityType''
+can have.  
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|LLL|}
+\hline
+\multicolumn{3}{|T|}{\textsf{\textbf{PajeDefineEntityValue}}}\\\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Description}\\
+\hline
+Name          & string or integer & Value of entity \\
+EntityType    & string or integer & Type of entity that can have this value \\
+\hline
+Alias         & string or integer & Alternative name of new value \\
+Color         & color             & Color of entities of this value\\
+\hline
+\end{tabular}%
+\end{center}%
+\caption{Fields of PajeDefineEntityValue event}
+\label{f:pajedefinevalue}
+\end{figure}
+
+In the example started in \S\ref{sec:instant}, ``Thread State''s can be
+``Executing'' or ``Blocked'', as shown in figure~\ref{f:definevalueexample}.
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|LL|}
+\hline
+\textbf{Field Name} & \textbf{Field Value} \\
+\hline
+PajeEventName & PajeDefineEntityValue \\
+Name          & Executing\\
+Alias         & E\\
+EntityType    & S\\
+Color         & "0 1 0"\\
+\hline
+\end{tabular}%
+\quad\begin{tabular}{|LL|}
+\hline
+\textbf{Field Name} & \textbf{Field Value} \\
+\hline
+PajeEventName & PajeDefineEntityValue \\
+Name          & Blocked\\
+Alias         & B\\
+EntityType    & S\\
+Color         & "0.9 0 0.1"
+\hline
+\end{tabular}%
+\end{center}%
+\caption{Example of PajeDefineEntityValue event}
+\label{f:definevalueexample}
+\end{figure}
+
+\subsection{Creation of visualizable entities}
+\label{sec:creation}
+
+There are different events to create entities of each possible type
+(states, events, variables or links). 
+
+\subsubsection{States}
+
+There are events to change a state
+("PajeSetState")\index{PajeSetState}, to push a state, saving the old
+state ("PajePushState")\index{PajePushState}, and to pop the
+previously saved state ("PajePopState")\index{PajePopState}.
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|LLL|}
+\hline
+\multicolumn{3}{|T|}{\textsf{\textbf{PajeSetState}}}\\\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Description}\\
+\hline
+Time          & date              & Time the state changed \\
+Type          & string or integer & Type of state \\
+Container     & string or integer & Container whose state changed \\
+Value         & string or integer & Value of new state of container \\
+\hline
+\end{tabular}
+
+\begin{tabular}{|LLL|}
+\hline
+\multicolumn{3}{|T|}{\textsf{\textbf{PajePushState}}}\\\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Description}\\
+\hline
+Time          & date              & Time the state changed \\
+Type          & string or integer & Type of state \\
+Container     & string or integer & Container whose state changed \\
+Value         & string or integer & Value of new state of container \\
+\hline
+\end{tabular}
+
+\begin{tabular}{|LLL|}
+\hline
+\multicolumn{3}{|T|}{\textsf{\textbf{PajePopState}}}\\\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Description}\\
+\hline
+Time          & date              & Time the state changed \\
+Type          & string or integer & Type of state \\
+Container     & string or integer & Container whose state changed \\
+\hline
+\end{tabular}%
+\end{center}%
+\caption{Fields of state changing events}
+\label{f:pajesetstate}
+\end{figure}
+
+For example, if "Thread 1" blocks at time 2.34567 and unblocks at time
+2.456789, the trace file could contain the events shown in
+figure~\ref{f:setstateexample}.
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|LL|}
+\hline
+\textbf{Field Name} & \textbf{Field Value} \\
+\hline
+PajeEventName & PajeSetState \\
+Time          & 2.34567\\
+Type          & "Thread State" \\
+Container     & "Thread 1"\\
+Value         & Blocked \\
+\hline
+\end{tabular}%
+\quad\begin{tabular}{|LL|}
+\hline
+\textbf{Field Name} & \textbf{Field Value} \\
+\hline
+PajeEventName & PajeSetState \\
+Time          & 2.456789\\
+Type          & S \\
+Container     & T1\\
+Value         & E \\
+\hline
+\end{tabular}%
+\end{center}%
+\caption{Example of PajeSetState event}
+\label{f:setstateexample}
+\end{figure}
+
+\subsubsection{Events}
+
+Events are created with the event named ``PajeNewEvent''\index{PajeNewEvent}.
+Just like states, the values of events must be previously
+defined by ``PajeDefineEntityValue''.
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|LLL|}
+\hline
+\multicolumn{3}{|T|}{\textsf{\textbf{PajeNewEvent}}}\\\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Description}\\
+\hline
+Time          & date              & Time the event happened \\
+Type          & string or integer & Type of event \\
+Container     & string or integer & Container that produced event \\
+Value         & string or integer & Value of new event \\
+\hline
+\end{tabular}%
+\end{center}%
+\caption{Fields of PajeNewEvent event}
+\label{f:pajenewevent}
+\end{figure}
+
+
+\subsubsection{Variables}
+
+There exist several events to set, add or subtract a value to/from a
+variable\index{PajeSetVariable}\index{PajeAddVariable}\index{PajeSubVariable}.
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|LLL|}
+\hline
+\multicolumn{3}{|T|}{\textsf{\textbf{PajeSetVariable}}}\\\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Description}\\
+\hline
+Time          & date              & Time the variable changed value\\
+Type          & string or integer & Type of variable \\
+Container     & string or integer & Container whose value changed \\
+Value         & double            & New value of variable \\
+\hline
+\end{tabular}
+
+\begin{tabular}{|LLL|}
+\hline
+\multicolumn{3}{|T|}{\textsf{\textbf{PajeAddVariable}}}\\\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Description}\\
+\hline
+Time          & date              & Time the variable changed value\\
+Type          & string or integer & Type of variable \\
+Container     & string or integer & Container whose value changed \\
+Value         & double            & Value to be added to variable \\
+\hline
+\end{tabular}
+
+\begin{tabular}{|LLL|}
+\hline
+\multicolumn{3}{|T|}{\textsf{\textbf{PajeSubVariable}}}\\\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Description}\\
+\hline
+Time          & date              & Time the variable changed value\\
+Type          & string or integer & Type of variable \\
+Container     & string or integer & Container whose value changed \\
+Value         & double            & Value to be subtracted from variable \\
+\hline
+\end{tabular}%
+\end{center}%
+\caption{Fields of events that change value of variables}
+\label{f:pajesetvalue}
+\end{figure}
+
+
+\subsubsection{Links}
+
+A link is defined by two events, a
+``PajeStartLink''\index{PajeStartLink} and a
+``PajeEndLink''\index{PajeEndLink}.  These two events are matched and
+considered to form a link when their respective ``Container'',
+``Value'' and ``Key'' fields are the same.
+
+\begin{figure}[htbp]
+\begin{center}
+\begin{tabular}{|LLL|}
+\hline
+\multicolumn{3}{|T|}{\textsf{\textbf{PajeStartLink}}}\\\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Description}\\
+\hline
+Time          & date              & Time the link started\\
+Type          & string or integer & Type of link \\
+Container     & string or integer & Container that has the link \\
+SourceContainer&string or integer & Container where link started \\
+Value         & string or integer & Value of link \\
+Key           & string or integer & Used to match to link end \\
+\hline
+\end{tabular}
+
+\begin{tabular}{|LLL|}
+\hline
+\multicolumn{3}{|T|}{\textsf{\textbf{PajeEndLink}}}\\\hline
+\textbf{Field Name} & \textbf{Field Type} & \textbf{Description}\\
+\hline
+Time          & date              & Time the link started\\
+Type          & string or integer & Type of link \\
+Container     & string or integer & Container that has the link \\
+DestContainer & string or integer & Container where link ended \\
+Value         & string or integer & Value of link \\
+Key           & string or integer & Used to match to link start \\
+\hline
+\end{tabular}%
+\end{center}%
+\caption{Fields of events that create links}
+\label{f:pajelink}
+\end{figure}
+
+
+\section{Example}
+\label{sec:example}
+
+The whole trace file of the example would be:
+
+\begin{verbatim}
+
+%EventDef       PajeDefineContainerType 1
+%       Alias           string
+%       ContainerType   string
+%       Name            string
+%EndEventDef
+%EventDef       PajeDefineStateType     3
+%       Alias           string
+%       ContainerType   string
+%       Name            string
+%EndEventDef
+%EventDef       PajeDefineEntityValue   6
+%       Alias           string
+%       EntityType      string
+%       Name            string
+%EndEventDef
+%EventDef       PajeCreateContainer     7
+%       Time            date
+%       Alias           string
+%       Type            string
+%       Container       string
+%       Name            string
+%EndEventDef
+%EventDef       PajeDestroyContainer    8
+%       Time            date
+%       Name            string
+%       Type            string
+%EndEventDef
+%EventDef       PajeSetState           10
+%       Time            date
+%       Type            string
+%       Container       string
+%       Value           string
+%EndEventDef
+1 P 0 Program
+1 T P Thread
+3 S T "Thread State"
+6 E S Executing
+6 B S Blocked
+7 0 TTP P 0 "Thread Testing Program"
+7 0.986789 T1 T TTP "Thread 1"
+10 0.986789 S T1 E
+7 1.012332 T2 T TTP "Thread 2"
+10 1.012332 S T2 E
+10 2.34567 S T1 B
+10 2.405678 S T2 B
+10 2.456789 S T1 E
+10 4.001543 S T2 E
+8 4.295677 T2 T
+8 4.34565 T1 T
+8 4.3498 TTP P
+
+\end{verbatim}
+
+
+\section{Visualisation of the activity of the processors of a cluster}
+\label{sec:admin}
+
+The genericity of Pajé made it possible to visualize the system
+activity of the processors of a large-sized (200 PEs) cluster of
+personal computers \cite{GuilloudCAS:2001}. Several visualizations
+were built from the system information available in the \texttt{/proc}
+pseudo-directory of each PE. It was thus possible to represent the
+processor and memory load of each PE, the most time consuming process
+of each PE., etc. Pajé was also used to visualize the reservations of
+PEs by the users of the cluster, the reservations being done using the
+PBS system \cite{PBS} (see figure~\ref{fig:pbs}). The main bits of the
+Pajé trace file analyzed to produce this figure are given below.
+
+\begin{figure}[ht]
+\epsfxsize=\linewidth
+%\epsfysize=5cm
+\centerline{\epsfbox{FIG/pbs5.eps}}
+\caption{Scheduling of jobs on a large-sized cluster}
+\label{fig:pbs}
+\end{figure}
+
+\begin{verbatim}
+%EventDef       PajeDefineContainerType 1
+%       Alias           string
+%       ContainerType   string
+%       Name            string
+%EndEventDef
+%EventDef       PajeDefineEventType     2
+%       Alias           string
+%       ContainerType   string
+%       Name            string
+%EndEventDef
+%EventDef       PajeDefineStateType     3
+%       Name            string
+%       ContainerType   string
+%EndEventDef
+%EventDef       PajeDefineEntityValue   6
+%       Name            string
+%       EntityType      string
+%EndEventDef
+%EventDef       PajeCreateContainer     7
+%       Time            date
+%       Alias           string
+%       Type            string
+%       Container       string
+%       Name            string
+%EndEventDef
+%EventDef       PajeDestroyContainer    8
+%       Time            date
+%       Name            string
+%       Type            string
+%EndEventDef
+%EventDef       PajeSetState           10
+%       Time            date
+%       Type            string
+%       Container       string
+%       Value           string
+%EndEventDef
+1 MG        0      M-Grappe
+1 G         MG     Grappe
+1 M         G      Machine
+1 CPU       M      Processeur
+3 pbs-task  CPU
+7 7 MG1     MG     0   M-grappe_1
+7 7 G1      G      MG1 Grappe_1
+6 nobody pbs-task
+6 chapron pbs-task
+6 charao pbs-task
+6 fchaussum pbs-task
+6 feliot pbs-task
+6 guilloud pbs-task
+6 gustavo pbs-task
+6 leblanc pbs-task
+6 maillard pbs-task
+6 mpillon pbs-task
+6 paugerat pbs-task
+6 plumejea pbs-task
+6 romagnol pbs-task
+6 sderr pbs-task         
+7 8 M_icluster11  M  G1 M_icluster11
+7 8 P_icluster11  CPU  M_icluster11 P_icluster11
+7 8 M_icluster21  M  G1 M_icluster21
+7 8 P_icluster21  CPU  M_icluster21 P_icluster21
+7 8 M_icluster31  M  G1 M_icluster31
+7 8 P_icluster31  CPU  M_icluster31 P_icluster31
+7 8 M_icluster41  M  G1 M_icluster41
+
+[...]
+
+10 1 pbs-task P_icluster5 nobody
+10 4273 pbs-task P_icluster5 nobody
+10 5323 pbs-task P_icluster5 plumejea
+10 7893 pbs-task P_icluster5 nobody
+10 8277 pbs-task P_icluster5 feliot
+10 8611 pbs-task P_icluster5 nobody
+10 8633 pbs-task P_icluster5 feliot
+10 8804 pbs-task P_icluster5 nobody
+10 8836 pbs-task P_icluster5 feliot
+10 9655 pbs-task P_icluster5 nobody
+10 10038 pbs-task P_icluster5 feliot
+10 10899 pbs-task P_icluster5 nobody
+10 10930 pbs-task P_icluster5 feliot
+10 10944 pbs-task P_icluster5 nobody
+
+[...]
+
+10 438224 pbs-task P_icluster100 feliot
+10 438278 pbs-task P_icluster100 nobody
+10 438339 pbs-task P_icluster100 feliot
+10 438713 pbs-task P_icluster100 nobody
+10 665686 pbs-task P_icluster100 sderr
+10 665727 pbs-task P_icluster100 nobody
+8 1465976  P_icluster100 P
+8 1465976  M_icluster100 M
+8 1465976 G1 G
+8 1465976 MG1 MG
+
+
+\end{verbatim}

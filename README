@@ -1,0 +1,39 @@
+This is Paje, a program to visualize the execution of parallel programs.
+
+Paje is released under the GNU Lesser General Public License
+
+How to install:
+
+On Linux (and other platforms where GNUstep works):
+
+- First, install GNUstep (www.gnustep.org)
+  There is a good installation manual on www.made-it.com
+
+- Be sure to source the GNUstep environment setting script
+  (source /path-to-gnustep/System/Library/Makefiles/GNUstep.[c]sh
+
+- Then cd to Paje's directory and type
+  make
+  make install
+
+- It should now be possible to execute Paje with:
+  openapp Paje.app
+
+
+On OPENSTEP (you must have developer installed):
+
+- double-click on PB.project
+- click on make (the hammer)
+- click on run (the terminal)
+
+
+On MacOS-X (you mast have development tools installed)
+
+- double click on PajeMerge3.pbproj
+- click on make
+- click on run
+
+
+There are some example trace files in the Traces directory.
+
+Any problems, questions, etc, mailto:benhur@inf.ufsm.br

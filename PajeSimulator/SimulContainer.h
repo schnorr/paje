@@ -1,0 +1,115 @@
+/*
+    Copyright (c) 1998, 1999, 2000, 2001, 2003, 2004 Benhur Stein
+    
+    This file is part of Pajé.
+
+    Pajé is free software; you can redistribute it and/or modify it under
+    the terms of the GNU Lesser General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    Pajé is distributed in the hope that it will be useful, but WITHOUT ANY
+    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+    FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
+    for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with Pajé; if not, write to the Free Software Foundation, Inc.,
+    59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+*/
+#ifndef _SimulContainer_h_
+#define _SimulContainer_h_
+
+//
+// PajeContainer
+//
+// superclass for containers
+//
+
+#include <Foundation/Foundation.h>
+#include "../General/PajeContainer.h"
+#include "../General/PajeEvent.h"
+
+@interface SimulContainer : PajeContainer
+{
+    NSDate *creationTime;
+    NSDate *lastTime;
+    id simulator;
+    NSString *alias;
+    NSMutableDictionary *userEntities; // key = entityType
+    NSMutableDictionary *minValues; // key = entityType
+    NSMutableDictionary *maxValues; // key = entityType
+    int logicalTime;
+}
+
++ (SimulContainer *)containerWithType:(PajeEntityType *)type
+                                 name:(NSString *)n
+                                alias:(NSString *)a
+                           container:(PajeContainer *)newcontainer
+                        creationTime:(NSDate *)time
+                           simulator:(id)simul;
+- (id)initWithType:(PajeEntityType *)type
+              name:(NSString *)n
+             alias:(NSString *)a
+         container:(PajeContainer *)c
+      creationTime:(NSDate *)time
+         simulator:(id)simul;
+
+- (NSString *)alias;
+
+- (NSDate *)startTime;
+- (NSDate *)endTime;
+
+- (void)stopWithEvent:(PajeEvent*)event;
+
+- (void)setLastTime:(NSDate *)time;
+
+- (id)entityOfType:(PajeEntityType *)entityType;
+- (void)setEntity:(id)entity ofType:(PajeEntityType *)entityType;
+- (void)pushEntity:(id)entity ofType:(PajeEntityType *)entityType;
+- (id)popEntityOfType:(PajeEntityType *)entityType;
+- (id)popEntity;
+
+- (void)setUserStateOfType:(PajeEntityType *)entityType
+                   toValue:(id)value
+                 withEvent:(PajeEvent *)event;
+- (void)pushUserStateOfType:(PajeEntityType *)entityType
+                      value:(id)value
+                  withEvent:(PajeEvent *)event;
+- (void)popUserStateOfType:(PajeEntityType *)entityType
+                 withEvent:(PajeEvent *)event;
+
+- (void)setUserVariableOfType:(PajeVariableType *)entityType
+                      toValue:(id)entityName
+                    withEvent:(PajeEvent *)event;
+- (void)addUserVariableOfType:(PajeVariableType *)entityType
+                        value:(id)entityName
+                    withEvent:(PajeEvent *)event;
+- (void)subUserVariableOfType:(PajeVariableType *)entityType
+                        value:(id)entityName
+                    withEvent:(PajeEvent *)event;
+
+- (void)startUserLinkOfType:(PajeEntityType *)entityType
+                      value:(id)entityName
+            sourceContainer:(PajeContainer *)sourceContainer
+                        key:(id)key
+                  withEvent:(PajeEvent *)event;
+- (void)endUserLinkOfType:(PajeEntityType *)entityType
+                    value:(id)entityName
+            destContainer:(PajeContainer *)destContainer
+                      key:(id)key
+                withEvent:(PajeEvent*)event;
+
+- (NSNumber *)minValueForEntityType:(PajeEntityType *)entityType;
+- (NSNumber *)maxValueForEntityType:(PajeEntityType *)entityType;
+
+- (int)logicalTime;
+- (void)setLogicalTime:(int)lt;
+
+- (void)reset;
+- (void)encodeCheckPointWithCoder:(NSCoder *)coder;
+- (void)decodeCheckPointWithCoder:(NSCoder *)coder;
+
+@end
+
+#endif

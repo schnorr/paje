@@ -1,0 +1,70 @@
+\documentclass[a4paper,twoside]{article}
+\usepackage{fullpage}
+\usepackage{graphics}
+\usepackage{xspace}
+\usepackage{alltt}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+
+\setcounter{secnumdepth}{3}  %% pour numéroter les subsubsections
+\setcounter{tocdepth}{3}     %% profondeur dans la table des matières
+
+\usepackage{times}
+
+\title{Pajé User Manual}
+
+\author{Benhur Stein}
+
+\newenvironment{code}{\begin{alltt}}{\end{alltt}}
+
+\begin{document}
+
+\newcommand{\menu}[1]{\fbox{#1}}
+
+\maketitle
+
+\section{Starting the application}
+
+To execute Pajé, the GNUstep environment must have been set
+previously, with either
+\begin{code}
+source \emph{gnustep_path}/System/Makefiles/GNUstep.sh
+\end{code}
+or
+\begin{code}
+source \emph{gnustep_path}/System/Makefiles/GNUstep.csh
+\end{code}
+depending on your shell.
+Then, the command
+\begin{code}
+openapp Paje
+\end{code}
+will execute it.
+Once started, the \menu{Open...} menu
+option can be used to open a file.
+Alternatively, the command
+\begin{code}
+gopen \emph{file.trace}
+\end{code}
+will execute Pajé and make it open the trace file
+\emph{file.trace}.
+
+\section{Navegating the trace file}
+
+The main visualization window is composed of three parts: 
+\begin{itemize}
+\item space-time diagram;
+\item status area;
+\item zooming buttons.
+\end{itemize}
+
+\subsection{Space-time diagram}
+\subsection{Status area}
+\subsection{Zooming buttons}
+
+\section{Customizing the space-time view}
+
+\section{Using Filters}
+
+
+\end{document}

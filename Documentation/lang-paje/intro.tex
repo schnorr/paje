@@ -1,0 +1,72 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \chapter{Introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+This report defines the input data format used by the Pajé
+visualization tool. Pajé is a versatile trace-based visualization tool
+designed to help performance debugging of large-sized parallel
+applications. From trace files, recorded during the execution of
+parallel programs, Pajé builds a graphical representation of the
+behavior of these programs, to help programmers identify their
+``performance errors''. The main novelty of Pajé is an original
+combination of three of the most desirable properties of visualisation
+tools for parallel programs: extensibility, interactivity and
+scalability. 
+
+Scalability is the ability to represent the execution of
+parallel programs executing during long periods on large-sized
+systems; it is provided in Pajé by zooming and filtering
+functionalities, both in space --- ability to synthesize the
+information originating from several nodes of the system or to zoom in
+one of these nodes --- and in time --- possibility to display  period
+of time at various levels of detail. Interactivity is the ability to
+interrogate visual objects --- events, thread states, communications,
+etc. --- to obtain more details or check the source code whose
+execution produced a given event; it is also the ability to move back
+and forth in time or to zoom from a synthetic representation to a
+detailed one or vice versa or to set or reset a filter. Extensibility
+is the possibility ot extend the tool with new functionalities ---
+visual representations, filters, etc. --- or to display new
+programming models. Several characteristics of Pajé contribute to its
+extensibility: careful modular design, independence of the
+visualization modules from the programming model.
+
+Key to the ability to build a visual representation of the behavior of
+parallel programs, developed with various programming models, is the
+\textit{genericity} of Pajé: ability to parameterize the tools with a
+description of \textit{what} is to be represented and \textit{how}.
+This description is provided in the trace file as a hierarchy of the
+types of objects appearing in the visualization. The format of this
+description as well as the format of the events of the trace are also
+described in the trace file. The trace files\index{trace file} used as
+input by Pajé thus contain four categories of data:
+\begin{enumerate}
+\item Description of the format of the generic instructions.
+\item Generic instructions, describing the hierarchy of the types of
+  objects appearing in the visualization.
+\item Description of the format of the events recorded during the
+  execution of the visualized program.
+\item Events recorded during the execution of the program to be
+  visualized.
+\end{enumerate}
+
+The aim of this technical report is to describe the Pajé trace data
+format. The organization of the report is the following. After this
+introduction, the extensibility and genericity of Pajé are described
+in detail. The following section defines the Pajé data format and
+gives an example of use before the conclusion.
+
+
+%Pajé is an interactive visualization tool originally designed for
+%displaying the execution of parallel applications where a
+%(potentially) large number of communicating threads of various
+%life-times execute on each node of a distributed memory parallel
+%system.   To be easier
+%to extend, Pajé was designed as a data-flow graph of modular
+%components, most of them being independent of the semantics of the
+%parallel programming model of the visualized parallel programs. In
+%addition, application programmers can tailor the visualization to
+%their needs, without having to know any insight nor to modify any
+%component of Pajé. This can be done by defining the type hierarchy of
+%objects to be visualized as well as how these objects should be
+%visualized.

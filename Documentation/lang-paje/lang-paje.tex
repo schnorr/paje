@@ -1,0 +1,96 @@
+\documentclass[11pt,twoside]{report}
+\usepackage{fullpage}
+\usepackage{epsfig}
+\usepackage{xspace}
+\usepackage{alltt}
+
+% \usepackage[francais]{babel}        % Pour Linux
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+
+\setcounter{secnumdepth}{3}  %% pour numéroter les subsubsections
+\setcounter{tocdepth}{3}     %% profondeur dans la table des matières
+
+\usepackage{times}
+
+\include{definitions} % Définitions de la thèse de Benhur
+
+\makeindex
+
+\title{Pajé trace file format}
+
+\author{B. de Oliveira Stein\\ 
+Departamento de Eletr\^onica e Computa\c{c}\~ao\\
+Universidade Federal de Santa Maria - RS, Brazil.\\
+Email: benhur@inf.UFSM.br\\
+\and
+J. Chassin de Kergommeaux\\
+Laboratoire Informatique et Distribution (ID-IMAG)\\
+ENSIMAG - antenne de Montbonnot,\\ ZIRST, 51, avenue Jean Kuntzmann\\
+F-38330 Montbonnot Saint Martin, France \\ 
+Email:Jacques.Chassin-de-Kergommeaux@imag.fr\\
+http://www-apache.imag.fr/\~\/chassin
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  
+  Pajé is an interactive and scalable trace-based visualization tool
+  which can be used for a large variety of visualizations including
+  performance monitoring of parallel applications, monitoring the
+  execution of processors in a large scale PC cluster or representing
+  the behavior of distributed applications. Users of Pajé can tailor
+  the visualization to their needs, without having to know any insight
+  nor to modify any component of Pajé. This can be done by defining
+  the type hierarchy of objects to be visualized as well as how these
+  objects should be visualized. This feature allows the use of Pajé
+  for a wide variety of visualizations such as the use of resources by
+  applications in a large-size cluster or the behavior of distributed
+  Java applications.  This report describes the trace format used by
+  Pajé. Traces include three different kind of informations:
+  definition of the formats of the event, definition of the type
+  hierarchy of the objects to be visualized, definition of the formats
+  of the events of the trace and a set of recorded events, complying
+  with the format definition, to be used to build visualizations
+  according to the type hierarchy.
+
+ \textbf{Keywords:} performance debugging, visualization, MPI, pthread, 
+parallel programming, self defined data format.
+
+  
+\end{abstract}
+
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{intro.tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Extensibility of Pajé}
+\label{chap:paje}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{extensibility.tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Definition of type hierarchies and trace event formats}
+\label{chap:format}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{typeevent.tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Conclusion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{conclusion.tex}
+
+\bibliography{lang-paje}
+\bibliographystyle{abbrv}
+
+\addcontentsline{toc}{chapter}{Index}
+\input{lang-paje.ind}
+
+\end{document}
