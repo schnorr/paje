@@ -79,4 +79,9 @@
 {
     return [self retain];
 }
+
+- (NSString *)description
+{
+    return [[NSArray arrayWithObjects:entityType, container, nil] description];
+}
 @end

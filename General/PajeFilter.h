@@ -75,75 +75,135 @@
 //
 // Notifications
 // -----------------------------------------------------------------
+// Messages sent by a filter to the filter after it in the filter chain.
+// They are used to inform the filters (and visualisation modules) that
+// something has changed. Default implementation just forwards the message.
+// Filters can intercept a message if the change affects it and act accordingly.
+// Viewers can intercept a message if the change means that something needs
+// redrawing.
 //
+
+// Generic message. Used when something not specified in the other messages
+// has changed. entityType can be nil if not only one entityType is affected.
 - (void)dataChangedForEntityType:(PajeEntityType *)entityType;
+
+// Message sent when the color of something of entityType has changed.
 - (void)colorChangedForEntityType:(PajeEntityType *)entityType;
+
+// Message sent when the order of the containers of some type has changed.
 - (void)orderChangedForContainerType:(PajeEntityType *)containerType;
+
+// Message sent when the hierarchy of types and/or containers has changed.
 - (void)hierarchyChanged;
+
+// Message sent when containers have been (de)selected.
 - (void)containerSelectionChanged;
+
+// Message sent when the selected time slice has changed (or deselected).
 - (void)timeSelectionChanged;
+
 
 //
 // Commands
 // -----------------------------------------------------------------
+// Messages sent from a viewer or a filter to the preceeding filter.
+// Generally used to cause some filter to change its configuration.
+// Default implementation just forwards the message to the preceeding filter.
+// First filter (StorageController for the time being) overrides the
+// default implementation to ignore the message, generally.
 //
 
+// Command a filter to remove entityType from the type hierarchy.
 - (void)hideEntityType:(PajeEntityType *)entityType;
+
+// Command a filter to remove the selected containers from hierarchy
 - (void)hideSelectedContainers;
+
+// Command a filter to change the containers that are selected to the given set.
 - (void)setSelectedContainers:(NSSet *)containers;
+
+// Command a filter to change the selected time slice
 - (void)setSelectionStartTime:(NSDate *)from endTime:(NSDate *)to;
+
+// Command a filter to change the order of the given containers to that of
+// the given array.
 - (void)setOrder:(NSArray *)containers
 ofContainersTyped:(PajeEntityType *)containerType
      inContainer:(PajeContainer *)container;
 
+// Command a filter to change the color of the given entity.
 - (void)setColor:(NSColor *)color
        forEntity:(id<PajeEntity>)entity;
+       
+// Command a filter to change the color of a given value of an entity type.
 - (void)setColor:(NSColor *)color
          forName:(id)name
     ofEntityType:(PajeEntityType *)entityType;
+
+// Command a filter to change the color for all entities of a given type
+// (used for "variable" entity types).
 - (void)setColor:(NSColor *)color
    forEntityType:(PajeEntityType *)entityType;
 
+// Command a filter (StorageController) to verify that all entities on
+// given time period are accessible.
 - (void)verifyStartTime:(NSDate *)start endTime:(NSDate *)end;
 
-//
-// Inspecting an entity
-//
+// Command a filter to open an inspection window to inspect given entity.
 - (void)inspectEntity:(id<PajeInspecting>)entity;
 
 
 //
 // Queries
 // -----------------------------------------------------------------
+// Messages sent by viewers or filters to the filter preceeding it.
+// These messages ask for some information about the loaded trace.
 //
 
+// The time period of the trace
 - (NSDate *)startTime;
 - (NSDate *)endTime;
 
+// The group of containers that are selected
 - (NSSet *)selectedContainers;
 
+// The time selection
 - (NSDate *)selectionStartTime;
 - (NSDate *)selectionEndTime;
 
 //
 // Accessing entities
 //
+
+// The entity at the root of the hierarchy
 - (PajeContainer *)rootInstance;
 
+// Array of types that are directly under given type in hierarchy
 - (NSArray *)containedTypesForContainerType:(PajeEntityType *)containerType;
+
+// The type that contains the given type
 - (PajeEntityType *)containerTypeForType:(PajeEntityType *)entityType;
 
+// All entities of a given type that are in a container. Container must be
+// of a type ancestral of entityType in the hierarchy.
 - (NSEnumerator *)enumeratorOfEntitiesTyped:(PajeEntityType *)entityType
                                 inContainer:(PajeContainer *)container
                                    fromTime:(NSDate *)start
                                      toTime:(NSDate *)end;
 
+// All containers of a given type contained by container. Container must be
+// of a type ancestral of entityType in the hierarchy.
 - (NSEnumerator *)enumeratorOfContainersTyped:(PajeEntityType *)entityType
                                   inContainer:(PajeContainer *)container;
 
+// All values an entity of given type can have.
 - (NSArray *)allNamesForEntityType:(PajeEntityType *)entityType;
+
+// Textual description of an entity type.
 - (NSString *)descriptionForEntityType:(PajeEntityType *)entityType;
 
+// Minimum and maximum value of a "variable" entity type, globally or inside
+// a container.
 - (NSNumber *)minValueForEntityType:(PajeEntityType *)entityType;
 - (NSNumber *)maxValueForEntityType:(PajeEntityType *)entityType;
 - (NSNumber *)minValueForEntityType:(PajeEntityType *)entityType
@@ -152,18 +212,26 @@ ofContainersTyped:(PajeEntityType *)containerType
                         inContainer:(PajeContainer *)container;
 
 //- (BOOL)isHiddenEntityType:(PajeEntityType *)entityType;
+
+// The drawing type of an entityType.
 - (PajeDrawingType)drawingTypeForEntityType:(PajeEntityType *)entityType;
+
+// Names of fields an entity of given type can have.
 - (NSArray *)fieldNamesForEntityType:(PajeEntityType *)entityType;
+
+// Names of fields an entity of given value and type can have.
 - (NSArray *)fieldNamesForEntityType:(PajeEntityType *)entityType
                                 name:(NSString *)name;
+
+// The value of the given named field for an entity type.
 - (id)valueOfFieldNamed:(NSString *)fieldName
           forEntityType:(PajeEntityType *)entityType;
 
-// Colors
-// - when each entity name has a different color
+// Color of given value of entity type
 - (NSColor *)colorForName:(NSString *)name
              ofEntityType:(PajeEntityType *)entityType;
-// - when there's one color for entity type (variables)
+             
+// Color for all entities of given type (used for "variable" entity type).
 - (NSColor *)colorForEntityType:(PajeEntityType *)entityType;
 
 //
@@ -200,6 +268,10 @@ ofContainersTyped:(PajeEntityType *)containerType
 - (PajeEntityType *)rootEntityType;
 - (NSArray *)allEntityTypes;
 - (BOOL)isContainerEntityType:(PajeEntityType *)entityType;
+
+- (PajeEntityType *)entityTypeWithName:(NSString *)n;
+- (PajeContainer *)containerWithName:(NSString *)n
+                                type:(PajeEntityType *)t;
 @end
 
 #endif

@@ -112,7 +112,7 @@
     PajeDrawingType drawingType;
     NSEnumerator *subtypeEnum;
     PajeEntityType *subtype;
-    
+
     drawingType = [self drawingTypeForEntityType:eType];
     layoutDescriptor = [STEntityTypeLayout
                                     descriptorWithEntityType:eType

@@ -590,18 +590,44 @@
         return [super maxValueForEntityType:entityType inContainer:container];
 }
 
-- (PajeEntityType *)entityTypeWithName:(NSString *)name
+- (id)configuration
 {
-    PajeEntityType *entityType;
-    NSArray *types;
     NSEnumerator *typeEnum;
+    ReduceEntityType *type;
+    NSMutableArray *types;
     
-    typeEnum = [[self allEntityTypes] objectEnumerator];
-    while ((entityType = [typeEnum nextObject]) != nil) {
-        if ([[entityType name] isEqual:name]) {
-            return entityType;
+    types = [NSMutableArray arrayWithCapacity:[reduceEntityTypes count]];
+    typeEnum = [reduceEntityTypes objectEnumerator];
+    while ((type = [typeEnum nextObject]) != nil) {
+        [types addObject:[type dictionaryForDefaults]];
+    }
+    return types;
+}
+
+- (void)setConfiguration:(id)config
+{
+    NSEnumerator *filterEnum;
+    NSDictionary *filter;
+    ReduceEntityType *entityType;
+
+    [reduceEntityTypes removeAllObjects];
+    filterEnum = [config objectEnumerator];
+    while ((filter = [filterEnum nextObject]) != nil) {
+        entityType = [ReduceEntityType typeFromDictionary:filter component:self];
+        if (entityType != nil) {
+            [reduceEntityTypes addObject:entityType];
+            [self addToHierarchy:entityType];
         }
     }
-    return nil;
+
+    [self calcEntityNamePopUp];
+    [self calcEntityTypePopUp];
+    [self calcGroupPopUp];
+    [self calcReduceModePopUp];
+    [self refreshMatrix];
+    [self calcHierarchy];
+
+    //[super hierarchyChanged];
 }
+
 @end

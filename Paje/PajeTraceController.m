@@ -336,4 +336,66 @@
 {
     [[PajeController controller] setCurrentTraceController:self];
 }
+
+- (void)saveConfiguration
+{
+    NSEnumerator *filterEnum;
+    NSString *filterName;
+    NSMutableDictionary *configuration;
+    
+    configuration = [NSMutableDictionary dictionaryWithCapacity:[filters count]];
+
+    filterEnum = [filters keyEnumerator];
+
+    while ((filterName = [filterEnum nextObject]) != nil) {
+        PajeFilter *filter;
+        NSDictionary *filterConfig;
+        
+        filter = [filters objectForKey:filterName];
+        filterConfig = [filter configuration];
+        
+        if (filterConfig != nil) {
+            [configuration setObject:filterConfig forKey:filterName];
+        }
+    }
+    
+    [configuration writeToFile:configurationName atomically:YES];
+}
+
+- (void)loadConfiguration:(NSString *)name
+{
+    // FIXME: should load and connect filters; more info needed on config file
+    NSDictionary *configuration;
+    NSEnumerator *filterEnum;
+    NSString *filterName;
+    
+    Assign(configurationName, name);
+
+    configuration = [NSDictionary dictionaryWithContentsOfFile:configurationName];
+    
+    filterEnum = [configuration keyEnumerator];
+
+    while ((filterName = [filterEnum nextObject]) != nil) {
+        PajeFilter *filter;
+        NSDictionary *filterConfig;
+        
+        filter = [filters objectForKey:filterName];
+        
+        if (filter == nil) {
+            // FIXME: shouldn't be done this way: reload all filters
+            continue;
+        }
+        filterConfig = [configuration objectForKey:filterName];
+        
+        if (filterConfig != nil) {
+            [filter setConfiguration:filterConfig];
+        }
+    }
+}
+
+- (void)setConfigurationName:(NSString *)name
+{
+    Assign(configurationName, name);
+    [self saveConfiguration];
+}
 @end

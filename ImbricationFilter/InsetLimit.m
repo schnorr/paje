@@ -22,6 +22,7 @@
 #include "InsetLimit.h"
 #include "../General/FoundationAdditions.h"
 #include "../General/UniqueString.h"
+#include "../General/Macros.h"
 
 
 @interface ImbricationFilteringEnumerator : NSEnumerator
@@ -164,13 +165,13 @@
         // only states have indentationLevel
         if ([self drawingTypeForEntityType:entityType]
             == PajeStateDrawingType) {
-            [entityTypePopUp addItemWithTitle:[entityType name]];
+            [entityTypePopUp addItemWithTitle:[self descriptionForEntityType:entityType]];
             [[entityTypePopUp lastItem] setRepresentedObject:entityType];
         }
     }
     if ([entityTypePopUp numberOfItems] > 0) {
         if (selectedEntityType != nil) {
-            [entityTypePopUp selectItemWithTitle:[selectedEntityType name]];
+            [entityTypePopUp selectItemWithTitle:[self descriptionForEntityType:selectedEntityType]];
         }
         if ([entityTypePopUp selectedItem] == nil) {
             [entityTypePopUp selectItemAtIndex:0];
@@ -194,7 +195,7 @@
     } else {
         NSString *value;
         NSRange range;
-        value = [limits objectForKey:[selectedEntityType name]];
+        value = [limits objectForKey:[self descriptionForEntityType:selectedEntityType]];
         if (value) {
             range = [value rangeValue];
         } else {
@@ -242,6 +243,58 @@
 }
 
 
+#define SETCACHEABSENT(et) \
+    do { \
+        _cachedEntityType = et; \
+        _cachedPresence = NO; \
+        _cachedRange = NSMakeRange(0,0); \
+    } while(0)
+#define SETCACHERANGE(et, ran) \
+    do { \
+        _cachedEntityType = et; \
+        _cachedPresence = YES; \
+        _cachedRange = ran; \
+    } while(0)
+#define FILLCACHE(et) \
+    do { \
+        if (et != _cachedEntityType) { \
+            NSString * val; \
+            val = [limits objectForKey:[self descriptionForEntityType:et]]; \
+            if (val == nil) { \
+                SETCACHEABSENT(et); \
+            } else { \
+                SETCACHERANGE(et, [val rangeValue]); \
+            } \
+        } \
+    } while(0)
+
+- (BOOL)isFilteredEntityType:(PajeEntityType *)entityType
+{
+    FILLCACHE(entityType);
+    return _cachedPresence;    
+}
+
+- (NSRange)rangeForEntityType:(PajeEntityType *)entityType
+{
+    FILLCACHE(entityType);
+    return _cachedRange;    
+}
+
+- (void)setRange:(NSRange)ran forEntityType:(PajeEntityType *)entityType
+{
+    if ((ran.location == 0) && (ran.length == 0)) {
+        [limits removeObjectForKey:[self descriptionForEntityType:entityType]];
+        SETCACHEABSENT(entityType);
+    } else {
+        [limits setObject:[NSString stringWithRange:ran]
+                   forKey:[self descriptionForEntityType:entityType]];
+        SETCACHERANGE(entityType, ran);
+    }
+    [self registerDefaults];
+    [self dataChangedForEntityType:entityType];
+}
+
+
 //
 // Handle interface messages
 //
@@ -252,19 +305,8 @@
 
 - (void)_valueChanged
 {
-    PajeEntityType *selectedEntityType;
-    NSRange ran;
-    selectedEntityType = [self selectedEntityType];
-    ran.location = [minField intValue];
-    ran.length = [maxField intValue];
-    if ((ran.location == 0) && (ran.length == 0)) {
-        [limits removeObjectForKey:[selectedEntityType name]];
-    } else {
-        [limits setObject:[NSString stringWithRange:ran]
-                   forKey:[selectedEntityType name]];
-    }
-    [self registerDefaults];
-    [self dataChangedForEntityType:selectedEntityType];
+    [self setRange:NSMakeRange([minField intValue], [maxField intValue])
+     forEntityType:[self selectedEntityType]];
 }
 
 - (IBAction)minValueChanged:(id)sender
@@ -302,7 +344,6 @@
                                    fromTime:(NSDate *)start
                                      toTime:(NSDate *)end
 {
-    NSString *val;
     int min, max;
     NSRange ran;
     NSEnumerator *origEnum;
@@ -310,35 +351,50 @@
                                              inContainer:container
                                                 fromTime:start
                                                   toTime:end];
-    val = [limits objectForKey:[entityType name]];
-    if (val == nil)
+    if (![self isFilteredEntityType:entityType]) {
         return origEnum;
-    ran = [val rangeValue];
+    }
+    ran = [self rangeForEntityType:entityType];
     min = ran.location;
     max = ran.length;
-    return [ImbricationFilteringEnumerator enumeratorWithEnumerator:origEnum
-                                                     inputComponent:inputComponent
-                                                           minValue:min
-                                                           maxValue:max];
+    return [ImbricationFilteringEnumerator
+                                enumeratorWithEnumerator:origEnum
+                                          inputComponent:inputComponent
+                                                minValue:min
+                                                maxValue:max];
 }
 
 
 - (int)imbricationLevelForEntity:(PajeEntity *)entity;
 {
     int origValue;
-    NSString *val;
     NSRange ran;
+    PajeEntityType *entityType;
 
+    entityType = [self entityTypeForEntity:entity];
     origValue = [inputComponent imbricationLevelForEntity:entity];
-    val = [limits objectForKey:[[self entityTypeForEntity:entity] name]];
-
-    if (val) {
-        ran = [val rangeValue];
-        if (origValue > ran.length) origValue = ran.length;
-        origValue -= ran.location;
+    if (![self isFilteredEntityType:entityType]) {
+        return origValue;
     }
+    
+    ran = [self rangeForEntityType:entityType];
+    if (origValue > ran.length) origValue = ran.length;
+    origValue -= ran.location;
+
     return origValue;
 }
 
+- (id)configuration
+{
+    return limits;
+}
 
+- (void)setConfiguration:(id)config
+{
+    if (![config isKindOfClass:[NSDictionary class]]) {
+        return;
+    }
+    
+    Assign(limits, [config unifyStrings]); 
+}
 @end

@@ -140,23 +140,18 @@
 }
 
 - (void)synchronizeKey:(OrderKey *)key
+        toOrderedNames:(NSArray *)containerNames
 {
     NSMutableArray *orderedContainers;
     NSMutableArray *allContainers;
     NSEnumerator *containerNamesEnum;
     NSString *containerName;
-    NSArray *orderFromDefaults;
     
-    orderFromDefaults = [self defaultsForKey:key];
-    if (orderFromDefaults == nil) {
-        return;
-    }
-
     orderedContainers = [NSMutableArray array];
     allContainers = [[[super enumeratorOfContainersTyped:[key entityType]
                                              inContainer:[key container]]
                                 allObjects] mutableCopy];
-    containerNamesEnum = [orderFromDefaults objectEnumerator];
+    containerNamesEnum = [containerNames objectEnumerator];
     while ((containerName = [containerNamesEnum nextObject]) != nil) {
         PajeContainer *container;
         container = [self removeContainerNamed:containerName
@@ -169,6 +164,18 @@
     [containers setObject:orderedContainers forKey:key];
     [allContainers release];
     //[self registerDefaultsForKey:key];
+}
+
+- (void)synchronizeKey:(OrderKey *)key
+{
+    NSArray *orderFromDefaults;
+    
+    orderFromDefaults = [self defaultsForKey:key];
+    if (orderFromDefaults == nil) {
+        return;
+    }
+
+    [self synchronizeKey:key toOrderedNames:orderFromDefaults];
 }
 
 - (void)dataChangedForEntityType:(PajeEntityType *)entityType
@@ -185,6 +192,13 @@
         }
     }
     [super dataChangedForEntityType:entityType];
+}
+
+- (void)hierarchyChanged
+{
+    [containers removeAllObjects];
+    [hierarchyBrowser refreshLastColumn];
+    [super hierarchyChanged];
 }
 
 //
@@ -313,6 +327,11 @@ ofContainersTyped:(PajeEntityType *)containerType
     OrderKey *key;
     NSArray *containerArray;
 
+    if (container == nil) {
+        return [super enumeratorOfContainersTyped:entityType
+                                      inContainer:container];
+    }
+
     key = [OrderKey keyWithEntityType:entityType container:container];
     containerArray = [containers objectForKey:key];
     if (containerArray == nil) {
@@ -328,4 +347,61 @@ ofContainersTyped:(PajeEntityType *)containerType
     }
 }
 
+- (id)configuration
+{
+    return containers;
+}
+
+- (OrderKey *)keyFromDescription:(NSString *)description
+{
+    NSArray *keyAsArray;
+    PajeEntityType *entityType;
+    PajeContainer *container;
+
+    NS_DURING
+        keyAsArray = [description propertyList];
+    NS_HANDLER
+        NS_VALUERETURN(nil, id);
+    NS_ENDHANDLER
+
+    if (![keyAsArray isKindOfClass:[NSArray class]]
+        || [keyAsArray count] != 2) {
+        return nil;
+    }
+
+    entityType = [self entityTypeWithName:[keyAsArray objectAtIndex:0]];
+    if (entityType == nil) {
+        return nil;
+    }
+    
+    container = [self containerWithName:[keyAsArray objectAtIndex:1]
+                                   type:[self containerTypeForType:entityType]];
+    if (container == nil) {
+        return nil;
+    }
+
+    return [OrderKey keyWithEntityType:entityType container:container];
+}
+
+- (void)setConfiguration:(id)config
+{
+    NSEnumerator *keyDescriptionEnumerator;
+    NSString *keyDescription;
+    OrderKey *key;
+
+    if (![config isKindOfClass:[NSDictionary class]]) {
+        return;
+    }
+
+    keyDescriptionEnumerator = [config keyEnumerator];
+    while ((keyDescription = [keyDescriptionEnumerator nextObject]) != nil) {
+        key = [self keyFromDescription:keyDescription];
+        if (key != nil) {
+            [self synchronizeKey:key
+                  toOrderedNames:[config objectForKey:keyDescription]];
+        }
+    }
+    [hierarchyBrowser refreshLastColumn];
+    [super hierarchyChanged];
+}
 @end

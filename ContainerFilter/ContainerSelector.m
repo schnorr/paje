@@ -151,11 +151,11 @@
 #endif
     }
     
-    if ([self isRegisteredAsHiddenEntityType:entityType]) {
-        [hiddenEntityTypes addObject:entityTypeDescription];
-    } else {
-        [hiddenEntityTypes removeObject:entityTypeDescription];
-    }
+//    if ([self isRegisteredAsHiddenEntityType:entityType]) {
+//        [hiddenEntityTypes addObject:entityTypeDescription];
+//    } else {
+//        [hiddenEntityTypes removeObject:entityTypeDescription];
+//    }
 }
 
 - (void)setHidden:(BOOL)hidden
@@ -219,7 +219,7 @@
 //
 // Handle interface messages
 //
-- (void)selectAll:(id)sender
+- (IBAction)selectAll:(id)sender
 {
     PajeEntityType *entityType = [self selectedEntityType];
     NSMutableSet *filter = [self filterForEntityType:entityType];
@@ -290,9 +290,10 @@
     hiddenTypes = [[config objectForKey:@"HiddenContainerTypes"] unifyStrings];
     Assign(hiddenEntityTypes, [NSMutableSet setWithArray:hiddenTypes]);
     [self hierarchyChanged];
+    [super dataChangedForEntityType:nil];
 }
 
-- (void)unselectAll:(id)sender
+- (IBAction)unselectAll:(id)sender
 {
     PajeEntityType *entityType = [self selectedEntityType];
     NSMutableSet *filter = [self filterForEntityType:entityType];
@@ -333,7 +334,7 @@
     }
 }
 
-- (void)matrixChanged:(id)sender
+- (IBAction)matrixChanged:(id)sender
 {
     NSButtonCell *cell = [sender selectedCell];
     PajeEntityType* entityType = [self selectedEntityType];
@@ -345,7 +346,7 @@
     }
 }
 
-- (void)entityPopUpChanged:(id)sender
+- (IBAction)entityPopUpChanged:(id)sender
 {
     [self synchronizeMatrix];
 }
@@ -485,7 +486,7 @@
 {
     NSEnumerator *origEnum;
     NSMutableSet *filter;
-    
+
     if ([self isHiddenEntityType:entityType]) {
         NSLog(@"enumerating hidden type %@", entityType);
         return nil;

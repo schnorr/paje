@@ -549,4 +549,63 @@ NSDebugMLog(@"");
     [self highlightCell:nil inMatrix:m];
 }
 
+- (id)configuration
+{
+    NSMutableDictionary *hiddenNames;
+    NSEnumerator *keyEnum;
+    id key;
+    NSSet *value;
+
+    hiddenNames = [NSMutableDictionary dictionaryWithCapacity:[filters count]];
+
+    keyEnum = [filters keyEnumerator];
+    while ((key = [keyEnum nextObject]) != nil) {
+        value = [filters objectForKey:key];
+	[hiddenNames setObject:[value allObjects] 
+                        forKey:[self descriptionForEntityType:key]];
+    }
+
+    return [NSDictionary dictionaryWithObjectsAndKeys:
+                hiddenNames, @"HiddenNames", 
+                [hiddenEntityTypes allObjects], @"HiddenEntityTypes",
+                nil];
+}
+
+- (void)setConfiguration:(id)config
+{
+    NSMutableDictionary *hiddenNames;
+    NSArray *hiddenTypes;
+    NSEnumerator *keyEnum;
+    NSString *entityTypeName;
+    PajeEntityType *entityType;
+    int i;
+
+    hiddenNames = [[config objectForKey:@"HiddenNames"] unifyStrings];
+
+    keyEnum = [hiddenNames keyEnumerator];
+    while ((entityTypeName = [keyEnum nextObject]) != nil) {
+        entityType = [self entityTypeWithName:entityTypeName];
+        if (entityType != nil) {
+            NSArray *value;
+            value = [hiddenNames objectForKey:entityTypeName];
+	    [filters setObject:[NSMutableSet setWithArray:value]
+                        forKey:entityType];
+        }
+    }
+
+    hiddenTypes = [[config objectForKey:@"HiddenEntityTypes"] unifyStrings];
+    for (i = 0; i < [hiddenTypes count];) {
+        entityTypeName = [hiddenTypes objectAtIndex:i];
+        entityType = [self entityTypeWithName:entityTypeName];
+        if (entityType == nil) {
+            [hiddenTypes removeObjectAtIndex:i];
+        } else {
+            [hiddenTypes replaceObjectAtIndex:i withObject:entityType];
+            i++;
+        }
+    }
+    Assign(hiddenEntityTypes, [NSMutableSet setWithArray:hiddenTypes]);
+    [self hierarchyChanged];
+    [super dataChangedForEntityType:nil];
+}
 @end

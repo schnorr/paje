@@ -292,9 +292,26 @@ static PajeController *uniqueController;
         [menuItem setTag:tag++];
     }
     
+    [filtersMenu addItemWithTitle:@"Save Configuration"
+                           action:@selector(saveFilterConfiguration:)
+                    keyEquivalent:nil];
+    [filtersMenu addItemWithTitle:@"Load Configuration"
+                           action:@selector(loadFilterConfiguration:)
+                    keyEquivalent:nil];
+
     [filtersMenu sizeToFit];
     [filtersPopUp selectItemWithTitle:previouslySelectedFilterName];
     [self filterChanged:self];
     [previouslySelectedFilterName release];
+}
+
+- (void)saveFilterConfiguration:(id)sender
+{
+    [currentTraceController setConfigurationName:@"/tmp/pajeconfig"];
+}
+
+- (void)loadFilterConfiguration:(id)sender
+{
+    [currentTraceController loadConfiguration:@"/tmp/pajeconfig"];
 }
 @end

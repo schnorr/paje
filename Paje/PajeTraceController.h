@@ -38,6 +38,8 @@
     NSMutableArray *tools;
 
     PSortedArray *checkPoints;
+    
+    NSString *configurationName;
 }
 
 - (void)registerFilter:(PajeFilter *)filter;

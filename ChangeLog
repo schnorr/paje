@@ -1,3 +1,21 @@
+2005-03-06  Benhur Stein <benhur@inf.ufsm.br>
+	* EntityTypeFilter/EntityTypeSelector.m, ImbricationFilter/InsetLimit.m,
+	  OrderFilter/Order.m, ReductionFilter/BusyNode.m,
+	  Paje/PajeController.[hm], Paje/PajeTraceController.m: implemented
+	  support for saving/loading filter configuration. Configuration is
+	  saved/loaded for file /tmp/pajeconfig. Missing FieldFilter, the
+	  possibility of naming configurations, a configuration editor (loading
+	  and unloading of filters, more than one filter of the same type, etc.
+	* General/PajeFilter.[hm]: added helper methods -entityTypeWithName:
+	  and -containerWithName:type:
+	* General/HierarchyBrowser.m: some better support for when updating 
+	  last column (still does not work in all cases)
+	* ImbricationFilter/InsetLimit.[hm]: added a cache for increased
+	  performance (not measured)
+
+2005-02-21  Benhur Stein <benhur@inf.ufsm.br>
+	* General/PajeFilter.h: add some documentation.
+
 2005-02-17  Benhur Stein <benhur@inf.ufsm.br>
 	* General/DataScanner.m: hack to read numbers from trace file in
 	  a locale independent way (solves bug #303193).

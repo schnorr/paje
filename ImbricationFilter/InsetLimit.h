@@ -36,6 +36,11 @@
     IBOutlet NSTextField *maxField;
     IBOutlet NSStepper *minStepper;
     IBOutlet NSStepper *maxStepper;
+
+    id _cachedEntityType;
+    BOOL _cachedPresence;
+    NSRange _cachedRange;
+
 }
 
 - (id)initWithController:(PajeTraceController *)c;

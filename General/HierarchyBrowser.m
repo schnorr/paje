@@ -71,7 +71,8 @@
 
 - (void)refreshLastColumn
 {
-    [containersBrowser reloadColumn:[containersBrowser selectedColumn]];
+// FIXME: this is wrong. sometimes it should be lastcolumn-1
+    [containersBrowser reloadColumn:[containersBrowser /*selected*/lastColumn]];
 }
 
 - (void)setFilter:(id)f
@@ -111,11 +112,14 @@
 
 - (void)selectContainers:(NSArray *)containers
 {
+// FIXME: this is wrong. sometimes it should be lastcolumn-1
     NSMatrix *matrix = [containersBrowser matrixInColumn:[containersBrowser lastColumn]];
     NSCell *cell;
     int row = 0;
-    
+
+//NSLog(@"matrix=%@ [%@]", matrix, [[matrix cellAtRow:row column:0] representedObject]);
     while ((cell = [matrix cellAtRow:row column:0]) != nil) {
+//NSLog(@"select? %@", [cell representedObject]);
         if ([containers indexOfObjectIdenticalTo:[cell representedObject]] != NSNotFound) {
             [matrix selectCellAtRow:row column:0];
         }

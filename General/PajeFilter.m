@@ -541,4 +541,34 @@ ofContainersTyped:(PajeEntityType *)containerType
            == PajeContainerDrawingType;
 }
 
+- (PajeEntityType *)entityTypeWithName:(NSString *)n
+{
+    NSEnumerator *entityTypeEnum;
+    PajeEntityType *entityType;
+    
+    entityTypeEnum = [[self allEntityTypes] objectEnumerator];
+    while ((entityType = [entityTypeEnum nextObject]) != nil) {
+        if ([n isEqual:[self descriptionForEntityType:entityType]]) {
+            break;
+        }
+    }
+    return entityType;
+}
+
+- (PajeContainer *)containerWithName:(NSString *)n
+                                type:(PajeEntityType *)t
+{
+    NSEnumerator *containerEnum;
+    PajeContainer *container;
+    
+    containerEnum = [self enumeratorOfContainersTyped:t
+                                          inContainer:[self rootInstance]];
+    while ((container = [containerEnum nextObject]) != nil) {
+        if ([n isEqual:[self nameForEntity:container]]) {
+            break;
+        }
+    }
+    return container;
+}
+
 @end
