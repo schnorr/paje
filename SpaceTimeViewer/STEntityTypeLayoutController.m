@@ -80,12 +80,17 @@
                             nil, nil, nil);
             return;
         }
-        [self setupPopUpWithLayoutDescriptors:[delegate layoutDescriptors]];
-        [self setupShapeMatrix];
-        [self setupDrawMatrixes];
+        [self reset];
     }
     
     [[shapeMatrix window] orderFront:self];
+}
+
+- (void)reset
+{
+    [self setupPopUpWithLayoutDescriptors:[delegate layoutDescriptors]];
+    [self setupShapeMatrix];
+    [self setupDrawMatrixes];
 }
 
 - (void)setupPopUpWithLayoutDescriptors:(NSArray *)set

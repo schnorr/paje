@@ -51,6 +51,8 @@
 - (IBAction)stepperChanged:(id)sender;
 - (IBAction)switchChanged:(id)sender;
 
+- (void)reset;
+
 - (id)initWithDelegate:(id)del;
 - (void)setupPopUpWithLayoutDescriptors:(NSArray *)set;
 - (void)setupShapeMatrix;

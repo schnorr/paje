@@ -70,7 +70,9 @@
 
     // register the tools with the controller
     [self registerTool:self];
-    [self registerTool:[[STEntityTypeLayoutController alloc] initWithDelegate:self]];
+    layoutController = [[STEntityTypeLayoutController alloc]
+                                          initWithDelegate:self];
+    [self registerTool:layoutController];
 }
 
 - (void)windowDidBecomeKey:(NSNotification *)notification
@@ -182,6 +184,7 @@
     [scrollView setRulersVisible:YES];
 [drawView doubleTimeScale:self];
 [drawView halveTimeScale:self];
+    [layoutController reset];
 }
 
 - (void)dataChangedForEntityType:(PajeEntityType *)entityType

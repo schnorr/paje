@@ -25,6 +25,7 @@
 
 @class DrawView;
 @class HierarchyRuler;
+@class STEntityTypeLayoutController;
 
 @interface STController: PajeFilter
 {
@@ -33,6 +34,7 @@
     IBOutlet DrawView *drawView;
     NSRulerView *timeRuler;
     HierarchyRuler *hierarchyRuler;
+    STEntityTypeLayoutController *layoutController;
 
     NSMutableDictionary *layoutDescriptors; // STEntityTypeLayout[entity type]
     
