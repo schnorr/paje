@@ -242,6 +242,7 @@ do { \
     float max;
     float scale;
     float offset;
+    float oldx2 = -1e6;
     PajeEntityType *entityType;
     NSColor *lastColor = nil;
     
@@ -278,7 +279,11 @@ do { \
         if (x1 < NSMinX(cutRect)) x1 = NSMinX(cutRect);
         if (x2 > NSMaxX(cutRect)) x2 = NSMaxX(cutRect);
 #endif
-        PSlineto(x1, y);
+        if (!first && x1 == oldx2) {
+            PSlineto(x1, y);
+        } else {
+            PSmoveto(x1, y);
+        }
 
         color = [filter colorForEntity:entity];
         if (![color isEqual:lastColor]) {
@@ -290,7 +295,7 @@ do { \
             [color set];
         }
         PSlineto(x2, y);
-
+        oldx2 = x2;
     }
     if (!first) {
         PSstroke();

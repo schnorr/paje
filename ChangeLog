@@ -1,4 +1,9 @@
 2005-01-05  Benhur Stein <benhur@inf.ufsm.br>
+	* SpaceTimeViewer/DrawView+Drawing.m: changed way of drawing values
+	  (now there can be times without values, and they will not be drawn)
+	  (necessary for new field value filter (to be commited)).
+
+2005-01-05  Benhur Stein <benhur@inf.ufsm.br>
 	* SpaceTimeViewer/STEntityTypeLayoutController.m: made highlighting
 	  of selected buttons in "Shapes&Sizes" work again
 
