@@ -1,4 +1,8 @@
 2005-02-17  Benhur Stein <benhur@inf.ufsm.br>
+	* Allow files with any extension to be selected in the open file
+	  panel.
+
+2005-02-17  Benhur Stein <benhur@inf.ufsm.br>
 	* Make sure Shapes&Sizes tool is informed when trace hierarchy
 	  changes (adds an instance variable to STController, must
 	  do a "make clean" before doing "make").

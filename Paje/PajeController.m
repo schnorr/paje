@@ -167,7 +167,7 @@ static PajeController *uniqueController;
 
     result = [openFilePanel runModalForDirectory:directory
                                             file:filename
-                                           types:filetypes];
+                                           types:nil/*filetypes*/];
     
     if (result == NSOKButton) {
         [self application:NSApp openFile:[openFilePanel filename]];
