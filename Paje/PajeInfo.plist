@@ -9,7 +9,7 @@
              "and Laborat\u00f3rio de Sistemas de Computa\u00e7\u00e3o, UFSM, Brazil");
   Copyright = "Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004 Benhur Stein and contributors.";
   CopyrightDescription = "Released under the GNU General Public License 2.0";
-  FullVersionID = "1.2.1, Jan 2005";
+  FullVersionID = "1.2.2, Jan 2005";
   NOTE = "Automatically generated, do not edit!";
   NSExecutable = "Paje";
   NSMainNibFile = "Paje";
