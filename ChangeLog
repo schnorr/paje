@@ -1,3 +1,7 @@
+2004-12-14  Vincent Danjean <Vincent.Danjean@ens-lyon.org>
+
+	* Bump to version 1.2 to make the first release on objectweb
+	
 2004-10-18  Benhur Stein <benhur@inf.ufsm.br>
 
         * **/*.{h,m,tex}: add copyright notice
