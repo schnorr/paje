@@ -374,7 +374,7 @@ if (x != maxLevel/*[thicknesses count]*/) {
     r = [layout rectInContainer:container];
 
     r.origin.y -= offset;
-    r.size.height += 1;
+    //r.size.height += 1;
     r.origin.x = drawRect.origin.x;
     r.size.width = drawRect.size.width;
     if (!NSIsEmptyRect(r /*NSIntersectionRect(r, drawRect)*/)) {
@@ -386,10 +386,10 @@ if (x != maxLevel/*[thicknesses count]*/) {
             [vcell setStringValue:[layout description]];
             r.origin.x = [self positionForLevel:level] - 1;
             if ([layout isContainer]) {
-                r.size.width = [self widthForLevel:level] + 1;
+                r.size.width = [self widthForLevel:level] /*+ 1*/;
             } else {
 [self widthForLevel:level];
-                r.size.width = NSMaxX([self bounds]) - r.origin.x;
+                r.size.width = NSMaxX([self bounds]) - r.origin.x - 1;
             }
             [vcell drawWithFrame:r inView:self];
         }
@@ -404,9 +404,9 @@ if (x != maxLevel/*[thicknesses count]*/) {
             r = [layout rectOfInstance:instance];
 
             r.origin.y -= offset;
-            r.size.height += 1;
+            //r.size.height += 1;
             r.origin.x = [self positionForLevel:level] - 1;
-            r.size.width = [self widthForLevel:level] + 1;
+            r.size.width = [self widthForLevel:level] /*+ 1*/;
             if (!NSIsEmptyRect(r /*NSIntersectionRect(r, drawRect)*/)) {
                 if (r.size.width > 2) {
                     if (containerBeingDragged != nil 
@@ -465,9 +465,9 @@ if (x != maxLevel/*[thicknesses count]*/) {
             if (point.x < position+width) {
                 r = [(STContainerTypeLayout *)layoutDescriptor rectOfInstance:instance];
 
-                r.size.height += 1;
+                //r.size.height += 1;
                 r.origin.x = position - 1;
-                r.size.width = width + 1;
+                r.size.width = width /*+ 1*/;
                 if (NSMouseInRect(point, r, [self isFlipped])) {
                     return instance;
                 }
@@ -664,10 +664,10 @@ if (x != maxLevel/*[thicknesses count]*/) {
 
     limitRect = [layoutDescriptor rectInContainer:container];
     instanceRect = [(STContainerTypeLayout *)layoutDescriptor rectOfInstance:clickedContainer];
-    instanceRect.size.height += 1;
+    //instanceRect.size.height += 1;
     
     minY = NSMinY(limitRect);
-    maxY = NSMaxY(limitRect) - NSHeight(instanceRect) + 1;
+    maxY = NSMaxY(limitRect) - NSHeight(instanceRect) /*+ 1*/;
 
     indexBeingDragged = [self levelForPosition:mouseDownLocation.x];
     if (indexBeingDragged == -1) {
@@ -677,7 +677,7 @@ if (x != maxLevel/*[thicknesses count]*/) {
     width = [self widthForLevel:indexBeingDragged];
 
     limitRect.origin.x = instanceRect.origin.x = minX - 1;
-    limitRect.size.width = instanceRect.size.width = width + 1;
+    limitRect.size.width = instanceRect.size.width = width /*+ 1*/;
 
     [self _makeRectVisible:instanceRect];
 

@@ -1,4 +1,8 @@
 2005-01-23  Benhur Stein <benhur@inf.ufsm.br>
+	* SpaceTimeViewer/HierarchyRuler.m: change rect size calculations
+	  to be on pair with recent GNUstep bugfixes
+
+2005-01-23  Benhur Stein <benhur@inf.ufsm.br>
 	* General/UniqueString.m: comment out some debug messages
 
 2005-01-20  Benhur Stein <benhur@inf.ufsm.br>
