@@ -1,3 +1,7 @@
+2005-01-20  Benhur Stein <benhur@inf.ufsm.br>
+	* Documentation/lang-paje/{typeevent.tex,lang-paje.tex}:
+	  comment the inclusion of other files, to make it compile.
+
 2005-01-09  Benhur Stein <benhur@inf.ufsm.br>
         * SpaceTimeViewer/STEntityTypeLayout.[hm]: declare and implement
           accessors for minValue and maxValue (for storing limits of graph)
