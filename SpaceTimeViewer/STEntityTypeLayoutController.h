@@ -31,16 +31,17 @@
 @interface STEntityTypeLayoutController : NSObject
 {
     IBOutlet NSPopUpButton *entityTypePopUp;
+    IBOutlet NSButton *displayValueOnEntitySwitch;
+    IBOutlet NSBox *matricesBox;
     IBOutlet NSMatrix *shapeMatrix;
     IBOutlet NSMatrix *drawMatrix;
     IBOutlet NSMatrix *highlightMatrix;
-    IBOutlet NSForm *fields;
-    IBOutlet NSForm *otherFields;
-    IBOutlet NSBox *otherFieldsBox;
+    IBOutlet NSForm *dimensionsForm;
+    IBOutlet NSBox *dimensionsBox;
     IBOutlet NSStepper *stepper0;
     IBOutlet NSStepper *stepper1;
-    IBOutlet NSButton *switch0;
-    IBOutlet NSBox *matrices;
+    IBOutlet NSForm *varDimensionsForm;
+    IBOutlet NSBox *varDimensionsBox;
     STController *delegate;
 }
 - (IBAction)entityTypeSelected:(id)sender;
@@ -56,7 +57,7 @@
 - (id)initWithDelegate:(id)del;
 - (void)setupPopUpWithLayoutDescriptors:(NSArray *)set;
 - (void)setupShapeMatrix;
-- (void)setupDrawMatrixes;
+- (void)setupDrawMatrices;
 //- (void)drawShape:(MyCustomImageRep *)image;
 //- (void)drawDraw:(MyCustomImageRep *)image;
 @end

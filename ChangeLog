@@ -1,3 +1,11 @@
+2005-03-26  Benhur Stein <benhur@inf.ufsm.br>
+	* SpaceTimeViewer/STEntityTypeLayoutController.[hm],
+	  STEntityTypeLayout.gorm: changed names of instance variables to
+	  better reflect their use. Corrected a bug that was preventing the
+	  edition of layout data in some cases (an invisible view over
+	  the others). Should create separate editor classes for each
+	  drawing type for this to be easily changed.
+
 2005-03-16  Benhur Stein <benhur@inf.ufsm.br>
 	* Traces: added directory
 	* Traces/JavaTest.trace: small trace example added

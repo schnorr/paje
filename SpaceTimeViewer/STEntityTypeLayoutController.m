@@ -62,6 +62,9 @@
 
 - (void)dealloc
 {
+    [matricesBox release];
+    [dimensionsBox release];
+    [varDimensionsBox release];
     [super dealloc];
 }
 
@@ -73,7 +76,7 @@
 - (void)activateTool:(id)sender
 /* sent by PajeController when the user selects this Tool */
 {
-    if (!shapeMatrix) {
+    if (entityTypePopUp == nil) {
         if (![NSBundle loadNibNamed:@"STEntityTypeLayout" owner:self]) {
             NSRunAlertPanel(@"EntityTypeLayoutController",
                             @"Couldn't load interface file",
@@ -83,14 +86,21 @@
         [self reset];
     }
     
-    [[shapeMatrix window] orderFront:self];
+    [[entityTypePopUp window] orderFront:self];
+}
+
+- (void)awakeFromNib
+{
+    [matricesBox retain];
+    [dimensionsBox retain];
+    [varDimensionsBox retain];
 }
 
 - (void)reset
 {
     [self setupPopUpWithLayoutDescriptors:[delegate layoutDescriptors]];
     [self setupShapeMatrix];
-    [self setupDrawMatrixes];
+    [self setupDrawMatrices];
 }
 
 - (void)setupPopUpWithLayoutDescriptors:(NSArray *)set
@@ -188,7 +198,7 @@
 #endif
 }
 
-- (void)setupDrawMatrixes
+- (void)setupDrawMatrices
 {
     ShapeImageRep *imageRep;
     NSImage *image;
@@ -249,7 +259,7 @@
 #ifdef GNUSTEP
     [[drawMatrix window] display];
 #endif
-    //BUG - pourquoi est-ce que matrixes sont detruites?
+    //BUG - pourquoi est-ce que matrices sont detruites?
     [drawMatrix retain];
     [highlightMatrix retain];
     [shapeMatrix retain];
@@ -453,6 +463,40 @@
     [self recacheAll];
 }
 
+- (void)showMatrices:(BOOL)showMatrices
+          dimensions:(BOOL)showDimensions
+       varDimensions:(BOOL)showVarDimensions
+              values:(BOOL)showDisplayValues
+{
+    if (showMatrices) {
+        if ([matricesBox superview] == nil)
+            [[entityTypePopUp superview] addSubview:matricesBox];
+        [self setupShapeMatrix];
+        [self setupDrawMatrices];
+    } else {
+        [matricesBox removeFromSuperview];
+    }
+
+    if (showDimensions) {
+        if ([dimensionsBox superview] == nil)
+            [[entityTypePopUp superview] addSubview:dimensionsBox];
+    } else {
+        [dimensionsBox removeFromSuperview];
+    }
+
+    if (showVarDimensions) {
+        if ([varDimensionsBox superview] == nil)
+            [[entityTypePopUp superview] addSubview:varDimensionsBox];
+    } else {
+        [varDimensionsBox removeFromSuperview];
+    }
+        
+    [displayValueOnEntitySwitch setHidden:!showDisplayValues];
+#ifdef GNUSTEP
+    [displayValueOnEntitySwitch setNeedsDisplay:YES];
+#endif
+}
+
 - (void)entityTypeSelected:(id)sender
 {
     STEntityTypeLayout *layoutDescriptor;
@@ -466,9 +510,6 @@
 
     layoutDescriptor = [self selectedLayoutDescriptor];
     drawingType = [layoutDescriptor drawingType];
-    [matrices setHidden:NO];
-    [switch0 setHidden:YES];
-    [otherFieldsBox setHidden:YES];
 
     switch (drawingType) {
         case PajeEventDrawingType :
@@ -476,40 +517,36 @@
             field2Name = @"Width:";
             field1Value = [(STEventTypeLayout *)layoutDescriptor height];
             field2Value = [(STEventTypeLayout *)layoutDescriptor width];
-            [switch0 setHidden:NO];
-            [switch0 setState:[layoutDescriptor drawsName]];
+            [displayValueOnEntitySwitch setState:[layoutDescriptor drawsName]];
+            [self showMatrices:YES dimensions:YES varDimensions:NO values:YES];
             break;
         case PajeStateDrawingType :
             field1Name = @"Height:";
             field2Name = @"Inset:";
             field1Value = [(STStateTypeLayout *)layoutDescriptor height];
             field2Value = [(STStateTypeLayout *)layoutDescriptor insetAmount];
-            [switch0 setHidden:NO];
-            [switch0 setState:[layoutDescriptor drawsName]];
+            [displayValueOnEntitySwitch setState:[layoutDescriptor drawsName]];
+            [self showMatrices:YES dimensions:YES varDimensions:NO values:YES];
             break;
         case PajeLinkDrawingType :
             field1Name = @"Line width:";
             field2Name = nil;
             field1Value = [(STLinkTypeLayout *)layoutDescriptor lineWidth];
             field2Value = 0;
+            [self showMatrices:YES dimensions:YES varDimensions:NO values:NO];
             break;
         case PajeVariableDrawingType :
             field1Name = nil;
-            //field1Name = @"Height:";
-            //field2Name = @"Line width:";
-            //field1Value = [(STVariableTypeLayout *)layoutDescriptor height];
-            //field2Value = [(STVariableTypeLayout *)layoutDescriptor lineWidth];
-            [[otherFields cellAtIndex:0] setFloatValue:
+            [[varDimensionsForm cellAtIndex:0] setFloatValue:
                     [(STVariableTypeLayout *)layoutDescriptor height]];
-            [[otherFields cellAtIndex:1] setFloatValue:
+            [[varDimensionsForm cellAtIndex:1] setFloatValue:
                     [(STVariableTypeLayout *)layoutDescriptor lineWidth]];
-            [[otherFields cellAtIndex:2] setFloatValue:
+            [[varDimensionsForm cellAtIndex:2] setFloatValue:
                     [(STVariableTypeLayout *)layoutDescriptor minValue]];
-            [[otherFields cellAtIndex:3] setFloatValue:
+            [[varDimensionsForm cellAtIndex:3] setFloatValue:
                     [(STVariableTypeLayout *)layoutDescriptor maxValue]];
 
-            [matrices setHidden:YES];
-            [otherFieldsBox setHidden:NO];
+            [self showMatrices:NO dimensions:NO varDimensions:YES values:NO];
             break;
         case PajeContainerDrawingType :
             field1Name = @"Container Separation:";
@@ -518,37 +555,35 @@
                                      siblingSeparation];
             field2Value = [(STContainerTypeLayout *)layoutDescriptor
                                      subtypeSeparation];
-            [matrices setHidden:YES];
+            [self showMatrices:NO dimensions:YES varDimensions:NO values:NO];
             break;
         default:
             NSAssert1(0, @"Invalid drawing type %d", drawingType);
     }
     if (field1Name != nil) {
-    field1 = [fields cellAtIndex:0];
+    field1 = [dimensionsForm cellAtIndex:0];
     [field1 setTitle:field1Name];
     [field1 setFloatValue:field1Value];
     [stepper0 setFloatValue:field1Value];
     if (field2Name != nil) {
-        if ([fields numberOfRows] < 2) {
-            [fields addEntry:@""];
+        if ([dimensionsForm numberOfRows] < 2) {
+            [dimensionsForm addEntry:@""];
         }
-        field2 = [fields cellAtIndex:1];
+        field2 = [dimensionsForm cellAtIndex:1];
         [field2 setTitle:field2Name];
         [field2 setFloatValue:field2Value];
         [stepper1 setHidden:NO];
         [stepper1 setFloatValue:field2Value];
         [[stepper1 superview] setNeedsDisplay:YES];
     } else {
-        if ([fields numberOfRows] > 1) {
-            [fields removeEntryAtIndex:1];
+        if ([dimensionsForm numberOfRows] > 1) {
+            [dimensionsForm removeEntryAtIndex:1];
         }
         [stepper1 setHidden:YES];
         [[stepper1 superview] setNeedsDisplay:YES];
     }
     }
     
-    [self setupShapeMatrix];
-    [self setupDrawMatrixes];
 //    [self recacheAll];
 }
 
@@ -581,8 +616,8 @@
     layoutDescriptor = [self selectedLayoutDescriptor];
     drawingType = [layoutDescriptor drawingType];
 
-    field1Value = [[fields cellAtIndex:0] floatValue];
-    field2Value = [[fields cellAtIndex:1] floatValue];
+    field1Value = [[dimensionsForm cellAtIndex:0] floatValue];
+    field2Value = [[dimensionsForm cellAtIndex:1] floatValue];
     [stepper0 setFloatValue:field1Value];
     [stepper1 setFloatValue:field2Value];
 
@@ -602,13 +637,13 @@
             //[(STVariableTypeLayout *)layoutDescriptor setHeight:field1Value];
             //[(STVariableTypeLayout *)layoutDescriptor setLineWidth:field2Value];
             [(STVariableTypeLayout *)layoutDescriptor setHeight:
-                    [[otherFields cellAtIndex:0] floatValue]];
+                    [[varDimensionsForm cellAtIndex:0] floatValue]];
             [(STVariableTypeLayout *)layoutDescriptor setLineWidth:
-                    [[otherFields cellAtIndex:1] floatValue]];
+                    [[varDimensionsForm cellAtIndex:1] floatValue]];
             [(STVariableTypeLayout *)layoutDescriptor setMinValue:
-                    [[otherFields cellAtIndex:2] floatValue]];
+                    [[varDimensionsForm cellAtIndex:2] floatValue]];
             [(STVariableTypeLayout *)layoutDescriptor setMaxValue:
-                    [[otherFields cellAtIndex:3] floatValue]];
+                    [[varDimensionsForm cellAtIndex:3] floatValue]];
             break;
         case PajeContainerDrawingType :
             [(STContainerTypeLayout *)layoutDescriptor
@@ -626,10 +661,10 @@
 - (IBAction)stepperChanged:(id)sender
 {
     if (sender == stepper0) {
-        [[fields cellAtIndex:0] takeIntValueFrom:sender];
+        [[dimensionsForm cellAtIndex:0] takeIntValueFrom:sender];
         [self sizeChanged:self];
     } else if (sender == stepper1) {
-        [[fields cellAtIndex:1] takeIntValueFrom:sender];
+        [[dimensionsForm cellAtIndex:1] takeIntValueFrom:sender];
         [self sizeChanged:self];
     }
 }
