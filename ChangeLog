@@ -1,6 +1,11 @@
 2005-01-20  Benhur Stein <benhur@inf.ufsm.br>
+	* SpaceTimeViewer/DrawView.[hm]: workaround a probable bug in GNUstep
+	  ([NSScrollView tile] is changing the frame size)
+
+2005-01-20  Benhur Stein <benhur@inf.ufsm.br>
 	* Documentation/lang-paje/{typeevent.tex,lang-paje.tex}:
-	  comment the inclusion of other files, to make it compile.
+	  comment the inclusion of some files, to make the documentation
+	  compile.
 
 2005-01-09  Benhur Stein <benhur@inf.ufsm.br>
         * SpaceTimeViewer/STEntityTypeLayout.[hm]: declare and implement

@@ -77,7 +77,11 @@
     NSDate   *selectionEndTime;
     BOOL      isMakingSelection;
     BOOL      selectionExists;
+    
 #ifdef GNUSTEP
+    NSSize    size;   // to workaround a probable bug in GNUstep
+                      // ([NSScrollView tile] is changing our frame size)
+
     // GNUstep doesn't draw rectangles that are too big. They are intersected with this.
     NSRect    cutRect;
 #endif

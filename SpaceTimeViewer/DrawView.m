@@ -297,6 +297,17 @@ void PSInit(void){}
     }
 }
 
+#ifdef GNUSTEP
+// to workaround a probable bug in GNUstep
+// ([NSScrollView tile] is changing our frame size)
+- (void)setFrame:(NSRect)r
+{
+    [super setFrame:r];
+    // I know better what my size should be. set it.
+    [self setFrameSize:size];
+}
+#endif
+
 - (void)adjustSize
 {
     NSRect newBounds;
@@ -321,10 +332,16 @@ void PSInit(void){}
         [self setBoundsOrigin:newBounds.origin];
         [self setFrameSize:newBounds.size];
 
+#ifdef GNUSTEP
+        // to workaround a probable bug in GNUstep
+        // ([NSScrollView tile] is changing our frame size)
+        // (see setFrame: above)
+        size = newBounds.size;
+#endif
+
         [ruler setOriginOffset:
                     TIMEtoX([NSDate dateWithTimeIntervalSinceReferenceDate:0])];
         [scrollView tile];
-        [scrollView setNeedsDisplay:YES];
         
         // change mouse tracking rect
         if (trackingRectTag) [self removeTrackingRect:trackingRectTag];
