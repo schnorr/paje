@@ -301,7 +301,6 @@ postNotificationName:@"PajeFilterEntityNameNotification"
     NSMutableArray *fieldObjects = [NSMutableArray array];
 
     while ([container container] != nil && ![container isEqual:upto]) {
-    NSLog(@"adding container:%@", [[container entityType] name]);
         [fieldTitles insertObject:[[container entityType] name] atIndex:0];
         [fieldValues insertObject:[container name] atIndex:0];
         [fieldObjects insertObject:container atIndex:0];
