@@ -122,6 +122,13 @@
     return [[self startTime] laterDate:[self endTime]];
 }
 
+- (NSNumber *)duration
+{
+    double duration;
+    
+    duration = [[self endTime] timeIntervalSinceDate:[self startTime]];
+    return [NSNumber numberWithDouble:duration];
+}
 
 - (NSColor *)color
 {
@@ -175,19 +182,27 @@
 {
     return [NSMutableArray arrayWithObjects:
         @"EntityType", @"Name", @"Container",
+        @"StartTime", @"EndTime", @"Duration",
         nil];
 }
 
 - (id)valueOfFieldNamed:(NSString *)fieldName
 {
-    if ([fieldName isEqualToString:@"EntityType"])
+    if ([fieldName isEqualToString:@"EntityType"]) {
         return [self entityType];
-    else if ([fieldName isEqualToString:@"Name"])
+    } else if ([fieldName isEqualToString:@"Name"]) {
         return [self name];
-    else if ([fieldName isEqualToString:@"Container"])
+    } else if ([fieldName isEqualToString:@"Container"]) {
         return [self container];
-    else
-        return nil; 
+    } else if ([fieldName isEqualToString:@"StartTime"]) {
+        return [self startTime];
+    } else if ([fieldName isEqualToString:@"EndTime"]) {
+        return [self endTime];
+    } else if ([fieldName isEqualToString:@"Duration"]) {
+        return [self duration];
+    } else {
+        return nil;
+    }
 }
 
 - (IBAction)inspect:(id)sender

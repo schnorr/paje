@@ -36,6 +36,9 @@
         Assign(array, a);
         index = i;
     }
+    // FIXME: temporary solution to get all fields' names
+    [[a entityType] addFieldNames:[self fieldNames]];
+
     return self;
 }
 

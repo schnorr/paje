@@ -20,6 +20,7 @@
 #include "ReduceEntityType.h"
 #include "ReduceEntity.h"
 #include "../General/Macros.h"
+#include "../General/NSUserDefaults+Colors.h"
 
 @implementation ReduceEntityType
 
@@ -91,6 +92,8 @@
             Assign(color, c);
         else
             Assign(color, [NSColor blackColor]);
+        fieldNames = [[NSMutableSet alloc] init];
+
         component = comp;
         filterNames = [[NSMutableSet alloc] init];
     }

@@ -51,6 +51,7 @@
             Assign(color, c);
         else
             Assign(color, [NSColor blackColor]);
+        fieldNames = [[NSMutableSet alloc] init];
     }
     return self;
 }
@@ -61,6 +62,7 @@
     containerType = nil;
     Assign(color, nil);
     Assign(event, nil);
+    Assign(fieldNames, nil);
     [super dealloc];
 }
 
@@ -133,6 +135,16 @@
 }
 
 
+- (void)addFieldNames:(NSArray *)names
+{
+    [fieldNames addObjectsFromArray:names];
+}
+
+- (NSArray *)fieldNames
+{
+    return [fieldNames allObjects];
+}
+
 - (unsigned)hash
 {
     return [name hash];
@@ -158,6 +170,7 @@
     [coder encodeObject:name];
     [coder encodeObject:containerType];
     [coder encodeObject:event];
+    [coder encodeObject:fieldNames];
 }
 
 - (id)initWithCoder:(NSCoder *)coder
@@ -169,6 +182,7 @@
     return [self initWithName:o1
                 containerType:o2];
     [self setEvent:o3];
+    Assign(fieldNames, [coder decodeObject]);
 }
 @end
 

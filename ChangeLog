@@ -1,4 +1,20 @@
 2005-01-05  Benhur Stein <benhur@inf.ufsm.br>
+	* General/PajeEntity.m: added -duration method (returns elapsed time
+	  of entity); added "StartTime", "EndTime" and "Duration" named fields
+	* General/PajeType.h: added new instance variable "fieldNames" to
+	  hold all known names of fields of entities of a type.
+	* General/PajeType.m: initialize new variable; implemented 
+	  new methods -addFieldNames: and -fieldNames to populate and get
+	  names of fields.
+	* ReductionFilter/ReduceEntityType.m: also initialize new variable
+	  (this class does not use initialization code from superclass)
+	* StorageController/Encapsulate.m: implement -fieldNamesForEntityType:
+	  so that a filter can have access to names of fields;
+	  add a temporary solution to garantee that an entity type has
+	  access to all names (make it see all entities - ugly)
+	* ReductionFilter/ReduceEntity.m: likewise, even uglier!
+
+2005-01-05  Benhur Stein <benhur@inf.ufsm.br>
 	* SpaceTimeViewer/DrawView+Drawing.m: changed way of drawing values
 	  (now there can be times without values, and they will not be drawn)
 	  (necessary for new field value filter (to be commited)).

@@ -38,6 +38,7 @@
     PajeContainerType *containerType;
     NSColor *color;
     PajeEvent *event;
+    NSSet *fieldNames;
 }
 
 + (id/*PajeEntityType **/)typeWithName:(NSString *)n
@@ -61,6 +62,9 @@
 - (NSArray *)allNames;
 
 - (id)valueOfFieldNamed:(NSString *)n;
+
+- (void)addFieldNames:(NSArray *)names;
+- (NSArray *)fieldNames;
 
 - (NSComparisonResult)compare:(id)other;
 @end
