@@ -53,4 +53,10 @@
     r.size.width -= NSHeight(frame);
     [super drawInteriorWithFrame:r inView:controlView];
 }
+
+- (NSComparisonResult) compare: (id)otherCell
+{
+  return [[self stringValue] compare: [(NSCell*)otherCell stringValue]];
+}
+
 @end
