@@ -1,3 +1,6 @@
+2005-01-23  Benhur Stein <benhur@inf.ufsm.br>
+	* General/UniqueString.m: comment out some debug messages
+
 2005-01-20  Benhur Stein <benhur@inf.ufsm.br>
 	* SpaceTimeViewer/DrawView.[hm]: workaround a probable bug in GNUstep
 	  ([NSScrollView tile] is changing the frame size)

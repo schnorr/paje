@@ -158,7 +158,7 @@ int C1, C2, C3, C4;
 @implementation NSString (UnifyStrings)
 - (id)unifyStrings
 {
-NSLog(@"Str %@", self);
+//NSLog(@"Str %@", self);
     return U(self);
 }
 @end
@@ -170,12 +170,12 @@ NSLog(@"Str %@", self);
     int i;
     int count;
 
-NSLog(@"Arr");
+//NSLog(@"Arr");
     count = [self count];
     unified = [NSMutableArray arrayWithCapacity:count];
 
     for (i = 0; i < count; i++) {
-    NSLog(@"  %d %@", i, [self objectAtIndex:i]);
+//    NSLog(@"  %d %@", i, [self objectAtIndex:i]);
         [unified addObject:[[self objectAtIndex:i] unifyStrings]];
     }
 
@@ -190,14 +190,14 @@ NSLog(@"Arr");
     NSEnumerator *keyEnum;
     id key;
     id value;
-    NSLog(@"Dic");
+//    NSLog(@"Dic");
 
     unified = [NSMutableDictionary dictionaryWithCapacity:[self count]];
 
     keyEnum = [self keyEnumerator];
     while ((key = [keyEnum nextObject]) != nil) {
         value = [self objectForKey:key];
-    NSLog(@"  %@ -> %@", key, value);
+//    NSLog(@"  %@ -> %@", key, value);
 	[unified setObject:[value unifyStrings] forKey:[key unifyStrings]];
     }
 
