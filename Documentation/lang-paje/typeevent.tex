@@ -21,10 +21,11 @@
 % \chapter{Definition of type hierarchies and trace event formats}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newcolumntype{T}{>{\sffamily\bfseries\color{white}\columncolor[gray]{.2}}l}
-\newcolumntype{R}{>{\sffamily}r}
-\newcolumntype{L}{>{\sffamily}l}
-\newcolumntype{C}{>{\sffamily}c}
+% T, R, L and C already in definitions.tex
+%\newcolumntype{T}{>{\sffamily\bfseries\color{white}\columncolor[gray]{.2}}l}
+%\newcolumntype{R}{>{\sffamily}r}
+%\newcolumntype{L}{>{\sffamily}l}
+%\newcolumntype{C}{>{\sffamily}c}
 \newcolumntype{P}{>{\sffamily}p{5cm}}
 
 \section{Introduction}
@@ -33,7 +34,8 @@
 A visualization constructed by Pajé is composed of objects organized
 according to a tree type hierarchy whose nodes are called
 \emph{containers}\index{container} and leaves
-\emph{entities}\index{entity} (see \S\ref{sec:genericity}). The Pajé
+\emph{entities}\index{entity}% (see \S\ref{sec:genericity})
+. The Pajé
 data format is self-defined, although it does not comply with the
 SDDF\index{SDDF} format used by Pablo \cite{sddf}. There exists a
 ``meta-format'' used to define:
@@ -46,8 +48,8 @@ SDDF\index{SDDF} format used by Pablo \cite{sddf}. There exists a
 These definitions are usually inserted in trace files. They can even
 be inserted in the observed programs source files, provided that the
 tracers used to record the events of these programs are able to
-capture a new definition as a ``user-defined'' event (see for example
-figure~\ref{f:simpleprogramtraced}).
+capture a new definition as a ``user-defined'' event.% (see for example
+%figure~\ref{f:simpleprogramtraced}).
 
 Using these definitions, it is possible to define a hierarchy of
 containers and entities adapted for a given programming model or
@@ -125,7 +127,8 @@ The event definition part of a Pajé trace file follows the following format:
   event type.  The number (an integer) will be used to identify the event
   in the second part of the trace file. The choice of this number is
   left to the user. The numbers given in the definitions below (see
-  \S\ref{sec:containers} and \S\ref{sec:entities}) are thus
+%  \S\ref{sec:containers} and \S\ref{sec:entities}
+  \S\ref{sec:example}) are thus
   \textbf{arbitrary}. The name of the event will be put in a field called
   ``PajeEventName''. There cannot be another field called so. The name is used
   to identify the type of an event;
@@ -298,7 +301,8 @@ Alias         & string or integer & Alternative name of new container type\\
 \label{f:pajedefinecontainertype}
 \end{figure}
 
-For the example in section~\ref{s:generic}, one would need two events (see
+For the example, one could need two events (see
+%in section~\ref{s:generic}, one would need two events (see
 figure~\ref{f:definecontainerexample} to indicate
 that a ``Program'' contains ``Thread''s:
 
@@ -379,7 +383,7 @@ Alias         & string or integer & Alternative name of new container \\
 Figure~\ref{f:createcontainerexample} shows the events necessary to create 
 the containers ``Thread Testing
 Program'' of type ``Program'' and ``Thread 1'' and ``Thread 2'' of
-type ``Thread'', contained by ``Thread Testing Program'', from the example in section~\ref{s:generic}.
+type ``Thread'', contained by ``Thread Testing Program''.%, from the example in section~\ref{s:generic}.
 
 \begin{figure}[htbp]
 \begin{center}

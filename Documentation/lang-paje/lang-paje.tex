@@ -63,7 +63,7 @@ parallel programming, self defined data format.
   
 \end{abstract}
 
-%\tableofcontents
+\tableofcontents
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\chapter{Introduction}
@@ -90,7 +90,9 @@ parallel programming, self defined data format.
 \bibliography{lang-paje}
 \bibliographystyle{abbrv}
 
-%\addcontentsline{toc}{chapter}{Index}
-%\input{lang-paje.ind}
+\addcontentsline{toc}{chapter}{Index}
+\IfFileExists{lang-paje.ind}{%
+  \input{lang-paje.ind}
+}
 
 \end{document}
