@@ -1,0 +1,76 @@
+{
+    "## Comment" = "Do NOT change this file, Gorm maintains it";
+    FieldFilter = {
+	Actions = (
+	    "valueChanged:",
+	    "comparisionPopUpChanged:",
+	    "entityTypePopUpChanged:",
+	    "fieldNamePopUpChanged:"
+	);
+	Outlets = (
+	    view,
+	    comparisionPopUp,
+	    entityTypePopUp,
+	    fieldNamePopUp,
+	    valueField
+	);
+	Super = PajeFilter;
+    };
+    FirstResponder = {
+	Actions = (
+	    "alignLeft:",
+	    "capitalizeWord:",
+	    "complete:",
+	    "cut:",
+	    "deleteToBeginningOfLine:",
+	    "deleteToMark:",
+	    "deselectAll:",
+	    "indent:",
+	    "makeKeyAndOrderFront:",
+	    "moveBackwardAndModifySelection:",
+	    "moveForwardAndModifySelection:",
+	    "moveToBeginningOfLine:",
+	    "moveToEndOfParagraph:",
+	    "moveWordBackwardAndModifySelection:",
+	    "ok:",
+	    "orderFront:",
+	    "orderFrontStandardAboutPanel:",
+	    "pageUp:",
+	    "pasteFont:",
+	    "performZoom:",
+	    "runPageLayout:",
+	    "saveDocumentAs:",
+	    "scrollPageDown:",
+	    "selectLine:",
+	    "selectText:",
+	    "showGuessPanel:",
+	    "subscript:",
+	    "takeFloatValueFrom:",
+	    "terminate:",
+	    "toggleRuler:",
+	    "transposeWords:",
+	    "unhide:",
+	    "useAllLigatures:",
+	    "zoom:",
+	    "comparisionPopUpChanged:",
+	    "entityTypePopUpChanged:"
+	);
+	Super = NSObject;
+    };
+    PajeComponent = {
+	Actions = (
+	    "inputEntity:",
+	    "outputEntity:"
+	);
+	Outlets = (
+	);
+	Super = NSObject;
+    };
+    PajeFilter = {
+	Actions = (
+	);
+	Outlets = (
+	);
+	Super = PajeComponent;
+    };
+}

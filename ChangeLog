@@ -1,4 +1,11 @@
 2005-01-05  Benhur Stein <benhur@inf.ufsm.br>
+	* FieldFilter, FieldFilter/FieldFilterDescriptor.h,
+	  FieldFilter/FieldFilter.h, FieldFilter/FieldFilterDescriptor.m,
+	  FieldFilter/FieldFilter.m, FieldFilter/GNUmakefile,
+	  FieldFilter/FieldFilter.gorm: new files, first implementation of
+	  filter that selects entities based on values of some of its fields.
+
+2005-01-05  Benhur Stein <benhur@inf.ufsm.br>
 	* General/PajeEntity.m: added -duration method (returns elapsed time
 	  of entity); added "StartTime", "EndTime" and "Duration" named fields
 	* General/PajeType.h: added new instance variable "fieldNames" to
