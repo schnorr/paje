@@ -82,6 +82,7 @@
     id virtualizer;
     id simul;
     id entityTypeSelector;
+    id fieldFilter;
     id containerselector;
     id order;
 //    id statViewer;
@@ -101,6 +102,7 @@
 //    virtualizer = [NSClassFromString(@"VirtualThread") componentWithController:self];
 //    [components addObject:virtualizer];
     entityTypeSelector = [NSClassFromString(@"EntityTypeSelector") componentWithController:self];
+    fieldFilter = [NSClassFromString(@"FieldFilter") componentWithController:self];
     [components addObject:entityTypeSelector];
     containerselector = [NSClassFromString(@"ContainerSelector") componentWithController:self];
     [components addObject:containerselector];
@@ -120,10 +122,11 @@
     [self connectComponent:reader            toComponent:decoder];
     [self connectComponent:decoder           toComponent:simul];
     [self connectComponent:simul             toComponent:encapsulator];
-    [self connectComponent:encapsulator      toComponent:containerselector];
+    [self connectComponent:encapsulator      toComponent:busyNode];
+    [self connectComponent:busyNode          toComponent:fieldFilter];
+    [self connectComponent:fieldFilter       toComponent:containerselector];
     [self connectComponent:containerselector toComponent:order];
-    [self connectComponent:order             toComponent:busyNode];
-    [self connectComponent:busyNode          toComponent:entityTypeSelector];
+    [self connectComponent:order             toComponent:entityTypeSelector];
 //    [self connectComponent:busyNode          toComponent:statViewer];
     [self connectComponent:entityTypeSelector toComponent:insetlimit];
     [self connectComponent:insetlimit         toComponent:spacetime];

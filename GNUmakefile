@@ -15,6 +15,7 @@ SUBPROJECTS = \
 	PajeSimulator \
 	StorageController \
 	EntityTypeFilter \
+	FieldFilter \
 	ContainerFilter \
 	OrderFilter \
 	ReductionFilter \

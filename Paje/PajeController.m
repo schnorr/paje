@@ -120,6 +120,7 @@ static PajeController *uniqueController;
     [self loadBundleNamed:@"StorageController"];
 
     [self loadBundleNamed:@"EntityTypeFilter"];
+    [self loadBundleNamed:@"FieldFilter"];
     [self loadBundleNamed:@"ContainerFilter"];
     [self loadBundleNamed:@"OrderFilter"];
     [self loadBundleNamed:@"ReductionFilter"];

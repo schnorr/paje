@@ -1,4 +1,8 @@
 2005-01-05  Benhur Stein <benhur@inf.ufsm.br>
+	* GNUmakefile, Paje/PajeController.m, Paje/PajeTraceController.m:
+	  compile and load FieldFilter
+
+2005-01-05  Benhur Stein <benhur@inf.ufsm.br>
 	* FieldFilter, FieldFilter/FieldFilterDescriptor.h,
 	  FieldFilter/FieldFilter.h, FieldFilter/FieldFilterDescriptor.m,
 	  FieldFilter/FieldFilter.m, FieldFilter/GNUmakefile,
