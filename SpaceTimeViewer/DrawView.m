@@ -47,6 +47,9 @@
 void PSInit(void){}
 #endif
 
+#define DefaultsPrefix NSStringFromClass([self class])
+#define DefaultsKey(name) [DefaultsPrefix stringByAppendingString:name]
+
 @implementation DrawView
 
 - (void)dealloc
@@ -75,7 +78,7 @@ void PSInit(void){}
     Assign(backgroundColor, color);
     [[NSUserDefaults standardUserDefaults]
               setColor:backgroundColor
-                forKey:[NSStringFromClass([self class]) stringByAppendingString:@"BackgroundColor"]];
+                forKey:DefaultsKey(@"BackgroundColor")];
 }
 
 - (void)setSelectedBackgroundColor:(NSColor *)color
@@ -83,7 +86,7 @@ void PSInit(void){}
     Assign(selectedBackgroundColor, color);
     [[NSUserDefaults standardUserDefaults]
               setColor:selectedBackgroundColor
-                forKey:[NSStringFromClass([self class]) stringByAppendingString:@"SelectedBackgroundColor"]];
+                forKey:DefaultsKey(@"SelectedBackgroundColor")];
 }
 
 - (void)setFilter:(PajeFilter *)newFilter
@@ -137,7 +140,11 @@ void PSInit(void){}
 
     // initialize instance variables
 
-    pointsPerSecond = 10000;
+    pointsPerSecond = [[NSUserDefaults standardUserDefaults]
+                                doubleForKey:DefaultsKey(@"PointsPerSecond")];
+    if (pointsPerSecond == 0) {
+        pointsPerSecond = 10000;
+    }
     hasZoomed = NO;
     filter = nil;
     trackingRectTag = 0;
@@ -151,14 +158,12 @@ void PSInit(void){}
 
     // get background color from defaults
     Assign(backgroundColor, [[NSUserDefaults standardUserDefaults]
-                                colorForKey:[NSStringFromClass([self class])
-                                   stringByAppendingString:@"BackgroundColor"]]);
+                                colorForKey:DefaultsKey(@"BackgroundColor")]);
     if (backgroundColor == nil) {
         Assign(backgroundColor, [NSColor controlBackgroundColor]);
     }
     Assign(selectedBackgroundColor, [[NSUserDefaults standardUserDefaults]
-                                colorForKey:[NSStringFromClass([self class])
-                                   stringByAppendingString:@"SelectedBackgroundColor"]]);
+                         colorForKey:DefaultsKey(@"SelectedBackgroundColor")]);
     if (selectedBackgroundColor == nil) {
         Assign(selectedBackgroundColor, [NSColor controlLightHighlightColor]);
     }
@@ -400,6 +405,10 @@ void PSInit(void){}
 - (void)setPointsPerSecond:(double)pps
 {
     pointsPerSecond = pps;
+    
+    [[NSUserDefaults standardUserDefaults]
+                                setDouble:pointsPerSecond
+                                   forKey:DefaultsKey(@"PointsPerSecond")];
     hasZoomed = YES;
 
     [self adjustTimeLimits];

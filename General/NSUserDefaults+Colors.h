@@ -29,6 +29,8 @@
 - (NSDictionary *)colorDictionaryForKey:(NSString *)key;
 - (void)setRect:(NSRect)rect forKey:(NSString *)key;
 - (NSRect)rectForKey:(NSString *)key;
+- (void)setDouble:(double)value forKey:(NSString *)key;
+- (double)doubleForKey:(NSString *)key;
 @end
 
 @interface NSUserDefaults (ArchivedObjects)

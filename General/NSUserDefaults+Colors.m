@@ -125,6 +125,23 @@
         return NSZeroRect;
     }
 }
+
+- (void)setDouble:(double)value forKey:(NSString *)key
+{
+    [self setObject:[NSNumber numberWithDouble:value] forKey:key];
+}
+
+- (double)doubleForKey:(NSString *)key
+{
+    id obj;
+
+    obj = [self objectForKey:key];
+    if (obj != nil && ([obj isKindOfClass:[NSString class]]
+                    || [obj isKindOfClass:[NSNumber class]])) {
+        return [obj doubleValue];
+    }
+    return 0;
+}
 @end
 
 @implementation NSUserDefaults (ArchivedObjects)
