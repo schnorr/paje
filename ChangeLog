@@ -1,15 +1,18 @@
+2005-01-04  (1.2.2) Vincent Danjean <Vincent.Danjean@ens-lyon.org>
+
+	* Version NEED to be set in changelog so that release can be
+	  easily generated
+	
 2005-01-04  (1.2.1) Vincent Danjean <Vincent.Danjean@ens-lyon.org>
 
 	* Bump to version 1.2.1 to make a release on objectweb
-	* Version NEED to be set in changelog so that release can be
-	  easily generated
 	
 2004-12-21  Benhur Stein  <benhur@inf.ufsm.br>
 
 	* Paje/PajeController.m: fixed typo in filter name
 	  corrects bug #301134 (reported by Gregory)
 
-2004-12-14  Vincent Danjean <Vincent.Danjean@ens-lyon.org>
+2004-12-14 (1.2.0) Vincent Danjean <Vincent.Danjean@ens-lyon.org>
 
 	* Bump to version 1.2 to make the first release on objectweb
 	
