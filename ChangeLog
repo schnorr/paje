@@ -1,3 +1,7 @@
+2005-03-16  Benhur Stein <benhur@inf.ufsm.br>
+	* Traces: added directory
+	* Traces/JavaTest.trace: small trace example added
+
 2005-03-06  Benhur Stein <benhur@inf.ufsm.br>
 	* EntityTypeFilter/EntityTypeSelector.m, ImbricationFilter/InsetLimit.m,
 	  OrderFilter/Order.m, ReductionFilter/BusyNode.m,
