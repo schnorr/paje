@@ -76,6 +76,11 @@
     return container;
 }
 
+- (void)setContainer:(PajeContainer *)c
+{
+    Assign(container, c);
+}
+
 - (BOOL)isContainedBy:(PajeContainer *)cont
 {
     if ((container == nil)) {

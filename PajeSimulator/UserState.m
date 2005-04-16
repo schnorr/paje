@@ -101,6 +101,22 @@
     return value;
 }
 
+
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+    [super encodeWithCoder:coder];
+    [coder encodeObject:endEvent];
+    [coder encodeObject:[NSNumber numberWithInt:imbricationLevel]];
+}
+
+- (id)initWithCoder:(NSCoder *)coder
+{
+    self = [super initWithCoder:coder];
+    Assign(endEvent, [coder decodeObject]);
+    imbricationLevel = [[coder decodeObject] intValue];
+    return self;
+}
+
 @end
 
 @implementation UserStateInspector

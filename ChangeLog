@@ -1,4 +1,14 @@
 2005-04-16  Benhur Stein <benhur@inf.ufsm.br>
+	* FileReader/PajeFileReader.h, FileReader/PajeFileReader.m,
+	  General/PSortedArray.m, General/PajeEntity.m, Paje/PajeCheckPoint.m,
+	  Paje/PajeTraceController.m, PajeEventDecoder/PajeEventDecoder.m,
+	  PajeSimulator/PajeSimul.m, PajeSimulator/SimulContainer.m,
+	  PajeSimulator/SimulContainer.m, PajeSimulator/UserEvent.m,
+	  PajeSimulator/UserState.m, SpaceTimeViewer/DrawView.m,
+	  SpaceTimeViewer/HierarchyRuler.m, StorageController/Encapsulate.m:
+	  First implementation of trace reading by chunks.
+
+2005-04-16  Benhur Stein <benhur@inf.ufsm.br>
 	* SpaceTimeViewer/DrawView+Drawing.m: corrected bug in which drawing
 	  names on events made them bigger each time
 	* SpaceTimeViewer/HierarchyRuler.m: corrected sizes of boxes (again)

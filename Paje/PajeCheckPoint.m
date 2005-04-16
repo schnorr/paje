@@ -67,4 +67,9 @@
         return [time isEqual:[anObject time]];
     return [time isEqual:anObject];
 }
+
+- (NSString *)description
+{
+    return fileName;
+}
 @end

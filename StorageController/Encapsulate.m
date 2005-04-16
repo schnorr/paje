@@ -31,6 +31,7 @@
 #include "../General/MultiEnumerator.h"
 #include "../General/PajeEntity.h"
 #include "../General/Macros.h"
+#include "../General/NSDate+Additions.h"
 
 @implementation AnchorFilter
 - (id)initWithController:(PajeTraceController *)c
@@ -189,9 +190,10 @@ ofContainersTyped:(PajeEntityType *)containerType
             }
         }
         time = [entity firstTime];
-        if(startTimeInMemory == nil || [time isEarlierThanDate:startTimeInMemory]) {
+        if (startTimeInMemory == nil 
+            || [time isEarlierThanDate:startTimeInMemory]) {
             Assign(startTimeInMemory, time);
-            if(startTime == nil || [time isEarlierThanDate:startTime]) {
+            if (startTime == nil || [time isEarlierThanDate:startTime]) {
                 Assign(startTime, time);
             }
         }
@@ -237,7 +239,7 @@ ofContainersTyped:(PajeEntityType *)containerType
     list = [dict objectForKey:container];
 
     if (!list) {
-        NSLog(@"entity %@ not found (entityChangedEndTime)");
+        NSWarnMLog(@"entity %@ not found", entity);
         return;
     }
 
@@ -270,7 +272,10 @@ ofContainersTyped:(PajeEntityType *)containerType
 }
 
 
-- (NSDate *)time { return startTime; }
+- (NSDate *)time
+{
+    return [self startTime];
+}
 
 // time when the trace starts
 - (NSDate *)startTime
@@ -284,11 +289,25 @@ ofContainersTyped:(PajeEntityType *)containerType
     return endTime;
 }
 
-- (NSDate *)firstTime { return startTime; }
-- (NSDate *)lastTime { return endTime; }
+- (NSDate *)firstTime
+{
+    return [self startTime];
+}
 
-- (NSDate *)startTimeInMemory { return startTimeInMemory; }
-- (NSDate *)endTimeInMemory { return endTimeInMemory; }
+- (NSDate *)lastTime
+{
+    return [self endTime];
+}
+
+- (NSDate *)startTimeInMemory
+{
+    return startTimeInMemory;
+}
+
+- (NSDate *)endTimeInMemory
+{
+    return endTimeInMemory;
+}
 
 - (id)rootInstance
 {
@@ -297,21 +316,17 @@ ofContainersTyped:(PajeEntityType *)containerType
 
 - (void)verifyStartTime:(NSDate *)start endTime:(NSDate *)end
 {
-    NSDictionary *userInfo = nil;
+    NSDebugMLLog(@"tim", @"[%@:%@] [%@:%@]",
+                start, end, startTimeInMemory, endTimeInMemory);
     if ([start isEarlierThanDate:startTimeInMemory]
-        && [startTimeInMemory isLaterThanDate:startTime]) {
+         || ![endTimeInMemory isLaterThanDate:end]) {
+        NSDictionary *userInfo;
         userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-            [start laterDate:startTime], @"StartTime",
-            [end earlierDate:endTime], @"EndTime",
+            start, @"StartTime",
+            end, @"EndTime",
             nil];
-    } else if ([end isLaterThanDate:endTimeInMemory]
-               && [endTimeInMemory isEarlierThanDate:endTime]) {
-        userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-            [start laterDate:startTime], @"StartTime",
-            [end earlierDate:endTime], @"EndTime",
-            nil];
-    }
-    if (userInfo) {
+        NSDebugMLLog(@"tim", @"notify [%@:%@] [%@:%@]",
+                    start, end, startTimeInMemory, endTimeInMemory);
         [[NSNotificationCenter defaultCenter]
                       postNotificationName:@"PajeTraceNotInMemoryNotification"
                                     object:self
@@ -584,13 +599,14 @@ ofContainersTyped:(PajeEntityType *)containerType
 
 - (void)removeObjectsBeforeTime:(NSDate *)time
 {
-    NSEnumerator *e = [entityLists objectEnumerator];
+    NSEnumerator *e;
     NSMutableDictionary *d;
 
-    if ([time earlierDate:startTimeInMemory] == time)
+    if (![time isLaterThanDate:startTimeInMemory]) {
         return;
+    }
 
-//    NSLog(@"Trace removing before %@", [time description]);
+    e = [entityLists objectEnumerator];
     while ((d = [e nextObject]) != nil) {
 #if 0
         //xxx waiting for NSDictionary to implement makeObjectsPerformSelector:
@@ -605,25 +621,23 @@ ject:time];
 #endif
     }
 
-    [time retain];
-    [startTimeInMemory release];
-    startTimeInMemory = time;
+    Assign(startTimeInMemory, time);
 
-    if ([time laterDate:endTimeInMemory] == time) {
-        [endTimeInMemory release];
-        endTimeInMemory = [time retain];
+    if ([time isLaterThanDate:endTimeInMemory]) {
+        Assign(endTimeInMemory, time);
     }
 }
 
 - (void)removeObjectsAfterTime:(NSDate *)time
 {
-    NSEnumerator *e = [entityLists objectEnumerator];
+    NSEnumerator *e;
     NSMutableDictionary *d;
 
-    if ([time laterDate:endTimeInMemory] == time)
+    if (![time isEarlierThanDate:endTimeInMemory]) {
         return;
+    }
 
-//    NSLog(@"Trace removing after %@", [time description]);
+    e = [entityLists objectEnumerator];
     while ((d = [e nextObject]) != nil) {
 #if 0
         //xxx waiting for NSDictionary to implement makeObjectsPerformSelector:
@@ -638,13 +652,10 @@ ect:time];
 #endif
     }
 
-    [time retain];
-    [endTimeInMemory release];
-    endTimeInMemory = time;
+    Assign(endTimeInMemory, time);
 
-    if ([time earlierDate:startTimeInMemory] == time) {
-        [startTimeInMemory release];
-        startTimeInMemory = [time retain];
+    if ([time isEarlierThanDate:startTimeInMemory]) {
+        Assign(startTimeInMemory, time);
     }
 }
 

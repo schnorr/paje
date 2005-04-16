@@ -179,7 +179,7 @@
     NSMutableArray *array = nil;
     id oldEntity = [userEntities objectForKey:type];
 
-    if (!oldEntity) {
+    if (oldEntity == nil) {
         [userEntities setObject:entity forKey:type];
     } else if ([oldEntity isKindOfClass:[NSMutableArray class]]) {
         array = (NSMutableArray *)oldEntity;
@@ -189,10 +189,11 @@
         [userEntities setObject:array forKey:type];
     }
     if ([entity respondsToSelector:@selector(setImbricationLevel:)]) {
-        if (array)
+        if (array != nil) {
             [entity setImbricationLevel:[array count]-1];
-        else
+        } else {
             [entity setImbricationLevel:0];
+        }
     }
 }
 
@@ -303,7 +304,7 @@ retry:
         [simulator outputEntity:currentUserState];
 //        [simulator entityChangedEndTime:currentUserState];
     } else {
-        NSLog(@"No user state to pop with event %@", event);
+        NSWarnMLog(@"No user state to pop with event %@", event);
     }
 }
 
@@ -523,11 +524,13 @@ int contador, contadorb;
 
 - (void)reset
 {
-    Assign(userEntities, nil);
+    [userEntities removeAllObjects];
 }
 
 - (void)encodeCheckPointWithCoder:(NSCoder *)coder
 {
+    NSDebugMLLog(@"tim", @"encoding %@ (lt=%@ %d ue=%@)",
+                         self, lastTime, logicalTime, userEntities);
     [coder encodeObject:lastTime];
     [coder encodeObject:[NSNumber numberWithInt:logicalTime]];
     [coder encodeObject:userEntities];
@@ -538,6 +541,24 @@ int contador, contadorb;
     [self setLastTime:[coder decodeObject]];
     [self setLogicalTime:[[coder decodeObject] intValue]];
     Assign(userEntities, [coder decodeObject]);
+//FIXME: entities are decoded without container (containers cannot be decoded),
+//       must set it.
+{int i;
+NSArray *keys= [userEntities allValues];
+for (i=0;i<[keys count];i++) {
+if (![[keys objectAtIndex:i] isKindOfClass:[NSArray class]]) {
+[[keys objectAtIndex:i] setContainer:self];
+} else {
+int j;
+NSArray *v= [keys objectAtIndex:i];
+for (j=0;j<[v count];j++) {
+[[v objectAtIndex:j] setContainer:self];
+}
+}
+}
+}
+    NSDebugMLLog(@"tim", @"decoded %@ (lt=%@ %d ue=%@)",
+                         self, lastTime, logicalTime, userEntities);
 }
 
 @end

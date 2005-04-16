@@ -296,17 +296,25 @@ NSInvocation *invocation;
 {
     NSEnumerator *containerEnum;
     SimulContainer *container;
+    NSMutableSet *c;
+
+    c = [[NSMutableSet alloc] init];
 
     [coder encodeObject:name];
     [coder encodeObject:startTime];
     [coder encodeObject:endTime];
     [coder encodeObject:currentTime];
+    // FIXME: should be saved by type
     containerEnum = [[userNumberToContainer allValues] objectEnumerator];
     while ((container = [containerEnum nextObject]) != nil) {
-        [coder encodeObject:[container name]];
-        [container encodeCheckPointWithCoder:coder];
+        if (![c containsObject:[container alias]]) {
+            [c addObject:[container alias]];
+            [coder encodeObject:[container alias]];
+            [container encodeCheckPointWithCoder:coder];
+        }
     }
     [coder encodeObject:nil];
+    [c release];
 }
 
 - (void)decodeCheckPointWithCoder:(NSCoder *)coder
@@ -330,8 +338,10 @@ NSInvocation *invocation;
         SimulContainer *container;
         container = [userNumberToContainer objectForKey:containerName];
         if (container == nil) {
+        NSLog(@"known: %@", userNumberToContainer);
             [self error:@"Decoding unknown container '%@'", containerName];
         }
+        NSDebugMLLog(@"tim", @"found container %@", containerName);
         [container decodeCheckPointWithCoder:coder];
     }
 }

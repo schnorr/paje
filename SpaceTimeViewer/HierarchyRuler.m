@@ -411,9 +411,8 @@ if (x != maxLevel/*[thicknesses count]*/) {
                 if (r.size.width > 2) {
                     if (containerBeingDragged != nil 
                         && [instance isEqual:containerBeingDragged]) {
-                        NSDrawWhiteBezel(NSInsetRect(r, -.5, -.5), NSInsetRect(r, -.5, -.5));
-                        //[[NSColor whiteColor] set];
-                        //NSRectFill(r);
+                        NSDrawWhiteBezel(NSInsetRect(r, -.5, -.5),
+                                         NSInsetRect(r, -.5, -.5));
                     } else if ([[controller selectedContainers]
                                                      containsObject:instance]) {
                         [[NSColor whiteColor] set];

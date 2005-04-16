@@ -33,34 +33,33 @@
 
 - (void)encodeCheckPointWithCoder:(NSCoder *)coder
 {
-    [coder encodeValuesOfObjCTypes:"@Q", &inputFilename, &bytesScanned];
+    unsigned long long position = [inputFile offsetInFile];
+    [coder encodeValuesOfObjCTypes:"@Q", &inputFilename, &position];
+    NSDebugMLLog(@"tim", @"encoded %@ %lld", inputFilename, position);
 }
 
 - (void)decodeCheckPointWithCoder:(NSCoder *)coder
 {
     id filename;
-    unsigned long long location;
-
-    Assign(remainsOfLastRead, nil);
+    unsigned long long position;
     
-    [coder decodeValuesOfObjCTypes:"@Q", &filename, &location];
+    [coder decodeValuesOfObjCTypes:"@Q", &filename, &position];
+    NSDebugMLLog(@"tim", @"decoded %@ %lld", filename, position);
     if (inputFilename) {
         if (![filename isEqual:inputFilename]) {
             [self raise:@"trying to read check point file of a different trace file"];
         }
-    } else {
-        [self setInputFilename:filename];
     }
+
     [filename release];
-    bytesScanned = location;
-    [inputFile seekToFileOffset:bytesScanned];
+    [inputFile seekToFileOffset:position];
+    hasMoreData = YES;
 }
 
 - (void)dealloc
 {
     [inputFilename release];
     [inputFile release];
-    [remainsOfLastRead release];
     [super dealloc];
 }
 
@@ -71,14 +70,15 @@
 
 - (void)raise:(NSString *)reason
 {
-    NSLog(@"PajeFileReader: '%@' in file '%@', bytes read %d",
-                            reason, inputFilename, bytesScanned);
+    NSDebugLog(@"PajeFileReader: '%@' in file '%@', bytes read %lld",
+                            reason, inputFilename, [inputFile offsetInFile]);
     [[NSException exceptionWithName:@"PajeReadFileException"
                              reason:reason
                            userInfo:
         [NSDictionary dictionaryWithObjectsAndKeys:
             inputFilename, @"File Name",
-            [NSNumber numberWithUnsignedLongLong:bytesScanned], @"BytesRead",
+            [NSNumber numberWithUnsignedLongLong:[inputFile offsetInFile]],
+                           @"BytesRead",
             nil]
         ] raise];
 }
@@ -97,6 +97,7 @@
     if (inputFile == nil) {
         [self raise:@"Couldn't open file"];
     }
+    hasMoreData = YES;
 }
 
 - (void)inputEntity:(id)entity
@@ -107,12 +108,49 @@
 - (void)readNextChunk
 {
     NSData *data;
-    data = [inputFile availableData];
-    [self outputEntity:data];
+    unsigned int length;
+
+    if (![self hasMoreData]) {
+        return;
+    }
+    data = [inputFile readDataOfLength:CHUNK_SIZE];
+    length = [data length];
+    if (length < CHUNK_SIZE) {
+        hasMoreData = NO;
+    } else {
+        char *bytes;
+        int i;
+        int offset = 0;
+        bytes = (char *)[data bytes];
+        for (i = length-1; i >= 0 && bytes[i] != '\n'; i--) {
+            offset++;
+        }
+    
+        if (i >= 0) {
+            [inputFile seekToFileOffset:[inputFile offsetInFile] - offset];
+            length -= offset;
+            [data setLength:length];
+        }
+    }
+    NSDebugMLLog(@"tim", @"data: %@\nchunk length: %u has more:%d",
+                 [data class], [data length], hasMoreData);
+    if (length > 0) {
+        [self outputEntity:data];
+    }
 }
 
+- (BOOL)hasMoreData
+{
+    return hasMoreData;
+}
+
+// shouldn't be here
 - (int)eventCount
 {
     return [outputComponent eventCount];
+}
+- (NSDate *)currentTime
+{
+    return [outputComponent currentTime];
 }
 @end

@@ -25,6 +25,10 @@
 #include "../General/PajeFilter.h"
 #include "../StorageController/Encapsulate.h"
 
+// number of chanks to keep simultaneously in memory
+// FIXME: should be configurable/more intelligent
+#define CHUNKS_TO_KEEP 10
+
 @implementation PajeTraceController
 - (id)init
 {
@@ -144,7 +148,7 @@
         [self createComponentGraph];
         [reader setInputFilename:filename];
 
-        [self performSelector:@selector(readAll:)
+        [self performSelector:@selector(readChunk:)
                    withObject:self
                    afterDelay:0.0];
 
@@ -163,32 +167,25 @@
     NS_ENDHANDLER
 }
 
-- (void)readAll:(id)sender
+- (void)readChunk:(id)sender
 {
-    int i = 0;
+    int i;
     NSDate *start = [NSDate date], *end;
     double t;
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+    NSAutoreleasePool *pool;
+    
+    if (![reader hasMoreData]) {
+        return;
+    }
+    
+    i = -(int)[reader eventCount];
+    pool = [NSAutoreleasePool new];
     
     NS_DURING
-[reader readNextChunk];
-/*
-        while([reader readNextEvent]) {
-            i++;
-            if ((i) % 1000 == 0) {
-                //[self writeCheckPoint];
-                [pool release];
-                pool = [NSAutoreleasePool new];
-//break;
-            }
-        }
-*/
-
-        [pool release];
-        end = [NSDate date];
-        t = [end timeIntervalSinceDate:start];
-        i = [reader eventCount];
-        NSLog(@"%@: %d events in %f seconds = %f e/s", [reader inputFilename], i, t, i/t);
+        NSDebugMLLog(@"tim", @"will read chunk starting at %@",
+                                [reader currentTime]);
+        [reader readNextChunk];
+        [self writeCheckPoint];
 
     NS_HANDLER
         if (NSRunAlertPanel([localException name], @"%@\n%@",
@@ -197,27 +194,50 @@
                             [[[localException userInfo] objectEnumerator] allObjects]) != NSAlertDefaultReturn)
             [[NSApplication sharedApplication] terminate:self];
     NS_ENDHANDLER
+
+    [pool release];
+
+    end = [NSDate date];
+    t = [end timeIntervalSinceDate:start];
+    i += [reader eventCount];
+    NSLog(@"%@: %d events in %f seconds = %f e/s", [reader inputFilename], i, t, i/t);
+    
 }
 
 - (void)writeCheckPoint
 {
-#if 0
     NSMutableData *d;
     NSArchiver *a;
-    id comp_enum = [components objectEnumerator];
+    id comp_enum;
     id component;
-    NSDate *time = [reader currentTime];
-    NSString *fileName = [NSString stringWithFormat:@"/tmp/Paje-%@.ckp", [time description]];
-    PajeCheckPoint *checkPoint = [PajeCheckPoint checkPointWithTime:time
-                                                           fileName:fileName];
+    NSDate *time;
+    NSString *fileName;
+    PajeCheckPoint *checkPoint;
 
-    if ([checkPoints indexOfObject:checkPoint] != NSNotFound)
+    time = [reader currentTime];
+    if (time == nil) {
         return;
+    }
+    
+    // FIXME: should put files elsewhere.
+    // FIXME: should erase files when done
+    fileName = [NSString stringWithFormat:@"/tmp/Paje-%@.ckp",
+                         [time description]];
+    checkPoint = [PajeCheckPoint checkPointWithTime:time fileName:fileName];
 
+    // If checkpoint has already been generated, do not write it again
+    if ([checkPoints indexOfObject:checkPoint] != NSNotFound) {
+        return;
+    }
+
+    NSDebugMLLog(@"tim", @"will write checkPoint %@", checkPoint);
     d = [[NSMutableData alloc] init];
     a = [[NSArchiver alloc] initForWritingWithMutableData:d];
+    comp_enum = [components objectEnumerator];
     while (component = [comp_enum nextObject]) {
-        if ([component respondsToSelector:@selector(encodeCheckPointWithCoder:)]) {
+        if ([component respondsToSelector:
+                            @selector(encodeCheckPointWithCoder:)]) {
+            NSDebugMLLog(@"tim", @"encoding component=%@", component);
             [component encodeCheckPointWithCoder:a];
         }
     }
@@ -226,32 +246,30 @@
     [d release];
     
     [checkPoints addObject:checkPoint];
-#endif
 }
 
 - (void)gotoCheckPoint:(PajeCheckPoint *)checkPoint
 {
-#if 0
-    NSData *d = [[NSData alloc] initWithContentsOfFile:[checkPoint fileName]];
-    NSUnarchiver *a=[[NSUnarchiver alloc] initForReadingWithData:d];
-    id comp_enum = [components objectEnumerator];
+    NSData *d;
+    NSUnarchiver *a;
+    NSEnumerator *comp_enum;
     id component;
+
+    NSDebugMLLog(@"tim", @"will read checkPoint %@", checkPoint);
+
+    d = [[NSData alloc] initWithContentsOfFile:[checkPoint fileName]];
+    a=[[NSUnarchiver alloc] initForReadingWithData:d];
+    comp_enum = [components objectEnumerator];
+
     while (component = [comp_enum nextObject])
-        if ([component respondsToSelector:@selector(decodeCheckPointWithCoder:)]) {
-            NSLog(@"%@ lendo %@", NSStringFromClass([component class]), [checkPoint fileName]);
+        if ([component respondsToSelector:
+                            @selector(decodeCheckPointWithCoder:)]) {
+            NSDebugMLLog(@"tim", @"decoding %@", component);
             [component decodeCheckPointWithCoder:a];
         }
     [a release];
     [d release];
     [encapsulator removeObjectsAfterTime:[checkPoint time]];
-
-
-    //KLUDGE
-    [self performSelector:@selector(readAll:)
-               withObject:self
-               afterDelay:0.0];
-
-#endif
 }
 
 - (void)traceFault:(NSNotification *)notification
@@ -263,47 +281,37 @@
     int index2;
     PajeCheckPoint *checkPoint;
     int i;
-    BOOL endOfFile;
 
-    return;
-//#if 0
     info = [notification userInfo];
     startTime = [info objectForKey:@"StartTime"];
     endTime = [info objectForKey:@"EndTime"];
-    index = [checkPoints indexOfLastObjectNotAfterValue:(id<Comparing>)startTime];
 
-    // let's remove some old stuff (should have some more intelligence in this!)
-    index2 = index - 5;
-    if (index2 > 0)
-        [encapsulator removeObjectsBeforeTime:
-            [[checkPoints objectAtIndex: index2] time]];
+    if (startTime != nil) {
+        index = [checkPoints indexOfLastObjectNotAfterValue:
+                                                    (id<Comparing>)startTime];
+    } else {
+        index = NSNotFound;
+    }
 
     if (index != NSNotFound) {
+        // let's remove some old stuff
+        // (should have some more intelligence in this!)
+        index2 = index - CHUNKS_TO_KEEP;
+        if (index2 > 0) {
+            [encapsulator removeObjectsBeforeTime:
+                [[checkPoints objectAtIndex: index2] time]];
+        }
+
         checkPoint = [checkPoints objectAtIndex:index];
         if (([startTime isEarlierThanDate: [encapsulator startTimeInMemory]])
             || ([[checkPoint time] isLaterThanDate:[reader currentTime]]))
             [self gotoCheckPoint:checkPoint];
     }
-//#endif
     
-//    NSLog(@"traceFault: will read, starting at %@", [reader currentTime]);
-//    [reader readUntilTime:endTime];
-    endOfFile = NO;
-    do {
-        NSAutoreleasePool *pool;
-        pool = [[NSAutoreleasePool alloc] init];
-        for (i=0; i<2000 && !endOfFile; i++) {
-            endOfFile = ![reader readNextEvent];
-            if (((i+1) % 50) == 49) {
-                [pool release];
-                pool = [[NSAutoreleasePool alloc] init];
-            }
-        }
-        [pool release];
-        if (!endOfFile)
-            [self writeCheckPoint];
-    } while (!endOfFile && [[reader currentTime] isEarlierThanDate:endTime]);
-//    NSLog(@"read until %@ (asked for %@)", [reader currentTime], endTime);
+    while ([reader hasMoreData]
+             && [[reader currentTime] isEarlierThanDate:endTime]) {
+        [self readChunk:self];
+    } 
 }
 
 - (void)registerFilter:(PajeFilter *)filter

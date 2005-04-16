@@ -287,4 +287,9 @@ NSDate *delta_d_t0;
     [coder decodeValueOfObjCType:@encode(SEL) at:&valueSelector];
     return self;
 }
+
+- (NSString *)description
+{
+    return [array description];
+}
 @end

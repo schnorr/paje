@@ -108,6 +108,7 @@ void PSInit(void){}
 {
     Assign(startTime, [filter startTime]);
     Assign(endTime, [filter endTime]);
+    NSDebugMLLog(@"tim", @"Hier changed. times=[%@ %@]", startTime, endTime);
 
     if (startTime != nil && endTime != nil) {
         [self adjustSize];
@@ -332,7 +333,7 @@ void PSInit(void){}
         newBounds = [[controller rootLayout] rectOfInstance:rootInstance];
 
         newBounds.origin.x = TIMEtoX(startTime);
-        newBounds.size.width = TIMEtoX(endTime) - newBounds.origin.x;
+        newBounds.size.width = TIMEtoX(endTime) - newBounds.origin.x + 3;
         newBounds.size.height += 1;
         [self setBoundsOrigin:newBounds.origin];
         [self setFrameSize:newBounds.size];
@@ -357,8 +358,10 @@ void PSInit(void){}
 
 - (void)verifyTimes:sender
 {
+    //FIXME: shouldn't be necessary; encapsulator should be more intelligent
     NSScrollView *scrollView = [self enclosingScrollView];
-    [filter verifyStartTime:startTime
+    [filter verifyStartTime:/*startTime*/XtoTIME(NSMinX([self convertRect:[scrollView frame]
+                                                    fromView:scrollView]))
                     endTime:XtoTIME(NSMaxX([self convertRect:[scrollView frame]
                                                     fromView:scrollView]))];
 }
@@ -400,6 +403,7 @@ void PSInit(void){}
     }
     Assign(startTime, startTimeLimit);
     Assign(endTime, endTimeLimit);
+    NSDebugMLLog(@"tim", @"times=[%@ %@] trace=[%@ %@]", startTime, endTime, traceStartTime, traceEndTime);
 }
 
 - (void)setPointsPerSecond:(double)pps
@@ -624,6 +628,7 @@ BOOL dontdraw;
 
     if (startTime == nil) return;
 
+[self verifyTimes:self];
     // draws some more pixels, for the graphs that expand their limits (events)
     drawStartTime = XtoTIME(NSMinX(rect) - 5);
     drawEndTime   = XtoTIME(NSMaxX(rect) + 5);

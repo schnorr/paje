@@ -55,11 +55,13 @@ static NSString *COLOR_VALUE = @"Color";
 - (void)encodeCheckPointWithCoder:(NSCoder *)coder
 {
     [coder encodeValuesOfObjCTypes:"ii", &eventCount, &lineCount];
+    NSDebugMLLog(@"tim", @"encoded %d %d", eventCount, lineCount);
 }
 
 - (void)decodeCheckPointWithCoder:(NSCoder *)coder
 {
     [coder decodeValuesOfObjCTypes:"ii", &eventCount, &lineCount];
+    NSDebugMLLog(@"tim", @"decoded %d %d", eventCount, lineCount);
 }
 
 - (void)dealloc
@@ -282,5 +284,12 @@ tt=aDouble;
 - (int)eventCount
 {
     return eventCount;
+}
+
+// FIXME: shouldn't be here; only simulator shuld know this.
+//        Must change TraceController
+- (NSDate *)currentTime
+{
+    return [outputComponent currentTime];
 }
 @end

@@ -82,6 +82,18 @@
     return value;
 }
 
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+    [super encodeWithCoder:coder];
+    [coder encodeObject:event];
+}
+
+- (id)initWithCoder:(NSCoder *)coder
+{
+    self = [super initWithCoder:coder];
+    Assign(event, [coder decodeObject]);
+    return self;
+}
 @end
 
 @implementation UserEventInspector
