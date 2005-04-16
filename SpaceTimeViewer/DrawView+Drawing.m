@@ -76,17 +76,16 @@
                 h = 12;
             }
             x -= w;
-            w *= 2;
-            NSRectFill(NSMakeRect(x, y, w, h));
-            NSLog(@"br=%f", [[color colorUsingColorSpaceName:NSCalibratedWhiteColorSpace
-                                          device:nil] whiteComponent]);
+            NSRectFill(NSMakeRect(x, y, w * 2, h));
+            /*NSLog(@"br=%f", [[color colorUsingColorSpaceName:NSCalibratedWhiteColorSpace
+                                          device:nil] whiteComponent]);*/
             if ([[color colorUsingColorSpaceName:NSCalibratedWhiteColorSpace
                                           device:nil] whiteComponent] > 0.5) {
                 [[NSColor blackColor] set];
             } else {
                 [[NSColor whiteColor] set];
             }
-            [name drawInRect:NSMakeRect(x, y, w, h)];
+            [name drawInRect:NSMakeRect(x, y, w * 2, h)];
             PSgrestore();
         }
     }

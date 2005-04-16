@@ -1,4 +1,9 @@
 2005-04-16  Benhur Stein <benhur@inf.ufsm.br>
+	* SpaceTimeViewer/DrawView+Drawing.m: corrected bug in which drawing
+	  names on events made them bigger each time
+	* SpaceTimeViewer/HierarchyRuler.m: corrected sizes of boxes (again)
+
+2005-04-16  Benhur Stein <benhur@inf.ufsm.br>
 	* ContainerFilter/ContainerSelector.m,
 	  EntityTypeFilter/EntityTypeSelector.m, General/HierarchyBrowser.m,
 	  General/MultiEnumerator.m, General/PajeType.m, General/TimeList.m,

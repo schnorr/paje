@@ -391,7 +391,7 @@ if (x != maxLevel/*[thicknesses count]*/) {
 [self widthForLevel:level];
                 r.size.width = NSMaxX([self bounds]) - r.origin.x - 1;
             }
-            [vcell drawWithFrame:r inView:self];
+            [vcell drawWithFrame:NSInsetRect(r, -.5, -.5) inView:self];
         }
         if (![layout isContainer]) return;
         level++;
@@ -411,14 +411,16 @@ if (x != maxLevel/*[thicknesses count]*/) {
                 if (r.size.width > 2) {
                     if (containerBeingDragged != nil 
                         && [instance isEqual:containerBeingDragged]) {
-                        NSDrawWhiteBezel(r, r);
+                        NSDrawWhiteBezel(NSInsetRect(r, -.5, -.5), NSInsetRect(r, -.5, -.5));
+                        //[[NSColor whiteColor] set];
+                        //NSRectFill(r);
                     } else if ([[controller selectedContainers]
                                                      containsObject:instance]) {
                         [[NSColor whiteColor] set];
                         NSRectFill(r);
                     }
                     [cell setStringValue:[instance description]];
-                    [cell drawWithFrame:r inView:self];
+                    [cell drawWithFrame:NSInsetRect(r, -.5, -.5) inView:self];
                 }
             }
 
@@ -449,7 +451,7 @@ if (x != maxLevel/*[thicknesses count]*/) {
     layoutDescriptor = [controller descriptorForEntityType:containerType];
 
     if (![layoutDescriptor isContainer]) {
-        return;
+        return nil;
     }
 
     r = [layoutDescriptor rectInContainer:container];
@@ -664,10 +666,11 @@ if (x != maxLevel/*[thicknesses count]*/) {
 
     limitRect = [layoutDescriptor rectInContainer:container];
     instanceRect = [(STContainerTypeLayout *)layoutDescriptor rectOfInstance:clickedContainer];
-    //instanceRect.size.height += 1;
+    instanceRect.size.height += 1;
+    instanceRect.size.width += 1;
     
     minY = NSMinY(limitRect);
-    maxY = NSMaxY(limitRect) - NSHeight(instanceRect) /*+ 1*/;
+    maxY = NSMaxY(limitRect) - NSHeight(instanceRect) + 1;
 
     indexBeingDragged = [self levelForPosition:mouseDownLocation.x];
     if (indexBeingDragged == -1) {
@@ -677,7 +680,7 @@ if (x != maxLevel/*[thicknesses count]*/) {
     width = [self widthForLevel:indexBeingDragged];
 
     limitRect.origin.x = instanceRect.origin.x = minX - 1;
-    limitRect.size.width = instanceRect.size.width = width /*+ 1*/;
+    limitRect.size.width = instanceRect.size.width = width + 1;
 
     [self _makeRectVisible:instanceRect];
 
