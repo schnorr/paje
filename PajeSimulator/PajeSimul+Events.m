@@ -93,12 +93,14 @@ NSDictionary *USER_TYPES;
 
     // new type should not exist
     if ([userTypes objectForKey:newContainerTypeName] != nil) {
-        NSLog(@"Redefining container type %@", newContainerTypeName);
+        NSWarnLog(@"Redefining container type %@ with event %@",
+                  newContainerTypeName, event);
         return;
     }
     if (newContainerTypeAlias != nil 
         && [userTypes objectForKey:newContainerTypeAlias] != nil) {
-        NSLog(@"Redefining container type %@", newContainerTypeAlias);
+        NSWarnLog(@"Redefining container type alias %@ with event %@",
+                  newContainerTypeAlias, event);
         return;
     }
 
@@ -160,12 +162,14 @@ NSDictionary *USER_TYPES;
 
     // new type should not exist
     if ([userTypes objectForKey:newEntityTypeName] != nil) {
-        NSLog(@"Redefining entity type %@", newEntityTypeName);
+        NSWarnLog(@"Redefining entity type %@ with event %@",
+                  newEntityTypeName, event);
         return;
     }
     if (newEntityTypeAlias != nil 
         && [userTypes objectForKey:newEntityTypeAlias] != nil) {
-        NSLog(@"Redefining entity type %@", newEntityTypeAlias);
+        NSWarnLog(@"Redefining entity type alias %@ with event %@",
+                  newEntityTypeAlias, event);
         return;
     }
 
@@ -205,12 +209,14 @@ NSDictionary *USER_TYPES;
 
     // new type should not exist
     if ([userTypes objectForKey:newEntityTypeName] != nil) {
-        NSLog(@"Redefining entity type %@", newEntityTypeName);
+        NSWarnLog(@"Redefining entity type %@ with event %@",
+                  newEntityTypeName, event);
         return;
     }
     if (newEntityTypeAlias != nil 
         && [userTypes objectForKey:newEntityTypeAlias] != nil) {
-        NSLog(@"Redefining entity type %@", newEntityTypeAlias);
+        NSWarnLog(@"Redefining entity type alias %@ with event %@",
+                  newEntityTypeAlias, event);
         return;
     }
 
@@ -292,7 +298,7 @@ NSDictionary *USER_TYPES;
     }
 
     if ([entityType drawingType] == PajeVariableDrawingType) {
-        NSLog(@"Values of variables cannot be named in event %@", event);
+        NSWarnLog(@"Values of variables cannot be named in event %@", event);
         return;
     }
 
@@ -351,11 +357,24 @@ NSDictionary *USER_TYPES;
         [self error:@"Unknown container type" inEvent:event];
     }
     
-//    if ([self containerOfNumber:newContainerName 
-//                           type:typeOfNewContainer
-//                        inEvent:event] != nil) {
-//        NSLog(@"Redefining container %@ in event %@", newContainerName, event);
-//    }
+    if ([self containerOfNumber:newContainerName 
+                           type:typeOfNewContainer
+                        inEvent:event] != nil) {
+        NSWarnLog(@"Redefining container %@ in event %@",
+                  newContainerName, event);
+        NSWarnLog(@"brothers=%@", [[self containerOfNumber:containerId
+                                   type:[typeOfNewContainer containerType]
+                                inEvent:event] subContainers]);
+        [[self containerOfNumber:newContainerName 
+                           type:typeOfNewContainer
+                        inEvent:event] log];
+        NSLog(@"container=%@ %@", [self containerOfNumber:newContainerName 
+                           type:typeOfNewContainer
+                        inEvent:event], NSStringFromClass([[self containerOfNumber:newContainerName 
+                           type:typeOfNewContainer
+                        inEvent:event] class]));
+        return;
+    }
 
     if (newContainerAlias == nil) {
         newContainerAlias      = newContainerName;
@@ -364,7 +383,20 @@ NSDictionary *USER_TYPES;
         && [self containerOfNumber:newContainerAlias 
                               type:typeOfNewContainer
                            inEvent:event] != nil) {
-        NSLog(@"Redefining container %@ in event %@", newContainerAlias, event);
+        NSWarnLog(@"Redefining container alias %@ in event %@",
+                  newContainerAlias, event);
+        NSWarnLog(@"brothers=%@", [[self containerOfNumber:containerId
+                                   type:[typeOfNewContainer containerType]
+                                inEvent:event] subContainers]);
+        [[self containerOfNumber:newContainerAlias
+                           type:typeOfNewContainer
+                        inEvent:event] log];
+        NSLog(@"container=%@ %@", [self containerOfNumber:newContainerAlias 
+                           type:typeOfNewContainer
+                        inEvent:event], NSStringFromClass([[self containerOfNumber:newContainerAlias 
+                           type:typeOfNewContainer
+                        inEvent:event] class]));
+        return;
     }
 
     container = [self containerOfNumber:containerId
@@ -407,7 +439,7 @@ NSDictionary *USER_TYPES;
 
     containerType = [userTypes objectForKey:containerTypeId];
     if (containerType == nil) {
-        NSLog(@"Unknown container type in event %@", event);
+        NSWarnLog(@"Unknown container type in event %@", event);
         //[self error:@"Unknown container type" inEvent:event];
     }
  
@@ -432,7 +464,7 @@ NSDictionary *USER_TYPES;
     NSString *entityTypeId;
     NSString *containerId;
 
-    if (entityType) {
+    if (entityType != NULL) {
         entityTypeId  = [event objectForKey:@"EntityType"];
 	if (entityTypeId == nil) {
             entityTypeId  = [event objectForKey:@"Type"];
@@ -443,7 +475,7 @@ NSDictionary *USER_TYPES;
         }
     }
 
-    if (entityType != nil && container != nil) {
+    if (entityType != NULL && container != NULL) {
         containerId   = [event objectForKey:@"Container"];
         *container = [self containerOfNumber:containerId
                                         type:[*entityType containerType]

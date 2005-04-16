@@ -199,7 +199,7 @@ NSDate *delta_a_t0;
 
     // if we don't have the corresponding array to this firstTime, log.
     if (!array) {
-        NSLog(@"object %@ not found while changing endTime");
+        NSDebugMLog(@"object %@ not found while changing endTime");
         return;
     }
 

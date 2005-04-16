@@ -238,8 +238,7 @@
     while ((className = [classNameEnum nextObject]) != nil) {
         entityClass = NSClassFromString(className);
         if (!entityClass) {
-            NSLog(@"%@: class named %@ not found!",
-                  NSStringFromClass([self class]), className);
+            NSWarnMLog(@"class named %@ not found!", className);
             continue;
         }
         [reduceModePopUp addItemWithTitle:[entityClass titleForPopUp]];

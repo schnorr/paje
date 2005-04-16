@@ -204,7 +204,7 @@
         [self containersBrowser:sender createRowsForColumn:column
                        inMatrix:matrix];
     else
-        NSLog(@"Unknown browser in HierarchyBrowser");
+        NSDebugLog(@"Unknown browser in HierarchyBrowser");
 }
 
 - (void)containersBrowser:(NSBrowser *)sender createRowsForColumn:(int)column inMatrix:(NSMatrix *)matrix

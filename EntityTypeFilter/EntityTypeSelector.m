@@ -328,7 +328,6 @@
     id entityName;
     int i = 0;
     ColoredSwitchButtonCell *cell;
-    NSMutableAttributedString *title;
 
     if (entityType == nil) {
         return;
@@ -348,6 +347,7 @@
         [cell setRepresentedObject:entityName];
 #if 0
 #ifndef xxGNUSTEP
+        NSMutableAttributedString *title;
         title = [[[NSMutableAttributedString alloc] initWithString:[entityName description]] autorelease];
 #if defined(__APPLE__)// || defined(GNUSTEP)
         [title replaceCharactersInRange:NSMakeRange(0,0) withString:@"# "];
@@ -421,7 +421,7 @@
     NSMutableSet *filter;
     
     if ([self isHiddenEntityType:entityType]) {
-        NSLog(@"enumerating hidden type %@", entityType);
+        NSWarnLog(@"enumerating hidden type %@", entityType);
         return nil;
     }
 
@@ -574,7 +574,7 @@ NSDebugMLog(@"");
 - (void)setConfiguration:(id)config
 {
     NSMutableDictionary *hiddenNames;
-    NSArray *hiddenTypes;
+    NSMutableArray *hiddenTypes;
     NSEnumerator *keyEnum;
     NSString *entityTypeName;
     PajeEntityType *entityType;

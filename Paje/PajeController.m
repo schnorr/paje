@@ -279,7 +279,7 @@ static PajeController *uniqueController;
         filter = [filters objectForKey:filterName];
         keyEquivalent = [filter filterKeyEquivalent];
         if ([filter filterView] == nil) {
-            NSLog(@"Filter %@ has no view", filterName);
+            NSWarnLog(@"Filter %@ has no view", filterName);
             continue;
         }
 

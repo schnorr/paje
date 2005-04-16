@@ -179,10 +179,11 @@
     o1 = [coder decodeObject];
     o2 = [coder decodeObject];
     o3 = [coder decodeObject];
-    return [self initWithName:o1
+    self = [self initWithName:o1
                 containerType:o2];
     [self setEvent:o3];
     Assign(fieldNames, [coder decodeObject]);
+    return self;
 }
 @end
 

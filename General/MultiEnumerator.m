@@ -64,10 +64,9 @@
 
 - (void)addEnumerator:(NSEnumerator *)enumerator
 {
-    if (enumerator)
+    if (enumerator != nil) {
         [origEnums addObject:enumerator];
-    else
-        NSLog(@"nil enumerator ignored");
+    }
 }
 
 - (id)nextObject;
