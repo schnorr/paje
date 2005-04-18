@@ -17,6 +17,8 @@
     along with Pajé; if not, write to the Free Software Foundation, Inc.,
     59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 */
+#ifndef _SourceTextController_h_
+#define _SourceTextController_h_
 //
 // SourceTextController
 //
@@ -25,7 +27,7 @@
 // controller and delegate of the textView that shows the source file
 //
 
-#import <AppKit/AppKit.h>
+#include <AppKit/AppKit.h>
 
 @interface SourceTextController : NSObject
 {
@@ -45,4 +47,4 @@ willChangeSelectionFromCharacterRange:(NSRange)oldRange
    toCharacterRange:(NSRange)newRange;
 
 @end
-
+#endif

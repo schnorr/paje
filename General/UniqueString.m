@@ -41,7 +41,7 @@ NSMutableSet *TheUniqueStringsSet;
 {
     UniqueString *uniquestring = [TheUniqueStringsSet member:s];
     if (!uniquestring) {
-        uniquestring = s;//[[UniqueString allocWithZone:[TheUniqueStringsSet zone]] initWithString:s];
+        uniquestring = (id)s;//[[UniqueString allocWithZone:[TheUniqueStringsSet zone]] initWithString:s];
         [TheUniqueStringsSet addObject:uniquestring];
         //[uniquestring autorelease];
     }

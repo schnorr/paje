@@ -19,6 +19,7 @@
 */
 #include "PajeEntityInspector.h"
 #include "SourceCodeReference.h"
+#include "SourceTextController.h"
 #include "PajeType.h"
 
 //NSPoint lastWindowPosition;
@@ -477,7 +478,7 @@ postNotificationName:@"PajeFilterEntityNameNotification"
             fullPath = [fullPath stringByAppendingPathComponent:filename];
             if ([[NSFileManager defaultManager] isReadableFileAtPath:fullPath]) {
 //                [[NSWorkspace sharedWorkspace] openFile:fullPath];
-                [[NSClassFromString(@"SourceTextController") controllerForFilename:fullPath] selectLineNumber:lineNumber];
+                [[SourceTextController controllerForFilename:fullPath] selectLineNumber:lineNumber];
 //                NSRunAlertPanel(@"Source Code",
 //                                @"Sorry, source code inspection is not working",
 //                                @"OK", nil, nil);

@@ -1,3 +1,9 @@
+2005-04-18  Benhur Stein <benhur@inf.ufsm.br>
+        * General/PajeEntityInspector.m, General/PajeType.h,
+          General/PajeType.m, General/SourceTextController.h,
+          General/SourceTextController.m, General/UniqueString.m:
+          removed some compiler warnings
+
 2005-04-16  Benhur Stein <benhur@inf.ufsm.br>
 	* FileReader/PajeFileReader.h, FileReader/PajeFileReader.m,
 	  General/PSortedArray.m, General/PajeEntity.m, Paje/PajeCheckPoint.m,

@@ -17,9 +17,9 @@
     along with Pajé; if not, write to the Free Software Foundation, Inc.,
     59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 */
-#import "SourceTextController.h"
-#import "../General/NSString+Additions.h"
-#import "../General/Macros.h"
+#include "SourceTextController.h"
+#include "../General/NSString+Additions.h"
+#include "../General/Macros.h"
 
 @implementation SourceTextController
 
@@ -119,7 +119,7 @@ willChangeSelectionFromCharacterRange:(NSRange)oldRange
     lineNumber = [string lineNumberAtIndex:newRange.location];
     
     // highlight related entities
-    [[NSClassFromString(@"A0bSimul") onlyInstance] selectLine:lineNumber inFile:filename];
+//    [[NSClassFromString(@"A0bSimul") onlyInstance] selectLine:lineNumber inFile:filename];
     
     return selRange;
 }

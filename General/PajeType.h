@@ -38,7 +38,7 @@
     PajeContainerType *containerType;
     NSColor *color;
     PajeEvent *event;
-    NSSet *fieldNames;
+    NSMutableSet *fieldNames;
 }
 
 + (id/*PajeEntityType **/)typeWithName:(NSString *)n

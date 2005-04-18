@@ -320,13 +320,13 @@
 
 - (void)setValue:(id)value
            alias:(id)alias
-           color:(id)color
+           color:(id)c
 {
     if (alias != nil) {
         [aliases setObject:value forKey:alias];
     }
     [allValues addObject:value];
-    [self setColor:color forName:value];
+    [self setColor:c forName:value];
 }
 
 - (id)unaliasedValue:(id)v
