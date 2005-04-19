@@ -28,7 +28,7 @@
 
 #include "STController.h"
 
-@interface STEntityTypeLayoutController : NSObject
+@interface STEntityTypeLayoutController : NSObject <PajeTool>
 {
     IBOutlet NSPopUpButton *entityTypePopUp;
     IBOutlet NSButton *displayValueOnEntitySwitch;

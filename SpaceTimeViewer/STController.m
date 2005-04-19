@@ -23,6 +23,7 @@
 #include "STController.h"
 #include "DrawView.h"
 #include "STEntityTypeLayoutController.h"
+#include "../Paje/PajeTraceController.h"
 
 @implementation STController
 

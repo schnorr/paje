@@ -186,8 +186,8 @@
 
 - (NSDate *)xendTime
 {
-    if (endLogicalTime != nil)
-	return endLogicalTime;
+//    if (endLogicalTime != nil)
+//	return endLogicalTime;
     return [super endTime];
 }
 

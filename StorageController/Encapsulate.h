@@ -34,7 +34,7 @@
 }
 @end
 
-@interface Encapsulate : AnchorFilter
+@interface Encapsulate : AnchorFilter <PajeStorageController>
 {
     BOOL                 traceChanged;
     BOOL                 timerActive;
@@ -61,6 +61,7 @@
 - (void)addEntity:(PajeEntity *)entity;
 
 - (void)removeObjectsBeforeTime:(NSDate *)time;
+- (void)removeObjectsAfterTime:(NSDate *)time;
 - (NSDate *)startTimeInMemory;
 
 @end

@@ -312,7 +312,7 @@
     selectedEntityType = [[entityNamePopUp selectedItem] representedObject];
     if (selectedEntityType) {
         newEntityType = [ReduceEntityType typeWithName:newEntityName
-                                         containerType:[self containerTypeForType:selectedEntityType]
+                                         containerType:(PajeContainerType *)[self containerTypeForType:selectedEntityType]
                                              component:self];
         [newEntityType setEntityClass:[selectedEntityType entityClass]];
         [newEntityType setEntityTypeToReduce:[selectedEntityType entityTypeToReduce]];

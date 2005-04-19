@@ -23,6 +23,7 @@
 #include <AppKit/AppKit.h>
 #include "../General/PSortedArray.h"
 #include "../General/PajeFilter.h"
+#include "PajeCheckPoint.h"
 
 #ifdef GNUSTEP
 #define IBOutlet  
@@ -30,7 +31,8 @@
 
 @interface PajeTraceController : NSObject
 {
-    id reader;
+    id <PajeReader> reader;
+    id <PajeSimulator> simulator;
     id encapsulator;
     NSMutableArray *components;
     
@@ -43,17 +45,25 @@
 }
 
 - (void)registerFilter:(PajeFilter *)filter;
-- (void)registerTool:(id)tool;
+- (void)registerTool:(id<PajeTool>)tool;
 
 - (NSDictionary *)filters;
 - (NSArray *)tools;
 
-- (void)readAll:(id)sender;
+- (void)readChunk:(id)sender;
 
 - (void)writeCheckPoint;
+- (void)gotoCheckPoint:(PajeCheckPoint *)checkPoint;
+- (void)traceFault:(NSNotification *)notification;
 
 - (BOOL)openFile:(NSString *)filename;
 
+- (void)setConfigurationName:(NSString *)name;
+- (void)loadConfiguration:(NSString *)name;
+- (void)saveConfiguration;
+
+// One of the windows controlled by me has become key.
+- (void)windowIsKey;
 @end
 
 #endif

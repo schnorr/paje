@@ -22,6 +22,12 @@
 
 #include <AppKit/AppKit.h>
 
+// GNUstep implements this but does not declares publically
+@interface NSColor (Additions)
++ (NSColor *)colorFromString:(NSString *)value;
+@end
+
+
 @interface NSUserDefaults (Colors)
 - (void)setColor:(NSColor *)color forKey:(NSString *)key;
 - (NSColor *)colorForKey:(NSString *)key;

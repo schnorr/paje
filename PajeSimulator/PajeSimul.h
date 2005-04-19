@@ -33,7 +33,7 @@
 #include "../General/PajeFilter.h"
 #include "../General/PajeEvent.h"
 
-@interface PajeSimul : PajeComponent
+@interface PajeSimul : PajeComponent <PajeSimulator>
 {
     NSString *name;
     PajeContainer *rootContainer;
@@ -49,6 +49,8 @@
     NSDate *startTime;
     NSDate *endTime;
     NSDate *currentTime;
+
+    int eventCount;
 }
 
 + (PajeSimul *)simulatorWithName:(NSString *)n;
@@ -66,6 +68,8 @@
 - (NSDate *)startTime;
 - (NSDate *)endTime;
 - (NSDate *)currentTime;
+
+- (int)eventCount;
 
 - (void)encodeCheckPointWithCoder:(NSCoder *)coder;
 - (void)decodeCheckPointWithCoder:(NSCoder *)coder;

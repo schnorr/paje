@@ -24,15 +24,13 @@
 #include "../General/PajeType.h"
 #include "BusyArray.h"
 
-@interface ReduceEntityType : PajeEntityType
+@interface ReduceEntityType : PajeVariableType
 {
     PajeFilter *component;
     Class entityClass;
     PajeEntityType *entityTypeToReduce;
     NSMutableSet *filterNames;       // entity names that are counted
     BusyArray *array;
-    NSNumber *minValue;
-    NSNumber *maxValue;
 }
 
 + (ReduceEntityType *)typeWithName:(NSString *)n
@@ -61,9 +59,6 @@
 - (void)addNamesToFilter:(NSArray *)n;
 - (void)removeNameFromFilter:(NSString *)n;
 - (NSSet *)filterNames;
-
-- (NSNumber *)minValue;
-- (NSNumber *)maxValue;
 
 - (NSEnumerator *)enumeratorOfEntitiesInContainer:(PajeContainer *)container
                                          fromTime:(NSDate *)start

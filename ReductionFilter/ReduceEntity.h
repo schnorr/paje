@@ -44,7 +44,7 @@
 - (id)initWithArray:(BusyArray *)a index:(int)i;
 
 - (PajeDrawingType)drawingType;
-- (PajeEntityType *)entityType;
+//- (ReduceEntityType *)entityType;
 
 - (NSDate *)startTime;
 - (NSDate *)endTime;

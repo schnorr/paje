@@ -20,6 +20,7 @@
 #include "PajeEventDecoder.h"
 #include "../General/FoundationAdditions.h"
 #include "../General/UniqueString.h"
+#include "../General/NSUserDefaults+Colors.h"
 
 @implementation PajeEventDecoder
 
@@ -284,12 +285,5 @@ tt=aDouble;
 - (int)eventCount
 {
     return eventCount;
-}
-
-// FIXME: shouldn't be here; only simulator shuld know this.
-//        Must change TraceController
-- (NSDate *)currentTime
-{
-    return [outputComponent currentTime];
 }
 @end

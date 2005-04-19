@@ -99,6 +99,7 @@
 - (void)adjustSize;
 
 - (void)adjustTimeLimits;
+- (void)saveMiddleTime;
 
 - (void)setPointsPerSecond:(double)pps;
 - (double)pointsPerSecond;

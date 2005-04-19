@@ -28,6 +28,9 @@
 - (NSComparisonResult)compare:other;
 @end
 
+@interface NSDate (C)<Comparing>
+@end
+
 @interface NSNumber(Comparing)
 - (BOOL) isDifferent:(id) obj;
 - (BOOL) isGreaterThan:(id) obj;

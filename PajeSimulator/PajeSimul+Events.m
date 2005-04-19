@@ -362,17 +362,6 @@ NSDictionary *USER_TYPES;
                         inEvent:event] != nil) {
         NSWarnLog(@"Redefining container %@ in event %@",
                   newContainerName, event);
-        NSWarnLog(@"brothers=%@", [[self containerOfNumber:containerId
-                                   type:[typeOfNewContainer containerType]
-                                inEvent:event] subContainers]);
-        [[self containerOfNumber:newContainerName 
-                           type:typeOfNewContainer
-                        inEvent:event] log];
-        NSLog(@"container=%@ %@", [self containerOfNumber:newContainerName 
-                           type:typeOfNewContainer
-                        inEvent:event], NSStringFromClass([[self containerOfNumber:newContainerName 
-                           type:typeOfNewContainer
-                        inEvent:event] class]));
         return;
     }
 
@@ -385,17 +374,6 @@ NSDictionary *USER_TYPES;
                            inEvent:event] != nil) {
         NSWarnLog(@"Redefining container alias %@ in event %@",
                   newContainerAlias, event);
-        NSWarnLog(@"brothers=%@", [[self containerOfNumber:containerId
-                                   type:[typeOfNewContainer containerType]
-                                inEvent:event] subContainers]);
-        [[self containerOfNumber:newContainerAlias
-                           type:typeOfNewContainer
-                        inEvent:event] log];
-        NSLog(@"container=%@ %@", [self containerOfNumber:newContainerAlias 
-                           type:typeOfNewContainer
-                        inEvent:event], NSStringFromClass([[self containerOfNumber:newContainerAlias 
-                           type:typeOfNewContainer
-                        inEvent:event] class]));
         return;
     }
 

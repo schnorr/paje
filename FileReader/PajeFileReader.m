@@ -107,13 +107,13 @@
 
 - (void)readNextChunk
 {
-    NSData *data;
+    NSMutableData *data;
     unsigned int length;
 
     if (![self hasMoreData]) {
         return;
     }
-    data = [inputFile readDataOfLength:CHUNK_SIZE];
+    data = (NSMutableData *)[inputFile readDataOfLength:CHUNK_SIZE];
     length = [data length];
     if (length < CHUNK_SIZE) {
         hasMoreData = NO;
@@ -142,15 +142,5 @@
 - (BOOL)hasMoreData
 {
     return hasMoreData;
-}
-
-// shouldn't be here
-- (int)eventCount
-{
-    return [outputComponent eventCount];
-}
-- (NSDate *)currentTime
-{
-    return [outputComponent currentTime];
 }
 @end

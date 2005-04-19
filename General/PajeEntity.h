@@ -47,6 +47,7 @@
 
 - (NSString *)name;
 - (PajeEntityType *)entityType;
+- (void)setContainer:(PajeContainer *)c;
 - (PajeContainer *)container;
 - (BOOL)isContainedBy:(PajeContainer *)cont;
 

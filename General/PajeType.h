@@ -96,6 +96,9 @@
 
 - (void)setValue:(id)n
            alias:(id)v;
+- (void)setValue:(id)value
+           alias:(id)alias
+           color:(id)c;
 - (id)unaliasedValue:(id)v;
 - (NSArray *)allNames;
 

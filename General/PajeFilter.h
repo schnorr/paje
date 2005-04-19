@@ -58,7 +58,7 @@
 - (NSString *)traceDescription; /* only for use by simulator */
 
 - (void)registerFilter:(PajeFilter *)filter;
-- (void)registerTool:(PajeFilter *)filter;
+- (void)registerTool:(id<PajeTool>)filter;
 
 - (NSString *)toolName;
 - (NSString *)filterName;
@@ -66,7 +66,6 @@
 - (NSString *)filterKeyEquivalent;
 - (id)filterDelegate;
 @end
-
 
 @interface PajeFilter : PajeComponent
 {

@@ -70,6 +70,9 @@ typedef enum {
 //- (id)hierarchy;
 - (PajeContainer *)container;
 - (int)imbricationLevel;
+
+- (NSArray *)fieldNames;
+- (id)valueOfFieldNamed:(NSString *)fieldName;
 @end
 
 @protocol PajeEntityType
@@ -109,6 +112,12 @@ typedef enum {
 - (void)decodeCheckPointWithCoder:(NSCoder *)coder;
 @end
 
+@protocol PajeTool
+- (NSString *)toolName;
+- (void)activateTool:(id)sender;
+@end
+
+/*
 @protocol PajeReader <PajeComponent>
 - (BOOL)readNextEvent;
 - (NSDictionary *)setInputFilename:(NSString *)filename;
@@ -116,6 +125,7 @@ typedef enum {
 - (NSDate *)currentTime;
 - (id <PajeEvent>)readEvent;
 @end
+*/
 /*
    Reader
    - (void)readEvent;
@@ -129,6 +139,25 @@ typedef enum {
    - (void)removeObjectsBeforeTime:(NSDate *)t
 
  */
+
+@protocol PajeReader
+- (void)setInputFilename:(NSString *)filename;
+- (NSString *)inputFilename;
+- (void)readNextChunk;
+- (BOOL)hasMoreData;
+@end
+
+@protocol PajeSimulator
+- (int)eventCount;
+- (NSDate *)currentTime;
+@end
+
+@protocol PajeStorageController
+- (void)removeObjectsBeforeTime:(NSDate *)time;
+- (void)removeObjectsAfterTime:(NSDate *)time;
+@end
+
+
 
 @protocol PajeInspector
 + (id <PajeInspector>)inspector;

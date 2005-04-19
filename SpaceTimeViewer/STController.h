@@ -27,7 +27,7 @@
 @class HierarchyRuler;
 @class STEntityTypeLayoutController;
 
-@interface STController: PajeFilter
+@interface STController: PajeFilter <PajeTool>
 {
     IBOutlet NSScrollView *scrollView;
     IBOutlet NSWindow *window;

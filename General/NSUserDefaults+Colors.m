@@ -20,10 +20,6 @@
 #include "NSUserDefaults+Colors.h"
 #include "UniqueString.h"
 
-// GNUstep implements this but does not declares publically
-@interface NSColor (Additions)
-+ (NSColor *)colorFromString:(NSString *)value;
-@end
 #ifndef GNUSTEP
 @implementation NSColor (Additions)
 + (NSColor *)colorFromString:(NSString *)value

@@ -52,9 +52,9 @@
     return PajeVariableDrawingType;
 }
 
-- (PajeEntityType *)entityType
+- (ReduceEntityType *)xentityType
 {
-    return [array entityType];
+    return (ReduceEntityType *)[array entityType];
 }
 
 - (NSDate *)startTime
@@ -81,8 +81,8 @@
 {
     // FIXME: should color be calculated from value? If so, who keeps the color limits?
     float x;
-    x = ([[self value] floatValue] - [[[self entityType] minValue] floatValue]);
-    x /= ([[[self entityType] maxValue] floatValue] - [[[self entityType] minValue] floatValue]);
+    x = ([[self value] floatValue] - [[(ReduceEntityType *)[self entityType] minValue] floatValue]);
+    x /= ([[(ReduceEntityType *)[self entityType] maxValue] floatValue] - [[(ReduceEntityType *)[self entityType] minValue] floatValue]);
     return [[NSColor blueColor] blendedColorWithFraction:x ofColor:[NSColor redColor]];
 }
 

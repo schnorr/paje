@@ -111,8 +111,6 @@
     Assign(filterNames, nil);
     Assign(entityTypeToReduce, nil);
     Assign(array, nil);
-    Assign(minValue, nil);
-    Assign(maxValue, nil);
     [super dealloc];
 }
 
@@ -211,16 +209,6 @@
 - (NSSet *)filterNames
 {
     return filterNames;
-}
-
-- (NSNumber *)minValue
-{
-    return minValue;
-}
-
-- (NSNumber *)maxValue
-{
-    return maxValue;
 }
 
 

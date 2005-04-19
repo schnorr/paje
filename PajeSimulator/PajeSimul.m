@@ -129,7 +129,7 @@ static NSMutableDictionary *simulators;
 
 - (PajeContainerType *)rootContainerType
 {
-    return [[self rootContainer] entityType];
+    return (PajeContainerType *)[[self rootContainer] entityType];
 }
 
 - (NSString *)delete_name {
@@ -235,6 +235,11 @@ NSInvocation *invocation;
     return currentTime;
 }
 
+- (int)eventCount
+{
+    return eventCount;
+}
+
 - (void)inputEntity:(PajeEvent *)event
 {
     NSInvocation *invocation;
@@ -284,6 +289,8 @@ NSInvocation *invocation;
         [invocation setArgument:&event atIndex:2];
         [invocation invoke];
     }
+    
+    eventCount++;
 }
 
 - (void)_resetContainers
@@ -304,6 +311,7 @@ NSInvocation *invocation;
     [coder encodeObject:startTime];
     [coder encodeObject:endTime];
     [coder encodeObject:currentTime];
+    [coder encodeValueOfObjCType:@encode(int) at:&eventCount];
     // FIXME: should be saved by type
     containerEnum = [[userNumberToContainer allValues] objectEnumerator];
     while ((container = [containerEnum nextObject]) != nil) {
@@ -331,6 +339,7 @@ NSInvocation *invocation;
     Assign(startTime, [coder decodeObject]);
     Assign(endTime, [coder decodeObject]);
     Assign(currentTime, [coder decodeObject]);
+    [coder decodeValueOfObjCType:@encode(int) at:&eventCount];
 
     [self _resetContainers];
 

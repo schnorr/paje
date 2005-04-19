@@ -26,7 +26,7 @@
 
 #define CHUNK_SIZE 100000
 
-@interface PajeFileReader: PajeComponent
+@interface PajeFileReader: PajeComponent <PajeReader>
 {
     NSFileHandle *inputFile;
     NSString *inputFilename;
@@ -41,8 +41,6 @@
 - (BOOL)hasMoreData;
 
 - (void)raise:(NSString *)reason;
-
-- (int)eventCount;
 
 - (void)encodeCheckPointWithCoder:(NSCoder *)coder;
 - (void)decodeCheckPointWithCoder:(NSCoder *)coder;

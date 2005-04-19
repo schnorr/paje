@@ -113,7 +113,7 @@
     return nil;
 }
 
-- (void)registerTool:(PajeFilter *)filter
+- (void)registerTool:(id<PajeTool>)filter
 {
     [controller registerTool:filter];
 }

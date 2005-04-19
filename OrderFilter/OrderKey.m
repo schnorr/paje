@@ -28,6 +28,7 @@
 
 #include <OrderKey.h>
 #include "../General/Macros.h"
+#include <Foundation/NSArray.h>
 
 @implementation OrderKey
 + (OrderKey *)keyWithEntityType:(id)e container:(id)c

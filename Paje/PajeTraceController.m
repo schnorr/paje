@@ -19,7 +19,6 @@
 */
 #include "PajeTraceController.h"
 #include "PajeController.h"
-#include "PajeCheckPoint.h"
 #include "../General/Protocols.h"
 #include "../General/Macros.h"
 #include "../General/PajeFilter.h"
@@ -84,7 +83,6 @@
 {
     id decoder;
     id virtualizer;
-    id simul;
     id entityTypeSelector;
     id fieldFilter;
     id containerselector;
@@ -95,12 +93,12 @@
     id spacetime;
     id insetlimit;
 
-    reader = [NSClassFromString(@"PajeFileReader") componentWithController:self];
+    reader = (id<PajeReader>)[NSClassFromString(@"PajeFileReader") componentWithController:self];
     [components addObject:reader];
     decoder = [NSClassFromString(@"PajeEventDecoder") componentWithController:self];
     [components addObject:decoder];
-    simul = [NSClassFromString(@"PajeSimul") componentWithController:self];
-    [components addObject:simul];
+    simulator = (id<PajeSimulator>)[NSClassFromString(@"PajeSimul") componentWithController:self];
+    [components addObject:simulator];
     encapsulator = [NSClassFromString(@"Encapsulate") componentWithController:self];
     [components addObject:encapsulator];
 //    virtualizer = [NSClassFromString(@"VirtualThread") componentWithController:self];
@@ -124,8 +122,8 @@
 //    [components addObject:statViewer];
 
     [self connectComponent:reader            toComponent:decoder];
-    [self connectComponent:decoder           toComponent:simul];
-    [self connectComponent:simul             toComponent:encapsulator];
+    [self connectComponent:decoder           toComponent:simulator];
+    [self connectComponent:simulator         toComponent:encapsulator];
     [self connectComponent:encapsulator      toComponent:busyNode];
     [self connectComponent:busyNode          toComponent:fieldFilter];
     [self connectComponent:fieldFilter       toComponent:containerselector];
@@ -178,12 +176,12 @@
         return;
     }
     
-    i = -(int)[reader eventCount];
+    i = -(int)[simulator eventCount];
     pool = [NSAutoreleasePool new];
     
     NS_DURING
         NSDebugMLLog(@"tim", @"will read chunk starting at %@",
-                                [reader currentTime]);
+                                [simulator currentTime]);
         [reader readNextChunk];
         [self writeCheckPoint];
 
@@ -191,7 +189,10 @@
         if (NSRunAlertPanel([localException name], @"%@\n%@",
                             @"Continue", @"Abort", nil,
                             [localException reason],
-                            [[[localException userInfo] objectEnumerator] allObjects]) != NSAlertDefaultReturn)
+                            [localException userInfo]
+                            //[[[localException userInfo] objectEnumerator] 
+                            //allObjects]
+                            ) != NSAlertDefaultReturn)
             [[NSApplication sharedApplication] terminate:self];
     NS_ENDHANDLER
 
@@ -199,7 +200,7 @@
 
     end = [NSDate date];
     t = [end timeIntervalSinceDate:start];
-    i += [reader eventCount];
+    i += [simulator eventCount];
     NSLog(@"%@: %d events in %f seconds = %f e/s", [reader inputFilename], i, t, i/t);
     
 }
@@ -214,7 +215,7 @@
     NSString *fileName;
     PajeCheckPoint *checkPoint;
 
-    time = [reader currentTime];
+    time = [simulator currentTime];
     if (time == nil) {
         return;
     }
@@ -304,12 +305,12 @@
 
         checkPoint = [checkPoints objectAtIndex:index];
         if (([startTime isEarlierThanDate: [encapsulator startTimeInMemory]])
-            || ([[checkPoint time] isLaterThanDate:[reader currentTime]]))
+            || ([[checkPoint time] isLaterThanDate:[simulator currentTime]]))
             [self gotoCheckPoint:checkPoint];
     }
     
     while ([reader hasMoreData]
-             && [[reader currentTime] isEarlierThanDate:endTime]) {
+             && [[simulator currentTime] isEarlierThanDate:endTime]) {
         [self readChunk:self];
     } 
 }
@@ -334,7 +335,7 @@
     [[PajeController controller] updateFiltersMenu];
 }
 
-- (void)registerTool:(id)tool
+- (void)registerTool:(id<PajeTool>)tool
 {
     [tools addObject:tool];
     [[PajeController controller] updateToolsMenu];

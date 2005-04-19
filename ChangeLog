@@ -1,4 +1,7 @@
 2005-04-18  Benhur Stein <benhur@inf.ufsm.br>
+	* many: removed compiler warnings
+
+2005-04-18  Benhur Stein <benhur@inf.ufsm.br>
         * General/PajeEntityInspector.m, General/PajeType.h,
           General/PajeType.m, General/SourceTextController.h,
           General/SourceTextController.m, General/UniqueString.m:
