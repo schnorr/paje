@@ -1,3 +1,7 @@
+2005-04-22  Benhur Stein <benhur@inf.ufsm.br>
+	* General/DataScanner.m: set numeric locale to C instead of en_US
+	  (suggestion from castet.matthieu@free.fr)
+
 2005-04-18  Benhur Stein <benhur@inf.ufsm.br>
 	* many: removed compiler warnings
 

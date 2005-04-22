@@ -36,7 +36,7 @@
         position = 0;
         
         // FIXME: find a cleaner way of reading numbers independently of locale
-        setlocale(LC_NUMERIC, "en_US");
+        setlocale(LC_NUMERIC, "C");
     }
     return self;
 }
