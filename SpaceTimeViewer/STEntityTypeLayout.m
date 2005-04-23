@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 1998, 1999, 2000, 2001, 2003, 2004 Benhur Stein
+    Copyright (c) 1998-2005 Benhur Stein
     
     This file is part of Pajé.
 
@@ -18,7 +18,7 @@
     59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 */
 #include "STEntityTypeLayout.h"
-#include "../General/NSUserDefaults+Colors.h"
+#include "../General/NSUserDefaults+Additions.h"
 #include "../General/Macros.h"
 #include "STController.h"
 

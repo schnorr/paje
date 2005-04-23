@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 1998, 1999, 2000, 2001, 2003, 2004 Benhur Stein
+    Copyright (c) 1998-2005 Benhur Stein
     
     This file is part of Pajé.
 
@@ -20,7 +20,7 @@
 #include "ReduceEntityType.h"
 #include "ReduceEntity.h"
 #include "../General/Macros.h"
-#include "../General/NSUserDefaults+Colors.h"
+#include "../General/NSUserDefaults+Additions.h"
 
 @implementation ReduceEntityType
 

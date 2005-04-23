@@ -1,3 +1,12 @@
+2005-04-23  Benhur Stein <benhur@inf.ufsm.br>
+	* General/NSUserDefaults+Colors.[hm],
+	  General/NSUserDefaults+Additions.[hm] General/PajeEvent.m,
+	  General/PajeType.m PajeEventDecoder/PajeEventDecoder.m,
+	  ReductionFilter/ReduceEntityType.m SpaceTimeViewer/DrawView.m,
+	  SpaceTimeViewer/STEntityTypeLayout.m: changed NSUserDefaults+Colors
+	  to NSUserDefaults+Additions.
+	* General/NSColor+Additions.[hm]: new files
+
 2005-04-22  Benhur Stein <benhur@inf.ufsm.br>
 	* General/DataScanner.m: set numeric locale to C instead of en_US
 	  (suggestion from castet.matthieu@free.fr)

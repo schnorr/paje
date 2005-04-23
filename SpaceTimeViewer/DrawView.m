@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 1998, 1999, 2000, 2001, 2003, 2004 Benhur Stein
+    Copyright (c) 1998-2005 Benhur Stein
     
     This file is part of Pajé.
 
@@ -40,7 +40,7 @@
 #import "drawline.h"
 #endif
 
-#include "../General/NSUserDefaults+Colors.h"
+#include "../General/NSUserDefaults+Additions.h"
 #include "../General/Macros.h"
 
 #if defined(GNUSTEP) || defined(__APPLE__)
@@ -328,8 +328,6 @@ void PSInit(void){}
                afterDelay:0.0];
 
     if (rootInstance != nil) {
-        float delta;
-
         newBounds = [[controller rootLayout] rectOfInstance:rootInstance];
 
         newBounds.origin.x = TIMEtoX(startTime);
@@ -705,6 +703,8 @@ BOOL dontdraw;
 
     [self setNeedsDisplayInRect:redisplayRect];
     [self scrollRectToVisible:redisplayRect];
+    [controller setSelectionStartTime:selectionStartTime
+                              endTime:selectionEndTime];
 }
 
 - (void)setNeedsDisplayInSelection

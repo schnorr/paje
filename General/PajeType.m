@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 1998, 1999, 2000, 2001, 2003, 2004 Benhur Stein
+    Copyright (c) 1998-2005 Benhur Stein
     
     This file is part of Pajé.
 
@@ -26,7 +26,7 @@
 #include <Foundation/Foundation.h>
 #include "PajeType.h"
 #include "Macros.h"
-#include "NSUserDefaults+Colors.h"
+#include "NSUserDefaults+Additions.h"
 #include "PajeContainer.h"
 
 @implementation PajeEntityType
