@@ -69,9 +69,11 @@
     bw = [self colorUsingColorSpaceName:NSCalibratedWhiteColorSpace];
     wc = [bw whiteComponent];
     if (wc > .5) {
-        ret = [NSColor blackColor];
+        //ret = [NSColor blackColor];
+        ret = [NSColor colorWithCalibratedWhite:0.15 alpha:1.0];
     } else {
-        ret = [NSColor whiteColor];
+        //ret = [NSColor whiteColor];
+        ret = [NSColor colorWithCalibratedWhite:0.85 alpha:1.0];
     }
     return ret;
 }

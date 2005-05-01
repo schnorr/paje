@@ -1,0 +1,43 @@
+{
+    "## Comment" = "Do NOT change this file, Gorm maintains it";
+    FirstResponder = {
+	Actions = (
+	    "percentSelectorChanged:"
+	);
+	Super = NSObject;
+    };
+    PajeComponent = {
+	Actions = (
+	    "inputEntity:",
+	    "outputEntity:"
+	);
+	Outlets = (
+	);
+	Super = NSObject;
+    };
+    PajeFilter = {
+	Actions = (
+	);
+	Outlets = (
+	);
+	Super = PajeComponent;
+    };
+    StatViewer = {
+	Actions = (
+	    "changeInitialAngle:",
+	    "graphTypeSelectorChanged:",
+	    "entityTypeSelectorChanged:",
+	    "print:",
+	    "percentSelectorChanged:"
+	);
+	Outlets = (
+	    matrix,
+	    window,
+	    entityTypeSelector,
+	    graphTypeSelector,
+	    percentSelector,
+	    durationField
+	);
+	Super = PajeFilter;
+    };
+}

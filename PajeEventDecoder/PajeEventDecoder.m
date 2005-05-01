@@ -21,6 +21,7 @@
 #include "../General/FoundationAdditions.h"
 #include "../General/UniqueString.h"
 #include "../General/NSUserDefaults+Additions.h"
+#include "../General/NSColor+Additions.h"
 
 @implementation PajeEventDecoder
 
@@ -229,10 +230,10 @@ static NSString *COLOR_VALUE = @"Color";
     NSNumber *aNumber;
     double aDouble;
     NSString *aString;
-static double tt;
-static NSDate *last = nil;
-static n = 0;
-if (last == nil) last = [NSDate new];
+//static double tt;
+//static NSDate *last = nil;
+//static int n = 0;
+//if (last == nil) last = [NSDate new];
 //if ((++n %1000)==0) { double t = [[NSDate date] timeIntervalSinceDate:last]; Assign(last, [NSDate date]); NSLog(@"%d %f/s t=%f e=%@", n, 1000/t, tt, event);}
 
     if (valArray == nil) {
@@ -260,7 +261,7 @@ if (last == nil) last = [NSDate new];
             [valArray addObject:aNumber];
         } else if (type == TIME_VALUE) {
             aDouble = [scanner readDouble];
-tt=aDouble;
+//tt=aDouble;
             [valArray addObject:[NSDate/*PTime*/ dateWithTimeIntervalSinceReferenceDate:aDouble]];
         } else if (type == HEX_VALUE || type == STRING_VALUE) {
             // string can be delimited by ""

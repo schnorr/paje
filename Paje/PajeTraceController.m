@@ -82,12 +82,12 @@
 - (id)createComponentGraph
 {
     id decoder;
-    id virtualizer;
+//    id virtualizer;
     id entityTypeSelector;
     id fieldFilter;
     id containerselector;
     id order;
-//    id statViewer;
+    id statViewer;
 //    id nodeGroup;
     id busyNode;
     id spacetime;
@@ -118,8 +118,8 @@
     [components addObject:insetlimit];
     spacetime = [NSClassFromString(@"STController") componentWithController:self];
     [components addObject:spacetime];
-//    statViewer = [NSClassFromString(@"StatViewer") componentWithController:self];
-//    [components addObject:statViewer];
+    statViewer = [NSClassFromString(@"StatViewer") componentWithController:self];
+    [components addObject:statViewer];
 
     [self connectComponent:reader            toComponent:decoder];
     [self connectComponent:decoder           toComponent:simulator];
@@ -132,6 +132,7 @@
 //    [self connectComponent:busyNode          toComponent:statViewer];
     [self connectComponent:entityTypeSelector toComponent:insetlimit];
     [self connectComponent:insetlimit         toComponent:spacetime];
+    [self connectComponent:insetlimit         toComponent:statViewer];
     
     return reader;
 }
@@ -235,7 +236,7 @@
     d = [[NSMutableData alloc] init];
     a = [[NSArchiver alloc] initForWritingWithMutableData:d];
     comp_enum = [components objectEnumerator];
-    while (component = [comp_enum nextObject]) {
+    while ((component = [comp_enum nextObject]) != nil) {
         if ([component respondsToSelector:
                             @selector(encodeCheckPointWithCoder:)]) {
             NSDebugMLLog(@"tim", @"encoding component=%@", component);
@@ -262,12 +263,13 @@
     a=[[NSUnarchiver alloc] initForReadingWithData:d];
     comp_enum = [components objectEnumerator];
 
-    while (component = [comp_enum nextObject])
+    while ((component = [comp_enum nextObject]) != nil) {
         if ([component respondsToSelector:
                             @selector(decodeCheckPointWithCoder:)]) {
             NSDebugMLLog(@"tim", @"decoding %@", component);
             [component decodeCheckPointWithCoder:a];
         }
+    }
     [a release];
     [d release];
     [encapsulator removeObjectsAfterTime:[checkPoint time]];
@@ -281,7 +283,6 @@
     unsigned index;
     int index2;
     PajeCheckPoint *checkPoint;
-    int i;
 
     info = [notification userInfo];
     startTime = [info objectForKey:@"StartTime"];

@@ -127,6 +127,7 @@ static PajeController *uniqueController;
     [self loadBundleNamed:@"ImbricationFilter"];
 
     [self loadBundleNamed:@"SpaceTimeViewer"];
+    [self loadBundleNamed:@"StatViewer"];
 }
 
 - (void)applicationWillFinishLaunching:(NSNotification *)notification

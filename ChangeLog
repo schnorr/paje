@@ -1,4 +1,17 @@
 2005-04-30  Benhur Stein <benhur@inf.ufsm.br>
+	* General/NSColor+Additions.m (-contrastingWhiteOrBlackColor):
+	  use less contrasting colors
+	* Paje/PajeController.m (-loadAllBundles): load StatViewer bundle
+	* Paje/PajeTraceController.m (-createComponentGraph): inatantiate and
+	  connect statViewer to component graph; some small changes to remove
+	  compiler warnings
+	* PajeEventDecoder/PajeEventDecoder.m: commented some unused code
+	* StatViewer/PieCell.h StatViewer/PieCell.m StatViewer/StatArray.h
+	  StatViewer/StatArray.m StatViewer/StatValue.h StatViewer/StatValue.m
+	  StatViewer/StatViewer.gorm StatViewer/StatViewer.h
+	  StatViewer/StatViewer.m: new files
+
+2005-04-30  Benhur Stein <benhur@inf.ufsm.br>
 	* GNUmakefile, */GNUmakefile: removed definition of GNUSTEP_MAKEFILES
 
 2005-04-23  Benhur Stein <benhur@inf.ufsm.br>
