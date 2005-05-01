@@ -1,4 +1,3 @@
-GNUSTEP_MAKEFILES = $(GNUSTEP_SYSTEM_ROOT)/Makefiles
 include $(GNUSTEP_MAKEFILES)/common.make
 Paje_PRINCIPAL_CLASS = NSApplication
 

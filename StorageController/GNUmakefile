@@ -3,7 +3,7 @@ ifeq "$(GNUSTEP_SYSTEM_ROOT)" ""
 else
 
 BUNDLE_INSTALL_DIR=$(GNUSTEP_INSTALLATION_DIR)/Library/Bundles/Paje
-GNUSTEP_MAKEFILES = $(GNUSTEP_SYSTEM_ROOT)/Makefiles
+
 include $(GNUSTEP_MAKEFILES)/common.make
 
 StorageController_PRINCIPAL_CLASS = Encapsulate

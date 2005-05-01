@@ -1,5 +1,5 @@
 BUNDLE_INSTALL_DIR=$(GNUSTEP_INSTALLATION_DIR)/Library/Bundles/Paje
-GNUSTEP_MAKEFILES = $(GNUSTEP_SYSTEM_ROOT)/Makefiles
+
 include $(GNUSTEP_MAKEFILES)/common.make
 
 ImbricationFilter_PRINCIPAL_CLASS = InsetLimit

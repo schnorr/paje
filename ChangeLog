@@ -1,3 +1,6 @@
+2005-04-30  Benhur Stein <benhur@inf.ufsm.br>
+	* GNUmakefile, */GNUmakefile: removed definition of GNUSTEP_MAKEFILES
+
 2005-04-23  Benhur Stein <benhur@inf.ufsm.br>
 	* General/NSUserDefaults+Colors.[hm],
 	  General/NSUserDefaults+Additions.[hm] General/PajeEvent.m,
