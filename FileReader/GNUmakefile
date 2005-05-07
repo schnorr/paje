@@ -52,7 +52,7 @@ FileReader_HEADERS= \
 #
 
 FileReader_OBJC_FILES= \
-PajeFileReader.m 
+        PajeFileReader.m 
 
 #
 # C files

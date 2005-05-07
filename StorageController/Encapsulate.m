@@ -365,12 +365,23 @@ ofContainersTyped:(PajeEntityType *)containerType
     dict = [entityLists objectForKey:entityType];
     // if container directly contains entityType's
     list = [dict objectForKey:container];
-    if (list)
-        return [list timeEnumeratorFromTime:start toTime:end];
+    if (list != nil) {
+        multiEnum = [MultiEnumerator enumerator];
+        [multiEnum addEnumerator:[list timeEnumeratorFromTime:start
+                                                       toTime:end]];
+        [multiEnum addEnumerator:
+                           [container enumeratorOfEntitiesTyped:entityType
+                                                       fromTime:start
+                                                         toTime:end]];
+        return multiEnum;
+    }
 
     // if container should contain entityType directly, we have no entities!
-    if ([[entityType containerType] isEqual:[container entityType]])
-        return nil;
+    if ([[entityType containerType] isEqual:[container entityType]]) {
+        return [container enumeratorOfEntitiesTyped:entityType
+                                           fromTime:start
+                                             toTime:end];
+    }
     
     // container does not contain entityType's directly. Try containers in-between.
     parentType = [entityType containerType];
@@ -379,9 +390,15 @@ ofContainersTyped:(PajeEntityType *)containerType
     multiEnum = [MultiEnumerator enumerator];
     while ((subcontainer = [subcontainerEnum nextObject]) != nil) {
         list = [dict objectForKey:subcontainer];
-        if (list)
+        if (list != nil) {
             [multiEnum addEnumerator:[list timeEnumeratorFromTime:start
                                                            toTime:end]];
+            [multiEnum addEnumerator:
+                               [container enumeratorOfEntitiesTyped:entityType
+                                                           fromTime:start
+                                                             toTime:end]];
+
+        }
     }
     return multiEnum;
 }

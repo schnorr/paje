@@ -527,6 +527,23 @@ int contador, contadorb;
     [userEntities removeAllObjects];
 }
 
+- (NSEnumerator *)enumeratorOfEntitiesTyped:(PajeEntityType *)entityType
+                                   fromTime:(NSDate *)start
+                                     toTime:(NSDate *)end
+{
+    id entity = [userEntities objectForKey:entityType];
+
+    if (entity == nil) {
+        return [[NSArray array] objectEnumerator];
+    }
+    if (![entity isKindOfClass:[NSArray class]]) {
+        return [[NSArray arrayWithObject:entity] objectEnumerator];
+    }
+    
+    return [(NSArray *)entity objectEnumerator];
+}
+
+
 - (void)encodeCheckPointWithCoder:(NSCoder *)coder
 {
     NSDebugMLLog(@"tim", @"encoding %@ (lt=%@ %d ue=%@)",

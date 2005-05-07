@@ -1,4 +1,11 @@
 2005-04-30  Benhur Stein <benhur@inf.ufsm.br>
+	* PajeSimulator/SimulContainer.m
+          [-enumeratorOfEntitiesTyped:fromTime:toTime:]: new method
+        * StorageController/Encapsulate.m
+          [-enumeratorOfEntitiesTyped:inContainer:fromTime:toTime:]: call
+          new method in container
+
+2005-04-30  Benhur Stein <benhur@inf.ufsm.br>
 	* General/NSColor+Additions.m (-contrastingWhiteOrBlackColor):
 	  use less contrasting colors
 	* Paje/PajeController.m (-loadAllBundles): load StatViewer bundle
