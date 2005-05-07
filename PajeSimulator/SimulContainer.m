@@ -392,13 +392,6 @@ retry:
 }
 
 
-double tempo0, tempo1, tempo2;
-double tempo0b, tempo1b, tempo2b;
-int contador, contadorb;
-#define CONTA1 {contador++; if ((contador %2000)==0) NSLog(@"%f %f %f %f %f %f %d %d", tempo0, tempo1, tempo2, tempo0b, tempo1b, tempo2b, contador, contadorb);}
-#define CONTA2 {contador++;contadorb++; if ((contador %2000)==0) NSLog(@"%f %f %f %f %f %f %d %d", tempo0, tempo1, tempo2, tempo0b, tempo1b, tempo2b, contador, contadorb);}
-#define START {NSDate *tn=[NSDate date];
-#define STOP(t) t-=[tn timeIntervalSinceNow];}
 - (void)startUserLinkOfType:(PajeEntityType *)type
                       value:(id)value
             sourceContainer:(PajeContainer *)sourceContainer
@@ -409,18 +402,18 @@ int contador, contadorb;
     UserLink *link = nil;
     unsigned index = 0;
     BOOL found = NO;
+    int sourceLogicalTime;
+    
+    sourceLogicalTime = [(SimulContainer *)sourceContainer logicalTime];
 
-    CONTA1
-//    NSLog(@"start %@ %d", sourceContainer, [sourceContainer logicalTime]);
-    [(SimulContainer *)sourceContainer setLogicalTime:[(SimulContainer *)sourceContainer logicalTime]+1];
-//    NSLog(@"start %@ %d", sourceContainer, [sourceContainer logicalTime]);
+    sourceLogicalTime++;
+    [(SimulContainer *)sourceContainer setLogicalTime:sourceLogicalTime];
     
     if (!pendingLinks) {
         pendingLinks = [NSMutableArray array];
         [userEntities setObject:pendingLinks forKey:type];
     } else {
         unsigned count = [pendingLinks count];
-	START
         for (index = 0; index < count; index++) {
             link = [pendingLinks objectAtIndex:index];
             if ([link canBeStartedWithValue:value key:key]) {
@@ -428,22 +421,18 @@ int contador, contadorb;
                 break;
             }
         }
-	STOP(tempo0)
     }
 
     if (found) {
-	START
         [link setSourceContainer:sourceContainer sourceEvent:event];
-        [link setStartLogicalTime:[(SimulContainer *)sourceContainer logicalTime]];
-        if ([(SimulContainer *)[link destContainer] logicalTime] < [(SimulContainer *)sourceContainer logicalTime]+1) {
-            [(SimulContainer *)[link destContainer] setLogicalTime:[(SimulContainer *)sourceContainer logicalTime]+1];
-            [link setEndLogicalTime:[(SimulContainer *)sourceContainer logicalTime]+1];
+        [link setStartLogicalTime:sourceLogicalTime];
+        if ([(SimulContainer *)[link destContainer] logicalTime] < sourceLogicalTime+1) {
+            [(SimulContainer *)[link destContainer] setLogicalTime:sourceLogicalTime+1];
+            [link setEndLogicalTime:sourceLogicalTime+1];
         }
         [simulator outputEntity:link];
         [pendingLinks removeObjectAtIndex:index];
-	STOP(tempo1)
     } else {
-	START
         link = [UserLink linkOfType:type
                               value:value
                                 key:key
@@ -451,8 +440,7 @@ int contador, contadorb;
                     sourceContainer:sourceContainer
                         sourceEvent:event];
         [pendingLinks addObject:link];
-        [link setStartLogicalTime:[(SimulContainer *)sourceContainer logicalTime]];
-	STOP(tempo2)
+        [link setStartLogicalTime:sourceLogicalTime];
    }
 }
 
@@ -466,18 +454,18 @@ int contador, contadorb;
     UserLink *link = nil;
     unsigned index = 0;
     BOOL found = NO;
+    int destLogicalTime;
+    
+    destLogicalTime = [(SimulContainer *)destContainer logicalTime];
 
-    CONTA2
-//    NSLog(@"start %@ %d", destContainer, [destContainer logicalTime]);
-    [(SimulContainer *)destContainer setLogicalTime:[(SimulContainer *)destContainer logicalTime]+1];
-//    NSLog(@"start %@ %d", destContainer, [destContainer logicalTime]);
+    destLogicalTime++;
+    [(SimulContainer *)destContainer setLogicalTime:destLogicalTime];
 
-    if (!pendingLinks) {
+    if (pendingLinks == nil) {
         pendingLinks = [NSMutableArray array];
         [userEntities setObject:pendingLinks forKey:type];
     } else {
         unsigned count = [pendingLinks count];
-	START
         for (index = 0; index < count; index++) {
             link = [pendingLinks objectAtIndex:index];
             if ([link canBeEndedWithValue:value key:key]) {
@@ -485,30 +473,27 @@ int contador, contadorb;
                 break;
             }
         }
-	STOP(tempo0b)
     }
 
     if (found) {
         int lt = [link startLogicalTime]+1;
-	START
-        if (lt > [(SimulContainer *)destContainer logicalTime])
+        if (lt > destLogicalTime) {
+            destLogicalTime = lt;
             [(SimulContainer *)destContainer setLogicalTime: lt];
-        [link setEndLogicalTime:[(SimulContainer *)destContainer logicalTime]];
+        }
+        [link setEndLogicalTime:destLogicalTime];
         [link setDestContainer:destContainer destEvent:event];
         [simulator outputEntity:link];
         [pendingLinks removeObjectAtIndex:index];
-	STOP(tempo1b)
     } else {
-	START
         link = [UserLink linkOfType:type
                               value:value
                                 key:key
                           container:self
                       destContainer:destContainer
                           destEvent:event];
-        [link setEndLogicalTime:[(SimulContainer *)destContainer logicalTime]];
+        [link setEndLogicalTime:destLogicalTime];
         [pendingLinks addObject:link];
-	STOP(tempo2b)
    }
 }
 
@@ -527,11 +512,11 @@ int contador, contadorb;
     [userEntities removeAllObjects];
 }
 
-- (NSEnumerator *)enumeratorOfEntitiesTyped:(PajeEntityType *)entityType
+- (NSEnumerator *)enumeratorOfEntitiesTyped:(PajeEntityType *)type
                                    fromTime:(NSDate *)start
                                      toTime:(NSDate *)end
 {
-    id entity = [userEntities objectForKey:entityType];
+    id entity = [userEntities objectForKey:type];
 
     if (entity == nil) {
         return [[NSArray array] objectEnumerator];
