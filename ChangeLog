@@ -1,4 +1,7 @@
 2005-05-21  Benhur Stein <benhur@inf.ufsm.br>
+	* General/SourceCodeReference.m: unify references
+
+2005-05-21  Benhur Stein <benhur@inf.ufsm.br>
 	* StorageController/Encapsulate.m, General/PajeFilter.[hm]:
 	  new -entitySelectionChanged notification and -isSelectedEntity:
 	  query

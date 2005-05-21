@@ -28,19 +28,33 @@
 
 @implementation SourceCodeReference
 
+NSMutableSet *allReferences;
+
++ (void)initialize
+{
+    allReferences = [[NSMutableSet alloc] init];
+}
+
 + (SourceCodeReference *)referenceToFilename:(NSString *)name
-                                 lineNumber:(int)line
+                                  lineNumber:(int)line
 {
     return [[[self alloc] initWithFilename:name lineNumber:line] autorelease];
 }
 
 - (id)initWithFilename:(NSString *)name
-           lineNumber:(int)line
+            lineNumber:(int)line
 {
     self = [super init];
     if (self) {
+        id obj;
         Assign(filename, name);
         lineNumber = line;
+        obj = [allReferences member:self];
+        if (obj == nil) {
+            [allReferences addObject:self];
+        } else {
+            Assign(self, obj);
+        }
     }
     return self;
 }
@@ -55,8 +69,15 @@
 // accessors
 //
 
-- (NSString *)filename  { return filename; }
-- (int)lineNumber       { return lineNumber; }
+- (NSString *)filename
+{
+    return filename;
+}
+
+- (int)lineNumber
+{
+    return lineNumber;
+}
 
 
 - (NSString *)description
