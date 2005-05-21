@@ -110,8 +110,6 @@
     [self invalidateValues];
 }
 
-//extern NSDictionary *USER_TYPES;
-
 - (PajeEntityType *)selectedEntityType
 {
     return [[entityTypeSelector selectedItem] representedObject];

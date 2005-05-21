@@ -1,4 +1,8 @@
 2005-05-21  Benhur Stein <benhur@inf.ufsm.br>
+	* PajeSimulator/PajeSimul+Events.m, StatViewer/StatViewer.m: remove
+	  unneeded hack
+
+2005-05-21  Benhur Stein <benhur@inf.ufsm.br>
 	* General/SourceCodeReference.m: unify references
 
 2005-05-21  Benhur Stein <benhur@inf.ufsm.br>

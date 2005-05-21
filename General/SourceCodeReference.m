@@ -32,7 +32,7 @@ NSMutableSet *allReferences;
 
 + (void)initialize
 {
-    allReferences = [[NSMutableSet alloc] init];
+    allReferences = [[NSMutableSet alloc] init]; // never released!
 }
 
 + (SourceCodeReference *)referenceToFilename:(NSString *)name
@@ -45,7 +45,7 @@ NSMutableSet *allReferences;
             lineNumber:(int)line
 {
     self = [super init];
-    if (self) {
+    if (self != nil) {
         id obj;
         Assign(filename, name);
         lineNumber = line;

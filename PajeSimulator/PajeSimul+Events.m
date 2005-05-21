@@ -55,7 +55,6 @@
     Assign(endTime, [event objectForKey:@"EndTime"]);
 }
 
-NSDictionary *USER_TYPES;
 - (void)pajeDefineContainerType:(PajeEvent *)event
 {
     NSString *newContainerTypeAlias;
@@ -111,7 +110,6 @@ NSDictionary *USER_TYPES;
     if (newContainerTypeAlias != nil) {
         [userTypes setObject:newContainerType forKey:newContainerTypeAlias];
     }
-    USER_TYPES=userTypes;
 }
 
 - (void)pajeDefineLinkType:(PajeEvent *)event
