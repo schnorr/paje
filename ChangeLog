@@ -1,3 +1,7 @@
+2005-05-21  Benhur Stein <benhur@inf.ufsm.br>
+	* ReductionFilter/BusyArray.[hm], ReductionFilter/BusyDate.m,
+	  ReductionFilter/ReduceEntity.m: fix memory leak
+
 2005-05-07  Benhur Stein <benhur@inf.ufsm.br>
 	* PajeSimulator/SimulContainer.m [-start/endUserLink...]: code cleanup
 

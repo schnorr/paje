@@ -39,7 +39,7 @@
 
 @interface BusyArray : PSortedArray
 {
-    PajeContainer *container;
+    PajeContainer *container;  // not retained
     PajeEntityType *entityType;
 }
 

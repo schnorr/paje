@@ -38,7 +38,6 @@
 }
 - (void)dealloc
 {
-    return;
     [time release];
     [objects release];
     [super dealloc];

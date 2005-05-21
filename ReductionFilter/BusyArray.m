@@ -98,7 +98,7 @@
     self = [super initWithSelector:@selector(time)];
     if (self) {
         container = [cont retain];
-        entityType = [et retain];
+        entityType = et; // not retained
         [array insertObject:[BusyDate dateWithDate:startTime objects:[NSMutableArray array]] atIndex:0];
         [array insertObject:[BusyDate dateWithDate:endTime objects:[NSMutableArray array]] atIndex:1];
     }
@@ -128,7 +128,6 @@
 - (void)dealloc
 {
     [container release];
-    [entityType release];
     [super dealloc];
 }
 

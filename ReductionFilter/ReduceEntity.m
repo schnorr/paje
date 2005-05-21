@@ -47,6 +47,12 @@
     return PajeVariableDrawingType;
 }
 
+- (void)dealloc
+{
+    Assign(array, nil);
+    [super dealloc];
+}
+
 - (PajeDrawingType)drawingType
 {
     return PajeVariableDrawingType;
