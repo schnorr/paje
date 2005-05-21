@@ -28,25 +28,37 @@ static NSMutableDictionary *filenameToInstance;
 + (SourceTextController *)controllerForFilename:(NSString *)name
 {
     SourceTextController *controller;
-    if (!filenameToInstance)
+    if (filenameToInstance == nil) {
         filenameToInstance = [NSMutableDictionary new];
+    }
+
     controller = [filenameToInstance objectForKey:name];
-    if (!controller) {
+    if (controller == nil) {
         controller = [[[super alloc] initWithFilename:name] autorelease];
-        if (controller)
+        if (controller != nil) {
             [filenameToInstance setObject:controller forKey:name];
+        }
     }
     return controller;
 }
 
 - (id)initWithFilename:(NSString*)name
 {
+    NSString *fileContents;
+    
+    fileContents = [NSString stringWithContentsOfFile:name];
+    if (fileContents == nil) {
+        return nil;
+    }
     self = [super init];
     if (self) {
         Assign(filename, name);
         if (![NSBundle loadNibNamed:@"SourceTextViewer" owner:self])
             NSRunAlertPanel(@"SourceTextController",
                             @"Couldn't load interface file", nil, nil, nil);
+        [textView setString:fileContents];
+        [textView sizeToFit];
+        [[textView window] setTitleWithRepresentedFilename:name];
         [[textView window] makeKeyAndOrderFront:self];
     }
     return self;
@@ -55,15 +67,14 @@ static NSMutableDictionary *filenameToInstance;
 - (void)dealloc
 {
     [filename release];
-    [textView release];
+//    [textView release];
+//    [lineNumberField release];
     [super dealloc];
 }
 
-- (void)awakeFromNib
+- (IBAction)lineNumberChanged:(id)sender
 {
-    [textView setString:[NSString stringWithContentsOfFile:filename]];
-    [textView sizeToFit];
-    [[textView window] setTitleWithRepresentedFilename:filename];
+    [self selectLineNumber:[sender intValue]];
 }
 
 - (void)selectLineNumber:(unsigned)lineNumber
@@ -72,30 +83,10 @@ static NSMutableDictionary *filenameToInstance;
     NSRange selRange;
 
     selRange = [string rangeForLineNumber:lineNumber];
-    [textView sizeToFit];
     [textView setSelectedRange:selRange];
     [textView scrollRangeToVisible:selRange];
     [[textView window] orderFront:self];
 }
-
-// Deselect any previously highlighted line and select the specified one.
-/*
-- (void)selectCharRange:(NSRange)charRange
-{
-    NSTextStorage    *store = [self textStorage];
-
-    [store beginEditing];
-    if (previousSelection)
-        [store removeAttribute:NSBackgroundColorAttributeName 
-        range¬revRange];
-    [store addAttribute:NSBackgroundColorAttributeName 
-        value:selColor range:charRange];
-    [store endEditing];
-
-    prevRange = charRange;
-    previousSelection = YES;
-}
-*/
 
 
 // This delegate method is called when the selection is about to change
@@ -109,20 +100,21 @@ willChangeSelectionFromCharacterRange:(NSRange)oldRange
     NSRange selRange;
 
     // expand the range to the whole line
-    selRange = [textView selectionRangeForProposedRange:newRange
-                                            granularity:NSSelectByParagraph];
+    selRange = [string lineRangeForRange:NSMakeRange(newRange.location, 0)];
 
-    [textView sizeToFit];
-//    [textView setSelectedRange:selRange];
-//    [textView scrollRangeToVisible:selRange];
+    lineNumber = [string lineNumberAtIndex:selRange.location];
+    [lineNumberField setIntValue:lineNumber];
 
-    lineNumber = [string lineNumberAtIndex:newRange.location];
-    
     // highlight related entities
 //    [[NSClassFromString(@"A0bSimul") onlyInstance] selectLine:lineNumber inFile:filename];
-    
+
     return selRange;
 }
 
+// Delegate method from window
+- (void)windowWillClose:(NSNotification *)aNotification
+{
+    [filenameToInstance removeObjectForKey:filename];
+}
 @end
 

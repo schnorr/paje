@@ -30,7 +30,7 @@
 // Adapted from Mike Ferris' TextExtras
 - (NSRange)rangeForLineNumber:(unsigned)lineNumber
 {
-    unsigned curLineNum = 0;
+    unsigned curLineNum = 1;
     unsigned startCharIndex = NSNotFound;
     unichar buff[UNICHAR_BUFF_SIZE];
     unsigned i = 0, buffCount = 0;
@@ -38,7 +38,8 @@
     
     // Returned range should start at beginning of lineNumber
     // and end at beginning of lineNumber+1.
-    if (lineNumber == 0) startCharIndex = 0;
+    if (lineNumber < 1) lineNumber = 1;
+    if (lineNumber == 1) startCharIndex = 0;
     while (searchRange.length > 0) {
         buffCount = MIN(searchRange.length, UNICHAR_BUFF_SIZE);
         [self getCharacters:buff

@@ -67,4 +67,14 @@
 {
     return value;
 }
+
+- (void)setAction:(fieldFilterAction)a
+{
+    action = a;
+}
+
+- (fieldFilterAction)action
+{
+    return action;
+}
 @end

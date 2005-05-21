@@ -101,6 +101,8 @@
 // Message sent when the selected time slice has changed (or deselected).
 - (void)timeSelectionChanged;
 
+// Message sent when the selected entities have changed
+- (void)entitySelectionChanged;
 
 //
 // Commands
@@ -257,6 +259,8 @@ ofContainersTyped:(PajeEntityType *)containerType
 - (int)imbricationLevelForEntity:(id<PajeEntity>)entity;
 
 - (BOOL)canHighlightEntity:(id<PajeEntity>)entity;
+
+- (BOOL)isSelectedEntity:(id<PajeEntity>)entity;
 
 // configure filter
 - (id)configuration;

@@ -35,6 +35,7 @@
     IBOutlet NSPopUpButton *fieldNamePopUp;
     IBOutlet NSPopUpButton *comparisionPopUp;
     IBOutlet NSTextField *valueField;
+    IBOutlet NSMatrix *actionMatrix;
 }
 
 - (id)initWithController:(PajeTraceController *)c;

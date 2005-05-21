@@ -35,6 +35,7 @@
 {
     shapefunction *path;
     drawfunction *draw;
+    drawfunction *highlight;
     NSColor *color;
     NSColor *lastColor = nil;
     id entity;
@@ -52,6 +53,7 @@
     h = [layout height];
     path = [[layout shapeFunction] function];
     draw = [drawFunction function];
+    highlight = [[layout highlightFunction] function];
     PSgsave();
 
     while ((entity = [enumerator nextObject]) != nil) {
@@ -65,7 +67,11 @@
 
         PSgsave();
         path(x, y, w, h);
-        draw();
+        if ([filter isSelectedEntity:entity]) {
+            highlight();
+        } else {
+            draw();
+        }
         PSgrestore();
         if (drawNames) {
             PSgsave();
@@ -108,6 +114,7 @@ do { \
 {
     shapefunction *path;
     drawfunction *draw;
+    drawfunction *highlight;
     float insetBy;
     NSColor *color;
     NSColor *lastColor = nil;
@@ -128,6 +135,7 @@ do { \
     h = [layout height];
     path = [[layout shapeFunction] function];
     draw = [drawFunction function];
+    highlight = [[layout highlightFunction] function];
     insetBy = [layout insetAmount];
     PSgsave();
     PSsetlinewidth(1.0);
@@ -208,7 +216,11 @@ do { \
 
         PSgsave();
         path(x, y, w, newHeight);
-        draw();
+        if ([filter isSelectedEntity:entity]) {
+            highlight();
+        } else {
+            draw();
+        }
         if (drawNames && ow>10) {
             [name replaceCharactersInRange:NSMakeRange(0, [name length])
                                 withString:[filter nameForEntity:entity]];
@@ -314,6 +326,7 @@ do { \
 {
     shapefunction *path;
     drawfunction *draw;
+    drawfunction *highlight;
     NSColor *color;
     NSColor *lastColor = nil;
     id <PajeLink>entity;
@@ -321,6 +334,7 @@ do { \
 
     path = [[layout shapeFunction] function];
     draw = [drawFunction function];
+    highlight = [[layout highlightFunction] function];
 
     PSgsave();
     PSsetlinewidth([layout lineWidth]);
@@ -357,6 +371,7 @@ do { \
         }
 
         color = [filter colorForEntity:entity];
+        //color = [color colorWithAlphaComponent:0.5];
         if (![color isEqual:lastColor]) {
             lastColor = color;
             [color set];
@@ -373,7 +388,11 @@ do { \
         } else {
             path(x1, y1, x2-x1, y2-y1);
         }
-        draw();
+        if ([filter isSelectedEntity:entity]) {
+            highlight();
+        } else {
+            draw();
+        }
         PSgrestore();
     }
     PSgrestore();

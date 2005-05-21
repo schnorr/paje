@@ -1,4 +1,18 @@
 2005-05-21  Benhur Stein <benhur@inf.ufsm.br>
+	* StorageController/Encapsulate.m, General/PajeFilter.[hm]:
+	  new -entitySelectionChanged notification and -isSelectedEntity:
+	  query
+	* SpaceTimeViewer/DrawView+Drawing.m: use new query to highlight
+	  selected entities
+	* FieldFilter/FieldFilter.gorm,
+	  FieldFilter/FieldFilterDescriptor.[hm], FieldFilter/FieldFilter.[hm]:
+	  Add action to perform when applying filter (filter in, filter out or
+	  highlight)
+	* General/NSString+Additions.m: fix a bug in line numbering
+	* General/SourceTextViewer.gorm, General/SourceTextController.[mh]:
+	  correct buggy gorm file, show selected line number.
+
+2005-05-21  Benhur Stein <benhur@inf.ufsm.br>
 	* ReductionFilter/BusyArray.[hm], ReductionFilter/BusyDate.m,
 	  ReductionFilter/ReduceEntity.m: fix memory leak
 

@@ -12,46 +12,13 @@
 	    comparisionPopUp,
 	    entityTypePopUp,
 	    fieldNamePopUp,
-	    valueField
+	    valueField,
+	    actionMatrix
 	);
 	Super = PajeFilter;
     };
     FirstResponder = {
 	Actions = (
-	    "alignLeft:",
-	    "capitalizeWord:",
-	    "complete:",
-	    "cut:",
-	    "deleteToBeginningOfLine:",
-	    "deleteToMark:",
-	    "deselectAll:",
-	    "indent:",
-	    "makeKeyAndOrderFront:",
-	    "moveBackwardAndModifySelection:",
-	    "moveForwardAndModifySelection:",
-	    "moveToBeginningOfLine:",
-	    "moveToEndOfParagraph:",
-	    "moveWordBackwardAndModifySelection:",
-	    "ok:",
-	    "orderFront:",
-	    "orderFrontStandardAboutPanel:",
-	    "pageUp:",
-	    "pasteFont:",
-	    "performZoom:",
-	    "runPageLayout:",
-	    "saveDocumentAs:",
-	    "scrollPageDown:",
-	    "selectLine:",
-	    "selectText:",
-	    "showGuessPanel:",
-	    "subscript:",
-	    "takeFloatValueFrom:",
-	    "terminate:",
-	    "toggleRuler:",
-	    "transposeWords:",
-	    "unhide:",
-	    "useAllLigatures:",
-	    "zoom:",
 	    "comparisionPopUpChanged:",
 	    "entityTypePopUpChanged:"
 	);

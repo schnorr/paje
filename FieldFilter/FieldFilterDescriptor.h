@@ -26,11 +26,14 @@
 
 #define NOFILTER @"None"
 
+typedef enum { HIGHLIGHT, FILTEROUT, OTHERSOUT } fieldFilterAction;
+
 @interface FieldFilterDescriptor : NSEnumerator
 {
     NSString *fieldName;
     int comparision;
     id value;
+    fieldFilterAction action;
 }
 
 + (FieldFilterDescriptor *)descriptorWithFieldName:(NSString *)fn
@@ -43,6 +46,9 @@
 - (NSString *)fieldName;
 - (int)comparision;
 - (id)value;
+
+- (void)setAction:(fieldFilterAction)a;
+- (fieldFilterAction)action;
 @end
 
 

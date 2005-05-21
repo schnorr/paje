@@ -183,6 +183,15 @@
     }
 }
 
+- (void)entitySelectionChanged
+{
+    if ([outputComponent isKindOfClass:[NSArray class]]) {
+        [(NSArray*)outputComponent makeObjectsPerformSelector:_cmd];
+    } else {
+        [outputComponent entitySelectionChanged];
+    }
+}
+
 
 //
 // Filter commands
@@ -495,6 +504,11 @@ ofContainersTyped:(PajeEntityType *)containerType
 - (BOOL)canHighlightEntity:(id<PajeEntity>)entity
 {
     return [inputComponent canHighlightEntity:entity];
+}
+
+- (BOOL)isSelectedEntity:(id<PajeEntity>)entity
+{
+    return [inputComponent isSelectedEntity:entity];
 }
 
 

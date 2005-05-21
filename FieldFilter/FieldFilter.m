@@ -154,14 +154,15 @@
     int comparision;
     id value;
 
-     fieldName = [[fieldNamePopUp selectedItem] title];
-     if (![fieldName isEqual:NOFILTER]) {
-         comparision = [[comparisionPopUp selectedItem] tag];
-         value = [valueField stringValue];
-         fdesc = [FieldFilterDescriptor descriptorWithFieldName:fieldName
-                                                    comparision:comparision
-                                                          value:value];
-     }
+    fieldName = [[fieldNamePopUp selectedItem] title];
+    if (![fieldName isEqual:NOFILTER]) {
+        comparision = [[comparisionPopUp selectedItem] tag];
+        value = [valueField stringValue];
+        fdesc = [FieldFilterDescriptor descriptorWithFieldName:fieldName
+                                                   comparision:comparision
+                                                         value:value];
+        [fdesc setAction:[[actionMatrix selectedCell] tag]];
+    }
     
     return fdesc;
 }
@@ -209,6 +210,7 @@
         [fieldNamePopUp selectItemWithTitle:[fdesc fieldName]];
         [comparisionPopUp selectItemAtIndex:[fdesc comparision]];
         [valueField setStringValue:[fdesc value]];
+        [actionMatrix selectCellWithTag:[fdesc action]];
     }
 }
 
@@ -248,6 +250,7 @@ withFilterDescriptor:(FieldFilterDescriptor *)fdesc
 {
     id entityValue;
     id filterValue;
+    BOOL result = NO;
 
     entityValue = [self valueOfFieldNamed:[fdesc fieldName] forEntity:entity];
     entityValue = [entityValue description];
@@ -255,13 +258,16 @@ withFilterDescriptor:(FieldFilterDescriptor *)fdesc
     
     switch ([fdesc comparision]) {
     case 0:
-        return [entityValue isEqual:filterValue];
+        result = [entityValue isEqual:filterValue];
+        break;
     case 1:
-        return [entityValue floatValue] > [filterValue floatValue];
+        result = [entityValue floatValue] > [filterValue floatValue];
+        break;
     case 2:
-        return [entityValue floatValue] < [filterValue floatValue];
+        result = [entityValue floatValue] < [filterValue floatValue];
+        break;
     }
-    return NO;
+    return result;
 }
 
 
@@ -283,7 +289,7 @@ withFilterDescriptor:(FieldFilterDescriptor *)fdesc
                                                   toTime:end];
 
     fdesc = [filterDescriptors objectForKey:entityType];
-    if (fdesc != nil) {
+    if (fdesc != nil && [fdesc action] == FILTEROUT) {
         SEL filterSelector = @selector(filterEntity:withFilterDescriptor:);
         return [[[FilteredEnumerator alloc]
                                      initWithEnumerator:origEnum
@@ -293,6 +299,16 @@ withFilterDescriptor:(FieldFilterDescriptor *)fdesc
     } else {
         return origEnum;
     }
+}
+
+- (BOOL)isSelectedEntity:(id<PajeEntity>)entity
+{
+    FieldFilterDescriptor *fdesc;
+    fdesc = [filterDescriptors objectForKey:[self entityTypeForEntity:entity]];
+    if (fdesc != NULL && [fdesc action] == HIGHLIGHT) {
+        return [self filterEntity:entity withFilterDescriptor:fdesc];
+    }
+    return [super isSelectedEntity:entity];
 }
 
 

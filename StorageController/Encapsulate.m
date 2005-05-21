@@ -544,6 +544,12 @@ ofContainersTyped:(PajeEntityType *)containerType
     return YES;
 }
 
+- (BOOL)isSelectedEntity:(id<PajeEntity>)entity
+{
+    return NO;
+}
+
+
 - (NSArray *)fieldNamesForEntity:(id<PajeEntity>)entity
 {
     return [entity fieldNames];

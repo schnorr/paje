@@ -32,6 +32,7 @@
 @interface SourceTextController : NSObject
 {
     IBOutlet NSTextView *textView;
+    IBOutlet NSTextField *lineNumberField;
     NSString *filename;
 }
 
@@ -39,6 +40,8 @@
 - (id)initWithFilename:(NSString*)name;
 
 - (void)selectLineNumber:(unsigned)lineNumber;
+
+- (IBAction)lineNumberChanged:(id)sender;
 
 // This delegate method is called when the selection is about to change
 // (and whenever the textView is clicked on).
