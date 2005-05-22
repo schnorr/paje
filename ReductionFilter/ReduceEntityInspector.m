@@ -37,15 +37,22 @@
                         nil, nil, nil);
         return;
     }
+    
+    [executeForm setAutosizesCells:YES];
+    fieldNameField = [executeForm cellAtIndex:0];
+    programPathField = [executeForm cellAtIndex:0];
+    NSLog(@"distances: %@", NSStringFromSize([executeBox contentViewMargins]));
 
     lastFieldName = [[NSUserDefaults standardUserDefaults] objectForKey:@"ReduceEntityInspector FieldName"];
-    if (lastFieldName == nil)
+    if (lastFieldName == nil) {
         lastFieldName = @"";
+    }
     [fieldNameField setStringValue:lastFieldName];
 
     lastProgramName = [[NSUserDefaults standardUserDefaults] objectForKey:@"ReduceEntityInspector ProgramPath"];
-    if (lastProgramName == nil)
+    if (lastProgramName == nil) {
         lastProgramName = @"";
+    }
     [programPathField setStringValue:lastProgramName];
 
     [self addSubview:executeBox atBottom:NO];

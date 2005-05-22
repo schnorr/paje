@@ -1,3 +1,29 @@
+2005-05-22  Benhur Stein <benhur@inf.ufsm.br>
+	* ContainerFilter/ContainerSelector.m: code reformating
+	* EntityTypeFilter/EntityTypeSelector.m: code reformating, remove
+	  call to colorChanged.. when droping color, it will come
+	  automatically from previous filters.
+	* General/PajeEntity.m: moved inspect method to Encapsulator's
+	  -inspectEntity:
+	* General/PajeEntityInspector.h: declared outlets and new/changed
+	  methods
+	* General/PajeEntityInspector.m: changed window layout a bit,
+	  corrected some memory leaks, changed way of starting inspection --
+	  now the filter is known and integration is better (mainly for
+	  changing colors)
+	* General/PajeEntityInspector.gorm: layout changes
+	* Paje/PajeController.m: enabled alpha channel in color panel, now
+	  entities can be semi-transparent.
+	* ReductionFilter/ReduceEntityInspector.{h,m,gorm}: layout changes
+	* SpaceTimeViewer/DrawView.m: change selection background color when a
+	  color is dropped inside the time selection.
+	* StatViewer/StatViewer.m: redraw when colors change
+	* StorageController/Encapsulate.m: send colorChanged... notification
+	  to other filters when colors are changed, get code for inspection
+	  from PajeEntity.
+	* General/Protocols.h, General/PajeFilter.[hm]: removed "PajeInspecting" protocol
+
+
 2005-05-21  Benhur Stein <benhur@inf.ufsm.br>
 	* PajeSimulator/PajeSimul+Events.m, StatViewer/StatViewer.m: remove
 	  unneeded hack

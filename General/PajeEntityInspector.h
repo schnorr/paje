@@ -23,28 +23,33 @@
 #include <AppKit/AppKit.h>
 #include "PajeEntity.h"
 #include "PajeContainer.h"
+#include "PajeFilter.h"
 
 @interface PajeEntityInspector : NSObject
 {
     PajeEntity *inspectedEntity;
-    NSWindow *inspectionWindow;
-    NSTextField *nameField;
-    NSColorWell *colorField;
-    NSButton *reuseButton;
-    NSButton *filterButton;
-    NSBox *fieldBox;
-    NSBox *relatedEntitiesBox;
-    NSMatrix *relatedEntitiesMatrix;
+    PajeFilter *filter;
+
+    IBOutlet NSWindow *inspectionWindow;
+    IBOutlet NSTextField *nameField;
+    IBOutlet NSColorWell *colorField;
+    IBOutlet NSButton *reuseButton;
+    IBOutlet NSButton *filterButton;
+    IBOutlet NSBox *fieldBox;
+    IBOutlet NSBox *relatedEntitiesBox;
+    IBOutlet NSMatrix *relatedEntitiesMatrix;
     
-    NSBox *fileBox;
-    NSTextField *filenameField;
-    NSTextField *lineNumberField;
+    IBOutlet NSBox *fileBox;
+    IBOutlet NSTextField *filenameField;
+    IBOutlet NSTextField *lineNumberField;
 
     NSMutableSet *nonDisplayedFields;
 
     float top;
     float bottom;
 }
+
++ (PajeEntityInspector *)inspector;
 
 - (id)init;
 - (void)dealloc;
@@ -65,7 +70,11 @@
 - (BOOL)isReusable;
 - (void)setReusable:(BOOL)reuse;
 
-- (void)inspect:(PajeEntity *)anObj;
+- (void)inspectEntity:(id<PajeEntity>)entity
+           withFilter:(PajeFilter *)filter;
+
+- (IBAction)colorChanged:(id)sender;
+- (IBAction)entityClicked:(id)sender;
 
 - (IBAction)showSource:(id)sender;
 - (IBAction)filterEntityName:(id)sender;

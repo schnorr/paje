@@ -92,6 +92,11 @@
     [self invalidateValues];
 }
 
+- (void)colorChangedForEntityType:(PajeEntityType *)entityType
+{
+    [self invalidateValues];
+}
+
 - (void)setStartTime:(NSDate *)time
 {
     Assign(startTime, time);

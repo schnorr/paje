@@ -151,7 +151,7 @@ ofContainersTyped:(PajeEntityType *)containerType
 - (void)verifyStartTime:(NSDate *)start endTime:(NSDate *)end;
 
 // Command a filter to open an inspection window to inspect given entity.
-- (void)inspectEntity:(id<PajeInspecting>)entity;
+- (void)inspectEntity:(id<PajeEntity>)entity;
 
 
 //

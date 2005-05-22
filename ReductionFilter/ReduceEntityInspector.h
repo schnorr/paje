@@ -25,6 +25,7 @@
 @interface ReduceEntityInspector : PajeEntityInspector
 {
     IBOutlet NSBox *executeBox;
+    IBOutlet NSForm *executeForm;
     IBOutlet NSTextField *fieldNameField;
     IBOutlet NSTextField *programPathField;
 }

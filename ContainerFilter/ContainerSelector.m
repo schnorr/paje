@@ -48,7 +48,8 @@
     // view is an NSBox. we need its contents.
     view = [[(NSBox *)view contentView] retain];
 
-    [matrix registerForDraggedTypes:[NSArray arrayWithObject:NSColorPboardType]];
+    [matrix registerForDraggedTypes:
+                                 [NSArray arrayWithObject:NSColorPboardType]];
     [matrix setDelegate:self];
 //    [matrix setCellClass:[ColoredSwitchButtonCell class]];
 

@@ -224,14 +224,15 @@
     PajeEntityType *entityType = [self selectedEntityType];
     NSMutableSet *filter = [filters objectForKey:entityType];
 
-    if (filter) {
+    if (filter != nil) {
         [filter removeAllObjects];
         [self synchronizeMatrix];
         [self registerDefaultFilter:filter forEntityType:entityType];
         [super dataChangedForEntityType:entityType];
     } else {
         [NSException raise:@"EntityTypeSelector: Internal Inconsistency"
-                    format:@"%@ sent by unknown view %@", NSStringFromSelector(_cmd), sender];
+                    format:@"%@ sent by unknown view %@",
+                             NSStringFromSelector(_cmd), sender];
     }
 }
 
@@ -245,14 +246,16 @@
     PajeEntityType *entityType = [self selectedEntityType];
     NSMutableSet *filter = [filters objectForKey:entityType];
 
-    if (filter) {
-        [filter addObjectsFromArray:[self unfilteredObjectsForEntityType:entityType]];
+    if (filter != nil) {
+        [filter addObjectsFromArray:
+                              [self unfilteredObjectsForEntityType:entityType]];
         [self synchronizeMatrix];
         [self registerDefaultFilter:filter forEntityType:entityType];
         [super dataChangedForEntityType:entityType];
     } else {
         [NSException raise:@"EntityTypeSelector: Internal Inconsistency"
-                    format:@"%@ sent by unknown view %@", NSStringFromSelector(_cmd), sender];
+                    format:@"%@ sent by unknown view %@",
+                            NSStringFromSelector(_cmd), sender];
     }
 }
 
@@ -431,8 +434,12 @@
                                                   toTime:end];
 
     filter = [filters objectForKey:entityType];
-    if (filter) {
-        return [[[FilteredEnumerator alloc] initWithEnumerator:origEnum filter:self selector:@selector(isHiddenEntity:filter:) context:filter] autorelease];
+    if (filter != nil) {
+        return [[[FilteredEnumerator alloc] 
+                           initWithEnumerator:origEnum
+                                       filter:self
+                                     selector:@selector(isHiddenEntity:filter:)
+                                      context:filter] autorelease];
     } else {
         return origEnum;
     }
@@ -490,7 +497,6 @@
 - (NSDragOperation)matrix:(NSMatrix *)m
           draggingEntered:(id <NSDraggingInfo>)sender
 {
-NSDebugMLog(@"");
     return NSDragOperationAll;
 }
 #endif
@@ -501,7 +507,6 @@ NSDebugMLog(@"");
     NSPoint point = [m convertPoint:[sender draggingLocation] fromView:nil];
     NSButtonCell *cell = [m cellAtPoint:point];
 
-NSDebugMLog(@"");
     [self highlightCell:cell inMatrix:m];
     if (cell)
         return NSDragOperationAll;//NSDragOperationGeneric;
@@ -512,7 +517,6 @@ NSDebugMLog(@"");
 #ifdef GNUSTEP
 - (BOOL)matrix:(NSMatrix *)m prepareForDragOperation:(id <NSDraggingInfo>)sender
 {
-NSDebugMLog(@"");
     return YES;
 }
 #endif
@@ -522,22 +526,19 @@ NSDebugMLog(@"");
     NSPoint point;
     NSButtonCell *cell;
 
-NSDebugMLog(@"");
     point = [m convertPoint:[sender draggingLocation] fromView:nil];
     cell = [m cellAtPoint:point];
 
     [self highlightCell:nil inMatrix:m];
     
     if (cell != nil) {
-        id entityType = [self selectedEntityType];
-NSDebugMLog(@"entityType:%@ color:%@", entityType, [NSColor colorFromPasteboard:[sender draggingPasteboard]]);
-        [inputComponent setColor:[NSColor colorFromPasteboard:[sender draggingPasteboard]]
+        PajeEntityType *entityType = [self selectedEntityType];
+        NSColor *dragColor;
+        
+        dragColor = [NSColor colorFromPasteboard:[sender draggingPasteboard]];
+        [inputComponent setColor:dragColor
                          forName:[cell representedObject]
                     ofEntityType:entityType];
-        if ([cell state] == 1) {
-            [super colorChangedForEntityType:entityType];
-	}
-        [self synchronizeMatrix];
         return YES;
     }
     return NO;
@@ -545,7 +546,6 @@ NSDebugMLog(@"entityType:%@ color:%@", entityType, [NSColor colorFromPasteboard:
 
 - (void)matrix:(NSMatrix *)m draggingExited:(id <NSDraggingInfo>)sender
 {
-NSDebugMLog(@"");
     [self highlightCell:nil inMatrix:m];
 }
 

@@ -261,7 +261,7 @@ ofContainersTyped:(PajeEntityType *)containerType
 //
 // Inspecting an entity
 //
-- (void)inspectEntity:(id<PajeInspecting>)entity
+- (void)inspectEntity:(id<PajeEntity>)entity
 {
     [inputComponent inspectEntity:entity];
 }

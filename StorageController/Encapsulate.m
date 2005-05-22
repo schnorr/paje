@@ -30,6 +30,7 @@
 #include "../General/TimeList.h"
 #include "../General/MultiEnumerator.h"
 #include "../General/PajeEntity.h"
+#include "../General/PajeEntityInspector.h"
 #include "../General/Macros.h"
 #include "../General/NSDate+Additions.h"
 
@@ -594,11 +595,13 @@ ofContainersTyped:(PajeEntityType *)containerType
     ofEntityType:(PajeEntityType *)entityType
 {
     [entityType setColor:color forName:name];
+    [self colorChangedForEntityType:entityType];
 }
 
 - (void)setColor:(NSColor *)color forEntity:(id<PajeEntity>)entity
 {
     [entity setColor:color];
+    [self colorChangedForEntityType:[self entityTypeForEntity:entity]];
 }
 
 - (NSColor *)colorForEntityType:(PajeEntityType *)entityType
@@ -682,9 +685,24 @@ ect:time];
     }
 }
 
-- (void)inspectEntity:(id<PajeInspecting>)entity
+- (void)inspectEntity:(id<PajeEntity>)entity
 {
-    [entity inspect];
+    Class inspectorClass = nil;
+    Class class = [(NSObject *)entity class];
+
+    while ((inspectorClass == nil) && (class != [class superclass])) {
+        NSString *inspName;
+        inspName = [NSStringFromClass(class)
+                                       stringByAppendingString:@"Inspector"];
+        inspectorClass = NSClassFromString(inspName);
+        class = [class superclass];
+    }
+    if (inspectorClass != nil) {
+        [(PajeEntityInspector *)[inspectorClass inspector]
+                                    inspectEntity:entity withFilter:self];
+    }
+
+//    [entity inspect];
 }
 
 @end

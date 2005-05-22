@@ -41,10 +41,6 @@ typedef enum {
     PajeNonDrawingType,
 } PajeDrawingType;
 
-@protocol PajeInspecting
-- (void)inspect;
-@end
-
 @protocol PajeTiming
 // the time an entity starts, ends
 - (NSDate *)startTime;
@@ -58,7 +54,7 @@ typedef enum {
 - (NSDate *)lastTime;
 @end
 
-@protocol PajeEntity <PajeTiming, PajeInspecting, NSCoding>
+@protocol PajeEntity <PajeTiming, NSCoding>
 - (NSString *)name;
 - (PajeEntityType *)entityType;
 - (NSArray *)relatedEntities;

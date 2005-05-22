@@ -79,6 +79,7 @@ void PSInit(void){}
     [[NSUserDefaults standardUserDefaults]
               setColor:backgroundColor
                 forKey:DefaultsKey(@"BackgroundColor")];
+    [self setNeedsDisplay:YES];
 }
 
 - (void)setSelectedBackgroundColor:(NSColor *)color
@@ -87,6 +88,7 @@ void PSInit(void){}
     [[NSUserDefaults standardUserDefaults]
               setColor:selectedBackgroundColor
                 forKey:DefaultsKey(@"SelectedBackgroundColor")];
+    [self setNeedsDisplay:YES];
 }
 
 - (void)setFilter:(PajeFilter *)newFilter
@@ -661,6 +663,19 @@ BOOL dontdraw;
  * ------------------------------------------------------------------------
  */
 
+- (BOOL)isPointInSelection:(NSPoint)point
+{
+    NSDate *pointInTime;
+    
+    if (!selectionExists) {
+        return NO;
+    }
+    
+    pointInTime = XtoTIME(point.x);
+    return [pointInTime isLaterThanDate:selectionStartTime]
+           && [pointInTime isEarlierThanDate:selectionEndTime];
+}
+
 - (void)changeSelectionWithPoint:(NSPoint)point
 {
     NSRect redisplayRect;
@@ -724,15 +739,8 @@ BOOL dontdraw;
     selectionStartTime = [startTime retain];
     selectionEndTime = [endTime retain];
     selectionExists = YES;
-/*    [[NSNotificationCenter defaultCenter]
-              postNotificationName:@"PajeTimeSelectionChangedNotification"
-                            object:[self rootInstance]
-                          userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-                              selectionStartTime, @"StartTime",
-                              selectionEndTime, @"EndTime", nil]];*/
     [controller setSelectionStartTime:selectionStartTime
 			      endTime:selectionEndTime];
-    [self setNeedsDisplay:YES];
 }
 
 
@@ -767,19 +775,25 @@ return NSDragOperationCopy;
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
 {
     NSColor *draggedColor;
+    NSPoint point = [self convertPoint:[sender draggingLocation] fromView:nil];
 
     draggedColor = [NSColor colorFromPasteboard:[sender draggingPasteboard]];
-    if (draggedColor == nil)
+    if (draggedColor == nil) {
         return NO;
+    }
 
-    if (highlightedEntity) {
+    // if some entity is highlighted, the color has been dropped over it.
+    if (highlightedEntity != nil) {
         [filter setColor:draggedColor forEntity:highlightedEntity];
         [self setHighlightedEntity:nil];
     } else {
-        //FIXME: should test if inside selection to setSelectedBackgroundcolor:
-        [self setBackgroundColor:draggedColor];
-   }
-    [self setNeedsDisplay:YES];
+        // didn't drop on an entity, change background color
+        if ([self isPointInSelection:point]) {
+            [self setSelectedBackgroundColor:draggedColor];
+        } else {
+            [self setBackgroundColor:draggedColor];
+        }
+    }
     return YES;
 }
 

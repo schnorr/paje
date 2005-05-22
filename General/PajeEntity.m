@@ -167,22 +167,6 @@
 }
 
 
-- (void)inspect
-{
-    Class inspectorClass = nil;
-    Class class = [self class];
-
-    while (!inspectorClass && !(class == [class superclass])) {
-        NSString *inspName;
-        inspName = [NSStringFromClass(class) stringByAppendingString:@"Inspector"];
-        inspectorClass = NSClassFromString(inspName);
-        class = [class superclass];
-    }
-    if (inspectorClass)
-        //        [[[inspectorClass alloc] init] inspect:self];
-        [[inspectorClass inspector] inspect:self];
-}
-
 - (NSArray *)fieldNames
 {
     return [NSMutableArray arrayWithObjects:
@@ -208,11 +192,6 @@
     } else {
         return nil;
     }
-}
-
-- (IBAction)inspect:(id)sender
-{
-    [self inspect];
 }
 
 - (NSComparisonResult)compare:(id)other

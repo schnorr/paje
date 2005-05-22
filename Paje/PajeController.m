@@ -134,6 +134,7 @@ static PajeController *uniqueController;
 {
     [filtersPopUp removeAllItems];
     [filtersMenu removeAllItems];
+    [[NSColorPanel sharedColorPanel] setShowsAlpha:YES];
     
     [self loadAllBundles];
 }
