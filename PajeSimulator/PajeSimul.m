@@ -190,11 +190,12 @@ NSInvocation *invocation;
 
 - (id)initWithController:(PajeTraceController *)c
 {
-    self =[super initWithController:c];
+    self = [super initWithController:c];
 
     if (self != nil) {
         userTypes = [[NSMutableDictionary alloc] init];
         userNumberToContainer = [[NSMutableDictionary alloc] init];
+        relatedEntities = [[NSMutableDictionary alloc] init];
 
         [self _initInvocationTable];
     }
@@ -208,6 +209,7 @@ NSInvocation *invocation;
     [invocationTable release];
     [userTypes release];
     [userNumberToContainer release];
+    [relatedEntities release];
     [startTime release];
     [endTime release];
     [currentTime release];
@@ -302,6 +304,40 @@ NSInvocation *invocation;
 {
     [[userNumberToContainer allValues]
         makeObjectsPerformSelector:@selector(reset)];
+}
+
+- (void)addRelatedEntity:(id)entity toKey:(id)key
+{
+    NSMutableArray *entities;
+    entities = [relatedEntities objectForKey:key];
+    if (entities == nil) {
+        entities = [NSMutableArray arrayWithObject:entity];
+        [relatedEntities setObject:entities forKey:key];
+    } else {
+        [entities addObject:entity];
+    }
+}
+
+- (NSArray *)relatedEntitiesForEntity:(id<PajeEntity>)entity
+{
+    id key;
+
+    key = [entity valueOfFieldNamed:@"RelationKey"];
+    if (key != nil) {
+        return [relatedEntities objectForKey:key];
+    } else {
+        return [entity relatedEntities];
+    }
+}
+
+- (void)outputEntity:(id)entity
+{
+    id key;
+    key = [(id<PajeEntity>)entity valueOfFieldNamed:@"RelationKey"];
+    if (key != nil) {
+        [self addRelatedEntity:entity toKey:key];
+    }
+    [super outputEntity:entity];
 }
 
 - (void)encodeCheckPointWithCoder:(NSCoder *)coder

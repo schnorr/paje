@@ -1,4 +1,13 @@
 2005-06-06  Benhur Stein <benhur@inf.ufsm.br>
+	* Documentation/lang-paje/typeevent.tex: document new "RelationKey"
+	  field that entities can have to identify related entities.
+	* PajeSimulator/PajeSimul.h: add relatedEntities dictionary
+	* PajeSimulator/PajeSimul.m: -outputEntity:, -addRelatedEntity:toKey:,
+	  -relatedEntitiesToEntity: new methods
+	* StorageController/Encapsulate.m: removed -relatedEntitiesToEntity:
+	  method (taken over by simulator)
+
+2005-06-06  Benhur Stein <benhur@inf.ufsm.br>
 	* PajeSimulator/PajeSimul.m (-rootInstance): implemented to return
 	  rootContainer
 	* SpaceTimeViewer/DrawView+Mouse.m: remove unused notification

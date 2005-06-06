@@ -716,7 +716,9 @@ Color         & "0.9 0 0.1"\\
 \label{sec:creation}
 
 There are different events to create entities of each possible type
-(states, events, variables or links). 
+(states, events, variables or links).
+In events that create entities, the optional fields named "FileName" and "LineNumber" can be used to relate the created event to a position in a file, that can be obtained in Pajé during the inspection of the entity.
+These events can also have the optional field named "RelationKey", to group entities that are somehow related to each other. All entities with the same key are highlighted in the space-time diagram when the mouse cursor is over one of them.
 
 \subsubsection{States}
 

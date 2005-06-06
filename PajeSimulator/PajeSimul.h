@@ -51,6 +51,9 @@
     NSDate *currentTime;
 
     int eventCount;
+    
+    /* arrays of entities related to a key */
+    NSMutableDictionary *relatedEntities;
 }
 
 + (PajeSimul *)simulatorWithName:(NSString *)n;

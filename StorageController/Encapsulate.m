@@ -435,11 +435,6 @@ ofContainersTyped:(PajeEntityType *)containerType
     return [entity destEntityType];
 }
 
-- (NSArray *)relatedEntitiesForEntity:(id<PajeEntity>)entity
-{
-    return [entity relatedEntities];
-}
-
 - (NSColor *)colorForEntity:(id<PajeEntity>)entity
 {
     return [entity color];
