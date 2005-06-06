@@ -221,11 +221,6 @@ void PSInit(void){}
     [self adjustSize];
 }
 
-- (id)rootInstance
-{
-    return [filter rootInstance];
-}
-
 - (void)setRulerUnit
 {
     NSRulerView *ruler = [[self enclosingScrollView] horizontalRulerView];
@@ -321,7 +316,7 @@ void PSInit(void){}
     NSRect newBounds;
     NSScrollView *scrollView = [self enclosingScrollView];
     NSRulerView *ruler = [scrollView horizontalRulerView];
-    id rootInstance = [self rootInstance];
+    id rootInstance = [filter rootInstance];
 
     [self setRulerUnit];
 

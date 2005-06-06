@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 1998, 1999, 2000, 2001, 2003, 2004 Benhur Stein
+    Copyright (c) 1998--2005 Benhur Stein
     
     This file is part of Pajé.
 
@@ -116,7 +116,6 @@
 - (void)changeSelectionWithPoint:(NSPoint)point;
 - (void)setNeedsDisplayInSelection;
 
-- (id)rootInstance;
 - (PajeFilter *)filter;
 
 - (double)timeToX:(NSDate *)t;

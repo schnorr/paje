@@ -1,3 +1,16 @@
+2005-06-06  Benhur Stein <benhur@inf.ufsm.br>
+	* PajeSimulator/PajeSimul.m (-rootInstance): implemented to return
+	  rootContainer
+	* SpaceTimeViewer/DrawView+Mouse.m: remove unused notification
+	* SpaceTimeViewer/DrawView.[hm]: removed -rootInstance method; changed
+	  calls to ask filter
+	* SpaceTimeViewer/STController.m: remove obsolete fileSelected
+	  notification
+	* StorageController/Encapsulate.[hm]: removed local startTime, endTime
+	  and rootInstance variables; changed uses to ask previous component
+	  (simulator); also removed unused entityTypeToClass variable.
+	  removed obsolete PajeFilenameNotification.
+
 2005-05-22  Benhur Stein <benhur@inf.ufsm.br>
 	* ContainerFilter/ContainerSelector.m: code reformating
 	* EntityTypeFilter/EntityTypeSelector.m: code reformating, remove

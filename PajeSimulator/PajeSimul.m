@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 1998, 1999, 2000, 2001, 2003, 2004 Benhur Stein
+    Copyright (c) 1998--2005 Benhur Stein
     
     This file is part of Pajé.
 
@@ -89,6 +89,11 @@ static NSMutableDictionary *simulators;
                 [eventCopy descriptionWithLocale:[NSDictionary dictionary]
                                           indent:0]];
     [eventCopy release];
+}
+
+- (PajeContainer *)rootInstance
+{
+    return [self rootContainer];
 }
 
 - (PajeContainer *)rootContainer

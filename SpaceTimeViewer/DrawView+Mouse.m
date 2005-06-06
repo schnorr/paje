@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 1998, 1999, 2000, 2001, 2003, 2004 Benhur Stein
+    Copyright (c) 1998--2005 Benhur Stein
     
     This file is part of Pajé.
 
@@ -170,13 +170,6 @@
     }
 
     if (selectionExists) {
-/*NSLog(@"DrawView postando TimeSelection");
-        [[NSNotificationCenter defaultCenter]
-            postNotificationName:@"PajeTimeSelectionChangedNotification"
-                          object:[self rootInstance]
-                        userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-                            selectionStartTime, @"StartTime",
-                            selectionEndTime, @"EndTime", nil]];*/
         [controller setSelectionStartTime:selectionStartTime
 				  endTime:selectionEndTime];
     }

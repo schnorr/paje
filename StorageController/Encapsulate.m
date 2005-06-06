@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 1998, 1999, 2000, 2001, 2003, 2004 Benhur Stein
+    Copyright (c) 1998--2005 Benhur Stein
     
     This file is part of Pajé.
 
@@ -107,16 +107,8 @@ ofContainersTyped:(PajeEntityType *)containerType
     timerActive = NO;
 
     entityLists = [[NSMutableDictionary alloc] init];
-    startTime = nil;
-    endTime = nil;
     startTimeInMemory = nil;
     endTimeInMemory = nil;
-
-    [[NSNotificationCenter defaultCenter]
-        addObserver:self
-           selector:@selector(fileSelected:)
-               name:@"PajeFilenameNotification"
-             object:nil];
 
     return self;
 }
@@ -124,11 +116,8 @@ ofContainersTyped:(PajeEntityType *)containerType
 - (void)dealloc
 {
     [entityLists release];
-    [startTime release];
-    [endTime release];
     [startTimeInMemory release];
     [endTimeInMemory release];
-    [rootInstance release];
 
     [super dealloc];
 }
@@ -141,18 +130,6 @@ ofContainersTyped:(PajeEntityType *)containerType
         [self performSelector:@selector(timeElapsed:) withObject:self afterDelay:0];
         timerActive = YES;
     }
-}
-
-- (void)fileSelected:(id)notification
-/*"notification sent by the controller when a new file is selected."*/
-{
-    NSDictionary *userInfo = [notification userInfo];
-
-    startTime = [[userInfo objectForKey:@"StartTime"] retain];
-    endTime = [[userInfo objectForKey:@"EndTime"] retain];
-    startTimeInMemory = [startTime retain];
-    endTimeInMemory = [startTime retain];
-//    [self reset];
 }
 
 - (void)inputEntity:(id)entity
@@ -186,17 +163,11 @@ ofContainersTyped:(PajeEntityType *)containerType
         NSDate *time = [entity lastTime];
         if(endTimeInMemory == nil || [time isLaterThanDate:endTimeInMemory]) {
             Assign(endTimeInMemory, time);
-            if(endTime == nil || [time isLaterThanDate:endTime]) {
-                Assign(endTime, time);
-            }
         }
         time = [entity firstTime];
         if (startTimeInMemory == nil 
             || [time isEarlierThanDate:startTimeInMemory]) {
             Assign(startTimeInMemory, time);
-            if (startTime == nil || [time isEarlierThanDate:startTime]) {
-                Assign(startTime, time);
-            }
         }
     }
     //ENDKLUDGE
@@ -206,16 +177,6 @@ ofContainersTyped:(PajeEntityType *)containerType
         dict = [[NSMutableDictionary alloc] init];
         [entityLists setObject:dict forKey:entityType];
         [dict release];
-
-        if (rootInstance == nil) {
-            PajeEntity *ent;
-            ent = entity;
-            while (ent != nil && ent != rootInstance) {
-                rootInstance = ent;
-                ent = [ent container];
-            }
-            [rootInstance retain];
-        }
     }
 
     list = [dict objectForKey:container];
@@ -254,13 +215,11 @@ ofContainersTyped:(PajeEntityType *)containerType
     // only send trace if it is already initialized
     // (or else space time diagram will think trace has no data, and the
     // lazy reading will not work well)
-//    if (startTime) {
-        // FIXME should send more specific notification
-        [self hierarchyChanged];
-        traceChanged = NO;
-        [self performSelector:@selector(timeElapsed:) withObject:self afterDelay:0.5];
-        timerActive = YES;
-//    }
+    // FIXME should send more specific notification
+    [self hierarchyChanged];
+    traceChanged = NO;
+    [self performSelector:@selector(timeElapsed:) withObject:self afterDelay:0.5];
+    timerActive = YES;
 }
 
 - (void)timeElapsed:(id)sender
@@ -276,18 +235,6 @@ ofContainersTyped:(PajeEntityType *)containerType
 - (NSDate *)time
 {
     return [self startTime];
-}
-
-// time when the trace starts
-- (NSDate *)startTime
-{
-    return startTime;
-}
-
-// time when the trace ends
-- (NSDate *)endTime
-{
-    return endTime;
 }
 
 - (NSDate *)firstTime
@@ -308,11 +255,6 @@ ofContainersTyped:(PajeEntityType *)containerType
 - (NSDate *)endTimeInMemory
 {
     return endTimeInMemory;
-}
-
-- (id)rootInstance
-{
-    return rootInstance;
 }
 
 - (void)verifyStartTime:(NSDate *)start endTime:(NSDate *)end

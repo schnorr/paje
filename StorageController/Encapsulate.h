@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 1998, 1999, 2000, 2001, 2003, 2004 Benhur Stein
+    Copyright (c) 1998--2005 Benhur Stein
     
     This file is part of Pajé.
 
@@ -39,24 +39,15 @@
     BOOL                 traceChanged;
     BOOL                 timerActive;
 
-    NSDate              *startTime;
-    NSDate              *endTime;
     NSDate              *startTimeInMemory;
     NSDate              *endTimeInMemory;
 
     NSMutableDictionary *entityLists;   // dictionary (by entity type) of
                                         // dictionaries (by container) of
                                         // TimeList's of entities
-
-    NSMutableDictionary *entityTypeToClass;
-
-    id                   rootInstance;
 }
 
 - (id)initWithController:(PajeTraceController *)c;
-
-- (void)send;
-- (void)timeElapsed:(id)sender;
 
 - (void)addEntity:(PajeEntity *)entity;
 

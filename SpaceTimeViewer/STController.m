@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 1998, 1999, 2000, 2001, 2003, 2004 Benhur Stein
+    Copyright (c) 1998--2005 Benhur Stein
     
     This file is part of Pajé.
 
@@ -233,12 +233,6 @@
 {
     [drawView setNeedsDisplay:YES];
     [hierarchyRuler setNeedsDisplay:YES];
-}
-
-- (void)fileSelected:(NSNotification *)notification
-/* receives PajeFilenameNotification, changes the window title accordingly */
-{
-    [window setTitleWithRepresentedFilename:[[notification userInfo] objectForKey:@"Filename"]];
 }
 
 - (void)activateTool:(id)sender
