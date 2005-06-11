@@ -1,3 +1,7 @@
+2005-06-11  Benhur Stein <benhur@inf.ufsm.br>
+	* Paje/PajeTraceController.[hm]: put checkpoints in a better place;
+	  remove them when dealloc'ed
+
 2005-06-06  Benhur Stein <benhur@inf.ufsm.br>
 	* Documentation/lang-paje/typeevent.tex: document new "RelationKey"
 	  field that entities can have to identify related entities.

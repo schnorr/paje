@@ -39,6 +39,7 @@
     NSMutableDictionary *filters;
     NSMutableArray *tools;
 
+    NSString *checkPointDirectory;
     PSortedArray *checkPoints;
     
     NSString *configurationName;
@@ -51,6 +52,10 @@
 - (NSArray *)tools;
 
 - (void)readChunk:(id)sender;
+
+- (void)createCheckPointDirectory;
+- (void)destroyCheckPointDirectory;
+- (NSString *)checkPointDirectory;
 
 - (void)writeCheckPoint;
 - (void)gotoCheckPoint:(PajeCheckPoint *)checkPoint;

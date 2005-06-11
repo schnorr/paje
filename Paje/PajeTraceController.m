@@ -24,7 +24,7 @@
 #include "../General/PajeFilter.h"
 #include "../StorageController/Encapsulate.h"
 
-// number of chanks to keep simultaneously in memory
+// number of chunks to keep simultaneously in memory
 // FIXME: should be configurable/more intelligent
 #define CHUNKS_TO_KEEP 10
 
@@ -56,6 +56,8 @@
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self removeCheckPointDirectory];
+    Assign(checkPointDirectory, nil);
     Assign(filters, nil);
     Assign(tools, nil);
     Assign(checkPoints, nil);
@@ -206,6 +208,40 @@
     
 }
 
+- (void)createCheckPointDirectory
+{
+    NSString *dirname;
+    NSString *path;
+    
+    if (checkPointDirectory != nil) {
+        return;
+    }
+    
+    dirname = [NSString stringWithFormat:@"Paje-%@-%@",
+                          [[reader inputFilename] lastPathComponent],
+                          [[NSProcessInfo processInfo] globallyUniqueString]];
+    path = [NSTemporaryDirectory() stringByAppendingPathComponent:dirname];
+    checkPointDirectory = [path retain];
+    
+    [[NSFileManager defaultManager] createDirectoryAtPath:checkPointDirectory
+                                               attributes:nil];
+
+}
+
+- (void)destroyCheckPointDirectory
+{
+    [[NSFileManager defaultManager] removeFileAtPath:checkPointDirectory
+                                             handler:nil];
+}
+
+- (NSString *)checkPointDirectory
+{
+    if (checkPointDirectory == nil) {
+        [self createCheckPointDirectory];
+    }
+    return checkPointDirectory;
+}
+
 - (void)writeCheckPoint
 {
     NSMutableData *d;
@@ -214,6 +250,7 @@
     id component;
     NSDate *time;
     NSString *fileName;
+    NSString *filePath;
     PajeCheckPoint *checkPoint;
 
     time = [simulator currentTime];
@@ -221,11 +258,10 @@
         return;
     }
     
-    // FIXME: should put files elsewhere.
-    // FIXME: should erase files when done
-    fileName = [NSString stringWithFormat:@"/tmp/Paje-%@.ckp",
-                         [time description]];
-    checkPoint = [PajeCheckPoint checkPointWithTime:time fileName:fileName];
+    fileName = [NSString stringWithFormat:@"%@.ckp", [time description]];
+    filePath = [[self checkPointDirectory]
+                                stringByAppendingPathComponent:fileName];
+    checkPoint = [PajeCheckPoint checkPointWithTime:time fileName:filePath];
 
     // If checkpoint has already been generated, do not write it again
     if ([checkPoints indexOfObject:checkPoint] != NSNotFound) {
@@ -243,7 +279,7 @@
             [component encodeCheckPointWithCoder:a];
         }
     }
-    [d writeToFile:fileName atomically:NO];
+    [d writeToFile:filePath atomically:NO];
     [a release];
     [d release];
     
