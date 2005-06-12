@@ -37,29 +37,15 @@
 #include "EventNames.h"
 #undef DEFINE_STRINGS
 
-// Class variable
-static NSMutableDictionary *simulators;
-
 @implementation PajeSimul
 
 + (void)initialize
 {
     if (self == [PajeSimul class]) {
-        simulators = [[NSMutableDictionary alloc] init];
 #define INIT_STRINGS
 #include "EventNames.h"
 #undef INIT_STRINGS
     }
-}
-
-+ (PajeSimul *)simulatorWithName:(NSString *)n
-{
-    return [simulators objectForKey:n];
-}
-
-+ (void)setSimulator:(PajeSimul *)simul forName:(NSString *)n
-{
-    [simulators setObject:simul forKey:n];
 }
 
 - (void)error:(NSString *)format, ...
@@ -108,7 +94,6 @@ static NSMutableDictionary *simulators;
         }
         
         Assign(name, rootContainerName);
-        [[self class] setSimulator:self forName:name];
 
         rootContainerType = [PajeContainerType typeWithName:@"File"
                                               containerType:nil];

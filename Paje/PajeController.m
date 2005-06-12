@@ -196,6 +196,14 @@ static PajeController *uniqueController;
     return YES;
 }
 
+- (void)closeTraceController:(PajeTraceController *)traceController
+{
+    if (traceController == currentTraceController) {
+        [self setCurrentTraceController:nil];
+    }
+    [traceControllers removeObjectIdenticalTo:traceController];
+}
+
 - (void)filterMenuSelected:(id)sender
 {
     [filtersPopUp selectItemAtIndex:[sender tag]];

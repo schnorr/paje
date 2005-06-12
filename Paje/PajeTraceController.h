@@ -69,6 +69,9 @@
 
 // One of the windows controlled by me has become key.
 - (void)windowIsKey;
+
+// Remove a component from the chain.
+- (void)removeComponent:component;
 @end
 
 #endif

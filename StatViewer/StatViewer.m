@@ -66,6 +66,13 @@
     [self registerTool:self];
 }
 
+- (void)dealloc
+{
+    Assign(startTime, nil);
+    Assign(endTime, nil);
+    [super dealloc];
+}
+
 - (NSString *)toolName
 {
     return @"Stat Viewer";
@@ -79,7 +86,8 @@
 - (void)setInputComponent:(PajeComponent *)component
 {
     [super setInputComponent:component];
-    Assign(filter, component);
+    //Assign(filter, component);
+    filter = component;
 }
 
 - (void)hierarchyChanged

@@ -25,7 +25,7 @@
 
 @interface HierarchyBrowser : NSObject
 {
-    PajeFilter *filter;
+    PajeFilter *filter;  // not retained
     IBOutlet NSBrowser *containerTypesBrowser;
     IBOutlet NSBrowser *containersBrowser;
     IBOutlet NSSplitView *splitView;

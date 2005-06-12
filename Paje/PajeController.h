@@ -46,6 +46,8 @@
 - (void)updateToolsMenu;
 - (void)updateFiltersMenu;
 
+- (void)closeTraceController:(PajeTraceController *)traceController;
+
 // NSApplication delegate
 - (BOOL)application:(NSApplication *)sender openFile:(NSString *)filename;
 

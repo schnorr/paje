@@ -47,6 +47,12 @@
     return self;
 }
 
+- (void)dealloc
+{
+    [outputComponent release]; // HACK (see setOutputComponent:)
+    [super dealloc];
+}
+
 - (void)setInputComponent:(id)component
 {
     inputComponent = component;
@@ -54,13 +60,16 @@
 
 - (void)setOutputComponent:(id)component
 {
-    if (outputComponent) { // HACK
-        if ([outputComponent isKindOfClass: [NSMutableArray class]])
+    if (outputComponent != nil) { // HACK
+        if ([outputComponent isKindOfClass: [NSMutableArray class]]) {
             [(NSMutableArray *)outputComponent addObject:component];
-        else
+        } else {
+            [outputComponent release];
             outputComponent = [[NSMutableArray arrayWithObjects:outputComponent, component, nil] retain];
-    } else
-        outputComponent = component;
+        }
+    } else {
+        outputComponent = [component retain];
+    }
 }
 
 - (void)inputEntity:(id)entity

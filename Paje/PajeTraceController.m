@@ -56,7 +56,7 @@
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [self removeCheckPointDirectory];
+    [self destroyCheckPointDirectory];
     Assign(checkPointDirectory, nil);
     Assign(filters, nil);
     Assign(tools, nil);
@@ -381,6 +381,11 @@
 - (void)windowIsKey
 {
     [[PajeController controller] setCurrentTraceController:self];
+}
+
+- (void)removeComponent:component
+{
+    [[PajeController controller] closeTraceController:self];
 }
 
 - (void)saveConfiguration

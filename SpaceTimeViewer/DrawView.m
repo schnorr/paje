@@ -54,7 +54,7 @@ void PSInit(void){}
 
 - (void)dealloc
 {
-    [filter release];
+    //[filter release];
     [startTime release];
     [endTime release];
     [backgroundColor release];
@@ -93,7 +93,8 @@ void PSInit(void){}
 
 - (void)setFilter:(PajeFilter *)newFilter
 {
-    Assign(filter, newFilter);
+    //Assign(filter, newFilter);
+    filter = newFilter;
 }
 
 - (PajeFilter *)filter

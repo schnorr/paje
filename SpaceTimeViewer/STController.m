@@ -47,6 +47,9 @@
 {
     [layoutDescriptors release];
     [hierarchyRuler release];
+    //[drawView release];
+    //[drawView release];
+    NSLog(@"%@ deallocing. drawView has %d win=%d scr=%d", self, [drawView retainCount], [window retainCount], [scrollView retainCount]);
     [super dealloc];
 }
 
@@ -81,6 +84,11 @@
     // tell controller that we are key (to change filter menus)
     // TODO: find a cleaner way of doing this
     [controller windowIsKey];
+}
+
+- (void)windowWillClose:(NSNotification *)notification
+{
+    [controller removeComponent:self];
 }
 
 - (void)windowDidResize:(NSNotification *)notification

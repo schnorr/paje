@@ -93,7 +93,7 @@
 {
     self = [super initWithController:c];
 
-    if (self) {
+    if (self != nil) {
         NSWindow *win;
 
         [self readDefaults];

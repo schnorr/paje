@@ -56,8 +56,6 @@
     NSMutableDictionary *relatedEntities;
 }
 
-+ (PajeSimul *)simulatorWithName:(NSString *)n;
-
 - (id)initWithController:(PajeTraceController *)c;
 
 - (PajeContainerType *)rootContainerType;

@@ -1,4 +1,14 @@
 2005-06-11  Benhur Stein <benhur@inf.ufsm.br>
+	* StatViewer/StatViewer.m: do not retain filter; implement -dealloc
+	* SpaceTimeViewer/STController.m: implement -windowWillClose, to inform 		  controller that it should remove this component.
+	* SpaceTimeViewer/DrawView.m: do not retain filter
+	* PajeSimulator/PajeSimul.[hm]: remove "simulators" class variable
+        * Paje/PajeTraceController.[hm]: new method -removeComponent:
+        * Paje/PajeController.[hm]: new method -closeTraceController:
+        * General/PajeFilter.m: retain outputComponent
+        * General/HierarchyBrowser.m: do not retain filter
+
+2005-06-11  Benhur Stein <benhur@inf.ufsm.br>
 	* Paje/PajeTraceController.[hm]: put checkpoints in a better place;
 	  remove them when dealloc'ed
 

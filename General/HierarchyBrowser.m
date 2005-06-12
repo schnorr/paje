@@ -32,7 +32,7 @@
 {
     self = [super init];
     if (self) {
-        Assign(filter, f);
+        filter = f; // not retained
         if (![NSBundle loadNibNamed:@"HierarchyBrowser" owner:self])
             NSRunAlertPanel(@"HierarchyBrowser", @"Couldn't load interface file",
                             nil, nil, nil);
@@ -42,7 +42,7 @@
 
 - (void)dealloc
 {
-    Assign(filter, nil);
+    // filter is not retained, do not release it.
     Assign(containerTypesBrowser, nil);
     Assign(containersBrowser, nil);
     Assign(splitView, nil);
@@ -77,7 +77,7 @@
 
 - (void)setFilter:(id)f
 {
-    Assign(filter, f);
+    filter = f; // not retained
     [self refresh];
 }
 
