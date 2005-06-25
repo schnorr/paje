@@ -441,7 +441,6 @@ if (x != maxLevel/*[thicknesses count]*/) {
     NSRect r;
     float position = [self positionForLevel:level];
     float width = [self widthForLevel:level];
-    DrawView *drawView = (DrawView *)[self clientView];
     
     if (point.x < position) {
         return nil;
@@ -495,7 +494,6 @@ if (x != maxLevel/*[thicknesses count]*/) {
     NSEnumerator *subtypeEnum;
     PajeContainerType *subtype;
     id foundInstance = nil;
-    DrawView *drawView = (DrawView *)[self clientView];
 
     subtypes = [controller containedTypesForContainerType:containerType];
     subtypeEnum = [subtypes objectEnumerator];
@@ -803,8 +801,6 @@ if (x != maxLevel/*[thicknesses count]*/) {
 {
     NSPoint mouseDownLocation;
     hierarchyRulerPart hitPart;
-    
-    NSRect rect = [self bounds];
     
     mouseDownLocation = [self convertPoint:[event locationInWindow]
                                   fromView:nil];

@@ -293,7 +293,7 @@
             h = size.height - 10;
             break;
         case PajeContainerDrawingType :
-            return;
+            return NSZeroRect;
         default:
             NSAssert1(0, @"Invalid drawing type %d", drawingType);
     }

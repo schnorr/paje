@@ -70,7 +70,10 @@ static NSString *COLOR_VALUE = @"Color";
 {
     [eventBeingDefined.fieldTypes release];
     [eventBeingDefined.fieldNames release];
+    [eventBeingDefined.eventId release];
+    [eventBeingDefined.eventName release];
 
+    [valArray release];
     [eventNames release];
     [eventFieldTypes release];
     [eventFieldNames release];
@@ -185,9 +188,9 @@ static NSString *COLOR_VALUE = @"Color";
         if ([fieldName isEqualToString:@"EndEventDef"]) {
             [eventNames setObject:U(eventBeingDefined.eventName)
                            forKey:eventBeingDefined.eventId];
-            [eventFieldTypes setObject:[eventBeingDefined.fieldTypes copy]
+            [eventFieldTypes setObject:[[eventBeingDefined.fieldTypes copy] autorelease]
                                 forKey:eventBeingDefined.eventId];
-            [eventFieldNames setObject:[eventBeingDefined.fieldNames copy]
+            [eventFieldNames setObject:[[eventBeingDefined.fieldNames copy] autorelease]
                                 forKey:eventBeingDefined.eventId];
             status = OUT_DEF;
             break;

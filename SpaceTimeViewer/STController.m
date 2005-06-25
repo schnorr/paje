@@ -46,10 +46,8 @@
 - (void)dealloc
 {
     [layoutDescriptors release];
+    [layoutController release];
     [hierarchyRuler release];
-    //[drawView release];
-    //[drawView release];
-    NSLog(@"%@ deallocing. drawView has %d win=%d scr=%d", self, [drawView retainCount], [window retainCount], [scrollView retainCount]);
     [super dealloc];
 }
 

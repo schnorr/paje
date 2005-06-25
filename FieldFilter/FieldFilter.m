@@ -68,6 +68,7 @@
 
 - (void)dealloc
 {
+    [entityTypePopUp removeAllItems];
     [filterDescriptors release];
     [view release];
     [super dealloc];
@@ -306,7 +307,8 @@ withFilterDescriptor:(FieldFilterDescriptor *)fdesc
     FieldFilterDescriptor *fdesc;
     fdesc = [filterDescriptors objectForKey:[self entityTypeForEntity:entity]];
     if (fdesc != NULL && [fdesc action] == HIGHLIGHT) {
-        return [self filterEntity:entity withFilterDescriptor:fdesc];
+        return [self filterEntity:(PajeEntity *)entity
+             withFilterDescriptor:fdesc];
     }
     return [super isSelectedEntity:entity];
 }

@@ -30,8 +30,8 @@
 @interface UserLink : UserState
 {
     id key;
-    PajeContainer *sourceContainer;
-    PajeContainer *destContainer;
+    PajeContainer *sourceContainer;  // not retained
+    PajeContainer *destContainer;    // not retained
     int startLogicalTime;
     int endLogicalTime;
 }

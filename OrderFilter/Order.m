@@ -31,7 +31,6 @@
 - (id)initWithController:(PajeTraceController *)c
 {
     NSWindow *win;
-    NSDictionary *filterDict;
     
     self = [super initWithController:c];
 
@@ -68,6 +67,7 @@
 - (void)dealloc
 {
     [containers release];
+    [hierarchyBrowser release];
     [view release];
     [super dealloc];
 }

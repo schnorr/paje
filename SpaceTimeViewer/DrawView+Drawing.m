@@ -340,8 +340,6 @@ do { \
     PSsetlinewidth([layout lineWidth]);
 
     while ((entity = [enumerator nextObject]) != nil) {
-        NSRect rect1;
-        NSRect rect2;
         PajeContainer *sourceContainer;
         PajeContainer *destContainer;
 

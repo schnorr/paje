@@ -71,6 +71,7 @@
 
 - (void)dealloc
 {
+    [entityTypePopUp removeAllItems];
     [filters release];
     [hiddenEntityTypes release];
     [view release];

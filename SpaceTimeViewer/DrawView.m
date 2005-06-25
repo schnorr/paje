@@ -54,14 +54,12 @@ void PSInit(void){}
 
 - (void)dealloc
 {
-    //[filter release];
-    [startTime release];
-    [endTime release];
-    [backgroundColor release];
-    [selectedBackgroundColor release];
+    Assign(startTime, nil);
+    Assign(endTime, nil);
+    Assign(backgroundColor, nil);
+    Assign(selectedBackgroundColor, nil);
     [super dealloc];
 }
-
 
 - (NSColor *)backgroundColor
 {
@@ -93,7 +91,6 @@ void PSInit(void){}
 
 - (void)setFilter:(PajeFilter *)newFilter
 {
-    //Assign(filter, newFilter);
     filter = newFilter;
 }
 
@@ -312,6 +309,14 @@ void PSInit(void){}
 }
 #endif
 
+- (void)removeFromSuperview
+{
+    if (trackingRectTag != 0) {
+        [self removeTrackingRect:trackingRectTag];
+    }
+    [super removeFromSuperview];
+}
+
 - (void)adjustSize
 {
     NSRect newBounds;
@@ -346,7 +351,9 @@ void PSInit(void){}
         [scrollView tile];
         
         // change mouse tracking rect
-        if (trackingRectTag) [self removeTrackingRect:trackingRectTag];
+        if (trackingRectTag != 0) {
+            [self removeTrackingRect:trackingRectTag];
+        }
         trackingRectTag = [self addTrackingRect:[self visibleRect] owner:self
                                        userData:NULL assumeInside:NO];
     }
@@ -808,13 +815,4 @@ return NSDragOperationCopy;
     PSInit();
     [super endPrologue];
 }
-
-
-#ifdef GNUSTEP
-- (void)setCursorTimeField:(id)field { cursorTimeField = [field retain]; }
-- (void)setEntityNameField:(id)field { entityNameField = [field retain]; }
-//- (void)setSelStateButton:(id)button { selStateButton = button; }
-//- (void)setSelEventButton:(id)button { selEventButton = button; }
-//- (void)setSelCommButton:(id)button { selCommButton = button; }
-#endif
 @end

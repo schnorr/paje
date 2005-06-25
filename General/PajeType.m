@@ -46,11 +46,13 @@
         Assign(name, n);
         containerType = type;
 	[containerType addContainedType:self];
-        c = [[NSUserDefaults standardUserDefaults] colorForKey:[name stringByAppendingString:@" Color"]];
-        if (c)
+        c = [[NSUserDefaults standardUserDefaults]
+                         colorForKey:[name stringByAppendingString:@" Color"]];
+        if (c != nil) {
             Assign(color, c);
-        else
+        } else {
             Assign(color, [NSColor blackColor]);
+        }
         fieldNames = [[NSMutableSet alloc] init];
     }
     return self;
@@ -493,8 +495,8 @@
     destContainerType:(PajeContainerType *)destType
 {
     self = [super initWithName:n containerType:type];
-    Assign(sourceContainerType, sourceType);
-    Assign(destContainerType, destType);
+    sourceContainerType = sourceType;
+    destContainerType = destType;
     return self;
 }
 

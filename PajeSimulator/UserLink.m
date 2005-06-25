@@ -71,9 +71,9 @@
                          value:v
                      container:c
                     startEvent:e];
-    if (self) {
+    if (self != nil) {
         Assign(key, k);
-        Assign(sourceContainer, sc);
+        sourceContainer = sc;  // not retained
     }
     return self;
 }
@@ -89,10 +89,10 @@
                          value:v
                      container:c
                     startEvent:nil];
-    if (self) {
+    if (self != nil) {
         [self setEndEvent:e];
         Assign(key, k);
-        Assign(destContainer, dc);
+        destContainer = dc;  // not retained
     }
     return self;
 }
@@ -101,22 +101,20 @@
 - (void)dealloc
 {
     Assign(key, nil);
-    Assign(sourceContainer, nil);
-    Assign(destContainer, nil);
     [super dealloc];
 }
 
 - (void)setSourceContainer:(PajeContainer *)sc
                sourceEvent:(PajeEvent *)e
 {
-    Assign(sourceContainer, sc);
+    sourceContainer = sc;   // not retained
     Assign(event, e);
 }
 
 - (void)setDestContainer:(PajeContainer *)dc
                destEvent:(PajeEvent *)e
 {
-    Assign(destContainer, dc);
+    destContainer = dc;   // not retained
     [self setEndEvent:e];
 }
 

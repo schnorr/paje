@@ -32,9 +32,9 @@
 
 @interface PajeEntity : NSObject <PajeEntity>
 {
-    PajeEntityType *entityType;
+    PajeEntityType *entityType;    // not retained
     NSString *name;
-    PajeContainer *container;
+    PajeContainer *container;      // not retained
 }
 
 - (id)initWithType:(PajeEntityType *)type

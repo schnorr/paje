@@ -1,3 +1,28 @@
+2005-06-25  Benhur Stein <benhur@inf.ufsm.br>
+	* ContainerFilter/ContainerSelector.m,
+	  EntityTypeFilter/EntityTypeSelector.m, FieldFilter/FieldFilter.m,
+	  ImbricationFilter/InsetLimit.m, ReductionFilter/BusyNode.m (-dealloc): remove items of NSPopUp
+	* General/PajeEntity.[hm]: entityType and container are not retained;
+	  document it
+	* General/PajeType.[hm]: same, for source and destContainerType
+	* OrderFilter/Order.m (-dealloc): release hierarchyBrowser
+	* PajeEventDecoder/PajeEventDecoder.m: make sure values in
+	  eventBeingDefined are properly released
+	* PajeSimulator/PajeSimul.[hm]: remove unused variable "name"; release
+	  NSInvocations
+	* PajeSimulator/UserLink.[hm]: source and destContainer are not
+	  retained
+	* SpaceTimeViewer/DrawView+Drawing.m,
+	  SpaceTimeViewer/DrawView+Finding.m,
+	  SpaceTimeViewer/HierarchyRuler.m: remove unused variables
+	* SpaceTimeViewer/DrawView.m [-removeFromSuperview]: remove tracking
+	  rectangle
+	* SpaceTimeViewer/STController.m (dealloc): release layoutController
+	* SpaceTimeViewer/STEntityTypeLayout.m: changed default height for
+	  variables to 60 points (was 6)
+	* StatViewer/StatViewer.[hm]: removed "filter"variable (use self); 
+	  remove items from popups
+
 2005-06-11  Benhur Stein <benhur@inf.ufsm.br>
 	* StatViewer/StatViewer.m: do not retain filter; implement -dealloc
 	* SpaceTimeViewer/STController.m: implement -windowWillClose, to inform 		  controller that it should remove this component.

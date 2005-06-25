@@ -72,7 +72,12 @@
 {
     [reduceEntityTypes release];
     [entityTypesDictionary release];
-    [typesContainingReducedTypes release];    
+    [typesContainingReducedTypes release];
+    [view removeFromSuperview];
+    [groupByPopUp removeAllItems];
+    [entityTypePopUp removeAllItems];
+    //[nameMatrix removeAllItems];
+    [entityNamePopUp removeAllItems];
     [view release];
     [super dealloc];
 }

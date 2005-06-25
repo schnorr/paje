@@ -334,7 +334,7 @@ break;
 
 - (NSRect)rectForEntity:(PajeEntity *)entity
 {
-    float x, x1, x2, y1, y2, min, max, scale, offset;
+    float x1, x2, y1, y2, min, max, scale, offset;
     NSRect rect, rect1, rect2;
     id entityType;
     int imbricationLevel;

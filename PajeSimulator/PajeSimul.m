@@ -92,8 +92,6 @@
         if (rootContainerName == nil) {
             return nil;
         }
-        
-        Assign(name, rootContainerName);
 
         rootContainerType = [PajeContainerType typeWithName:@"File"
                                               containerType:nil];
@@ -138,8 +136,8 @@ NSInvocation *invocation;
     invocation)
 #else
 #define NS_MESSAGE(target, message)                             \
-    ([[NSInvocation alloc] initWithTarget:target                \
-    selector:@selector(message), nil])
+    ([[[NSInvocation alloc] initWithTarget:target                \
+    selector:@selector(message), nil] autorelease])
 #endif                          // GNUSTEP
 #define ADD_INVOCATION(name) [invocationTable  \
                                     setObject:NS_MESSAGE(self, paje##name:) \
@@ -251,7 +249,7 @@ NSInvocation *invocation;
         id line;
         int lineNumber;
         SourceCodeReference *sourceRef;
-        NSMutableDictionary *refToEvents;
+//        NSMutableDictionary *refToEvents;
 
         line = [event objectForKey:@"Line"];
         if (line == nil)
@@ -333,7 +331,6 @@ NSInvocation *invocation;
 
     c = [[NSMutableSet alloc] init];
 
-    [coder encodeObject:name];
     [coder encodeObject:startTime];
     [coder encodeObject:endTime];
     [coder encodeObject:currentTime];
@@ -353,15 +350,8 @@ NSInvocation *invocation;
 
 - (void)decodeCheckPointWithCoder:(NSCoder *)coder
 {
-    NSString *decodedName;
     NSString *containerName;
     
-    decodedName = [coder decodeObject];
-    
-    if (![name isEqual:decodedName]) {
-        [self error:@"decoding wrong simulator [%@ != %@]", name, decodedName];
-    }
-
     Assign(startTime, [coder decodeObject]);
     Assign(endTime, [coder decodeObject]);
     Assign(currentTime, [coder decodeObject]);

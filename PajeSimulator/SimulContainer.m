@@ -57,7 +57,7 @@
     self = [super initWithType:type
                           name:n
                      container:c];
-    if (self) {
+    if (self != nil) {
         Assign(creationTime, time);
         simulator = simul;
 

@@ -30,7 +30,6 @@
 {
     id matrix;
     id window;
-    PajeFilter *filter;
     NSDate *startTime;
     NSDate *endTime;
     IBOutlet NSPopUpButton *entityTypeSelector;

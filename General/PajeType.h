@@ -134,8 +134,8 @@
 
 @interface PajeLinkType : PajeCategorizedEntityType
 {
-    PajeContainerType *sourceContainerType;
-    PajeContainerType *destContainerType;
+    PajeContainerType *sourceContainerType; // not retained
+    PajeContainerType *destContainerType;   // not retained
 }
 
 + (PajeLinkType *)typeWithName:(id)n

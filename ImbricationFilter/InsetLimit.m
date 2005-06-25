@@ -123,6 +123,7 @@
 
 - (void)dealloc
 {
+    [entityTypePopUp removeAllItems];
     [limits release];
     [view release];
     [super dealloc];

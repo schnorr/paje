@@ -38,6 +38,7 @@
     case PajeContainerDrawingType: return [STContainerTypeLayout class];
     }
     NSAssert1(0, @"Invalid drawing type %d", dtype);
+    return Nil;
 }
 
 + (STEntityTypeLayout *)descriptorWithEntityType:(PajeEntityType *)etype
@@ -63,7 +64,7 @@
 
     tHeight = [controller valueOfFieldNamed:@"Height" forEntityType:entityType];
     if (tHeight == nil) {
-        tHeight = [NSNumber numberWithInt:6];
+        tHeight = [NSNumber numberWithInt:60];
     }
 
     tShape = [controller valueOfFieldNamed:@"Shape" forEntityType:entityType];

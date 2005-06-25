@@ -35,19 +35,18 @@
          container:(PajeContainer *)c
 {
     self = [super init];
-    if (self) {
-        Assign(entityType, type);
+    if (self != nil) {
+        entityType = type;     // not retained
         Assign(name, U(n));
-        Assign(container, c);
+        container = c;         // not retained
     }
     return self;
 }
 
 - (void)dealloc
 {
-    Assign(entityType, nil);
+    // container and entityType are not retained
     Assign(name, nil);
-    Assign(container, nil);
     [super dealloc];
 }
 
@@ -78,7 +77,7 @@
 
 - (void)setContainer:(PajeContainer *)c
 {
-    Assign(container, c);
+    container = c;
 }
 
 - (BOOL)isContainedBy:(PajeContainer *)cont

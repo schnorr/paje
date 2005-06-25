@@ -35,7 +35,6 @@
 
 @interface PajeSimul : PajeComponent <PajeSimulator>
 {
-    NSString *name;
     PajeContainer *rootContainer;
     NSMutableDictionary *invocationTable;
 

@@ -70,6 +70,10 @@
 {
     Assign(startTime, nil);
     Assign(endTime, nil);
+    [entityTypeSelector removeAllItems];
+    [[matrix cells] makeObjectsPerformSelector:@selector(setRepresentedObject:)
+                                    withObject:nil];
+    [window release];
     [super dealloc];
 }
 
@@ -81,13 +85,6 @@
 - (void)activateTool:(id)sender
 {
     [window makeKeyAndOrderFront:self];
-}
-
-- (void)setInputComponent:(PajeComponent *)component
-{
-    [super setInputComponent:component];
-    //Assign(filter, component);
-    filter = component;
 }
 
 - (void)hierarchyChanged
@@ -170,12 +167,10 @@
     id container;
     PieCell *cell;
 
-    if (!filter) return;
-
     [self fillEntityTypeSelector];
 
-    nn = [filter enumeratorOfContainersTyped:[self selectedContainerType]
-                                 inContainer:[filter rootInstance]];
+    nn = [self enumeratorOfContainersTyped:[self selectedContainerType]
+                               inContainer:[self rootInstance]];
     while ((container = [nn nextObject]) != nil) {
         [matrix renewRows:i+1 columns:1];
 
@@ -216,21 +211,19 @@
     PajeContainer *container;
     NSMutableArray *stack;
 
-    if (!filter) return;
-
-    if (!startTime) [self setStartTime:[filter startTime]];
-    if (!endTime) [self setEndTime:[filter endTime]];
+    if (!startTime) [self setStartTime:[super startTime]];
+    if (!endTime) [self setEndTime:[super endTime]];
 
     container = [cell representedObject];
     //NSAssert(container, @"Invalid container in StatViewer cell");
     if (container == nil) return;
 
-    array = [[StatArray alloc] initWithName:[filter nameForEntity:container]];
+    array = [[StatArray alloc] initWithName:[self nameForEntity:container]];
     stack = [NSMutableArray array];
 
-    enumerator = [filter enumeratorOfEntitiesTyped:[self selectedEntityType]
-                                       inContainer:container
-                                          fromTime:startTime
+    enumerator = [self enumeratorOfEntitiesTyped:[self selectedEntityType]
+                                     inContainer:container
+                                        fromTime:startTime
                                             toTime:endTime];
     enumerator = [[enumerator allObjects] reverseObjectEnumerator];
     while ((entity = [enumerator nextObject]) != nil) {
@@ -250,8 +243,8 @@
             topEntity = [stack lastObject];
             if ([self isEntity:entity inEntity:topEntity]) {
                 v = [StatValue valueWithValue:-duration
-                                        color:[filter colorForEntity:topEntity]
-                                         name:[filter nameForEntity:topEntity]];
+                                        color:[self colorForEntity:topEntity]
+                                         name:[self nameForEntity:topEntity]];
                 [array addObject:v];
                 break;
             } else {
@@ -261,8 +254,8 @@
         [stack addObject:entity];
 
         v = [StatValue valueWithValue:duration
-                                color:[filter colorForEntity:entity]
-                                 name:[filter nameForEntity:entity]];
+                                color:[self colorForEntity:entity]
+                                 name:[self nameForEntity:entity]];
         [array addObject:v];
     }
 
