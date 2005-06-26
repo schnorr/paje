@@ -47,7 +47,20 @@
 {
     [layoutDescriptors release];
     [layoutController release];
+#ifdef GNUSTEP
+    // GNUstep bug #13382
+    {
+    int rc;
+    rc = [drawView retainCount];
+    [drawView retain];
     [hierarchyRuler release];
+    if ([drawView retainCount] > rc) {
+        [drawView release];
+    }
+    }
+#else
+    [hierarchyRuler release];
+#endif
     [super dealloc];
 }
 
