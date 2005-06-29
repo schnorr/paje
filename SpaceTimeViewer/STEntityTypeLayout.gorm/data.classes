@@ -2,36 +2,118 @@
     "## Comment" = "Do NOT change this file, Gorm maintains it";
     FirstResponder = {
 	Actions = (
-	    "stepperChanged:",
-	    "switchChanged:"
+	    "displayValueChanged:",
+	    "heightChanged:",
+	    "heightForVariablesChanged:",
+	    "lineWidthChanged:",
+	    "maxValueChanged:",
+	    "minValueChanged:",
+	    "newAction1:",
+	    "insetAmountChanged:",
+	    "newAction:",
+	    "siblingSeparationChanged:",
+	    "subtypeSeparationChanged:",
+	    "widthChanged:"
 	);
 	Super = NSObject;
     };
+    STContainerLayoutEditor = {
+	Actions = (
+	    "heightForVariablesChanged:",
+	    "siblingSeparationChanged:",
+	    "subtypeSeparationChanged:"
+	);
+	Outlets = (
+	    heightForVariablesField,
+	    siblingSeparationField,
+	    subtypeSeparationField
+	);
+	Super = STLayoutEditor;
+    };
     STEntityTypeLayoutController = {
 	Actions = (
-	    "entityTypeSelected:",
-	    "shapeSelected:",
-	    "drawFunctionSelected:",
-	    "highlightFunctionSelected:",
-	    "sizeChanged:",
-	    "initWithDelegate:",
-	    "stepperChanged:",
-	    "switchChanged:"
+	    "entityTypeSelected:"
 	);
 	Outlets = (
 	    entityTypePopUp,
-	    highlightMatrix,
-	    drawMatrix,
-	    shapeMatrix,
-	    dimensionsForm,
-	    stepper0,
-	    stepper1,
-	    displayValueOnEntitySwitch,
-	    matricesBox,
-	    varDimensionsBox,
-	    varDimensionsForm,
-	    dimensionsBox
+	    containerEditor,
+	    variableEditor,
+	    linkEditor,
+	    stateEditor,
+	    eventEditor
 	);
 	Super = NSObject;
+    };
+    STEventLayoutEditor = {
+	Actions = (
+	    "heightChanged:",
+	    "widthChanged:",
+	    "displayValueChanged:"
+	);
+	Outlets = (
+	    heightField,
+	    widthField,
+	    displayValueSwitch
+	);
+	Super = STShapedLayoutEditor;
+    };
+    STLayoutEditor = {
+	Actions = (
+	);
+	Outlets = (
+	    box,
+	    controller
+	);
+	Super = NSObject;
+    };
+    STLinkLayoutEditor = {
+	Actions = (
+	    "lineWidthChanged:"
+	);
+	Outlets = (
+	    lineWidthField
+	);
+	Super = STShapedLayoutEditor;
+    };
+    STShapedLayoutEditor = {
+	Actions = (
+	    "drawFunctionSelected:",
+	    "highlightFunctionSelected:",
+	    "shapeSelected:"
+	);
+	Outlets = (
+	    shapeMatrix,
+	    drawMatrix,
+	    highlightMatrix
+	);
+	Super = STLayoutEditor;
+    };
+    STStateLayoutEditor = {
+	Actions = (
+	    "heightChanged:",
+	    "insetAmountChanged:",
+	    "displayValueChanged:"
+	);
+	Outlets = (
+	    heightField,
+	    insetAmountField,
+	    displayValueSwitch
+	);
+	Super = STShapedLayoutEditor;
+    };
+    STVariableLayoutEditor = {
+	Actions = (
+	    "heightChanged:",
+	    "lineWidthChanged:",
+	    "minValueChanged:",
+	    "maxValueChanged:"
+	);
+	Outlets = (
+	    heightField,
+	    lineWidthField,
+	    minValueField,
+	    maxValueField
+	);
+	Super = STLayoutEditor;
     };
 }

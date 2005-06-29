@@ -94,7 +94,8 @@
         }
 
         rootContainerType = [PajeContainerType typeWithName:@"File"
-                                              containerType:nil];
+                                              containerType:nil
+                                                      event:nil];
         rootContainer = [[SimulContainer alloc] initWithType:rootContainerType
                                                         name:rootContainerName
                                                        alias:@"0"
@@ -124,6 +125,7 @@
     return NSStringFromClass([self class]);
 }
 
+#ifndef MAP
 #undef NS_MESSAGE
 #ifndef NS_MESSAGE
 #ifndef GNUSTEP
@@ -147,10 +149,20 @@ NSInvocation *invocation;
                                     setObject:NS_MESSAGE(self, paje##name:nil) \
                                        forKey:Paje##name##EventName]
 #endif                          // NS_MESSAGE
+#else /* MAP */
+#define ADD_INVOCATION(name) NSMapInsert(invocationTable, \
+                                         Paje##name##EventName, \
+                                         [self methodForSelector:@selector(paje##name:)])
+#endif /* MAP */
 
 - (void)_initInvocationTable
 {
+#ifdef MAP
+    invocationTable = NSCreateMapTable(NSIntMapKeyCallBacks/*NSObjectMapKeyCallBacks*/,
+                                       NSIntMapValueCallBacks, 50);
+#else
     Assign(invocationTable, [NSMutableDictionary dictionary]);
+#endif
     ADD_INVOCATION(StartTrace);
     ADD_INVOCATION(DefineContainerType);
     ADD_INVOCATION(DefineEventType);
@@ -189,7 +201,11 @@ NSInvocation *invocation;
 - (void)dealloc
 {
     [rootContainer release];
+#ifdef MAP
+    NSFreeMapTable(invocationTable);
+#else
     [invocationTable release];
+#endif
     [userTypes release];
     [userNumberToContainer release];
     [relatedEntities release];
@@ -274,11 +290,17 @@ NSInvocation *invocation;
         [self setCurrentTime:time];
     }
     // invoke the method that simulates this event
+#ifndef MAP
     invocation = [invocationTable objectForKey:[event pajeEventName]];
     if (invocation) {
         [invocation setArgument:&event atIndex:2];
         [invocation invoke];
     }
+#else
+    void (*f)(id, SEL, id);
+    f = NSMapGet(invocationTable, [event pajeEventName]);
+    f(self, 0, event);
+#endif
     
     eventCount++;
 }

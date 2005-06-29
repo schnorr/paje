@@ -211,8 +211,12 @@
     PajeContainer *container;
     NSMutableArray *stack;
 
-    if (!startTime) [self setStartTime:[super startTime]];
-    if (!endTime) [self setEndTime:[super endTime]];
+    if (startTime == nil) {
+        [self setStartTime:[super startTime]];
+    }
+    if (endTime == nil) {
+        [self setEndTime:[super endTime]];
+    }
 
     container = [cell representedObject];
     //NSAssert(container, @"Invalid container in StatViewer cell");

@@ -175,6 +175,7 @@
     float supEventsOffset;  // base of superior events
     float infEventsOffset;  // base of inferior events
     float subcontainersOffset;  // start of subcontainers
+    float heightForVariables;
     
     float siblingSeparation; // separation from other containers of same type
                              // in same container
@@ -206,6 +207,9 @@
 
 - (void)setSubcontainersOffset:(float)val;
 - (float)subcontainersOffset;
+
+- (void)setHeightForVariables:(float)val;
+- (float)heightForVariables;
 
 - (float)linkOffset;
 

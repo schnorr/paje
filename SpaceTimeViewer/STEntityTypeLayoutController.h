@@ -27,39 +27,27 @@
 #include <AppKit/AppKit.h>
 
 #include "STController.h"
+#include "STLayoutEditor.h"
 
 @interface STEntityTypeLayoutController : NSObject <PajeTool>
 {
     IBOutlet NSPopUpButton *entityTypePopUp;
-    IBOutlet NSButton *displayValueOnEntitySwitch;
-    IBOutlet NSBox *matricesBox;
-    IBOutlet NSMatrix *shapeMatrix;
-    IBOutlet NSMatrix *drawMatrix;
-    IBOutlet NSMatrix *highlightMatrix;
-    IBOutlet NSForm *dimensionsForm;
-    IBOutlet NSBox *dimensionsBox;
-    IBOutlet NSStepper *stepper0;
-    IBOutlet NSStepper *stepper1;
-    IBOutlet NSForm *varDimensionsForm;
-    IBOutlet NSBox *varDimensionsBox;
+    IBOutlet STContainerLayoutEditor *containerEditor;
+    IBOutlet STVariableLayoutEditor *variableEditor;
+    IBOutlet STLinkLayoutEditor *linkEditor;
+    IBOutlet STEventLayoutEditor *eventEditor;
+    IBOutlet STStateLayoutEditor *stateEditor;
     STController *delegate;
+    NSView *currentView;
 }
+- (id)initWithDelegate:(id)del;
+
 - (IBAction)entityTypeSelected:(id)sender;
-- (IBAction)shapeSelected:(id)sender;
-- (IBAction)drawFunctionSelected:(id)sender;
-- (IBAction)highlightFunctionSelected:(id)sender;
-- (IBAction)sizeChanged:(id)sender;
-- (IBAction)stepperChanged:(id)sender;
-- (IBAction)switchChanged:(id)sender;
 
 - (void)reset;
 
-- (id)initWithDelegate:(id)del;
-- (void)setupPopUpWithLayoutDescriptors:(NSArray *)set;
-- (void)setupShapeMatrix;
-- (void)setupDrawMatrices;
-//- (void)drawShape:(MyCustomImageRep *)image;
-//- (void)drawDraw:(MyCustomImageRep *)image;
+- (void)layoutEdited;
+
 @end
 
 #endif

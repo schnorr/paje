@@ -88,18 +88,18 @@
         containerType = type;
 //	[containerType addContainedType:self];
         c = [[NSUserDefaults standardUserDefaults] colorForKey:[name stringByAppendingString:@" Color"]];
-        if (c)
-            Assign(color, c);
-        else
-            Assign(color, [NSColor blackColor]);
+        if (c == nil) {
+            c = [NSColor blackColor];
+        }
+        Assign(color, c);
         fieldNames = [[NSMutableSet alloc] init];
 
         component = comp;
         filterNames = [[NSMutableSet alloc] init];
     }
     return self;
-    self = [super initWithName:n containerType:type];
-    if (self) {
+    self = [super initWithName:n containerType:type event:nil];
+    if (self != nil) {
         component = comp;
         filterNames = [[NSMutableSet alloc] init];
     }

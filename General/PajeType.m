@@ -33,26 +33,32 @@
 
 + (PajeEntityType *)typeWithName:(NSString *)n
                    containerType:(PajeContainerType *)type
+                           event:(PajeEvent *)e
 {
     return [[[self alloc] initWithName:n
-                         containerType:type] autorelease];
+                         containerType:type
+                                 event:e] autorelease];
 }
 
 - (id)initWithName:(NSString *)n
      containerType:(PajeContainerType *)type
+             event:(PajeEvent *)e
 {
     if (self == [super init]) {
         NSColor *c;
         Assign(name, n);
         containerType = type;
 	[containerType addContainedType:self];
+        Assign(event, e);
         c = [[NSUserDefaults standardUserDefaults]
                          colorForKey:[name stringByAppendingString:@" Color"]];
-        if (c != nil) {
-            Assign(color, c);
-        } else {
-            Assign(color, [NSColor blackColor]);
+        if (c == nil) {
+            c = [event valueOfFieldNamed:@"Color"];
         }
+        if (c == nil) {
+            c = [NSColor blackColor];
+        }
+        Assign(color, c);
         fieldNames = [[NSMutableSet alloc] init];
     }
     return self;
@@ -67,12 +73,6 @@
     Assign(fieldNames, nil);
     [super dealloc];
 }
-
-- (void)setEvent:(PajeEvent *)e
-{
-    Assign(event, e);
-}
-
 
 - (BOOL)isContainer
 {
@@ -120,10 +120,12 @@
 {
     [self setColor:c];
 }
+
 - (NSColor *)color
 {
     return color;
 }
+
 - (void)setColor:(NSColor*)c
 {
     Assign(color, c);
@@ -182,8 +184,8 @@
     o2 = [coder decodeObject];
     o3 = [coder decodeObject];
     self = [self initWithName:o1
-                containerType:o2];
-    [self setEvent:o3];
+                containerType:o2
+                        event:o3];
     Assign(fieldNames, [coder decodeObject]);
     return self;
 }
@@ -193,15 +195,18 @@
 @implementation PajeContainerType
 + (PajeContainerType *)typeWithName:(NSString *)n
                       containerType:(PajeContainerType *)type
+                              event:(PajeEvent *)e
 {
     return [[[self alloc] initWithName:n
-                         containerType:type] autorelease];
+                         containerType:type
+                                 event:e] autorelease];
 }
 
 - (id)initWithName:(NSString *)n
      containerType:(PajeContainerType *)type
+             event:(PajeEvent *)e
 {
-    self = [super initWithName:n containerType:type];
+    self = [super initWithName:n containerType:type event:e];
     if (self != nil) {
         allInstances = [[NSMutableArray alloc] init];
         idToInstance = [[NSMutableDictionary alloc] init];
@@ -293,8 +298,9 @@
 @implementation PajeCategorizedEntityType
 - (id)initWithName:(NSString *)n
      containerType:(PajeContainerType *)type
+             event:(PajeEvent *)e
 {
-    self = [super initWithName:n containerType:type];
+    self = [super initWithName:n containerType:type event:e];
     if (self != nil) {
         Assign(aliases, [NSMutableDictionary dictionary]);
         allValues = [[NSMutableSet alloc] init];
@@ -482,19 +488,22 @@
                  containerType:(PajeContainerType *)type
            sourceContainerType:(PajeContainerType *)sourceType
              destContainerType:(PajeContainerType *)destType
+                         event:(PajeEvent *)e
 {
     return [[[self alloc] initWithName:n
                          containerType:type
                    sourceContainerType:sourceType
-                     destContainerType:destType] autorelease];
+                     destContainerType:destType
+                                 event:e] autorelease];
 }
 
 -    (id)initWithName:(id)n
         containerType:(PajeContainerType *)type
   sourceContainerType:(PajeContainerType *)sourceType
     destContainerType:(PajeContainerType *)destType
+                event:(PajeEvent *)e
 {
-    self = [super initWithName:n containerType:type];
+    self = [super initWithName:n containerType:type event:e];
     sourceContainerType = sourceType;
     destContainerType = destType;
     return self;

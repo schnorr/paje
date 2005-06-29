@@ -171,7 +171,7 @@
 - (void)readChunk:(id)sender
 {
     int i;
-    NSDate *start = [NSDate date], *end;
+    NSDate *start, *end;
     double t;
     NSAutoreleasePool *pool;
     
@@ -181,6 +181,7 @@
     
     i = -(int)[simulator eventCount];
     pool = [NSAutoreleasePool new];
+    start = [NSDate date];
     
     NS_DURING
         NSDebugMLLog(@"tim", @"will read chunk starting at %@",
@@ -199,13 +200,12 @@
             [[NSApplication sharedApplication] terminate:self];
     NS_ENDHANDLER
 
-    [pool release];
-
     end = [NSDate date];
     t = [end timeIntervalSinceDate:start];
     i += [simulator eventCount];
     NSLog(@"%@: %d events in %f seconds = %f e/s", [reader inputFilename], i, t, i/t);
     
+    [pool release];
 }
 
 - (void)createCheckPointDirectory

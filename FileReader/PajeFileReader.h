@@ -24,7 +24,7 @@
 #include <Foundation/Foundation.h>
 #include "../General/PajeFilter.h"
 
-#define CHUNK_SIZE 100000
+#define CHUNK_SIZE 1000000
 
 @interface PajeFileReader: PajeComponent <PajeReader>
 {

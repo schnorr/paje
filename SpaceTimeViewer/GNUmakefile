@@ -26,7 +26,8 @@ SpaceTimeViewer_OBJC_FILES = \
         HierarchyRuler.m \
         Shape.m \
 	STEntityTypeLayout.m \
-	STEntityTypeLayoutController.m
+	STEntityTypeLayoutController.m \
+        STLayoutEditor.m
 
 SpaceTimeViewer_HEADER_FILES = \
         DrawView.h \
@@ -34,7 +35,8 @@ SpaceTimeViewer_HEADER_FILES = \
         HierarchyRuler.h \
         Shape.h \
 	STEntityTypeLayout.h \
-	STEntityTypeLayoutController.h
+	STEntityTypeLayoutController.h \
+        STLayoutEditor.h
 
 SpaceTimeViewer_PSWFILES = drawline.psw
 

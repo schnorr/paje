@@ -382,7 +382,8 @@ if (x != maxLevel/*[thicknesses count]*/) {
         id instance;
 
 #ifdef SHOW_TYPES
-        if (r.size.width > 2 && [layout drawingType] != PajeLinkDrawingType) {
+        if (r.size.width > 2 && [layout drawingType] != PajeLinkDrawingType
+                             && [layout drawingType] != PajeVariableDrawingType) {
             [vcell setStringValue:[layout description]];
             r.origin.x = [self positionForLevel:level] - 1;
             if ([layout isContainer]) {
@@ -392,6 +393,9 @@ if (x != maxLevel/*[thicknesses count]*/) {
                 r.size.width = NSMaxX([self bounds]) - r.origin.x - 1;
             }
             [vcell drawWithFrame:NSInsetRect(r, -.5, -.5) inView:self];
+        }
+        if (r.size.width > 2 && [layout drawingType] == PajeVariableDrawingType) {
+            [self widthForLevel:level];
         }
         if (![layout isContainer]) return;
         level++;

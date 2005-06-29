@@ -33,10 +33,15 @@
 #include "../General/PajeFilter.h"
 #include "../General/PajeEvent.h"
 
+#define MAP
 @interface PajeSimul : PajeComponent <PajeSimulator>
 {
     PajeContainer *rootContainer;
+#ifdef MAP
+    NSMapTable *invocationTable;
+#else
     NSMutableDictionary *invocationTable;
+#endif
 
     /* PajeContainerType's and PajeEntityTypes's mapped by name and alias */
     NSMutableDictionary *userTypes;

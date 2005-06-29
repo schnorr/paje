@@ -64,7 +64,7 @@
 
     tHeight = [controller valueOfFieldNamed:@"Height" forEntityType:entityType];
     if (tHeight == nil) {
-        tHeight = [NSNumber numberWithInt:60];
+        tHeight = [NSNumber numberWithInt:6];
     }
 
     tShape = [controller valueOfFieldNamed:@"Shape" forEntityType:entityType];
@@ -617,6 +617,16 @@
     return maxValue;
 }
 
+- (float)height
+{
+    return [containerDescriptor heightForVariables];
+}
+
+- (void)setHeight:(float)val
+{
+    [containerDescriptor setHeightForVariables:val];
+}
+
 @end
 
 
@@ -630,6 +640,7 @@
         [NSDictionary dictionaryWithObjectsAndKeys:
             @"1", [self defaultKeyForKey:@"SiblingSeparation"],
             @"1", [self defaultKeyForKey:@"TypeSeparation"],
+            @"60", [self defaultKeyForKey:@"HeightForVariables"],
             nil]];
 }
 
@@ -654,6 +665,7 @@
         
         siblingSeparation = [self defaultFloatForKey:@"SiblingSeparation"];
         subtypeSeparation = [self defaultFloatForKey:@"SubtypeSeparation"];
+        heightForVariables = [self defaultFloatForKey:@"HeightForVariables"];
     }
     return self;
 }
@@ -707,6 +719,17 @@
 }
 
 
+- (void)setHeightForVariables:(float)val
+{
+    heightForVariables = val;
+    [self setDefaultFloat:heightForVariables forKey:@"HeightForVariables"];
+}
+
+- (float)heightForVariables
+{
+    return heightForVariables;
+}
+
 - (void)setSupEventsOffset:(float)val;
 {
     supEventsOffset = val;
@@ -743,6 +766,7 @@
 {
     return (supEventsOffset + infEventsOffset) / 2;
 }
+
 
 - (void)reset
 {
@@ -922,7 +946,7 @@
             subcontainersOffset += subtypeSeparation;
         }
         [self setOffset:subcontainersOffset ofSubtypes:variableSubtypes];
-        subcontainersOffset += [self getMaxHeight:variableSubtypes];
+        subcontainersOffset += [self heightForVariables];
     }
 
     if (([containerSubtypes count] != 0) && (subcontainersOffset != 0)) {

@@ -276,12 +276,21 @@ do { \
     path = [[layout shapeFunction] function];
     draw = [drawFunction function];
     color = [filter colorForEntityType:entityType];
-    [color set];
 
+#define VARIABLES_3D
+#ifdef VARIABLES_3D
+    NSArray *todos = [enumerator allObjects];
+
+    first = YES;
+    PSsetlinejoin(2);
+    float off2=1;
+    [[color highlightWithLevel:0.3] set];
+    enumerator = [todos objectEnumerator];
     while ((entity = [enumerator nextObject]) != nil) {
-        float x1 = TIMEtoX([filter startTimeForEntity:entity]);
-        float x2 = TIMEtoX([filter endTimeForEntity:entity]);
+        float x1 = TIMEtoX([filter startTimeForEntity:entity]) - off2;
+        float x2 = TIMEtoX([filter endTimeForEntity:entity]) - off2;
         float y = [[filter valueForEntity:entity] doubleValue] * scale + offset;
+        y -= off2;
         if (first) {
             first = NO;
             PSgsave();
@@ -294,12 +303,83 @@ do { \
         if (x1 < NSMinX(cutRect)) x1 = NSMinX(cutRect);
         if (x2 > NSMaxX(cutRect)) x2 = NSMaxX(cutRect);
 #endif
+
         if (!first && x1 == oldx2) {
             PSlineto(x1, y);
         } else {
             PSmoveto(x1, y);
         }
 
+        PSlineto(x2, y);
+        oldx2 = x2;
+    }
+    if (!first) {
+        PSstroke();
+        PSgrestore();
+    }
+    first = YES;
+    [[color shadowWithLevel:0.3] set];
+    enumerator = [todos objectEnumerator];
+    while ((entity = [enumerator nextObject]) != nil) {
+        float x1 = TIMEtoX([filter startTimeForEntity:entity]) + off2;
+        float x2 = TIMEtoX([filter endTimeForEntity:entity]) + off2;
+        float y = [[filter valueForEntity:entity] doubleValue] * scale + offset;
+        y += off2;
+        if (first) {
+            first = NO;
+            PSgsave();
+            PSsetlinewidth([layout lineWidth]);
+            PSmoveto(x1, y);
+        }
+
+#ifdef GNUSTEP
+        // Very big lines are not drawn in GNUstep 
+        if (x1 < NSMinX(cutRect)) x1 = NSMinX(cutRect);
+        if (x2 > NSMaxX(cutRect)) x2 = NSMaxX(cutRect);
+#endif
+
+        if (!first && x1 == oldx2) {
+            PSlineto(x1, y);
+        } else {
+            PSmoveto(x1, y);
+        }
+
+        PSlineto(x2, y);
+        oldx2 = x2;
+    }
+    if (!first) {
+        PSstroke();
+        PSgrestore();
+    }
+    enumerator = [todos objectEnumerator];
+    first=YES;
+#endif
+    [color set];
+
+    while ((entity = [enumerator nextObject]) != nil) {
+        float x1 = TIMEtoX([filter startTimeForEntity:entity]);
+        float x2 = TIMEtoX([filter endTimeForEntity:entity]);
+        float y = [[filter valueForEntity:entity] doubleValue] * scale + offset;
+        if (first) {
+            first = NO;
+            PSgsave();
+            PSsetlinewidth([layout lineWidth] - 2);
+            PSmoveto(x1, y);
+        }
+
+#ifdef GNUSTEP
+        // Very big lines are not drawn in GNUstep 
+        if (x1 < NSMinX(cutRect)) x1 = NSMinX(cutRect);
+        if (x2 > NSMaxX(cutRect)) x2 = NSMaxX(cutRect);
+#endif
+
+        if (!first && x1 == oldx2) {
+            PSlineto(x1, y);
+        } else {
+            PSmoveto(x1, y);
+        }
+
+/*
         color = [filter colorForEntity:entity];
         if (![color isEqual:lastColor]) {
             if (lastColor != nil) {
@@ -309,6 +389,7 @@ do { \
             lastColor = color;
             [color set];
         }
+*/
         PSlineto(x2, y);
         oldx2 = x2;
     }
@@ -316,6 +397,7 @@ do { \
         PSstroke();
         PSgrestore();
     }
+
 }
 
 

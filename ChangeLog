@@ -1,3 +1,16 @@
+2005-06-29  Benhur Stein <benhur@inf.ufsm.br>
+	* FileReader/PajeFileReader.h: changed file read chunk size to 1MB
+	* PajeSimulator/PajeSimul.[hm]: use NSMapTable instead of NSDictionary
+	  as simulation dispatch table
+	* SpaceTimeViewer/STEntityTypeLayout.[hm]: set height for variables in
+	  container, instead of variable types
+	* SpaceTimeViewer/STEntityTypeLayoutController.[hm,gorm]: refactoring,
+	  separation of layout editor classes
+	* SpaceTimeViewer/STLayoutEditor.[hm]: new files
+	* SpaceTimeViewer/GNUmakefile: add new files
+	* SpaceTimeViewer/HierarchyRuler.m: remove names of variables from
+	  ruler
+
 2005-06-26  Benhur Stein <benhur@inf.ufsm.br>
 	* SpaceTimeViewer/STController.m: workaround for GNUstep bug #13382
 

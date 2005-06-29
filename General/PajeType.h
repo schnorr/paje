@@ -42,11 +42,11 @@
 }
 
 + (id/*PajeEntityType **/)typeWithName:(NSString *)n
-                   containerType:(PajeContainerType *)type;
+                   containerType:(PajeContainerType *)type
+                           event:(PajeEvent *)e;
 - (id)initWithName:(NSString *)n
-     containerType:(PajeContainerType *)type;
-     
-- (void)setEvent:(PajeEvent *)event;
+     containerType:(PajeContainerType *)type
+             event:(PajeEvent *)e;
 
 - (BOOL)isContainer;
 
@@ -76,8 +76,6 @@
     NSMutableDictionary *idToInstance;
     NSMutableArray *containedTypes;
 }
-//+ (PajeContainerType *)typeWithName:(NSString *)n
-//                      containerType:(PajeContainerType *)type;
 
 - (void)addInstance:(PajeContainer *)instance;
 - (PajeContainer *)instanceWithId:(NSString *)containerId;
@@ -141,11 +139,13 @@
 + (PajeLinkType *)typeWithName:(id)n
                  containerType:(PajeContainerType *)type
            sourceContainerType:(PajeContainerType *)sourceType
-             destContainerType:(PajeContainerType *)destType;
+             destContainerType:(PajeContainerType *)destType
+                         event:(PajeEvent *)e;
 -    (id)initWithName:(id)n
         containerType:(PajeContainerType *)type
   sourceContainerType:(PajeContainerType *)sourceType
-    destContainerType:(PajeContainerType *)destType;
+    destContainerType:(PajeContainerType *)destType
+                event:(PajeEvent *)e;
 - (PajeContainerType *)sourceContainerType;
 - (PajeContainerType *)destContainerType;
 - (PajeDrawingType)drawingType;

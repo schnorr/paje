@@ -105,7 +105,8 @@
 
     // create the new container type
     newContainerType = [PajeContainerType typeWithName:newContainerTypeName
-                                         containerType:containerType];
+                                         containerType:containerType
+                                                 event:event];
     [userTypes setObject:newContainerType forKey:newContainerTypeName];
     if (newContainerTypeAlias != nil) {
         [userTypes setObject:newContainerType forKey:newContainerTypeAlias];
@@ -174,8 +175,8 @@
     newEntityType = [PajeLinkType typeWithName:newEntityTypeName
                                  containerType:containerType
                            sourceContainerType:sourceContainerType
-                             destContainerType:destContainerType];
-    [newEntityType setEvent:event];
+                             destContainerType:destContainerType
+                                         event:event];
     [userTypes setObject:newEntityType forKey:newEntityTypeName];
     if (newEntityTypeAlias != nil) {
         [userTypes setObject:newEntityType forKey:newEntityTypeAlias];
@@ -226,22 +227,24 @@
     switch (drawingType) {
     case PajeEventDrawingType:
         newEntityType = [PajeEventType typeWithName:newEntityTypeName
-                                      containerType:containerType];
+                                      containerType:containerType
+                                              event:event];
         break;
     case PajeStateDrawingType:
         newEntityType = [PajeStateType typeWithName:newEntityTypeName
-                                      containerType:containerType];
+                                      containerType:containerType
+                                              event:event];
         break;
     case PajeVariableDrawingType:
         newEntityType = [PajeVariableType typeWithName:newEntityTypeName
-                                         containerType:containerType];
+                                         containerType:containerType
+                                                 event:event];
         break;
     default:
         [self error:@"Internal simulator error: unknown drawing type"
             inEvent:event];
     }
 
-    [newEntityType setEvent:event];
     [userTypes setObject:newEntityType forKey:newEntityTypeName];
     if (newEntityTypeAlias != nil) {
         [userTypes setObject:newEntityType forKey:newEntityTypeAlias];
