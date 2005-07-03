@@ -22,6 +22,7 @@
 #include "../General/UniqueString.h"
 #include "../General/NSUserDefaults+Additions.h"
 #include "../General/NSColor+Additions.h"
+#include "../General/Macros.h"
 
 @implementation PajeEventDecoder
 
@@ -163,8 +164,8 @@ static NSString *COLOR_VALUE = @"Color";
         }
 
         str = [scanner readString];
-        ASSIGN(eventBeingDefined.eventName, [scanner readString]);
-        ASSIGN(eventBeingDefined.eventId, [scanner readIntNumber]);
+        Assign(eventBeingDefined.eventName, [scanner readString]);
+        Assign(eventBeingDefined.eventId, [scanner readIntNumber]);
         if (![str isEqualToString:@"EventDef"]
             || eventBeingDefined.eventName == nil
             || eventBeingDefined.eventId == nil) {

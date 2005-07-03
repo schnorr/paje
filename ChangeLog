@@ -1,3 +1,6 @@
+2005-07-03  Benhur Stein <benhur@inf.ufsm.br>
+	* PajeEventDecoder/PajeEventDecoder.m: use Assign macro
+
 2005-06-29  Benhur Stein <benhur@inf.ufsm.br>
 	* FileReader/PajeFileReader.h: changed file read chunk size to 1MB
 	* PajeSimulator/PajeSimul.[hm]: use NSMapTable instead of NSDictionary
