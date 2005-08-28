@@ -21,9 +21,9 @@
 	    fieldBox,
 	    relatedEntitiesBox,
 	    relatedEntitiesMatrix,
-	    fileBox,
-	    filenameField,
-	    lineNumberField
+	    titleField,
+	    showFileButton,
+	    valueField
 	);
 	Super = NSObject;
     };

@@ -81,12 +81,17 @@ static NSMutableArray *allInstances;
     top = NSMinY([colorField frame]) - 5;
     bottom = 10;
 
-    [fieldBox retain];
+    [[showFileButton retain] removeFromSuperview];
+    archivedTitleField= [NSArchiver archivedDataWithRootObject:titleField];
+    archivedValueField= [NSArchiver archivedDataWithRootObject:valueField];
+    [archivedTitleField retain];
+    [archivedValueField retain];
+    [titleField removeFromSuperview];
+    [valueField removeFromSuperview];
     [fieldBox setContentViewMargins:NSMakeSize(2, 2)];
+    archivedBox= [[NSArchiver archivedDataWithRootObject:fieldBox] retain];
     [fieldBox removeFromSuperview];
-    [fileBox retain];
-    [fileBox setContentViewMargins:NSMakeSize(2, 2)];
-    [fileBox removeFromSuperview];
+
     [relatedEntitiesBox retain];
     [relatedEntitiesBox setContentViewMargins:NSMakeSize(2, 2)];
     [relatedEntitiesBox removeFromSuperview];
@@ -104,9 +109,10 @@ static NSMutableArray *allInstances;
     Assign(inspectedEntity, nil);
     Assign(nonDisplayedFields, nil);
 
-    Assign(fieldBox, nil);
-    Assign(fileBox, nil);
     Assign(relatedEntitiesBox, nil);
+    Assign(archivedBox, nil);
+    Assign(archivedTitleField, nil);
+    Assign(archivedValueField, nil);
 
     Assign(nameField, nil);
     Assign(colorField, nil);
@@ -201,79 +207,92 @@ postNotificationName:@"PajeFilterEntityNameNotification"
             fieldValues:(NSArray *)values
 {
     // I don't know a better way of copying a box...
-    NSBox *box = /*[*/[NSUnarchiver unarchiveObjectWithData:[NSArchiver archivedDataWithRootObject:fieldBox]]/* autorelease]*/;
-    NSForm *form = [[[box contentView] subviews] objectAtIndex:0];
+    NSBox *box = [NSUnarchiver unarchiveObjectWithData:archivedBox];
     int index;
+    float curY = 0;
+    float titleWidth = 0;
+    NSTextField *field1;
+    field1 = [NSUnarchiver unarchiveObjectWithData:archivedTitleField];
 
     NSAssert([titles count] == [values count],
              @"count of fields and values do not match");
     
     [box setTitle:boxTitle];
-    [form setAutosizesCells:YES];
-
-    // Field Matrix
-    while ([form cellAtIndex:0])
-        [form removeEntryAtIndex:0];
 
     for (index = 0; index < [titles count]; index++) {
-        NSString *fieldTitle = [[titles objectAtIndex:index] description];
-        NSString *fieldValue = [[values objectAtIndex:index] description];
-        NSFormCell *fieldCell;
-        
-//            [nonDisplayedFields removeObject:fieldName];
-        fieldCell = [form addEntry:[fieldTitle stringByAppendingString:@":"]];
-        [fieldCell setStringValue:fieldValue];
-        [fieldCell setEditable:NO];
-        [fieldCell setSelectable:YES];
-//        [fieldCell setTitleFont:[[NSFontManager sharedFontManager] convertFont:[fieldCell titleFont] toHaveTrait:NSBoldFontMask]];
+        float w;
+        NSString *title = [[titles objectAtIndex:index] description];
+        [field1 setStringValue:title];
+        w = [[field1 cell] cellSize].width;
+        if (w > titleWidth) titleWidth = w;
     }
-    [form sizeToCells];
+    for (index = [titles count] - 1; index >= 0; index--) {
+        float height;
+        NSString *title = [[titles objectAtIndex:index] description];
+        NSString *value = [[values objectAtIndex:index] description];
+        NSTextField *titleField;
+        NSTextField *valueField;
+        
+        titleField = [NSUnarchiver unarchiveObjectWithData:archivedTitleField];
+        valueField = [NSUnarchiver unarchiveObjectWithData:archivedValueField];
+        
+        [titleField setStringValue:title];
+        [valueField setStringValue:value];
+        
+        height = MAX([[titleField cell] cellSize].height,
+                     [[valueField cell] cellSize].height);
+        
+        [titleField setFrame:NSMakeRect(0, curY, titleWidth, height)];
+        [valueField setFrame:NSMakeRect(titleWidth + 2, curY, 10, height)];
+        [box addSubview:titleField];
+        [box addSubview:valueField];
+        
+        curY += height+2;
+    }
     [box sizeToFit];
 
     return box;
 }
+
+- (NSBox *)boxForSourceReference:(SourceCodeReference *)sourceRef
+{
+    NSBox *box;
+    NSArray *values;
+    NSRect buttonFrame;
+    NSRect contentFrame;
+    
+    values = [NSArray arrayWithObjects:
+        [sourceRef filename],
+        [NSString stringWithFormat:@"%d", [sourceRef lineNumber]],
+        nil];
+    
+    box = [self boxWithTitle:@""
+            fieldTitles:[NSArray arrayWithObjects:@"File", @"Line", nil]
+            fieldValues:values];
+    [box setTitlePosition:NSNoTitle];
+    [box sizeToFit];
+            
+    contentFrame = [[box contentView] frame];
+    buttonFrame = [showFileButton frame];
+    [showFileButton setFrame:NSMakeRect(NSMaxX(contentFrame) + 2,
+                                        0,
+                                        NSWidth(buttonFrame),
+                                        NSHeight(contentFrame))];
+    [box addSubview:showFileButton];
+    [box sizeToFit];
+
+    return box;
+}
+
 
 - (NSBox *)boxWithTitle:(NSString *)boxTitle
            fieldObjects:(NSArray *)objects
             fieldTitles:(NSArray *)titles
             fieldValues:(NSArray *)values
 {
-    // I don't know a better way of copying a box...
-    NSBox *box = /*[*/[NSUnarchiver unarchiveObjectWithData:[NSArchiver archivedDataWithRootObject:fieldBox]]/* autorelease]*/;
-    NSForm *form = [[[box contentView] subviews] objectAtIndex:0];
-    int index;
-
-    NSAssert([titles count] == [values count],
-             @"count of fields and values do not match");
-
-    [box setTitle:boxTitle];
-    [form setAutosizesCells:YES];
-
-    // Field Matrix
-    while ([form cellAtIndex:0])
-        [form removeEntryAtIndex:0];
-
-    [form setTarget:self]; //@@@
-    [form setDoubleAction:@selector(fuidoubleclicado:)]; //@@@
-
-    for (index = 0; index < [titles count]; index++) {
-        NSString *fieldTitle = [[titles objectAtIndex:index] description];
-        NSString *fieldValue = [[values objectAtIndex:index] description];
-        id fieldObject = [objects objectAtIndex:index];
-        NSFormCell *fieldCell;
-
-//            [nonDisplayedFields removeObject:fieldName];
-        fieldCell = [form addEntry:[fieldTitle stringByAppendingString:@":"]];
-        [fieldCell setStringValue:fieldValue];
-        [fieldCell setRepresentedObject:fieldObject];
-        [fieldCell setEditable:NO];
-        [fieldCell setSelectable:YES];
-//        [fieldCell setTitleFont:[[NSFontManager sharedFontManager] convertFont:[fieldCell titleFont] toHaveTrait:NSBoldFontMask]];
-    }
-    [form sizeToCells];
-    [box sizeToFit];
-
-    return box;
+    return [self boxWithTitle:boxTitle
+                  fieldTitles:titles
+                  fieldValues:values];
 }
 
 - (NSBox *)boxWithTitle:(NSString *)boxTitle
@@ -380,6 +399,9 @@ postNotificationName:@"PajeFilterEntityNameNotification"
 
 - (IBAction)entityClicked:(id)sender
 {
+    if ([sender isKindOfClass:[NSMatrix class]]) {
+        sender = [sender selectedCell];
+    }
     [self inspectEntity:[sender representedObject] withFilter:filter];
 }
 
@@ -423,11 +445,7 @@ postNotificationName:@"PajeFilterEntityNameNotification"
     sourceRef = [filter valueOfFieldNamed:@"FileReference"
                                 forEntity:inspectedEntity];
     if (sourceRef != nil) {
-        NSString *filename = [sourceRef filename];
-        int lineNumber = [sourceRef lineNumber];
-        [filenameField setStringValue:[filename description]];
-        [lineNumberField setIntValue:lineNumber];
-        [self addSubview:fileBox atBottom:YES];
+        [self addSubview:[self boxForSourceReference:sourceRef] atBottom:YES];
         [nonDisplayedFields removeObject:@"FileReference"];
     }
 

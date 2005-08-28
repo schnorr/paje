@@ -35,15 +35,20 @@
     IBOutlet NSColorWell *colorField;
     IBOutlet NSButton *reuseButton;
     IBOutlet NSButton *filterButton;
+
     IBOutlet NSBox *fieldBox;
+    IBOutlet NSTextField *titleField;
+    IBOutlet NSTextField *valueField;
+    IBOutlet NSButton *showFileButton;
+    NSData *archivedBox;
+    NSData *archivedTitleField;
+    NSData *archivedValueField;
+
     IBOutlet NSBox *relatedEntitiesBox;
     IBOutlet NSMatrix *relatedEntitiesMatrix;
     
-    IBOutlet NSBox *fileBox;
-    IBOutlet NSTextField *filenameField;
-    IBOutlet NSTextField *lineNumberField;
-
     NSMutableSet *nonDisplayedFields;
+    
 
     float top;
     float bottom;
