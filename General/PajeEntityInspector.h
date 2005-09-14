@@ -31,6 +31,7 @@
     PajeFilter *filter;
 
     IBOutlet NSWindow *inspectionWindow;
+
     IBOutlet NSTextField *nameField;
     IBOutlet NSColorWell *colorField;
     IBOutlet NSButton *reuseButton;
@@ -44,14 +45,17 @@
     NSData *archivedTitleField;
     NSData *archivedValueField;
 
+    IBOutlet NSBox *scriptBox;
+    IBOutlet NSTextField *scriptPathField;
+    IBOutlet NSTextField *scriptFieldNameField;
+    IBOutlet NSMatrix *scriptFieldSourceMatrix;
+
     IBOutlet NSBox *relatedEntitiesBox;
     IBOutlet NSMatrix *relatedEntitiesMatrix;
     
     NSMutableSet *nonDisplayedFields;
     
-
-    float top;
-    float bottom;
+    NSRect boundingBox;
 }
 
 + (PajeEntityInspector *)inspector;
@@ -59,7 +63,7 @@
 - (id)init;
 - (void)dealloc;
 
-- (void)addSubview:(NSView *)view atBottom:(BOOL)atBottom;
+- (void)addSubview:(NSView *)view;
 - (void)addLastSubview:(NSView *)view;
 - (NSBox *)boxWithTitle:(NSString *)boxTitle
             fieldTitles:(NSArray *)titles
@@ -82,6 +86,8 @@
 - (IBAction)entityClicked:(id)sender;
 
 - (IBAction)showSource:(id)sender;
+- (IBAction)executeScript:(id)sender;
+
 - (IBAction)filterEntityName:(id)sender;
 @end
 

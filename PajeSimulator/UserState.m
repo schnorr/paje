@@ -118,10 +118,3 @@
 }
 
 @end
-
-@implementation UserStateInspector
-- (void)addLocalFields
-{
-    [super addLocalFields];
-}
-@end

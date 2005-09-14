@@ -219,22 +219,3 @@
     return endLogicalTime;
 }
 @end
-
-@implementation UserLinkInspector
-- (void)addLocalFields
-{
-    [super addLocalFields];
-
-    // source container information
-    [self addBoxForContainer:[(UserLink *)inspectedEntity sourceContainer]
-               upToContainer:[inspectedEntity container]
-                   withTitle:@"Source"];
-    [nonDisplayedFields removeObject:@"SourceContainer"];
-
-    // dest container information
-    [self addBoxForContainer:[(UserLink *)inspectedEntity destContainer]
-               upToContainer:[inspectedEntity container]
-                   withTitle:@"Destination"];
-    [nonDisplayedFields removeObject:@"DestContainer"];
-}
-@end

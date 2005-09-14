@@ -23,7 +23,8 @@
 #include "PajeType.h"
 #include "Macros.h"
 
-//NSPoint lastWindowPosition;
+#define SUBVIEW_SEPARATION 2
+#define BOTTOM_MARGIN 10
 
 @implementation PajeEntityInspector
 
@@ -33,12 +34,12 @@ static NSMutableArray *allInstances;
 {
     NSEnumerator *instEnum;
     PajeEntityInspector *inspector;
-    if (!allInstances)
+    if (allInstances == nil) {
         allInstances = [[NSMutableArray alloc] init];
+    }
     instEnum = [allInstances objectEnumerator];
     while ((inspector = [instEnum nextObject]) != nil) {
         if ([inspector isReusable]) {
-            inspector->isa = self;
             return inspector;
         }
     }
@@ -78,9 +79,6 @@ static NSMutableArray *allInstances;
         return nil;
     }
 
-    top = NSMinY([colorField frame]) - 5;
-    bottom = 10;
-
     [[showFileButton retain] removeFromSuperview];
     archivedTitleField= [NSArchiver archivedDataWithRootObject:titleField];
     archivedValueField= [NSArchiver archivedDataWithRootObject:valueField];
@@ -107,7 +105,6 @@ static NSMutableArray *allInstances;
 - (void)dealloc
 {
     Assign(inspectedEntity, nil);
-    Assign(nonDisplayedFields, nil);
 
     Assign(relatedEntitiesBox, nil);
     Assign(archivedBox, nil);
@@ -125,7 +122,8 @@ static NSMutableArray *allInstances;
 - (void)reset
 {
     // remove everything from the panel
-    [[[[[inspectionWindow contentView] subviews] mutableCopy] autorelease] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+    [[[inspectionWindow contentView] subviews]
+            makeObjectsPerformSelector:@selector(removeFromSuperview)];
 
     // add the top widgets
     [[inspectionWindow contentView] addSubview:nameField];
@@ -133,48 +131,56 @@ static NSMutableArray *allInstances;
     [[inspectionWindow contentView] addSubview:reuseButton];
     [[inspectionWindow contentView] addSubview:filterButton];
 
-    // initialize vertical positions for boxes
-    top = NSMinY([colorField frame]) - 5;
-    bottom = 10;
+    // initialize bounding box
+    boundingBox = NSUnionRect([colorField frame], [nameField frame]);
 }
 
-- (void)addSubview:(NSView *)view atBottom:(BOOL)atBottom
+- (void)addSubview:(NSView *)view
 {
     NSRect frame;
-    float ypos;
 
     if (view == nil) {
         return;
     }
 
+    // add view bellow other views
     frame = [view frame];
-    if (atBottom) {
-        ypos = bottom;
-        bottom += (NSHeight(frame) + 2);
-    } else {
-        ypos = top - NSHeight(frame);
-        top = ypos - 2;
-    }
-    frame.origin.y = ypos;
-    frame.origin.x = NSMinX([colorField frame]);
-    frame.size.width = NSMaxX([nameField frame]) - NSMinX(frame);
+    frame.origin.y = NSMinY(boundingBox) - NSHeight(frame) - SUBVIEW_SEPARATION;
+    frame.origin.x = NSMinX(boundingBox);
+    frame.size.width = NSWidth(boundingBox);
     [view setFrame:frame];
     [[inspectionWindow contentView] addSubview:view];
-    [[inspectionWindow contentView] setBounds:NSUnionRect([[inspectionWindow contentView] bounds], frame)];
+
+    // update bounding box to reflect new view
+    boundingBox = NSUnionRect(boundingBox, frame);
 }
 
 - (void)addLastSubview:(NSView *)view
 {
     NSRect frame;
 
-    if (!view)
+    if (view == nil)
         return;
 
+    // the last view can autosize if window changes size. resize window
+    // before adding it, if necessary
     frame = [view frame];
-    frame.origin.y = bottom;
-    frame.size.height = top - bottom;
-    frame.origin.x = NSMinX([colorField frame]);
-    frame.size.width = NSMaxX([nameField frame]) - NSMinX(frame);
+    int dif = NSMinY(boundingBox) - SUBVIEW_SEPARATION
+            - NSHeight(frame) - BOTTOM_MARGIN;
+    if (dif != 0) {
+        NSSize windowSize = [inspectionWindow frame].size;
+        windowSize.height -= dif;
+        [inspectionWindow setContentSize:windowSize];
+    }
+
+    // bottom is now at window margin
+    frame.origin.y = BOTTOM_MARGIN;
+    frame.origin.x = NSMinX(boundingBox);
+    frame.size.width = NSWidth(boundingBox);
+
+    // the size of the window may have changed -- boundingBox is no longer valid
+    boundingBox = NSUnionRect([colorField frame], frame);
+
     [view setFrame:frame];
     [[inspectionWindow contentView] addSubview:view];
 }
@@ -183,40 +189,42 @@ static NSMutableArray *allInstances;
 {
     PajeEntityType *entityType;
     id entityName;
-    NSString *filtering;
 
     entityType = [inspectedEntity entityType];
     entityName = [inspectedEntity name];
-    if ([sender state])
-        filtering = @"YES";
-    else
-        filtering = @"NO";
-    if (entityType != nil && entityName != nil)
+    if (entityType != nil && entityName != nil) {
+        NSString *filtering;
+        NSDictionary *userInfo;
+        filtering = [sender state] ? @"YES" : @"NO";
+        userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                                         entityType, @"EntityType",
+                                         entityName, @"EntityName",
+                                         filtering, @"Show",
+                                         nil];
         [[NSNotificationCenter defaultCenter]
-postNotificationName:@"PajeFilterEntityNameNotification"
-              object:self
-            userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-                entityType, @"EntityType",
-                entityName, @"EntityName",
-                filtering, @"Show",
-                nil]];
+                postNotificationName:@"PajeFilterEntityNameNotification"
+                              object:self
+                            userInfo:userInfo];
+    }
 }
 
 - (NSBox *)boxWithTitle:(NSString *)boxTitle
             fieldTitles:(NSArray *)titles
             fieldValues:(NSArray *)values
 {
-    // I don't know a better way of copying a box...
-    NSBox *box = [NSUnarchiver unarchiveObjectWithData:archivedBox];
+    NSBox *box;
     int index;
     float curY = 0;
     float titleWidth = 0;
     NSTextField *field1;
-    field1 = [NSUnarchiver unarchiveObjectWithData:archivedTitleField];
 
     NSAssert([titles count] == [values count],
              @"count of fields and values do not match");
     
+    // I don't know a better way of copying a box...
+    box = [NSUnarchiver unarchiveObjectWithData:archivedBox];
+    field1 = [NSUnarchiver unarchiveObjectWithData:archivedTitleField];
+
     [box setTitle:boxTitle];
 
     for (index = 0; index < [titles count]; index++) {
@@ -230,22 +238,22 @@ postNotificationName:@"PajeFilterEntityNameNotification"
         float height;
         NSString *title = [[titles objectAtIndex:index] description];
         NSString *value = [[values objectAtIndex:index] description];
-        NSTextField *titleField;
-        NSTextField *valueField;
+        NSTextField *tField;
+        NSTextField *vField;
         
-        titleField = [NSUnarchiver unarchiveObjectWithData:archivedTitleField];
-        valueField = [NSUnarchiver unarchiveObjectWithData:archivedValueField];
+        tField = [NSUnarchiver unarchiveObjectWithData:archivedTitleField];
+        vField = [NSUnarchiver unarchiveObjectWithData:archivedValueField];
         
-        [titleField setStringValue:title];
-        [valueField setStringValue:value];
+        [tField setStringValue:title];
+        [vField setStringValue:value];
         
-        height = MAX([[titleField cell] cellSize].height,
-                     [[valueField cell] cellSize].height);
+        height = MAX([[tField cell] cellSize].height,
+                     [[vField cell] cellSize].height);
         
-        [titleField setFrame:NSMakeRect(0, curY, titleWidth, height)];
-        [valueField setFrame:NSMakeRect(titleWidth + 2, curY, 10, height)];
-        [box addSubview:titleField];
-        [box addSubview:valueField];
+        [tField setFrame:NSMakeRect(0, curY, titleWidth, height)];
+        [vField setFrame:NSMakeRect(titleWidth + 2, curY, 10, height)];
+        [box addSubview:tField];
+        [box addSubview:vField];
         
         curY += height+2;
     }
@@ -254,25 +262,33 @@ postNotificationName:@"PajeFilterEntityNameNotification"
     return box;
 }
 
-- (NSBox *)boxForSourceReference:(SourceCodeReference *)sourceRef
+- (void)addSourceReference
 {
+    SourceCodeReference *sourceRef;
     NSBox *box;
     NSArray *values;
     NSRect buttonFrame;
     NSRect contentFrame;
     
+    // source code reference
+    sourceRef = [filter valueOfFieldNamed:@"FileReference"
+                                forEntity:inspectedEntity];
+    if (sourceRef == nil) {
+        return;
+    }
+
     values = [NSArray arrayWithObjects:
-        [sourceRef filename],
-        [NSString stringWithFormat:@"%d", [sourceRef lineNumber]],
-        nil];
+            [sourceRef filename],
+            [NSString stringWithFormat:@"%d", [sourceRef lineNumber]],
+            nil];
     
-    box = [self boxWithTitle:@""
+    box = [self boxWithTitle:@"Source File"
             fieldTitles:[NSArray arrayWithObjects:@"File", @"Line", nil]
             fieldValues:values];
-    [box setTitlePosition:NSNoTitle];
     [box sizeToFit];
             
     contentFrame = [[box contentView] frame];
+    [showFileButton sizeToFit];
     buttonFrame = [showFileButton frame];
     [showFileButton setFrame:NSMakeRect(NSMaxX(contentFrame) + 2,
                                         0,
@@ -281,7 +297,7 @@ postNotificationName:@"PajeFilterEntityNameNotification"
     [box addSubview:showFileButton];
     [box sizeToFit];
 
-    return box;
+    [self addSubview:box];
 }
 
 
@@ -305,7 +321,7 @@ postNotificationName:@"PajeFilterEntityNameNotification"
 
     while ((fieldName = [fieldNameEnum nextObject]) != nil) {
         id fieldValue = [inspectedEntity valueOfFieldNamed:fieldName];
-        if (!fieldValue) fieldValue = @"";
+        if (fieldValue == nil) fieldValue = @"";
         [fieldValues addObject:[fieldValue description]];
         [nonDisplayedFields removeObject:fieldName];
     }
@@ -319,10 +335,17 @@ postNotificationName:@"PajeFilterEntityNameNotification"
                  withTitle:(NSString *)title
 {
     NSBox *box;
-    NSMutableArray *fieldTitles = [NSMutableArray array];
-    NSMutableArray *fieldValues = [NSMutableArray array];
-    NSMutableArray *fieldObjects = [NSMutableArray array];
+    NSMutableArray *fieldTitles;
+    NSMutableArray *fieldValues;
+    NSMutableArray *fieldObjects;
+    
+    if (container == nil) {
+        return;
+    }
 
+    fieldTitles = [NSMutableArray array];
+    fieldValues = [NSMutableArray array];
+    fieldObjects = [NSMutableArray array];
     while ([container container] != nil && ![container isEqual:upto]) {
         [fieldTitles insertObject:[[container entityType] name] atIndex:0];
         [fieldValues insertObject:[container name] atIndex:0];
@@ -334,38 +357,52 @@ postNotificationName:@"PajeFilterEntityNameNotification"
                 fieldObjects:fieldObjects
                  fieldTitles:fieldTitles
                  fieldValues:fieldValues];
-    [self addSubview:box atBottom:NO];
+    [self addSubview:box];
 }
 
 - (void)addLocalFields
 {
+    PajeContainer *container;
+    PajeContainer *sourceContainer;
+    PajeContainer *destContainer;
     NSBox *box;
-    NSMutableArray *fieldTitles = [NSMutableArray array];
-    NSMutableArray *fieldValues = [NSMutableArray array];
+    NSMutableArray *fieldTitles;
+    NSMutableArray *fieldValues;
     NSDate *startTime;
     NSDate *endTime;
-
-    // entity identification
-    // entityType and value are already on top of window.
-    /*
-    [fieldTitles addObject:@"Type"];
-    [fieldValues addObject:[[inspectedEntity entityType] name]];
-    [fieldTitles addObject:@"Value"];
-    [fieldValues addObject:[inspectedEntity name]];
-     */
+    double duration;
+    id startLogical;
+    id endLogical;
 
     // container information
-    [self addBoxForContainer:[inspectedEntity container]
+    container = [inspectedEntity container];
+    [self addBoxForContainer:container
                upToContainer:nil
                    withTitle:@"Container"];
     [nonDisplayedFields removeObject:@"Container"];
 
+    sourceContainer = [inspectedEntity valueOfFieldNamed:@"SourceContainer"];
+    if (sourceContainer != nil) {
+        [self addBoxForContainer:sourceContainer
+                   upToContainer:container
+                       withTitle:@"Source Container"];
+        [nonDisplayedFields removeObject:@"SourceContainer"];
+    }
+    destContainer = [inspectedEntity valueOfFieldNamed:@"DestContainer"];
+    if (destContainer != nil) {
+        [self addBoxForContainer:destContainer
+                   upToContainer:container
+                       withTitle:@"Dest Container"];
+        [nonDisplayedFields removeObject:@"DestContainer"];
+    }
+
     // timing information
-    [fieldTitles removeAllObjects];
-    [fieldValues removeAllObjects];
+    fieldTitles = [NSMutableArray array];
+    fieldValues = [NSMutableArray array];
     startTime = [inspectedEntity startTime];
     endTime = [inspectedEntity endTime];
-    if (startTime == endTime /*[startTime isEqualToDate:endTime]*/) {
+    duration = [[inspectedEntity duration] doubleValue];
+    if (duration == 0) {
         [fieldTitles addObject:@"Time"];
         [fieldValues addObject:[startTime description]];
     } else {
@@ -374,8 +411,21 @@ postNotificationName:@"PajeFilterEntityNameNotification"
         [fieldTitles addObject:@"End Time"];
         [fieldValues addObject:[endTime description]];
         [fieldTitles addObject:@"Duration"];
-        [fieldValues addObject:[NSString stringWithFormat:@"%.6f", [endTime timeIntervalSinceDate:startTime]]];
-   }
+        [fieldValues addObject:[NSString stringWithFormat:@"%.6f", duration]];
+    }
+    startLogical = [inspectedEntity valueOfFieldNamed:@"StartLogical"];
+    if (startLogical != nil) {
+        [fieldTitles addObject:@"Start Logical"];
+        [fieldValues addObject:[startLogical description]];
+        [nonDisplayedFields removeObject:@"StartLogical"];
+    }
+    endLogical = [inspectedEntity valueOfFieldNamed:@"EndLogical"];
+    if (endLogical != nil) {
+        [fieldTitles addObject:@"End Logical"];
+        [fieldValues addObject:[endLogical description]];
+        [nonDisplayedFields removeObject:@"EndLogical"];
+    }
+
     [nonDisplayedFields removeObject:@"Time"];
     [nonDisplayedFields removeObject:@"StartTime"];
     [nonDisplayedFields removeObject:@"EndTime"];
@@ -384,7 +434,39 @@ postNotificationName:@"PajeFilterEntityNameNotification"
     box = [self boxWithTitle:@"Timing"
                  fieldTitles:fieldTitles
                  fieldValues:fieldValues];
-    [self addSubview:box atBottom:NO];
+    [self addSubview:box];
+}
+
+- (void)addGlobalFields
+{
+    // global fields
+    [nameField setStringValue:[filter nameForEntity:inspectedEntity]];
+    [colorField setColor:[filter colorForEntity:inspectedEntity]];
+    [colorField setAction:@selector(colorChanged:)];
+    [colorField setTarget:self];
+    [inspectionWindow setTitle:[filter descriptionForEntityType:
+                                 [filter entityTypeForEntity:inspectedEntity]]];
+
+    [nonDisplayedFields removeObject:@"PajeEventName"];
+    [nonDisplayedFields removeObject:@"Name"];
+    [nonDisplayedFields removeObject:@"Color"];
+
+    [nonDisplayedFields removeObject:@"EntityType"];
+    [nonDisplayedFields removeObject:@"Value"];
+}
+
+- (void)addOtherFields
+{
+    // other fields
+    if ([nonDisplayedFields count] > 0) {
+        NSBox *box;
+        NSArray *fieldTitles = [nonDisplayedFields allObjects];
+
+        box = [self boxWithTitle:@"Other values"
+                     fieldTitles:fieldTitles
+                      fieldNames:fieldTitles];
+        [self addSubview:box];
+    }
 }
 
 - (BOOL)isReusable
@@ -410,60 +492,29 @@ postNotificationName:@"PajeFilterEntityNameNotification"
     [filter setColor:[sender color] forEntity:inspectedEntity];
 }
 
-- (void)inspectEntity:(id<PajeEntity>)entity
-           withFilter:(PajeFilter *)f
+- (void)addScriptBox
 {
-    SourceCodeReference *sourceRef;
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+
+    [scriptPathField setStringValue:
+            [defaults objectForKey:@"EntityInspectorScriptPath"]];
+    [scriptFieldNameField setStringValue:
+            [defaults objectForKey:@"EntityInspectorScriptFieldName"]];
+
+    if ([[filter relatedEntitiesForEntity:inspectedEntity] count] == 0) {
+        [scriptFieldSourceMatrix selectCellWithTag:0];
+    }
+
+    [[scriptBox retain] autorelease];
+    [scriptBox removeFromSuperview];
+    [self addSubview:scriptBox];
+}
+
+- (void)addRelatedEntities
+{
     NSArray *relatedEntities;
 
-    Assign(inspectedEntity, entity);
-    Assign(filter, f);
-
-    nonDisplayedFields = [[NSMutableSet alloc]
-        initWithArray:[filter fieldNamesForEntity:entity]];
-
-    [self reset];
-
-    // global fields
-    [nameField setStringValue:[filter nameForEntity:inspectedEntity]];
-    [colorField setColor:[filter colorForEntity:inspectedEntity]];
-    [colorField setAction:@selector(colorChanged:)];
-    [colorField setTarget:self];
-    [inspectionWindow setTitle:[filter descriptionForEntityType:
-                                 [filter entityTypeForEntity:inspectedEntity]]];
-
-    [nonDisplayedFields removeObject:@"PajeEventName"];
-    [nonDisplayedFields removeObject:@"Name"];
-    [nonDisplayedFields removeObject:@"Color"];
-
-    [nonDisplayedFields removeObject:@"EntityType"];
-    [nonDisplayedFields removeObject:@"Value"];
-
-    [self addLocalFields];
-
-    // source code reference
-    sourceRef = [filter valueOfFieldNamed:@"FileReference"
-                                forEntity:inspectedEntity];
-    if (sourceRef != nil) {
-        [self addSubview:[self boxForSourceReference:sourceRef] atBottom:YES];
-        [nonDisplayedFields removeObject:@"FileReference"];
-    }
-
     relatedEntities = [filter relatedEntitiesForEntity:inspectedEntity];
-    [nonDisplayedFields removeObject:@"RelatedEntities"];
-
-    // other fields
-    if ([nonDisplayedFields count] > 0) {
-        NSBox *box;
-        NSArray *fieldTitles = [nonDisplayedFields allObjects];
-
-        box = [self boxWithTitle:@"Other values"
-                     fieldTitles:fieldTitles
-                      fieldNames:fieldTitles];
-        [self addSubview:box atBottom:NO];
-    }
-
-    // Related entities
     if ([relatedEntities count] > 0) {
         NSEnumerator *relatedEnum;
         int row;
@@ -481,11 +532,53 @@ postNotificationName:@"PajeFilterEntityNameNotification"
             [cell setAction:@selector(entityClicked:)];
         }
         [relatedEntitiesMatrix sizeToCells];
+        NSScrollView *sv = [relatedEntitiesMatrix enclosingScrollView];
+        NSSize svSize = [sv frame].size;
+        svSize.height = MIN(NSHeight([relatedEntitiesMatrix frame]) + 1, 105);
+        [sv setFrameSize:svSize];
         [relatedEntitiesBox sizeToFit];
         [self addLastSubview:relatedEntitiesBox];
     }
-    [relatedEntitiesMatrix retain];///BUG (porque ta sendo liberada?)
+}
+
+
+- (void)inspectEntity:(id<PajeEntity>)entity
+           withFilter:(PajeFilter *)f
+{
+    Assign(inspectedEntity, entity);
+    Assign(filter, f);
+
+    nonDisplayedFields = [[NSMutableSet alloc]
+            initWithArray:[filter fieldNamesForEntity:entity]];
+
+    [self reset];
+
+    [self addGlobalFields];
+    [self addLocalFields];
+
+    [nonDisplayedFields removeObject:@"RelatedEntities"];
+    [nonDisplayedFields removeObject:@"FileReference"];
+
+    [self addOtherFields];
+
+    [self addSourceReference];
+
+    // script execution
+    [self addScriptBox];
+
+    // Related entities
+    [self addRelatedEntities];
     
+    int dif = NSMinY(boundingBox) - 10;
+    if (dif != 0) {
+        NSRect frame = [inspectionWindow frame];
+        frame.origin.y += dif;
+        frame.size.height -= dif;
+        [inspectionWindow setContentSize:frame.size];
+    }
+    
+    Assign(nonDisplayedFields, nil);
+
 //    lastWindowPosition = [inspectionWindow cascadeTopLeftFromPoint:lastWindowPosition];
 //    [inspectionWindow display];
     [inspectionWindow orderFront:self];
@@ -504,7 +597,8 @@ postNotificationName:@"PajeFilterEntityNameNotification"
         return;
     }
     
-    sourcePaths = [[NSUserDefaults standardUserDefaults] arrayForKey:@"PajeSourcePaths"];
+    sourcePaths = [[NSUserDefaults standardUserDefaults]
+            arrayForKey:@"PajeSourcePaths"];
 
     filename = [FileReference filename];
     lineNumber = [FileReference lineNumber];
@@ -514,18 +608,78 @@ postNotificationName:@"PajeFilterEntityNameNotification"
 
         while ((fullPath = [sourcePathEnum nextObject]) != nil) {
             fullPath = [fullPath stringByAppendingPathComponent:filename];
-            if ([[NSFileManager defaultManager] isReadableFileAtPath:fullPath]) {
-//                [[NSWorkspace sharedWorkspace] openFile:fullPath];
-                [[SourceTextController controllerForFilename:fullPath] selectLineNumber:lineNumber];
-//                NSRunAlertPanel(@"Source Code",
-//                                @"Sorry, source code inspection is not working",
-//                                @"OK", nil, nil);
+            if ([[NSFileManager defaultManager] 
+                   isReadableFileAtPath:fullPath]) {
+                [[SourceTextController controllerForFilename:fullPath]
+                        selectLineNumber:lineNumber];
                 return;
             }
         }
     }
     NSRunAlertPanel(@"File Not Found",
-                    @"File %@ has not been found or is not readable.\nVerify the value of the defaults variable \"PajeSourcePaths\" in the Info/Preferences... panel.\nCurrently, it is set to %@",
+                    @"File '%@' has not been found or is not readable.\n"
+                     @"Verify the value of the defaults variable"
+                     @" \"PajeSourcePaths\" in the Info/Preferences... panel.\n"                      @"Currently, it is set to '%@'",
                     @"Ok", nil, nil, filename, sourcePaths);
 }
+
+- (IBAction)executeScript:(id)sender
+{
+    NSArray *entities;
+    NSEnumerator *entitiesEnum;
+    PajeEntity *entity;
+    NSMutableArray *arguments;
+    NSString *fieldName;
+    NSString *scriptPath;
+    NSTask *task;
+
+    if ([[scriptFieldSourceMatrix selectedCell] tag] == 0) {
+        entities = [NSArray arrayWithObject:inspectedEntity];
+    } else {
+        entities = [inspectedEntity relatedEntities];
+        if ([entities count] < 1) {
+            NSRunAlertPanel(@"Entity Inspector",
+                            @"No related entities!", nil, nil, nil);
+            return;
+        }
+    }
+
+    fieldName = [scriptFieldNameField stringValue];
+    if ((fieldName == nil) || ([fieldName isEqual:@""])) {
+        NSRunAlertPanel(@"Entity Inspector",
+                        @"Field name not defined!", nil, nil, nil);
+        return;
+    }
+    [[NSUserDefaults standardUserDefaults]
+            setObject:fieldName forKey:@"EntityInspectorScriptFieldName"];
+
+    scriptPath = [scriptPathField stringValue];
+    if ((scriptPath == nil) || ([scriptPath isEqual:@""])) {
+        NSRunAlertPanel(@"EntityInspector",
+                        @"Program path not defined!", nil, nil, nil);
+        return;
+    }
+    [[NSUserDefaults standardUserDefaults]
+            setObject:scriptPath forKey:@"EntityInspectorScriptPath"];
+
+    if (![[NSFileManager defaultManager] isExecutableFileAtPath:scriptPath]) {
+        NSRunAlertPanel(@"EntityInspector",
+                        @"File '%@' does not exist or is not executable!",
+                        nil, nil, nil, scriptPath);
+        return;
+    }
+
+    arguments = [NSMutableArray array];
+    entitiesEnum = [entities objectEnumerator];
+    while ((entity = [entitiesEnum nextObject]) != nil) {
+        id argument;
+        argument = [[entity valueOfFieldNamed:fieldName] description];
+        if (argument == nil)
+            argument = @"--nil--";
+        [arguments addObject:argument];
+    }
+    
+    task = [NSTask launchedTaskWithLaunchPath:scriptPath arguments:arguments];
+}
+
 @end

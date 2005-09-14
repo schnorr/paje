@@ -2,15 +2,17 @@
     "## Comment" = "Do NOT change this file, Gorm maintains it";
     FirstResponder = {
 	Actions = (
-	    "showSource:",
-	    "filterEntityName:"
+	    "filterEntityName:",
+	    "executeScript:",
+	    "showSource:"
 	);
 	Super = NSObject;
     };
     PajeEntityInspector = {
 	Actions = (
 	    "showSource:",
-	    "filterEntityName:"
+	    "filterEntityName:",
+	    "executeScript:"
 	);
 	Outlets = (
 	    inspectionWindow,
@@ -23,7 +25,11 @@
 	    relatedEntitiesMatrix,
 	    titleField,
 	    showFileButton,
-	    valueField
+	    valueField,
+	    scriptBox,
+	    scriptPathField,
+	    scriptFieldNameField,
+	    scriptFieldSourceMatrix
 	);
 	Super = NSObject;
     };

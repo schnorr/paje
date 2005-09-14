@@ -114,11 +114,4 @@ static NSMutableDictionary *colorDict;
 
 - (NSArray *)relatedEntities { return relatedEntities; }
 
-/*
-- (void)inspect
-{
-    NSLog(@"%@ inspection:\nstartTime=%@\nendTime=%@\nrelatedEntities=%@",
-          NSStringFromClass([self class]), startTime, endTime, relatedEntities);
-}
-*/
 @end

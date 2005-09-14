@@ -50,7 +50,4 @@
 - (NSDate *)time;
 @end
 
-@interface UserEventInspector : PajeEntityInspector
-@end
-
 #endif

@@ -1,3 +1,15 @@
+2005-09-14  Benhur Stein <benhur@inf.ufsm.br>
+	* General/PajeEntity.h: declare -duration method
+        * General/PajeEntityInspector.h: new fields for executing script
+        * General/PajeEntityInspector.m: further changes in layout of boxes;
+          window size changes dynamically with content; add souurce/destination
+          fields if existent in entity -> can remove from specific inspectors
+        * General/PajeEntityInspector.gorm: add script box
+        * PajeSimulator/User{Event,Link,State}.[hm]: remove Inspector
+        * ReductionFilter/BusyState.m: remove Inspector call
+        * ReductionFilter/GNUmakefile: remove ReduceEntityInspector
+        * ReductionFilter/ReduceEntityInspector.{h,m,gorm}: removed
+
 2005-08-28  Benhur Stein <benhur@inf.ufsm.br>
 	* General/PajeEntityInspector.{m,h,gorm}: size text fields according
 	  to contents size

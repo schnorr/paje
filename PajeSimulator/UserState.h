@@ -53,7 +53,4 @@
 - (int)imbricationLevel;
 @end
 
-@interface UserStateInspector : UserEventInspector
-@end
-
 #endif

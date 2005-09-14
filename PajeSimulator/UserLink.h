@@ -79,7 +79,4 @@
 - (int)endLogicalTime;
 @end
 
-@interface UserLinkInspector : UserStateInspector
-@end
-
 #endif

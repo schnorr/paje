@@ -95,10 +95,3 @@
     return self;
 }
 @end
-
-@implementation UserEventInspector
-- (void)addLocalFields
-{
-    [super addLocalFields];
-}
-@end
