@@ -74,6 +74,12 @@
 {
     DECLS;
     SKIPWHITE;
+    if (c == '\\') {
+        c = NEXTCHAR;
+        if (c == 'n') {
+            c = '\n';
+        }
+    }
     return c;
 }
 
@@ -182,6 +188,12 @@
         c = NEXTCHAR;
     }
     do {
+        if (c == '\\') {
+            c = NEXTCHAR;
+            if (c == 'n') {
+                c = '\n';
+            }
+        }
         value[bi++] = c;
         c = NEXTCHAR;
     } while ((c != -1)
