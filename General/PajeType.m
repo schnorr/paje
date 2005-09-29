@@ -56,7 +56,7 @@
             c = [event valueOfFieldNamed:@"Color"];
         }
         if (c == nil) {
-            c = [NSColor blackColor];
+            c = [NSColor whiteColor];
         }
         Assign(color, c);
         fieldNames = [[NSMutableSet alloc] init];
@@ -360,7 +360,7 @@
     NSColor *c;
     c = [nameToColor objectForKey:n];
     if (c == nil) {
-        c = [NSColor blackColor];
+        c = [NSColor whiteColor];
     }
     return c;
 }
