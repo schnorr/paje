@@ -1,3 +1,6 @@
+2005-09-29  Benhur Stein <benhur@inf.ufsm.br>
+        * General/PajeType.m: change default entity color to white
+
 2005-09-14  Benhur Stein <benhur@inf.ufsm.br>
 	* General/PajeEntity.h: declare -duration method
         * General/PajeEntityInspector.h: new fields for executing script
