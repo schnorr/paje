@@ -10,6 +10,7 @@
                              forEntity:(id<PajeEntity>)entity;
           - (unsigned)subCountAtIndex:(unsigned)index
                             forEntity:(id<PajeEntity>)entity;
+        * General/PajeEntity.[hm]: add similar methods for entity
         * General/Protocols.h: likewise
         * StorageController/AnchorFilter.m: likewise
         * StorageController/Aggregate{Event,State}.[hm],
