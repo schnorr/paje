@@ -27,6 +27,7 @@
 //
 
 #include "PajeType.h"
+#include "CondensedEntitiesArray.h"
 
 @class PajeContainer;
 
@@ -68,6 +69,16 @@
 // for when there is one state inside another.
 // only states can have this; others should return 0.
 - (int)imbricationLevel;
+
+// When the entity has subentities
+- (BOOL)isAggregate;
+- (unsigned)subCount;
+- (NSString *)subNameAtIndex:(unsigned)index;
+- (NSColor *)subColorAtIndex:(unsigned)index;
+- (double)subDurationAtIndex:(unsigned)index;
+- (unsigned)subCountAtIndex:(unsigned)index;
+- (CondensedEntitiesArray *)condensedEntities;
+- (unsigned)condensedEntitiesCount;
 
 - (NSArray *)fieldNames;
 - (id)valueOfFieldNamed:(NSString *)fieldName;

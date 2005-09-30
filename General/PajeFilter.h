@@ -262,6 +262,13 @@ ofContainersTyped:(PajeEntityType *)containerType
 - (NSString *)descriptionForEntity:(id<PajeEntity>)entity;
 - (int)imbricationLevelForEntity:(id<PajeEntity>)entity;
 
+- (BOOL)isAggregateEntity:(id<PajeEntity>)entity;
+- (unsigned)subCountForEntity:(id<PajeEntity>)entity;
+- (NSColor *)subColorAtIndex:(unsigned)index forEntity:(id<PajeEntity>)entity;
+- (NSString *)subNameAtIndex:(unsigned)index forEntity:(id<PajeEntity>)entity;
+- (double)subDurationAtIndex:(unsigned)index forEntity:(id<PajeEntity>)entity;
+- (unsigned)subCountAtIndex:(unsigned)index forEntity:(id<PajeEntity>)entity;
+
 - (BOOL)canHighlightEntity:(id<PajeEntity>)entity;
 
 - (BOOL)isSelectedEntity:(id<PajeEntity>)entity;

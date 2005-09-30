@@ -70,6 +70,14 @@ typedef enum {
 
 - (NSArray *)fieldNames;
 - (id)valueOfFieldNamed:(NSString *)fieldName;
+
+// When the entity has subentities
+- (BOOL)isAggregate;
+- (unsigned)subCount;
+- (NSColor *)subColorAtIndex:(unsigned)index;
+- (NSString *)subNameAtIndex:(unsigned)index;
+- (double)subDurationAtIndex:(unsigned)index;
+- (unsigned)subCountAtIndex:(unsigned)index;
 @end
 
 @protocol PajeEntityType

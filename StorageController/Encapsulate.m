@@ -277,10 +277,54 @@
                                      toTime:(NSDate *)end
                                 minDuration:(double)minDuration
 {
-	return [self enumeratorOfEntitiesTyped:entityType
-                                   inContainer:container
-                                      fromTime:start
-                                        toTime:end];
+    NSEnumerator *en;
+    
+    if (0 && minDuration > 1e-6) {
+    en = [self enumeratorOfEntitiesTyped:entityType
+                             inContainer:container
+                                fromTime:[start addTimeInterval:-minDuration]
+                                  toTime:[end addTimeInterval:minDuration]
+                             minDuration:minDuration/2];
+    } else
+    en = [self enumeratorOfEntitiesTyped:entityType
+                             inContainer:container
+                                fromTime:[start addTimeInterval:-minDuration]
+                                  toTime:[end addTimeInterval:minDuration]];
+    if (minDuration <= 1e-6
+        || ([entityType drawingType] != PajeStateDrawingType
+            && [entityType drawingType] != PajeEventDrawingType)) {
+        return en;
+    }
+    EntityAggregator *aggregator;
+    PajeEntity *state;
+    NSMutableArray *filtered;
+    PajeEntity *aggregate;
+    
+    if ([entityType drawingType] == PajeStateDrawingType) {
+        aggregator = [StateAggregator aggregatorWithMaxDuration:minDuration];
+    } else {
+        aggregator = [EventAggregator aggregatorWithMaxDuration:minDuration];
+    }
+    filtered = [NSMutableArray array];
+    en = [[en allObjects] reverseObjectEnumerator];
+    while ((state = [en nextObject]) != nil) {
+        if (![aggregator addEntity:state]) {
+            aggregate = [aggregator aggregate];
+            if (aggregate != nil) {
+                [filtered addObject:aggregate];
+                if (![aggregator addEntity:state]) {
+                    [filtered addObject:state];
+                }
+            } else {
+                [filtered addObject:state];
+            }
+        }
+    }
+    aggregate = [aggregator aggregate];
+    if (aggregate != nil) {
+        [filtered addObject:aggregate];
+    }
+    return [filtered reverseObjectEnumerator];
 }
 
 - (NSEnumerator *)enumeratorOfContainersTyped:(PajeEntityType *)entityType

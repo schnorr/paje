@@ -136,6 +136,46 @@
     return [self duration];
 }
 
+- (BOOL)isAggregate
+{
+    return NO;
+}
+
+- (unsigned)subCount
+{
+    return 0;
+}
+
+- (NSString *)subNameAtIndex:(unsigned)index
+{
+    return [self name];
+}
+
+- (NSColor *)subColorAtIndex:(unsigned)index
+{
+    return [self color];
+}
+
+- (double)subDurationAtIndex:(unsigned)index
+{
+    return [self duration];
+}
+
+- (unsigned)subCountAtIndex:(unsigned)index
+{
+    return 1;
+}
+
+- (CondensedEntitiesArray *)condensedEntities
+{
+    return nil;
+}
+
+- (unsigned)condensedEntitiesCount
+{
+    return 0;
+}
+
 - (NSColor *)color
 {
     NSString *n = [self name];

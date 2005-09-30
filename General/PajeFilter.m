@@ -518,6 +518,37 @@ ofContainersTyped:(PajeEntityType *)containerType
 }
 
 
+- (BOOL)isAggregateEntity:(id<PajeEntity>)entity
+{
+    return [inputComponent isAggregateEntity:entity];
+}
+
+- (unsigned)subCountForEntity:(id<PajeEntity>)entity
+{
+    return [inputComponent subCountForEntity:entity];
+}
+
+- (NSColor *)subColorAtIndex:(unsigned)index forEntity:(id<PajeEntity>)entity
+{
+    return [inputComponent subColorAtIndex:index forEntity:entity];
+}
+
+- (NSString *)subNameAtIndex:(unsigned)index forEntity:(id<PajeEntity>)entity
+{
+    return [inputComponent subNameAtIndex:index forEntity:entity];
+}
+
+- (double)subDurationAtIndex:(unsigned)index forEntity:(id<PajeEntity>)entity
+{
+    return [inputComponent subDurationAtIndex:index forEntity:entity];
+}
+
+- (unsigned)subCountAtIndex:(unsigned)index forEntity:(id<PajeEntity>)entity
+{
+    return [inputComponent subCountAtIndex:index forEntity:entity];
+}
+
+
 
 - (BOOL)canHighlightEntity:(id<PajeEntity>)entity
 {
