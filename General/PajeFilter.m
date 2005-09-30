@@ -328,11 +328,13 @@ ofContainersTyped:(PajeEntityType *)containerType
                                 inContainer:(PajeContainer *)container
                                    fromTime:(NSDate *)start
                                      toTime:(NSDate *)end
+                                minDuration:(double)minDuration
 {
     return [inputComponent enumeratorOfEntitiesTyped:entityType
                                          inContainer:container
                                             fromTime:start
-                                              toTime:end];
+                                              toTime:end
+                                         minDuration:minDuration];
 }
 
 - (NSEnumerator *)enumeratorOfContainersTyped:(PajeEntityType *)entityType

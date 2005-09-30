@@ -87,7 +87,8 @@
 - (NSEnumerator *)enumeratorOfEntitiesTyped:(PajeEntityType *)entityType
                                 inContainer:(PajeContainer *)container
                                    fromTime:(NSDate *)start
-                                     toTime:(NSDate *)end;
+                                     toTime:(NSDate *)end
+                                minDuration:(double)minDuration;
 
 @end
 

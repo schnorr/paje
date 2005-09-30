@@ -78,6 +78,8 @@
     BOOL      isMakingSelection;
     BOOL      selectionExists;
     
+    int       smallEntityWidth;
+    
 #ifdef GNUSTEP
     NSSize    size;   // to workaround a probable bug in GNUstep
                       // ([NSScrollView tile] is changing our frame size)
@@ -197,5 +199,6 @@ BOOL line_hit(double px, double py,
 #define XtoTIME(x) [startTime addTimeInterval:(x) / pointsPerSecond]
 //#define TIMEtoX(time) ([time timeIntervalSinceReferenceDate] * pointsPerSecond)
 //#define XtoTIME(x) [NSDate dateWithTimeIntervalSinceReferenceDate:(x) / pointsPerSecond]
+#define SMALL_ENTITY_DURATION (smallEntityWidth / pointsPerSecond)
 
 #endif

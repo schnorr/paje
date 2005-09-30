@@ -419,7 +419,8 @@
 - (NSEnumerator *)enumeratorOfEntitiesTyped:(PajeEntityType *)entityType
                                 inContainer:(PajeContainer *)container
                                    fromTime:(NSDate *)start
-                                     toTime:(NSDate *)end;
+                                     toTime:(NSDate *)end
+                                minDuration:(double)minDuration
 {
     NSEnumerator *origEnum;
     NSMutableSet *filter;
@@ -432,7 +433,8 @@
     origEnum = [inputComponent enumeratorOfEntitiesTyped:entityType
                                              inContainer:container
                                                 fromTime:start
-                                                  toTime:end];
+                                                  toTime:end
+                                             minDuration:minDuration];
 
     filter = [filters objectForKey:entityType];
     if (filter != nil) {

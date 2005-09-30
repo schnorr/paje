@@ -520,17 +520,20 @@
                                 inContainer:(PajeContainer *)container
                                    fromTime:(NSDate *)start
                                      toTime:(NSDate *)end
+                                minDuration:(double)minDuration
 {
     if (![entityType isKindOfClass:[ReduceEntityType class]])
         return [inputComponent enumeratorOfEntitiesTyped:entityType
                                              inContainer:container
                                                 fromTime:start
-                                                  toTime:end];
+                                                  toTime:end
+                                             minDuration:minDuration];
 
     return [(ReduceEntityType *)entityType
                         enumeratorOfEntitiesInContainer:container
                                                fromTime:start
-                                                 toTime:end];
+                                                 toTime:end
+                                            minDuration:minDuration];
 }
 
 

@@ -146,6 +146,8 @@ void PSInit(void){}
     if (pointsPerSecond == 0) {
         pointsPerSecond = 10000;
     }
+    smallEntityWidth = [[NSUserDefaults standardUserDefaults]
+                              integerForKey:DefaultsKey(@"SmallEntityWidth")];
     hasZoomed = NO;
     filter = nil;
     trackingRectTag = 0;

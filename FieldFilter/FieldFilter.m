@@ -279,7 +279,8 @@ withFilterDescriptor:(FieldFilterDescriptor *)fdesc
 - (NSEnumerator *)enumeratorOfEntitiesTyped:(PajeEntityType *)entityType
                                 inContainer:(PajeContainer *)container
                                    fromTime:(NSDate *)start
-                                     toTime:(NSDate *)end;
+                                     toTime:(NSDate *)end
+                                minDuration:(double)minDuration
 {
     NSEnumerator *origEnum;
     FieldFilterDescriptor *fdesc;
@@ -287,7 +288,8 @@ withFilterDescriptor:(FieldFilterDescriptor *)fdesc
     origEnum = [inputComponent enumeratorOfEntitiesTyped:entityType
                                              inContainer:container
                                                 fromTime:start
-                                                  toTime:end];
+                                                  toTime:end
+                                             minDuration:minDuration];
 
     fdesc = [filterDescriptors objectForKey:entityType];
     if (fdesc != nil && [fdesc action] == FILTEROUT) {

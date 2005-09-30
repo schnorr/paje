@@ -515,7 +515,8 @@ do { \
     enumerator = [filter enumeratorOfEntitiesTyped:[layoutDescriptor entityType]
                                        inContainer:container
                                           fromTime:drawStartTime
-                                            toTime:drawEndTime];
+                                            toTime:drawEndTime
+                                       minDuration:SMALL_ENTITY_DURATION];
 
     switch (drawingType) {
         case PajeEventDrawingType:

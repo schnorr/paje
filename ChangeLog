@@ -1,4 +1,17 @@
 2005-09-30  Benhur Stein <benhur@inf.ufsm.br>
+        * General/PajeFilter.[hm]: change entity enumeration method to include
+          minDuration hint
+          (enumeratorOfEntitiesTyped:inContainer:fromTime:toTime:minDuration:)
+        * EntityTypeFilter/EntityTypeSelector.[hm],
+          FieldFilter/FieldFilter.[hm], ImbricationFilter/InsetLimit.[hm], 
+          ReductionFilter/BusyNode.[hm], StatViewer/StatViewer.m: reflect change
+        * SpaceTimeViewer/DrawView+{Drawing,Finding}.m: reflect change
+        * SpaceTimeViewer/DrawView.h: add smallEntityWidth field to keep
+          the width smaller than which entities should be aggregated;
+          add SMALL_ENTITY_DURATION to convert width to time duration
+        * SpaceTimeViewer/DrawView.m: read "SmallEntityWidth" from defaults
+
+2005-09-30  Benhur Stein <benhur@inf.ufsm.br>
         * StorageController/AnchorFilter.[hm]: new class (from Encapsulate)
         * StorageController/Encapsulate.[hm]: split in AnchorFilter subclass
         * StorageController/GNUmakefile: add AnchorFilter

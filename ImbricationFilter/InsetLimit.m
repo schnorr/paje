@@ -344,6 +344,7 @@
                                 inContainer:(PajeContainer *)container
                                    fromTime:(NSDate *)start
                                      toTime:(NSDate *)end
+                                minDuration:(double)minDuration
 {
     int min, max;
     NSRange ran;
@@ -351,7 +352,8 @@
     origEnum = [inputComponent enumeratorOfEntitiesTyped:entityType
                                              inContainer:container
                                                 fromTime:start
-                                                  toTime:end];
+                                                  toTime:end
+                                             minDuration:minDuration];
     if (![self isFilteredEntityType:entityType]) {
         return origEnum;
     }

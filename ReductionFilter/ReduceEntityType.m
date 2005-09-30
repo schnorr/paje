@@ -215,6 +215,7 @@
 - (NSEnumerator *)enumeratorOfEntitiesInContainer:(PajeContainer *)container
                                          fromTime:(NSDate *)start
                                            toTime:(NSDate *)end
+                                      minDuration:(double)minDuration
 {
     NSEnumerator *origEnum;
     NSNumber *min;
@@ -233,7 +234,8 @@
     origEnum = [component enumeratorOfEntitiesTyped:entityTypeToReduce
                                         inContainer:container
                                            fromTime:start
-                                             toTime:end];
+                                             toTime:end
+                                        minDuration:0];
     array = [[BusyArray alloc] initWithEntityType:self
                                         container:container
                                         startTime:start

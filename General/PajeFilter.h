@@ -185,12 +185,15 @@ ofContainersTyped:(PajeEntityType *)containerType
 // The type that contains the given type
 - (PajeEntityType *)containerTypeForType:(PajeEntityType *)entityType;
 
-// All entities of a given type that are in a container. Container must be
-// of a type ancestral of entityType in the hierarchy.
+// All entities of a given type that are in a container in a certain
+// time interval. minDuration is a hint to the minimum duration of an
+// entity of interest -- shorter entities could be condensed if possible.
+// Container must be of a type ancestral of entityType in the hierarchy.
 - (NSEnumerator *)enumeratorOfEntitiesTyped:(PajeEntityType *)entityType
                                 inContainer:(PajeContainer *)container
                                    fromTime:(NSDate *)start
-                                     toTime:(NSDate *)end;
+                                     toTime:(NSDate *)end
+                                minDuration:(double)minDuration;
 
 // All containers of a given type contained by container. Container must be
 // of a type ancestral of entityType in the hierarchy.

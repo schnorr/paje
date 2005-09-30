@@ -228,7 +228,8 @@
     enumerator = [self enumeratorOfEntitiesTyped:[self selectedEntityType]
                                      inContainer:container
                                         fromTime:startTime
-                                            toTime:endTime];
+                                          toTime:endTime
+                                     minDuration:[endTime timeIntervalSinceDate:startTime]/100];
     enumerator = [[enumerator allObjects] reverseObjectEnumerator];
     while ((entity = [enumerator nextObject]) != nil) {
         StatValue *v;

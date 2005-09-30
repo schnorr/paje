@@ -153,7 +153,8 @@ BOOL line_hit(double px, double py,
     enumerator = [filter enumeratorOfEntitiesTyped:[layoutDescriptor entityType]
                                        inContainer:container
                                           fromTime:findStartTime
-                                            toTime:findEndTime];
+                                            toTime:findEndTime
+                                       minDuration:SMALL_ENTITY_DURATION];
     while ((entity = [enumerator nextObject]) != nil) {
         if ([self isPoint:point insideEntity:entity]) {
             // find the entity whose center is closest to point
@@ -270,7 +271,8 @@ break;
     enumerator = [filter enumeratorOfEntitiesTyped:[layoutDescriptor entityType]
                                        inContainer:container
                                           fromTime:findStartTime
-                                            toTime:findEndTime];
+                                            toTime:findEndTime
+                                       minDuration:SMALL_ENTITY_DURATION];
     while ((entity = [enumerator nextObject]) != nil) {
         if ([self isPoint:point insideEntity:entity]) {
             [array addObject:entity];
