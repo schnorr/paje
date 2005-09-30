@@ -271,6 +271,18 @@
     return multiEnum;
 }
 
+- (NSEnumerator *)enumeratorOfEntitiesTyped:(PajeEntityType *)entityType
+                                inContainer:(PajeContainer *)container
+                                   fromTime:(NSDate *)start
+                                     toTime:(NSDate *)end
+                                minDuration:(double)minDuration
+{
+	return [self enumeratorOfEntitiesTyped:entityType
+                                   inContainer:container
+                                      fromTime:start
+                                        toTime:end];
+}
+
 - (NSEnumerator *)enumeratorOfContainersTyped:(PajeEntityType *)entityType
                                   inContainer:(PajeContainer *)container
 {

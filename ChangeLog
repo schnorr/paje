@@ -1,4 +1,7 @@
 2005-09-30  Benhur Stein <benhur@inf.ufsm.br>
+        * StorageController/Encapsulate.m: forgotten change to minDuration
+
+2005-09-30  Benhur Stein <benhur@inf.ufsm.br>
         * General/PajeFilter.[hm]: change entity enumeration method to include
           minDuration hint
           (enumeratorOfEntitiesTyped:inContainer:fromTime:toTime:minDuration:)
