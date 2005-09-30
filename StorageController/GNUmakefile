@@ -12,9 +12,9 @@ BUNDLE_NAME = StorageController
 
 ADDITIONAL_INCLUDE_DIRS = -I../General
 
-StorageController_OBJC_FILES = Encapsulate.m
+StorageController_OBJC_FILES = AnchorFilter.m Encapsulate.m
 
-StorageController_HEADER_FILES = Encapsulate.h
+StorageController_HEADER_FILES = AnchorFilter.h Encapsulate.h
 
 OTHERSRCS = Makefile.preamble Makefile Makefile.postamble m.template \
 h.template

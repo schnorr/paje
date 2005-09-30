@@ -22,17 +22,8 @@
 
 //
 
-#include <Foundation/Foundation.h>
-#include "../General/PajeFilter.h"
+#include "AnchorFilter.h"
 #include "../General/Protocols.h"
-
-@interface AnchorFilter : PajeFilter
-{
-    NSSet *selectedContainers;
-    NSDate *selectionStartTime;
-    NSDate *selectionEndTime;
-}
-@end
 
 @interface Encapsulate : AnchorFilter <PajeStorageController>
 {
