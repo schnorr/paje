@@ -52,6 +52,7 @@ typedef enum {
 // before beeing sent).
 - (NSDate *)firstTime;
 - (NSDate *)lastTime;
+- (double)duration;
 @end
 
 @protocol PajeEntity <PajeTiming, NSCoding>

@@ -26,6 +26,7 @@
 #define SUBVIEW_SEPARATION 2
 #define BOTTOM_MARGIN 10
 
+
 @implementation PajeEntityInspector
 
 static NSMutableArray *allInstances;
@@ -80,8 +81,8 @@ static NSMutableArray *allInstances;
     }
 
     [[showFileButton retain] removeFromSuperview];
-    archivedTitleField= [NSArchiver archivedDataWithRootObject:titleField];
-    archivedValueField= [NSArchiver archivedDataWithRootObject:valueField];
+    archivedTitleField = [NSArchiver archivedDataWithRootObject:titleField];
+    archivedValueField = [NSArchiver archivedDataWithRootObject:valueField];
     [archivedTitleField retain];
     [archivedValueField retain];
     [titleField removeFromSuperview];
@@ -371,6 +372,7 @@ static NSMutableArray *allInstances;
     NSDate *startTime;
     NSDate *endTime;
     double duration;
+    double exclusiveDuration;
     id startLogical;
     id endLogical;
 
@@ -401,7 +403,7 @@ static NSMutableArray *allInstances;
     fieldValues = [NSMutableArray array];
     startTime = [inspectedEntity startTime];
     endTime = [inspectedEntity endTime];
-    duration = [[inspectedEntity duration] doubleValue];
+    duration = [inspectedEntity duration];
     if (duration == 0) {
         [fieldTitles addObject:@"Time"];
         [fieldValues addObject:[startTime description]];
@@ -412,6 +414,13 @@ static NSMutableArray *allInstances;
         [fieldValues addObject:[endTime description]];
         [fieldTitles addObject:@"Duration"];
         [fieldValues addObject:[NSString stringWithFormat:@"%.6f", duration]];
+    }
+    exclusiveDuration = [inspectedEntity exclusiveDuration];
+    NSLog(@"inspected %@ dur=%f excl=%f", inspectedEntity, duration, exclusiveDuration);
+    if (exclusiveDuration != duration) {
+        [fieldTitles addObject:@"Exclusive Duration"];
+        [fieldValues addObject:[NSString stringWithFormat:@"%.6f",
+                                         exclusiveDuration]];
     }
     startLogical = [inspectedEntity valueOfFieldNamed:@"StartLogical"];
     if (startLogical != nil) {
@@ -430,6 +439,7 @@ static NSMutableArray *allInstances;
     [nonDisplayedFields removeObject:@"StartTime"];
     [nonDisplayedFields removeObject:@"EndTime"];
     [nonDisplayedFields removeObject:@"Duration"];
+    [nonDisplayedFields removeObject:@"Exclusive Duration"];
     
     box = [self boxWithTitle:@"Timing"
                  fieldTitles:fieldTitles

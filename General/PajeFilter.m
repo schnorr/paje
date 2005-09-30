@@ -485,6 +485,11 @@ ofContainersTyped:(PajeEntityType *)containerType
     return [inputComponent timeForEntity:entity];
 }
 
+- (double)durationForEntity:(id<PajeEntity>)entity
+{
+    return [inputComponent durationForEntity:entity];
+}
+
 - (PajeDrawingType)drawingTypeForEntity:(id<PajeEntity>)entity
 {
     return [inputComponent drawingTypeForEntity:entity];
@@ -509,6 +514,8 @@ ofContainersTyped:(PajeEntityType *)containerType
 {
     return [inputComponent imbricationLevelForEntity:entity];
 }
+
+
 
 - (BOOL)canHighlightEntity:(id<PajeEntity>)entity
 {

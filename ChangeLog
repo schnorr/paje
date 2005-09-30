@@ -1,4 +1,14 @@
 2005-09-29  Benhur Stein <benhur@inf.ufsm.br>
+        * General/PajeEntity.[hm]: change duration type to double, add
+          exclusiveDuration method
+        * General/PajeEntityInspector.m: reflect type change; show
+          exclusiveDuration if not 0
+        * General/PajeFilter.[hm]: durationForEntity: is double now
+        * General/Protocols.h: duration is double too
+        * PajeSimulator/UserState.[hm]: add inclusiveDuration variable and
+          exclusiveDuration method
+
+2005-09-29  Benhur Stein <benhur@inf.ufsm.br>
         * General/PajeType.m: change default entity color to white
 
 2005-09-14  Benhur Stein <benhur@inf.ufsm.br>

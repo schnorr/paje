@@ -126,12 +126,14 @@
     return [[self startTime] laterDate:[self endTime]];
 }
 
-- (NSNumber *)duration
+- (double)duration
 {
-    double duration;
-    
-    duration = [[self endTime] timeIntervalSinceDate:[self startTime]];
-    return [NSNumber numberWithDouble:duration];
+    return [[self endTime] timeIntervalSinceDate:[self startTime]];
+}
+
+- (double)exclusiveDuration
+{
+    return [self duration];
 }
 
 - (NSColor *)color
@@ -187,7 +189,7 @@
     } else if ([fieldName isEqualToString:@"EndTime"]) {
         return [self endTime];
     } else if ([fieldName isEqualToString:@"Duration"]) {
-        return [self duration];
+        return [NSNumber numberWithDouble:[self duration]];
     } else {
         return nil;
     }

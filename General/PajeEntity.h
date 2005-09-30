@@ -58,7 +58,8 @@
 - (NSDate *)endTime;
 - (NSDate *)firstTime;
 - (NSDate *)lastTime;
-- (NSNumber *)duration;
+- (double)duration;
+- (double)exclusiveDuration;
 
 - (NSColor *)color;
 - (void)setColor:(NSColor *)c;

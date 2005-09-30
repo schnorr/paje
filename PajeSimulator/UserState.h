@@ -31,6 +31,7 @@
 {
     PajeEvent *endEvent;
     int imbricationLevel;
+    double innerDuration;
 }
 
 + (UserState *)stateOfType:(PajeEntityType *)type
@@ -51,6 +52,9 @@
 
 - (void)setImbricationLevel:(int)level;
 - (int)imbricationLevel;
+
+- (double)exclusiveDuration;
+- (double)inclusiveDuration;
 @end
 
 #endif

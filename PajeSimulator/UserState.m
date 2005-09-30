@@ -43,7 +43,9 @@
                      container:c
                          event:e];
     if (self != nil) {
+        endEvent = nil;
         imbricationLevel = 0;
+        innerDuration = 0;
     }
     return self;
 }
@@ -81,10 +83,23 @@
     return imbricationLevel;
 }
 
+- (double)exclusiveDuration
+{
+    return [self duration] - innerDuration;
+}
+
+- (double)inclusiveDuration
+{
+    return [self duration];
+}
+
 - (NSArray *)fieldNames
 {
     NSArray *localFields;
-    localFields = [NSArray arrayWithObject:@"Imbrication Level"];
+    localFields = [NSArray arrayWithObjects:
+                        @"Imbrication Level",
+                        @"Exclusive Duration",
+                        nil];
     localFields = [localFields arrayByAddingObjectsFromArray:[endEvent fieldNames]];
     return [[super fieldNames] arrayByAddingObjectsFromArray:localFields];
 }
@@ -92,8 +107,11 @@
 - (id)valueOfFieldNamed:(NSString *)fieldName
 {
     id value;
-    if ([fieldName isEqual:@"Imbrication Level"])
+    if ([fieldName isEqual:@"Imbrication Level"]) {
         return [NSNumber numberWithInt:[self imbricationLevel]];
+    } else if ([fieldName isEqual:@"Exclusive Duration"]) {
+        return [NSNumber numberWithDouble:[self exclusiveDuration]];
+    }
     value = [super valueOfFieldNamed:fieldName];
     if (value != nil)
         return value;
@@ -105,15 +123,15 @@
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];
-    [coder encodeObject:endEvent];
-    [coder encodeObject:[NSNumber numberWithInt:imbricationLevel]];
+    [coder encodeValuesOfObjCTypes:"@id",
+            &endEvent, &imbricationLevel, &innerDuration];
 }
 
 - (id)initWithCoder:(NSCoder *)coder
 {
     self = [super initWithCoder:coder];
-    Assign(endEvent, [coder decodeObject]);
-    imbricationLevel = [[coder decodeObject] intValue];
+    [coder decodeValuesOfObjCTypes:"@id",
+            &endEvent, &imbricationLevel, &innerDuration];
     return self;
 }
 

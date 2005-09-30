@@ -252,6 +252,7 @@ ofContainersTyped:(PajeEntityType *)containerType
 - (NSDate *)startTimeForEntity:(id<PajeEntity>)entity;
 - (NSDate *)endTimeForEntity:(id<PajeEntity>)entity;
 - (NSDate *)timeForEntity:(id<PajeEntity>)entity;
+- (double)durationForEntity:(id<PajeEntity>)entity;
 - (PajeDrawingType)drawingTypeForEntity:(id<PajeEntity>)entity;
 - (NSString *)nameForEntity:(id<PajeEntity>)entity;
 - (NSNumber *)valueForEntity:(id<PajeEntity>)entity; // for variables
