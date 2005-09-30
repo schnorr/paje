@@ -416,7 +416,6 @@ static NSMutableArray *allInstances;
         [fieldValues addObject:[NSString stringWithFormat:@"%.6f", duration]];
     }
     exclusiveDuration = [inspectedEntity exclusiveDuration];
-    NSLog(@"inspected %@ dur=%f excl=%f", inspectedEntity, duration, exclusiveDuration);
     if (exclusiveDuration != duration) {
         [fieldTitles addObject:@"Exclusive Duration"];
         [fieldValues addObject:[NSString stringWithFormat:@"%.6f",

@@ -1,3 +1,15 @@
+2005-09-30  Benhur Stein <benhur@inf.ufsm.br>
+        * General/Association.[hm]: new class
+        * General/CondensedEntitiesArray.[hm]: new class
+        * General/GNUmakefile: include new classes
+        * PajeSimulator/UserState.[hm]: add innerStates and
+          condensedEntitiesCount variables;
+          add addInnerState: method; 
+          add accessor methods condensedEntities,
+          condensedEntitiesCount, subCount, subColorAtIndex:,
+          subDurationAtIndex:
+        * PajeSimulator/SimulContainer.m: add inner states to states
+
 2005-09-29  Benhur Stein <benhur@inf.ufsm.br>
         * General/PajeEntity.[hm]: change duration type to double, add
           exclusiveDuration method

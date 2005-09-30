@@ -45,6 +45,7 @@
     if (self != nil) {
         endEvent = nil;
         imbricationLevel = 0;
+        innerStates = nil;
         innerDuration = 0;
     }
     return self;
@@ -52,6 +53,7 @@
 - (void)dealloc
 {
     Assign(endEvent, nil);
+    Assign(innerStates, nil);
     [super dealloc];
 }
 
@@ -92,6 +94,49 @@
 {
     return [self duration];
 }
+
+- (unsigned)condensedEntitiesCount
+{
+    return condensedEntitiesCount;
+}
+
+- (void)addInnerState:(UserState *)innerState
+{
+    innerDuration += [innerState duration];
+    if (innerStates == nil) {
+        innerStates = [[CondensedEntitiesArray alloc] init];
+    }
+    [innerStates addArray:[innerState condensedEntities]];
+    [innerStates addName:[innerState name]
+                duration:[innerState exclusiveDuration]];
+    condensedEntitiesCount += [innerState condensedEntitiesCount] + 1;
+}
+
+- (CondensedEntitiesArray *)condensedEntities
+{
+    return innerStates;
+}
+
+- (unsigned)subCount
+{
+    return [innerStates count];
+}
+
+- (NSString *)subNameAtIndex:(unsigned)i
+{
+    return [innerStates nameAtIndex:i];
+}
+
+- (NSColor *)subColorAtIndex:(unsigned)i
+{
+    return [entityType colorForName:[innerStates nameAtIndex:i]];
+}
+
+- (double)subDurationAtIndex:(unsigned)i
+{
+    return [innerStates durationAtIndex:i];
+}
+
 
 - (NSArray *)fieldNames
 {

@@ -31,7 +31,9 @@ General_OBJC_FILES = \
 	GNUstep+Additions.m \
 	DataScanner.m \
 	PajeEvent.m \
-	SourceTextController.m
+	SourceTextController.m \
+	Association.m \
+	CondensedEntitiesArray.m
 
 General_HEADER_FILES = \
 	Comparing.h \
@@ -62,7 +64,9 @@ General_HEADER_FILES = \
 	PajeEntityInspector.h \
 	DataScanner.h \
 	PajeEvent.h \
-	SourceTextController.h
+	SourceTextController.h \
+	Association.h \
+	CondensedEntitiesArray.h
 
 General_RESOURCE_FILES = \
 	HierarchyBrowser.gorm \
@@ -85,7 +89,8 @@ PROJECT_HEADERS = \
 	SourceCodeReference.h \
 	NSDictionary+Additions.h \
 	NSString+Additions.h \
-	PajeFilter.h
+	PajeFilter.h \
+	CondensedEntitiesArray.h
 
 -include GNUmakefile.preamble
 include $(GNUSTEP_MAKEFILES)/bundle.make

@@ -26,12 +26,15 @@
 //
 
 #include "UserEvent.h"
+#include "../General/CondensedEntitiesArray.h"
 
 @interface UserState : UserEvent
 {
     PajeEvent *endEvent;
     int imbricationLevel;
     double innerDuration;
+    CondensedEntitiesArray *innerStates;
+    unsigned condensedEntitiesCount;
 }
 
 + (UserState *)stateOfType:(PajeEntityType *)type
@@ -55,6 +58,14 @@
 
 - (double)exclusiveDuration;
 - (double)inclusiveDuration;
+
+- (void)addInnerState:(UserState *)innerState;
+- (CondensedEntitiesArray *)condensedEntities;
+- (unsigned)condensedEntitiesCount;
+- (unsigned)subCount;
+- (NSString *)subNameAtIndex:(unsigned)i;
+- (double)subDurationAtIndex:(unsigned)i;
+- (NSColor *)subColorAtIndex:(unsigned)i;
 @end
 
 #endif

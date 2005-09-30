@@ -143,16 +143,18 @@
     }
 
     subEnum = [subContainers objectEnumerator];
-    while ((subContainer = [subEnum nextObject]) != nil)
+    while ((subContainer = [subEnum nextObject]) != nil) {
         [subContainer stopWithEvent:event];
+    }
 }
 
 - (id)entityOfType:(id)type
 {
     id entity = [userEntities objectForKey:type];
     
-    if (![entity isKindOfClass:[NSArray class]])
+    if (![entity isKindOfClass:[NSArray class]]) {
         return entity; // can be nil
+    }
     
     return [(NSArray *)entity lastObject];
 }
@@ -161,17 +163,20 @@
 {
     id oldEntity = [userEntities objectForKey:type];
 
-    if (oldEntity && [oldEntity isKindOfClass:[NSMutableArray class]]) {
+    if (oldEntity != nil && [oldEntity isKindOfClass:[NSMutableArray class]]) {
         NSMutableArray *array = (NSMutableArray *)oldEntity;
         unsigned count = [array count];
-        if ([entity respondsToSelector:@selector(setImbricationLevel:)])
+        if ([entity respondsToSelector:@selector(setImbricationLevel:)]) {
             [entity setImbricationLevel:(count>0) ? count-1 : 0];
-        if (count == 0)
+        }
+        if (count == 0) {
             [array addObject:entity];
-        else
+        } else {
             [array replaceObjectAtIndex:count-1 withObject:entity];
-    } else
+        }
+    } else {
         [userEntities setObject:entity forKey:type];
+    }
 }
 
 - (void)pushEntity:(id)entity ofType:(id)type
@@ -266,7 +271,7 @@ retry:
                                startEvent:event];
 
     currentUserState = [self entityOfType:type];
-    if (currentUserState) {
+    if (currentUserState != nil) {
         [currentUserState setEndEvent:event];
         //[simulator entityChangedEndTime:currentUserState];
         [simulator outputEntity:currentUserState];
@@ -297,12 +302,17 @@ retry:
                  withEvent:(PajeEvent *)event
 {
     UserState *currentUserState;
+    UserState *newCurrentUserState;
 
     currentUserState = [self popEntityOfType:type];
-    if (currentUserState) {
+    if (currentUserState != nil) {
         [currentUserState setEndEvent:event];
         [simulator outputEntity:currentUserState];
 //        [simulator entityChangedEndTime:currentUserState];
+        newCurrentUserState = [self entityOfType:type];
+        if (newCurrentUserState != nil) {
+            [newCurrentUserState addInnerState:currentUserState];
+        }
     } else {
         NSWarnMLog(@"No user state to pop with event %@", event);
     }
@@ -335,7 +345,7 @@ retry:
 {
     [self _verifyMinMaxOfEntityType:type withValue:value];
     [self setUserStateOfType:type
-                     toValue:value
+                     toValue:[value stringValue]
                    withEvent:event];
 }
 
