@@ -1,3 +1,7 @@
+2005-10-31  Benhur Stein <benhur@inf.ufsm.br>
+	* General/PajeEntityInspector.m: add inspection of new data and
+	  aggregate events and states
+
 2005-09-30  Benhur Stein <benhur@inf.ufsm.br>
         * General/Filter.[hm]: add new query methods to support aggregates
           - (BOOL)isAggregateEntity:(id<PajeEntity>)entity;

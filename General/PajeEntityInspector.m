@@ -26,6 +26,42 @@
 #define SUBVIEW_SEPARATION 2
 #define BOTTOM_MARGIN 10
 
+@interface InnerStatesCell : NSCell
+@end
+@implementation InnerStatesCell
+- (void)drawInteriorWithFrame:(NSRect)frame inView:(NSView *)controlView
+{
+    PajeEntity *entity;
+    unsigned count;
+    unsigned i;
+    double duration;
+    float x0;
+    float x;
+    float h;
+    
+    entity = [self representedObject];
+    [[entity color] set];
+    NSRectFill(frame);
+    duration = [entity duration];
+    x = x0 = NSMinX(frame);
+    h = NSHeight(frame) * 2 / 3 - 1;
+    count = [entity subCount];
+    for (i = 0; i < count; i++) {
+        double subDuration;
+        float w;
+
+        [[entity subColorAtIndex:i] set];
+        subDuration = [entity subDurationAtIndex:i];
+        w = subDuration / duration * NSWidth(frame);
+        NSRectFill(NSMakeRect(x, NSMinY(frame), w, h));
+        x += w; 
+    }
+    [[NSColor blackColor] set];
+    NSFrameRect(NSMakeRect(x0, NSMinY(frame), x - x0, h + 1));
+    NSFrameRect(frame);
+}
+@end
+
 
 @implementation PajeEntityInspector
 
@@ -247,6 +283,12 @@ static NSMutableArray *allInstances;
         
         [tField setStringValue:title];
         [vField setStringValue:value];
+        if ([value isEqual:@"**AQUI**"]) {
+            NSCell *cell = [[InnerStatesCell alloc] init];
+            [cell setRepresentedObject:inspectedEntity];
+            [vField setCell:cell];
+            [cell release];
+        }
         
         height = MAX([[tField cell] cellSize].height,
                      [[vField cell] cellSize].height);
@@ -415,11 +457,15 @@ static NSMutableArray *allInstances;
         [fieldTitles addObject:@"Duration"];
         [fieldValues addObject:[NSString stringWithFormat:@"%.6f", duration]];
     }
-    exclusiveDuration = [inspectedEntity exclusiveDuration];
-    if (exclusiveDuration != duration) {
-        [fieldTitles addObject:@"Exclusive Duration"];
-        [fieldValues addObject:[NSString stringWithFormat:@"%.6f",
-                                         exclusiveDuration]];
+    if (![inspectedEntity isAggregate]
+        && [inspectedEntity drawingType] == PajeStateDrawingType) {
+        exclusiveDuration = [inspectedEntity exclusiveDuration];
+        if (exclusiveDuration != duration) {
+            [fieldTitles addObject:@"Exclusive Duration"];
+            [fieldValues addObject:[NSString stringWithFormat:@"%.6f (%.1f%%)",
+                                         exclusiveDuration,
+                                         exclusiveDuration/duration*100]];
+        }
     }
     startLogical = [inspectedEntity valueOfFieldNamed:@"StartLogical"];
     if (startLogical != nil) {
@@ -444,6 +490,69 @@ static NSMutableArray *allInstances;
                  fieldTitles:fieldTitles
                  fieldValues:fieldValues];
     [self addSubview:box];
+
+    /* Inner Entities */
+    unsigned innerCount;
+    innerCount = [inspectedEntity condensedEntitiesCount];
+    if (innerCount > 0) {
+        [fieldTitles removeAllObjects];
+        [fieldValues removeAllObjects];
+        [fieldTitles addObject:@"Count"];
+        [fieldValues addObject:[NSString stringWithFormat:@"%d", innerCount]];
+        [fieldTitles addObject:@"Values"];
+        [fieldValues addObject:@"**AQUI**"];
+        int i;
+        int subCount;
+        int count;
+        double value;
+        double total;
+        if ([inspectedEntity drawingType] == PajeStateDrawingType) {
+            total = duration;
+        } else {
+            total = innerCount;
+        }
+        subCount = [inspectedEntity subCount];
+        if (subCount <= 5) count = subCount;
+        else count = 4;
+        for (i = 0; i < count; i++) {
+            [fieldTitles addObject:[inspectedEntity subNameAtIndex:i]];
+            if ([inspectedEntity drawingType] == PajeStateDrawingType) {
+                value = [inspectedEntity subDurationAtIndex:i];
+                [fieldValues addObject:
+                            [NSString stringWithFormat:@"%.6f (%.1f%%)",
+                                    value, value/total*100]];
+            } else {
+                value = [inspectedEntity subCountAtIndex:i];
+                [fieldValues addObject:
+                            [NSString stringWithFormat:@"%d (%.1f%%)",
+                                    (int)value, value/total*100]];
+            }
+        }
+        if (count < subCount) {
+            value = 0;
+            for (; i < subCount; i++) {
+                if ([inspectedEntity drawingType] == PajeStateDrawingType) {
+                    value += [inspectedEntity subDurationAtIndex:i];
+                } else {
+                    value += [inspectedEntity subCountAtIndex:i];
+                }
+            }
+            [fieldTitles addObject:[NSString stringWithFormat:@"Other %d", i - count]];
+            if ([inspectedEntity drawingType] == PajeStateDrawingType) {
+                [fieldValues addObject:
+                            [NSString stringWithFormat:@"%.6f (%.1f%%)",
+                                    value, value/total*100]];
+            } else {
+                [fieldValues addObject:
+                            [NSString stringWithFormat:@"%d (%.1f%%)",
+                                    (int)value, value/total*100]];
+            }
+        }
+        box = [self boxWithTitle:@"Inner Entities"
+                     fieldTitles:fieldTitles
+                     fieldValues:fieldValues];
+        [self addSubview:box];
+    }
 }
 
 - (void)addGlobalFields
