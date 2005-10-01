@@ -1,4 +1,9 @@
-2005-10-31  Benhur Stein <benhur@inf.ufsm.br>
+2005-10-01  Benhur Stein <benhur@inf.ufsm.br>
+        * SpaceTimeViewer/STEntityTypeLayout.[hm],
+          SpaceTimeViewer/STLayoutEditor.{h,m,gorm}: keep user drawName choice;
+          add choice for drawing pseudo-3D lines for variables
+
+2005-10-01  Benhur Stein <benhur@inf.ufsm.br>
 	* General/PajeEntityInspector.m: add inspection of new data and
 	  aggregate events and states
 

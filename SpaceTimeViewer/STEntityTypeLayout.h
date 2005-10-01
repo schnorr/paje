@@ -69,6 +69,8 @@
 - (NSString *)defaultKeyForKey:(NSString*)key;
 - (float)defaultFloatForKey:(NSString *)key;
 - (void)setDefaultFloat:(float)val forKey:(NSString *)key;
+- (BOOL)defaultBoolForKey:(NSString *)key;
+- (void)setDefaultBool:(BOOL)value forKey:(NSString *)key;
 
 // accessor methods
 - (PajeEntityType *)entityType;
@@ -156,11 +158,14 @@
     float lineWidth;
     float minValue;
     float maxValue;
+    BOOL threeD;
     // mais coisas
 }
 
 - (void)setLineWidth:(float)val;
 - (float)lineWidth;
+- (void)setThreeD:(BOOL)flag;
+- (BOOL)threeD;
 
 - (void)setMinValue:(float)val;
 - (float)minValue;

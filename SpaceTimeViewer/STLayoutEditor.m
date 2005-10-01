@@ -130,6 +130,7 @@
     [lineWidthField setFloatValue:[layoutDescriptor lineWidth]];
     [minValueField  setFloatValue:[layoutDescriptor minValue]];
     [maxValueField  setFloatValue:[layoutDescriptor maxValue]];
+    [threeDSwitch  setState:[layoutDescriptor threeD]];
 }
 
 - (IBAction)heightChanged:(id)sender
@@ -153,6 +154,12 @@
 - (IBAction)maxValueChanged:(id)sender
 {
     [layoutDescriptor setMaxValue:[sender floatValue]];
+    [controller layoutEdited];
+}
+
+- (IBAction)threeDChanged:(id)sender
+{
+    [layoutDescriptor setThreeD:[sender state]];
     [controller layoutEdited];
 }
 @end

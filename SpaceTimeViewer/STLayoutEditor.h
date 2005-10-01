@@ -69,6 +69,7 @@
     IBOutlet NSTextField *lineWidthField;
     IBOutlet NSTextField *minValueField;
     IBOutlet NSTextField *maxValueField;
+    IBOutlet NSButton *threeDSwitch;
 }
 
 - (void)setLayoutDescriptor:(STEntityTypeLayout *)descriptor;
@@ -77,6 +78,7 @@
 - (IBAction)lineWidthChanged:(id)sender;
 - (IBAction)minValueChanged:(id)sender;
 - (IBAction)maxValueChanged:(id)sender;
+- (IBAction)threeDChanged:(id)sender;
 @end
 
 

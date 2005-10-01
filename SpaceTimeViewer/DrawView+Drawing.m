@@ -277,7 +277,7 @@ do { \
     draw = [drawFunction function];
     color = [filter colorForEntityType:entityType];
 
-#define VARIABLES_3D
+//#define VARIABLES_3D
 #ifdef VARIABLES_3D
     NSArray *todos = [enumerator allObjects];
 

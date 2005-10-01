@@ -36,8 +36,8 @@
     case PajeLinkDrawingType:      return [STLinkTypeLayout class];
     case PajeVariableDrawingType:  return [STVariableTypeLayout class];
     case PajeContainerDrawingType: return [STContainerTypeLayout class];
+    default: NSAssert1(0, @"Invalid drawing type %d", dtype);
     }
-    NSAssert1(0, @"Invalid drawing type %d", dtype);
     return Nil;
 }
 
@@ -80,6 +80,7 @@
                 [self defaultKeyForKey:@" Draw Function"],
             @"PSFillAndFrameWhite",
                 [self defaultKeyForKey:@" Highlight Function"],
+            @"NO", [self defaultKeyForKey:@"DrawsName"],
             nil]];
 }
 
@@ -107,6 +108,19 @@
                 setObject:value forKey:[self defaultKeyForKey:key]];
 }
 
+- (BOOL)defaultBoolForKey:(NSString *)key
+{
+    return [[NSUserDefaults standardUserDefaults] 
+                boolForKey:[self defaultKeyForKey:key]];
+}
+
+- (void)setDefaultBool:(BOOL)value forKey:(NSString *)key
+{
+    return [[NSUserDefaults standardUserDefaults] 
+                setBool:value forKey:[self defaultKeyForKey:key]];
+}
+
+
 - (id)initWithEntityType:(PajeEntityType *)etype
      containerDescriptor:(STContainerTypeLayout *)cDesc
               controller:(STController *)controller
@@ -122,6 +136,8 @@
         [self registerDefaultsWithController:controller];
 
         height = [self defaultFloatForKey:@"Height"];
+        
+        drawsName = [self defaultBoolForKey:@"DrawsName"];
 
         name = [self defaultStringForKey:@" Path Function"];
         Assign(shapeFunction, [ShapeFunction shapeFunctionWithName:name]);
@@ -218,6 +234,7 @@
 - (void)setDrawsName:(BOOL)draws
 {
     drawsName = draws;
+    [self setDefaultBool:draws forKey:@"DrawsName"];
 }
 
 - (BOOL)drawsName
@@ -558,6 +575,7 @@
     [[NSUserDefaults standardUserDefaults] registerDefaults:
         [NSDictionary dictionaryWithObjectsAndKeys:
             tLineWidth, [self defaultKeyForKey:@"LineWidth"],
+            @"NO", [self defaultKeyForKey:@"ThreeD"],
             @"PSNoShape", [self defaultKeyForKey:@" Path Function"],
             @"PSstroke",
                 [self defaultKeyForKey:@" Draw Function"],
@@ -575,6 +593,7 @@
                           controller:controller];
     if (self != nil) {
         lineWidth = [self defaultFloatForKey:@"LineWidth"];
+        threeD = [self defaultBoolForKey:@"ThreeD"];
     }
     return self;
 }
@@ -596,6 +615,16 @@
     return lineWidth;
 }
 
+- (void)setThreeD:(BOOL)flag
+{
+    threeD = flag;
+    [self setDefaultBool:threeD forKey:@"ThreeD"];
+}
+
+- (BOOL)threeD
+{
+    return threeD;
+}
 
 - (void)setMinValue:(float)val
 {
