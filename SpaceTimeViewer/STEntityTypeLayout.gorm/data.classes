@@ -8,9 +8,8 @@
 	    "lineWidthChanged:",
 	    "maxValueChanged:",
 	    "minValueChanged:",
-	    "newAction1:",
 	    "insetAmountChanged:",
-	    "newAction:",
+	    "threeDChanged:",
 	    "siblingSeparationChanged:",
 	    "subtypeSeparationChanged:",
 	    "widthChanged:"
@@ -106,13 +105,15 @@
 	    "heightChanged:",
 	    "lineWidthChanged:",
 	    "minValueChanged:",
-	    "maxValueChanged:"
+	    "maxValueChanged:",
+	    "threeDChanged:"
 	);
 	Outlets = (
 	    heightField,
 	    lineWidthField,
 	    minValueField,
-	    maxValueField
+	    maxValueField,
+	    threeDSwitch
 	);
 	Super = STLayoutEditor;
     };
