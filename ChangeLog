@@ -1,4 +1,8 @@
 2005-10-01  Benhur Stein <benhur@inf.ufsm.br>
+        * SpaceTimeViewer/DrawView+Drawing.m: new drawing code for states with
+          support for aggregates.
+
+2005-10-01  Benhur Stein <benhur@inf.ufsm.br>
         * SpaceTimeViewer/DrawView+Drawing.m: new drawing code for variables
 
 2005-10-01  Benhur Stein <benhur@inf.ufsm.br>

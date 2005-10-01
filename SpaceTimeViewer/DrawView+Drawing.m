@@ -128,7 +128,11 @@ do { \
 
     drawNames = [layout drawsName];
     if (drawNames) {
-        name = [[NSMutableAttributedString alloc] init];
+        name = [[NSMutableAttributedString alloc] 
+                initWithString:@""
+                    attributes:[NSDictionary dictionaryWithObjectsAndKeys:
+                            [NSFont systemFontOfSize:8], @"NSFontAttributeName",
+                            nil]];
     }
 
     y = [layout yInContainer:container];
@@ -167,25 +171,9 @@ do { \
         }
         
         if (w < 2) {
-#if 0
-            if ((firstUndrawnX != MAXFLOAT) && (x > lastUndrawnX)) {
-                drawBlackRect(firstUndrawnX, lastUndrawnX, NSMakeRect(x,y,w,undrawnHeight));
-                undrawnHeight = 0;
-                firstUndrawnX = x;
-            }
-            if (firstUndrawnX == MAXFLOAT) {
-                firstUndrawnX = x;
-            }
-            if (lastUndrawnX < x2) {
-                lastUndrawnX = x2;
-            }
-            if (newHeight > undrawnHeight) {
-                undrawnHeight = newHeight;
-            }
-            continue;
-#else
             if ((lastUndrawnX != MAXFLOAT) && (x2 < firstUndrawnX)) {
-                drawBlackRect(firstUndrawnX, lastUndrawnX, NSMakeRect(x,y,w,undrawnHeight));
+                drawBlackRect(firstUndrawnX, lastUndrawnX,
+                              NSMakeRect(x, y, w, undrawnHeight));
                 undrawnHeight = 0;
                 lastUndrawnX = x2;
             }
@@ -199,38 +187,68 @@ do { \
                 undrawnHeight = newHeight;
             }
             continue;
-#endif
         }
 
         if (firstUndrawnX != MAXFLOAT) {
-            drawBlackRect(firstUndrawnX, lastUndrawnX, NSMakeRect(x,y,w,undrawnHeight));
+            drawBlackRect(firstUndrawnX, lastUndrawnX,
+                          NSMakeRect(x, y, w, undrawnHeight));
             firstUndrawnX = lastUndrawnX = MAXFLOAT;
             undrawnHeight = 0;
         }
 
-        color = [filter colorForEntity:entity];
-        if (![color isEqual:lastColor]) {
-            lastColor = color;
-            [color set];
-        }
-
-        PSgsave();
-        path(x, y, w, newHeight);
-        if ([filter isSelectedEntity:entity]) {
-            highlight();
+        if ([filter isAggregateEntity:entity]) {
+            unsigned i;
+            unsigned count = [filter subCountForEntity:entity];
+            float xi = x;
+            PSgsave();
+            for (i = 0; i < count; i++) {
+                float dx;
+                [[filter subColorAtIndex:i forEntity:entity] set];
+                dx = [filter subDurationAtIndex:i forEntity:entity]
+                   * pointsPerSecond;
+                NSRectFill(NSMakeRect(xi, y, dx, newHeight));
+                xi += dx;
+            }
+            path(x, y, w, newHeight);
+            PSmoveto(x, y);
+            PSlineto(x + w, y + newHeight);
+            if ((xi - x - w) > 1) {
+                PSmoveto(xi, y + newHeight);
+                PSlineto(x + w, y);
+            }
+            if ([filter isSelectedEntity:entity]) {
+                [[NSColor yellowColor] set];
+            } else {
+                [[NSColor blackColor] set];
+            }
+            PSstroke();
+            PSgrestore();
         } else {
-            draw();
+            color = [filter colorForEntity:entity];
+            if (![color isEqual:lastColor]) {
+                lastColor = color;
+                [color set];
+            }
+
+            PSgsave();
+            path(x, y, w, newHeight);
+            if ([filter isSelectedEntity:entity]) {
+                highlight();
+            } else {
+                draw();
+            }
+            if (drawNames && ow > smallEntityWidth && newHeight > 8) {
+                [name replaceCharactersInRange:NSMakeRange(0, [name length])
+                                    withString:[filter nameForEntity:entity]];
+                [name drawInRect:NSMakeRect(ox+2, y+newHeight-10, ow, 10)];
+            }
+            PSgrestore();
         }
-        if (drawNames && ow>10) {
-            [name replaceCharactersInRange:NSMakeRange(0, [name length])
-                                withString:[filter nameForEntity:entity]];
-            [name drawInRect:NSMakeRect(ox+3, y, ow, newHeight)];
-        }
-	PSgrestore();
     }
 
     if (firstUndrawnX != MAXFLOAT) {
-        drawBlackRect(firstUndrawnX, lastUndrawnX, NSMakeRect(x, y, w, undrawnHeight));
+        drawBlackRect(firstUndrawnX, lastUndrawnX,
+                      NSMakeRect(x, y, w, undrawnHeight));
     }
     PSgrestore();
 
