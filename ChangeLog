@@ -1,4 +1,7 @@
 2005-10-01  Benhur Stein <benhur@inf.ufsm.br>
+        * StatViewer/StatViewer.m: forgot on previous commit
+
+2005-10-01  Benhur Stein <benhur@inf.ufsm.br>
         * StatViewer/PieCell.m: autosize pie; draw arc around "other" value.
 
 2005-10-01  Benhur Stein <benhur@inf.ufsm.br>

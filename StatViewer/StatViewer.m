@@ -312,6 +312,7 @@
         cellSize = [matrix cellSize];
         matrixFrame = [matrix frame];
         cellSize.width = NSWidth(matrixFrame);
+        cellSize.height = 3 * cellSize.width / 5;
         [matrix setCellSize:cellSize];
         [matrix setIntercellSpacing:NSMakeSize(0, 0)];
         [matrix sizeToCells];
