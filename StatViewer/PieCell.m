@@ -295,6 +295,7 @@ static NSString *formatNumber(double n)
     float radius, angle1, angle2, mid_angle;
     NSPoint center;
     float val, total;
+    float others = 0;
     float fontHeight = 0;
     NSFont *font = nil;
     NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
@@ -328,7 +329,10 @@ static NSString *formatNumber(double n)
     valEnum = [data objectEnumerator];
     while (value = [valEnum nextObject]) {
         val = [value doubleValue];
-        if ((val/total) < .05) continue;
+        if ((val/total) < .05) {
+            others += val;
+            continue;
+        }
 
         angle2 = angle1 + 360 * val / total;
 
@@ -359,6 +363,12 @@ static NSString *formatNumber(double n)
 
         // next segment starts where this one ends
         angle1 = angle2;
+    }
+    if (others > 0) {
+        angle2 = angle1 + 360 * others / total;
+
+        PSmoveto(center.x, center.y);
+        PSarc(center.x, center.y, radius, angle1, angle2);
     }
     PSclosepath();
     [[NSColor blackColor] set];
