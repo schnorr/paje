@@ -244,161 +244,85 @@ do { \
                   fromEnumerator:(NSEnumerator *)enumerator
                     drawFunction:(DrawFunction *)drawFunction
 {
-    shapefunction *path;
-    drawfunction *draw;
+    NSBezierPath *path;
     NSColor *color;
     id <PajeState>entity;
-    BOOL first = YES;
-    float min;
-    float max;
-    float scale;
-    float offset;
-    float oldx2 = -1e6;
+    float yMin;
+    float yMax;
+    float yScale;
+    float yOffset;
+    float off3d;
+    float oldx1 = -1e6;
     PajeEntityType *entityType;
-    NSColor *lastColor = nil;
     
     entityType = [layout entityType];
     
-    min = [layout minValue];
-    max = [layout maxValue];
-    if (max <= min) {
-        min = [[filter minValueForEntityType:entityType] floatValue];
-        max = [[filter maxValueForEntityType:entityType] floatValue];
+    yMin = [layout minValue];
+    yMax = [layout maxValue];
+    if (yMax <= yMin) {
+        yMin = [[filter minValueForEntityType:entityType] floatValue];
+        yMax = [[filter maxValueForEntityType:entityType] floatValue];
     }
 
-    if (min != max) {
-        scale = -([layout height] - 4) / (max - min);
+    if (yMin != yMax) {
+        yScale = -([layout height] - 4) / (yMax - yMin);
     } else {
-        scale = 1;
+        yScale = 1;
     }
-    offset = [layout yInContainer:container] + 2 - (max * scale);
 
-    path = [[layout shapeFunction] function];
-    draw = [drawFunction function];
+    off3d = [layout threeD] ? -1 : 0;
+    yOffset = [layout yInContainer:container] + 2 - (yMax * yScale) + off3d;
+
+    path = [[NSBezierPath alloc] init];
+    [path setLineJoinStyle: NSBevelLineJoinStyle];
+
+    while ((entity = [enumerator nextObject]) != nil) {
+        float x1;
+        float x2;
+        float y;
+
+        x1 = TIMEtoX([filter startTimeForEntity:entity]) + off3d;
+        x2 = TIMEtoX([filter endTimeForEntity:entity]) + off3d;
+        y = [[filter valueForEntity:entity] doubleValue] * yScale + yOffset;
+
+#ifdef GNUSTEP
+        // Very big lines are not drawn in GNUstep 
+        if (x1 < NSMinX(cutRect)) x1 = NSMinX(cutRect);
+        if (x2 > NSMaxX(cutRect)) x2 = NSMaxX(cutRect);
+#endif
+        if (x2 == oldx1) {
+            [path lineToPoint: NSMakePoint(x2, y)];
+        } else {
+            [path moveToPoint: NSMakePoint(x2, y)];
+        }
+        [path lineToPoint: NSMakePoint(x1, y)];
+        oldx1 = x1;
+    }
+
     color = [filter colorForEntityType:entityType];
 
-//#define VARIABLES_3D
-#ifdef VARIABLES_3D
-    NSArray *todos = [enumerator allObjects];
-
-    first = YES;
-    PSsetlinejoin(2);
-    float off2=1;
-    [[color highlightWithLevel:0.3] set];
-    enumerator = [todos objectEnumerator];
-    while ((entity = [enumerator nextObject]) != nil) {
-        float x1 = TIMEtoX([filter startTimeForEntity:entity]) - off2;
-        float x2 = TIMEtoX([filter endTimeForEntity:entity]) - off2;
-        float y = [[filter valueForEntity:entity] doubleValue] * scale + offset;
-        y -= off2;
-        if (first) {
-            first = NO;
-            PSgsave();
-            PSsetlinewidth([layout lineWidth]);
-            PSmoveto(x1, y);
-        }
-
-#ifdef GNUSTEP
-        // Very big lines are not drawn in GNUstep 
-        if (x1 < NSMinX(cutRect)) x1 = NSMinX(cutRect);
-        if (x2 > NSMaxX(cutRect)) x2 = NSMaxX(cutRect);
-#endif
-
-        if (!first && x1 == oldx2) {
-            PSlineto(x1, y);
-        } else {
-            PSmoveto(x1, y);
-        }
-
-        PSlineto(x2, y);
-        oldx2 = x2;
-    }
-    if (!first) {
-        PSstroke();
-        PSgrestore();
-    }
-    first = YES;
-    [[color shadowWithLevel:0.3] set];
-    enumerator = [todos objectEnumerator];
-    while ((entity = [enumerator nextObject]) != nil) {
-        float x1 = TIMEtoX([filter startTimeForEntity:entity]) + off2;
-        float x2 = TIMEtoX([filter endTimeForEntity:entity]) + off2;
-        float y = [[filter valueForEntity:entity] doubleValue] * scale + offset;
-        y += off2;
-        if (first) {
-            first = NO;
-            PSgsave();
-            PSsetlinewidth([layout lineWidth]);
-            PSmoveto(x1, y);
-        }
-
-#ifdef GNUSTEP
-        // Very big lines are not drawn in GNUstep 
-        if (x1 < NSMinX(cutRect)) x1 = NSMinX(cutRect);
-        if (x2 > NSMaxX(cutRect)) x2 = NSMaxX(cutRect);
-#endif
-
-        if (!first && x1 == oldx2) {
-            PSlineto(x1, y);
-        } else {
-            PSmoveto(x1, y);
-        }
-
-        PSlineto(x2, y);
-        oldx2 = x2;
-    }
-    if (!first) {
-        PSstroke();
-        PSgrestore();
-    }
-    enumerator = [todos objectEnumerator];
-    first=YES;
-#endif
-    [color set];
-
-    while ((entity = [enumerator nextObject]) != nil) {
-        float x1 = TIMEtoX([filter startTimeForEntity:entity]);
-        float x2 = TIMEtoX([filter endTimeForEntity:entity]);
-        float y = [[filter valueForEntity:entity] doubleValue] * scale + offset;
-        if (first) {
-            first = NO;
-            PSgsave();
-            PSsetlinewidth([layout lineWidth] - 2);
-            PSmoveto(x1, y);
-        }
-
-#ifdef GNUSTEP
-        // Very big lines are not drawn in GNUstep 
-        if (x1 < NSMinX(cutRect)) x1 = NSMinX(cutRect);
-        if (x2 > NSMaxX(cutRect)) x2 = NSMaxX(cutRect);
-#endif
-
-        if (!first && x1 == oldx2) {
-            PSlineto(x1, y);
-        } else {
-            PSmoveto(x1, y);
-        }
-
-/*
-        color = [filter colorForEntity:entity];
-        if (![color isEqual:lastColor]) {
-            if (lastColor != nil) {
-                PSstroke();
-                PSmoveto(x1, y);
-            }
-            lastColor = color;
-            [color set];
-        }
-*/
-        PSlineto(x2, y);
-        oldx2 = x2;
-    }
-    if (!first) {
-        PSstroke();
-        PSgrestore();
+    if ([layout threeD]) {
+        NSAffineTransform *transform = [NSAffineTransform transform];
+        [path setLineWidth:[layout lineWidth] - 2];
+        [[color highlightWithLevel:0.3] set];
+        [path stroke];
+        [transform translateXBy: 2.0 yBy: 2.0];
+        [path transformUsingAffineTransform: transform];
+        [[color shadowWithLevel:0.3] set];
+        [path stroke];
+        [transform translateXBy: -3.0 yBy: -3.0];
+        [path transformUsingAffineTransform: transform];
+        [color set];
+        [path stroke];
+    } else {
+        [path setLineWidth:[layout lineWidth]];
+        [color set];
+        [path stroke];
     }
 
+    [path release];
 }
+
 
 
 - (void)drawLinksWithDescriptor:(STLinkTypeLayout *)layout
@@ -541,6 +465,7 @@ do { \
                              drawFunction:[layoutDescriptor drawFunction]];
             break;
         case PajeVariableDrawingType:
+            enumerator = [[enumerator allObjects] reverseObjectEnumerator];
             [self drawValuesWithDescriptor:(STVariableTypeLayout *)layoutDescriptor
                                inContainer:container
                             fromEnumerator:enumerator
