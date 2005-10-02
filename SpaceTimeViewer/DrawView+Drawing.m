@@ -315,11 +315,15 @@ do { \
     float yScale;
     float yOffset;
     float off3d;
-    float oldx1 = -1e6;
+    float xOld;
+    float yOld;
+    float yvMin;
+    float yvMax;
+    BOOL first = YES;
     PajeEntityType *entityType;
     
     entityType = [layout entityType];
-    
+
     yMin = [layout minValue];
     yMax = [layout maxValue];
     if (yMax <= yMin) {
@@ -340,26 +344,41 @@ do { \
     [path setLineJoinStyle: NSBevelLineJoinStyle];
 
     while ((entity = [enumerator nextObject]) != nil) {
-        float x1;
-        float x2;
+        float x;
         float y;
 
-        x1 = TIMEtoX([filter startTimeForEntity:entity]) + off3d;
-        x2 = TIMEtoX([filter endTimeForEntity:entity]) + off3d;
+        x = TIMEtoX([filter startTimeForEntity:entity]) + off3d;
         y = [[filter valueForEntity:entity] doubleValue] * yScale + yOffset;
 
+        // do not draw if on same column; get max & min y values
+        if (!first && (xOld - x) < 1) {
+            if (y < yvMin) yvMin = y;
+            if (y > yvMax) yvMax = y;
+            continue;
+        }
 #ifdef GNUSTEP
         // Very big lines are not drawn in GNUstep 
-        if (x1 < NSMinX(cutRect)) x1 = NSMinX(cutRect);
-        if (x2 > NSMaxX(cutRect)) x2 = NSMaxX(cutRect);
+        if (x < NSMinX(cutRect)) x = NSMinX(cutRect);
 #endif
-        if (x2 == oldx1) {
-            [path lineToPoint: NSMakePoint(x2, y)];
+        if (first) {
+            [path moveToPoint: NSMakePoint(x, y)];
         } else {
-            [path moveToPoint: NSMakePoint(x2, y)];
+            if (yvMin != yOld && yvMin != y) {
+                [path lineToPoint: NSMakePoint(xOld, yvMin)];
+                yOld = yvMin;
+            }
+            if (yvMax != yOld) {
+                [path lineToPoint: NSMakePoint(xOld, yvMax)];
+                yOld = yvMax;
+            }
+            if (y != yOld) {
+                [path lineToPoint: NSMakePoint(xOld, y)];
+            }
+            [path lineToPoint: NSMakePoint(x, y)];
         }
-        [path lineToPoint: NSMakePoint(x1, y)];
-        oldx1 = x1;
+        xOld = x;
+        yvMin = yvMax = yOld = y;
+        first = NO;
     }
 
     color = [filter colorForEntityType:entityType];
