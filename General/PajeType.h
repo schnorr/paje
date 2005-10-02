@@ -39,6 +39,7 @@
     NSColor *color;
     PajeEvent *event;
     NSMutableSet *fieldNames;
+    NSMutableSet *knownEventTypes;
 }
 
 + (id/*PajeEntityType **/)typeWithName:(NSString *)n
@@ -63,6 +64,7 @@
 
 - (id)valueOfFieldNamed:(NSString *)n;
 
+- (BOOL)isKnownEventType:(id)type;
 - (void)addFieldNames:(NSArray *)names;
 - (NSArray *)fieldNames;
 

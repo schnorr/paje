@@ -91,9 +91,6 @@
     PajeContainer *container = [entity container];
     TimeList *list;
     
-    // FIXME: temporary solution to get all fields' names
-    [entityType addFieldNames:[entity fieldNames]];
-
     //KLUDGE to identify last date in memory.
     // (doesn't work if events are not seen)
     // FIXME this should be calculated on demand

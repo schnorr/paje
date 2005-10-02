@@ -60,6 +60,7 @@
         }
         Assign(color, c);
         fieldNames = [[NSMutableSet alloc] init];
+        knownEventTypes = [[NSMutableSet alloc] init];
     }
     return self;
 }
@@ -71,6 +72,7 @@
     Assign(color, nil);
     Assign(event, nil);
     Assign(fieldNames, nil);
+    Assign(knownEventTypes, nil);
     [super dealloc];
 }
 
@@ -147,6 +149,15 @@
 - (NSArray *)fieldNames
 {
     return [fieldNames allObjects];
+}
+
+- (BOOL)isKnownEventType:(id)type
+{
+    if ([knownEventTypes containsObject:type]) {
+        return YES;
+    }
+    [knownEventTypes addObject:type];
+    return NO;
 }
 
 - (unsigned)hash

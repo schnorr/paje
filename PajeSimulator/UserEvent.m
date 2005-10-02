@@ -48,8 +48,12 @@
                           name:n
                      container:c];
 
-    if (self) {
+    if (self != nil) {
         Assign(event, e);
+        if (e != nil
+            && ![type isKnownEventType:[e objectForKey:@"PajeEventId"]]) {
+            [type addFieldNames:[self fieldNames]];
+        }
     }
 
     return self;

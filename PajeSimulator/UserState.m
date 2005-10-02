@@ -140,13 +140,16 @@
 
 - (NSArray *)fieldNames
 {
-    NSArray *localFields;
-    localFields = [NSArray arrayWithObjects:
+    NSMutableArray *localFields;
+    localFields = [NSMutableArray arrayWithObjects:
                         @"Imbrication Level",
                         @"Exclusive Duration",
                         nil];
-    localFields = [localFields arrayByAddingObjectsFromArray:[endEvent fieldNames]];
-    return [[super fieldNames] arrayByAddingObjectsFromArray:localFields];
+    if (endEvent != nil) {
+        [localFields addObjectsFromArray:[endEvent fieldNames]];
+    }
+    [localFields addObjectsFromArray:[super fieldNames]];
+    return localFields;
 }
 
 - (id)valueOfFieldNamed:(NSString *)fieldName
