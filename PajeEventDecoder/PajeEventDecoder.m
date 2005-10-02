@@ -174,6 +174,7 @@ static NSString *COLOR_VALUE = @"Color";
 
         [eventBeingDefined.fieldTypes removeAllObjects];
         [eventBeingDefined.fieldNames removeAllObjects];
+        [eventBeingDefined.fieldNames addObject: @"PajeEventId"];
         [eventBeingDefined.fieldNames addObject: @"PajeEventName"];
         status = IN_DEF;
         break;
@@ -253,6 +254,7 @@ static NSString *COLOR_VALUE = @"Color";
     if (eventName == nil) {
         [self raise: @"Unrecognized event id"];
     }
+    [valArray addObject:eventId];
     [valArray addObject:eventName];
 
     fieldTypeEnum = [[eventFieldTypes objectForKey:eventId] objectEnumerator];

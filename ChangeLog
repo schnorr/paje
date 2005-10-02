@@ -1,4 +1,7 @@
 2005-10-02  Benhur Stein <benhur@inf.ufsm.br>
+        * PajeEventDecoder/PajeEventDecoder.m: forgotten on previous commit
+
+2005-10-02  Benhur Stein <benhur@inf.ufsm.br>
         * SpaceTimeViewer/DrawView+Drawing.m: optimize drawing code for
           variables
 
