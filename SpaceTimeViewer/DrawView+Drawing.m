@@ -42,10 +42,17 @@
     float x, y, w, h;
     BOOL drawNames;
     NSMutableAttributedString *name;
+    NSDictionary *attributes;
+    
+    attributes = [NSDictionary dictionaryWithObjectsAndKeys:
+                            [NSFont systemFontOfSize:8], @"NSFontAttributeName",
+                            nil];
 
     drawNames = [layout drawsName];
     if (drawNames) {
-        name = [[NSMutableAttributedString alloc] init];
+        name = [[NSMutableAttributedString alloc] 
+                initWithString:@""
+                    attributes:attributes];
     }
     
     y = [layout yInContainer:container];
@@ -58,6 +65,45 @@
 
     while ((entity = [enumerator nextObject]) != nil) {
         x = TIMEtoX([filter timeForEntity:entity]);
+
+        if ([filter isAggregateEntity:entity]) {
+            float x2 = TIMEtoX([filter endTimeForEntity:entity]);
+            int condensedEntitiesCount;
+            unsigned i;
+            unsigned count;
+            float xi = x;
+            float dx;
+            int sup;
+
+            PSgsave();
+            condensedEntitiesCount = [entity condensedEntitiesCount];
+            sup = [layout isSupEvent];
+
+            count = [filter subCountForEntity:entity];
+            for (i = 0; i < count; i++) {
+                [[filter subColorAtIndex:i forEntity:entity] set];
+                dx = (x2-x) * [filter subCountAtIndex:i forEntity:entity] 
+                            / condensedEntitiesCount;
+                NSRectFill(NSMakeRect(xi, y+(sup*(-h+8))+(!sup*(h-10)), dx, 3));
+                xi += dx;
+            }
+            PSmoveto(x, y+2*sup-2*!sup);
+            PSlineto(x, y-(h-7)*sup+(h-7)*!sup);
+            PSlineto(x2, y-(h-7)*sup+(h-7)*!sup);
+            PSlineto(x2, y+2*sup-2*!sup);
+            if ([filter isSelectedEntity:entity]) {
+                [[NSColor yellowColor] set];
+            } else {
+                [[NSColor blackColor] set];
+            }
+            PSstroke();
+
+            [[NSString stringWithFormat:@"%d", condensedEntitiesCount]
+                        drawAtPoint:NSMakePoint(x, y-(h+1)*sup+(h-8)*!sup)
+                     withAttributes:attributes];
+            PSgrestore();
+
+        } else {
 
         color = [filter colorForEntity:entity];
         if (![color isEqual:lastColor]) {
@@ -83,8 +129,6 @@
             }
             x -= w;
             NSRectFill(NSMakeRect(x, y, w * 2, h));
-            /*NSLog(@"br=%f", [[color colorUsingColorSpaceName:NSCalibratedWhiteColorSpace
-                                          device:nil] whiteComponent]);*/
             if ([[color colorUsingColorSpaceName:NSCalibratedWhiteColorSpace
                                           device:nil] whiteComponent] > 0.5) {
                 [[NSColor blackColor] set];
@@ -93,6 +137,7 @@
             }
             [name drawInRect:NSMakeRect(x, y, w * 2, h)];
             PSgrestore();
+        }
         }
     }
     PSgrestore();
