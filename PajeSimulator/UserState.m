@@ -171,15 +171,17 @@
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];
-    [coder encodeValuesOfObjCTypes:"@id",
-            &endEvent, &imbricationLevel, &innerDuration];
+    [coder encodeValuesOfObjCTypes:"@id@i",
+            &endEvent, &imbricationLevel, &innerDuration,
+            &innerStates, &condensedEntitiesCount];
 }
 
 - (id)initWithCoder:(NSCoder *)coder
 {
     self = [super initWithCoder:coder];
-    [coder decodeValuesOfObjCTypes:"@id",
-            &endEvent, &imbricationLevel, &innerDuration];
+    [coder decodeValuesOfObjCTypes:"@id@i",
+            &endEvent, &imbricationLevel, &innerDuration,
+            &innerStates, &condensedEntitiesCount];
     return self;
 }
 

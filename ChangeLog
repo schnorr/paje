@@ -1,3 +1,6 @@
+2005-10-14  Benhur Stein <benhur@inf.ufsm.br>
+	* PajeSimulator/UserState.m: encode/decode new variables
+
 2005-10-02  Benhur Stein <benhur@inf.ufsm.br>
         * PajeEventDecoder/PajeEventDecoder.m: forgotten on previous commit
 
