@@ -20,113 +20,314 @@
 /* PieCell.m created by benhur on Wed 24-Sep-1997 */
 
 #include "PieCell.h"
+#include "StatViewer.h"
 #include "../General/Macros.h"
 #include "../General/NSColor+Additions.h"
+#include "../General/NSString+Additions.h"
 #include <math.h>
 
-static NSString *formatNumber(double n)
-{
-    static char *p = "TGMk munp";
-    int i = 4;
-    BOOL neg = (n < 0);
 
-    if (neg)
-        n = -n;
-    if (n < 1e-12)
-        return neg ? @"-0" : @"0";
-    if (n > 999e12)
-        return neg ? @"-Inf" : @"Inf";
-    while (n < 1) {
-        n *= 1000;
-        i++;
-    }
-    while (n > 1000) {
-        n /= 1000;
-        i--;
-    }
-    if (n < 10)
-        return [NSString stringWithFormat:@"%s%3.1f%c", neg?"-":"", n, p[i]];
-    return [NSString stringWithFormat:@"%s%3d%c", neg?"-":"", (int)n, p[i]];
+@interface PieSlice : NSObject
+{
+    float initialAngle;
+    float finalAngle;
+    NSColor *color;
+    NSBezierPath *path;
+    NSString *name;
+    NSString *complement;
+    NSMutableString *label;
+    NSPoint labelAnchorPosition;
+    NSPoint labelPosition;
+    BOOL rightSide;
+    PieCell *cell;
 }
 
++ (PieSlice *)sliceWithInitialAngle:(float)a1
+                         finalAngle:(float)a2
+                              color:(NSColor *)col
+                               name:(NSString *)n
+                         complement:(NSString *)n2
+                               cell:(PieCell *)c;
+- (id)initWithInitialAngle:(float)a1
+                finalAngle:(float)a2
+                     color:(NSColor *)col
+                      name:(NSString *)n
+                complement:(NSString *)n2
+                      cell:(PieCell *)c;
 
-@interface NSString (PajeNSStringPositionDrawing)
-// additions to NSString to support drawing them in many positions
-// relative to a given point. Uses NSStringAdditions methods to do this.
-// Should not be called if the focus is not locked to some view.
-// All methods are of the form: drawAtXYPoint: ...,
-// where X can be L, C or R, meaning that the x coordinate of aPoint
-// should be at the left, center or right of the string, and
-// Y can be B, C or T (bottom, center or top)
-- (void)drawAtLTPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes;
-- (void)drawAtLCPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes;
-- (void)drawAtLBPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes;
-- (void)drawAtCTPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes;
-- (void)drawAtCCPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes;
-- (void)drawAtCBPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes;
-- (void)drawAtRTPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes;
-- (void)drawAtRCPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes;
-- (void)drawAtRBPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes;
+- (void)makePath;
+- (void)makeLabelPosition;
+- (NSPoint)labelPosition;
+- (void)setLabelPosition:(NSPoint)position
+                   width:(float)width;
+- (BOOL)rightSide;
+- (float)midAngle;
+
+- (void)draw;
+- (void)drawLabel;
+- (void)appendLabelLinesToPath:(NSBezierPath *)incompletePath;
+- (void)appendDivisionLinesToPath:(NSBezierPath *)incompletePath;
+- (BOOL)containsPoint:(NSPoint)point;
 @end
 
-@implementation NSString (PajeNSStringPositionDrawing)
-- (void)drawAtLTPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes
+@implementation PieSlice
++ (PieSlice *)sliceWithInitialAngle:(float)a1
+                         finalAngle:(float)a2
+                              color:(NSColor *)col
+                               name:(NSString *)n
+                         complement:(NSString *)n2
+                               cell:(PieCell *)c
 {
-    [self drawAtPoint:aPoint withAttributes:attributes];
+    return [[[self alloc] initWithInitialAngle:a1
+                                    finalAngle:a2
+                                         color:col
+                                          name:n
+                                    complement:n2
+                                          cell:c] autorelease];
 }
-- (void)drawAtLCPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes
+
+- (id)initWithInitialAngle:(float)a1
+                finalAngle:(float)a2
+                     color:(NSColor *)col
+                      name:(NSString *)n
+                complement:(NSString *)n2
+                      cell:(PieCell *)c
 {
-    NSSize size = [self sizeWithAttributes:attributes];
-    NSPoint newPoint = NSMakePoint(aPoint.x, aPoint.y - size.height/2);
-    [self drawAtPoint:newPoint withAttributes:attributes];
+    self = [super init];
+    if (self != nil) {
+        cell = c;
+        initialAngle = a1;
+        finalAngle = a2;
+        Assign(color, col);
+        Assign(name, n);
+        Assign(complement, n2);
+        label = [name mutableCopy];
+        [self makePath];
+        [self makeLabelPosition];
+    }
+    return self;
 }
-- (void)drawAtLBPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes
+
+- (void)dealloc
 {
-    NSSize size = [self sizeWithAttributes:attributes];
-    NSPoint newPoint = NSMakePoint(aPoint.x, aPoint.y - size.height);
-    [self drawAtPoint:newPoint withAttributes:attributes];
+    cell = nil;
+    Assign(color, nil);
+    Assign(path, nil);
+    Assign(name, nil);
+    Assign(complement, nil);
+    Assign(label, nil);
+    [super dealloc];
 }
-- (void)drawAtCTPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes
+
+- (void)makePath
 {
-    NSSize size = [self sizeWithAttributes:attributes];
-    NSPoint newPoint = NSMakePoint(aPoint.x - size.width/2, aPoint.y);
-    [self drawAtPoint:newPoint withAttributes:attributes];
+    NSPoint center = [cell center];
+    float radius = [cell radius];
+
+    Assign(path, [NSBezierPath bezierPath]);
+    [path setLineWidth:2];
+    [path setLineJoinStyle:NSRoundLineJoinStyle];
+
+    [path appendBezierPathWithArcWithCenter:center
+                                     radius:radius
+                                 startAngle:initialAngle
+                                   endAngle:finalAngle];
+    [path appendBezierPathWithArcWithCenter:center
+                                     radius:radius * .3
+                                 startAngle:finalAngle
+                                   endAngle:initialAngle
+                                  clockwise:YES];
 }
-- (void)drawAtCCPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes
+
+- (void)makeLabelPosition
 {
-    NSSize size = [self sizeWithAttributes:attributes];
-    NSPoint newPoint = NSMakePoint(aPoint.x - size.width/2, aPoint.y - size.height/2);
-    [self drawAtPoint:newPoint withAttributes:attributes];
+    double radianAngle;
+    float cosine;
+    float sine;
+    float r;
+    NSPoint center = [cell center];
+    float radius = [cell radius];
+
+    radianAngle = [self midAngle] * M_PI / 180;
+    cosine = cos(radianAngle);
+    sine = sin(radianAngle);
+    rightSide = (cosine >= 0);
+
+    r = radius * .85;
+    labelAnchorPosition = NSMakePoint(center.x + r * cosine,
+                                      center.y + r * sine);
+    r = radius + 6 + 4 * fabs(sine);
+    if (rightSide) {
+        labelPosition = NSMakePoint(center.x + r * cosine + 6,
+                                    center.y + r * sine);
+    } else {
+        labelPosition = NSMakePoint(center.x + r * cosine - 6,
+                                    center.y + r * sine);
+    }
 }
-- (void)drawAtCBPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes
+
+- (NSPoint)labelPosition
 {
-    NSSize size = [self sizeWithAttributes:attributes];
-    NSPoint newPoint = NSMakePoint(aPoint.x - size.width/2, aPoint.y - size.height);
-    [self drawAtPoint:newPoint withAttributes:attributes];
+    return labelPosition;
 }
-- (void)drawAtRTPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes
+
+- (void)setLabelPosition:(NSPoint)position
+                   width:(float)width
 {
-    NSSize size = [self sizeWithAttributes:attributes];
-    NSPoint newPoint = NSMakePoint(aPoint.x - size.width, aPoint.y);
-    [self drawAtPoint:newPoint withAttributes:attributes];
+    labelPosition = position;
+    NSDictionary *labelAttributes = [cell labelAttributes];
+
+    if (label != nil) [label release];
+    label = [name mutableCopy];
+
+    NSString *elipsis = [NSString stringWithCharacter:0x2026];
+    while ([label sizeWithAttributes:labelAttributes].width > width) {
+        int middle;
+        middle = [label length] / 2;
+        [label replaceCharactersInRange:NSMakeRange(middle, 2)
+                             withString:elipsis];
+    }
 }
-- (void)drawAtRCPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes
+
+- (BOOL)rightSide
 {
-    NSSize size = [self sizeWithAttributes:attributes];
-    NSPoint newPoint = NSMakePoint(aPoint.x - size.width, aPoint.y - size.height/2);
-    [self drawAtPoint:newPoint withAttributes:attributes];
+    return rightSide;
 }
-- (void)drawAtRBPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes
+
+- (float)midAngle
 {
-    NSSize size = [self sizeWithAttributes:attributes];
-    NSPoint newPoint = NSMakePoint(aPoint.x - size.width, aPoint.y - size.height);
-    [self drawAtPoint:newPoint withAttributes:attributes];
+    return (initialAngle + finalAngle) / 2;
 }
+
+- (void)draw
+{
+    [color set];
+    [path fill];
+}
+
+- (void)drawLabel
+{
+    NSPoint lpoint;
+    NSPoint cpoint;
+    NSDictionary *labelAttributes = [cell labelAttributes];
+    NSDictionary *complementAttributes = [cell complementAttributes];
+
+    if (rightSide) {
+        lpoint = NSMakePoint(labelPosition.x + 2,
+                             labelPosition.y - 3);
+        cpoint = NSMakePoint(labelPosition.x + 2,
+                             labelPosition.y + 5);
+
+        [label drawAtLCPoint:lpoint withAttributes:labelAttributes];
+        [complement drawAtLCPoint:cpoint withAttributes:complementAttributes];
+    } else {
+        lpoint = NSMakePoint(labelPosition.x - 2,
+                             labelPosition.y - 3);
+        cpoint = NSMakePoint(labelPosition.x - 2,
+                             labelPosition.y + 5);
+
+        [label drawAtRCPoint:lpoint withAttributes:labelAttributes];
+        [complement drawAtRCPoint:cpoint withAttributes:complementAttributes];
+    }
+}
+
+- (void)appendLabelLinesToPath:(NSBezierPath *)incompletePath
+{
+    [incompletePath moveToPoint:labelPosition];
+    [incompletePath relativeMoveToPoint:NSMakePoint(0, 8)];
+    [incompletePath relativeLineToPoint:NSMakePoint(0, -15)];
+    [incompletePath moveToPoint:labelPosition];
+    if (rightSide) {
+        [incompletePath relativeLineToPoint:NSMakePoint(-6, 0)];
+    } else {
+        [incompletePath relativeLineToPoint:NSMakePoint(6, 0)];
+    }
+    [incompletePath lineToPoint:labelAnchorPosition];
+    [incompletePath appendBezierPathWithArcWithCenter:labelAnchorPosition
+                                               radius:1.0
+                                           startAngle:0
+                                             endAngle:360];
+}
+    
+- (void)appendDivisionLinesToPath:(NSBezierPath *)incompletePath
+{
+    NSPoint center = [cell center];
+    float radius = [cell radius];
+
+    if (finalAngle - initialAngle < 359.99) {
+        double radianAngle;
+        radianAngle = initialAngle * M_PI / 180;
+        [incompletePath moveToPoint:
+                             NSMakePoint(center.x+radius*.3*cos(radianAngle),
+                                         center.y+radius*.3*sin(radianAngle))];
+        [incompletePath lineToPoint:
+                             NSMakePoint(center.x+radius*cos(radianAngle),
+                                         center.y+radius*sin(radianAngle))];
+    }
+}
+
+- (BOOL)containsPoint:(NSPoint)point
+{
+    return [path containsPoint:point];
+}
+
 @end
+
 
 
 @implementation PieCell
-// We do not retain our data provider, it retains us.
+
+- (void)_init
+{
+    data = nil;
+    slices = nil;
+    divisionsPath = nil;
+    labelLinesPath = nil;
+    // set atributes for slice labels and complement
+    labelAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:
+            [NSFont systemFontOfSize:10], NSFontAttributeName,
+            [NSColor blackColor], NSForegroundColorAttributeName,
+            nil];
+    complementAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:
+            [NSFont systemFontOfSize:8], NSFontAttributeName,
+            [NSColor colorWithCalibratedWhite:0.1 alpha:1.0],
+                NSForegroundColorAttributeName,
+            nil];
+}
+
+- (id)copyWithZone:(NSZone *)z
+{
+    self = [super copyWithZone:z];
+    [self _init];
+    return self;
+}
+
+- (id)initImageCell:(NSImage *)image
+{
+    self = [super initImageCell:image];
+    [self _init];
+    return self;
+}
+
+- (id)initTextCell:(NSString *)text
+{
+    self = [super initTextCell:text];
+    [self _init];
+    return self;
+}
+
+- (void)dealloc
+{
+    dataProvider = nil;
+    Assign(data, nil);
+    Assign(slices, nil);
+    Assign(divisionsPath, nil);
+    Assign(labelLinesPath, nil);
+    Assign(labelAttributes, nil);
+    Assign(complementAttributes, nil);
+}
+
+// The data provider retains the cells, so they cannot retain it.
 - (void)setDataProvider:(id)provider
 {
     dataProvider = provider;
@@ -135,6 +336,14 @@ static NSString *formatNumber(double n)
 - (void)setData:(StatArray *)d
 {
     Assign(data, d);
+    [self discardCache];
+}
+
+- (void)discardCache
+{
+    Assign(slices, nil);
+    Assign(divisionsPath, nil);
+    Assign(labelLinesPath, nil);
 }
 
 - (void)setInitialAngle:(NSNumber *)angle
@@ -142,9 +351,31 @@ static NSString *formatNumber(double n)
     initialAngle = angle;
 }
 
+- (NSPoint)center
+{
+    return center;
+}
+
+- (float)radius
+{
+    return radius;
+}
+
+- (NSDictionary *)labelAttributes
+{
+    return labelAttributes;
+}
+
+- (NSDictionary *)complementAttributes
+{
+    return complementAttributes;
+}
+
+
+
+
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
-    //NSDrawGrayBezel(cellFrame, cellFrame);
     [[NSColor lightGrayColor] set];
     NSRectFill(cellFrame);
     [[NSColor blackColor] set];
@@ -154,33 +385,24 @@ static NSString *formatNumber(double n)
 
 - (void)drawTitleWithFrame:(NSRect)cellFrame
 {
-    NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
-    NSMutableParagraphStyle *paragraphStyle;
-    NSFont *font;
+    NSDictionary *attributes;
 
-    paragraphStyle = (NSMutableParagraphStyle *)
-                     [NSMutableParagraphStyle defaultParagraphStyle];
-    [paragraphStyle setAlignment:NSCenterTextAlignment];
-
-    font = [[NSFontManager sharedFontManager] convertFont:[NSFont userFontOfSize:12] toHaveTrait:NSBoldFontMask];
+    if (nil == data) {
+        [dataProvider provideDataForCell:self];
+        if (nil == data)
+            return;
+    }
     
-    // write title
-    [attributes setObject:font forKey:NSFontAttributeName];
-    [attributes setObject:[NSColor blackColor]
-                   forKey:NSForegroundColorAttributeName];
-    [attributes setObject:paragraphStyle
-                   forKey:NSParagraphStyleAttributeName];
-    [[data name] drawInRect:cellFrame
+    attributes = [[NSDictionary alloc] initWithObjectsAndKeys:
+            [NSFont boldSystemFontOfSize:12], NSFontAttributeName,
+            [NSColor blackColor], NSForegroundColorAttributeName,
+            nil];
+    [[data name] drawAtCTPoint:NSMakePoint(NSMidX(cellFrame), NSMinY(cellFrame))
                 withAttributes:attributes];
-    //[[data name] drawAtCTPoint:NSMakePoint(NSMidX(cellFrame),
-    //                                       NSMinY(cellFrame)+20)
-    //            withAttributes:attributes];
 }
 
 - (void)drawInteriorWithFrameVBar:(NSRect)cellFrame inView:(NSView *)controlView
 {
-    StatValue *value;
-    NSEnumerator *valEnum;
     float x, y, h, hmax, w, wmax;
     float val, total, max, min, cnt;
     float fontHeight = 0;
@@ -194,22 +416,26 @@ static NSString *formatNumber(double n)
     }
 
     // take totalizers
-    total = [data sum];
-    max = [data maxValue];
-    min = [data minValue];
-    cnt = [data count];
+    total = [data totalValue];
+    max = total;//[data maxValue];
+    min = 0;//[data minValue];
+    cnt = [data subCount];
+    if (cnt>10) cnt=10;
 
     PSsetlinewidth(1);
 
     if (!simple) {
         // calculate sizes, with space for title and names
         hmax = NSHeight(cellFrame) - 4 - 35;
-        wmax = NSWidth(cellFrame) - 4 - 30;
-        y = NSMaxY(cellFrame) - 2 - 35;
+        if (initialAngle != nil) {
+            hmax = NSHeight(cellFrame) * [initialAngle floatValue] / 380;
+        }
+        wmax = NSWidth(cellFrame) - 4 - 35;
+        y = NSMinY(cellFrame)+20+hmax;//NSMaxY(cellFrame) - 2 - 35;
         w = wmax / cnt;
         x = NSMaxX(cellFrame) - 2 - wmax;
 
-        font = [NSFont userFontOfSize:10];
+        font = [NSFont systemFontOfSize:10];
         [attributes setObject:font
                        forKey:NSFontAttributeName];
         [attributes setObject:[NSColor blackColor]
@@ -218,15 +444,33 @@ static NSString *formatNumber(double n)
 
         // draw scale
         PSmoveto(x-2, y);
-        PSrlineto(-3, 0);
+        //PSrlineto(-3, 0);
+        PSrlineto(2, 0);
+        PSrlineto(wmax, 0);
+
+        PSmoveto(x-2, y-hmax/2);
+        PSrlineto(2, 0);
+        PSrlineto(wmax, 0);
+
         PSmoveto(x-2, y-hmax);
-        PSrlineto(-3, 0);
+        //PSrlineto(-3, 0);
+        PSrlineto(2, 0);
+        PSrlineto(wmax, 0);
+        [[NSColor darkGrayColor] set];
+    PSgsave();
+    float dash[] = {1, 2};
+    PSsetdash(dash, 2, 0);
         PSstroke();
-        [@"0" drawAtRCPoint:NSMakePoint(x - 7, y) withAttributes:attributes];
-        [formatNumber(max) drawAtRCPoint:NSMakePoint(x - 7, y - hmax)
+    PSgrestore();
+        //[@"0" drawAtRCPoint:NSMakePoint(x - 7, y) withAttributes:attributes];
+        [[NSString stringWithFormattedNumber:min]
+                           drawAtRCPoint:NSMakePoint(x - 7, y)
                           withAttributes:attributes];
-   } else {
-       // calculate sizes, without space for title and names
+        [[NSString stringWithFormattedNumber:max]
+                           drawAtRCPoint:NSMakePoint(x - 7, y - hmax)
+                          withAttributes:attributes];
+    } else {
+        // calculate sizes, without space for title and names
         hmax = NSHeight(cellFrame) - 4;
         wmax = NSWidth(cellFrame) - 4;
         y = NSMaxY(cellFrame) - 2;
@@ -234,12 +478,13 @@ static NSString *formatNumber(double n)
         x = NSMaxX(cellFrame) - 2 - wmax;
     }
 
-    valEnum = [data objectEnumerator];
-    while ((value = [valEnum nextObject]) != nil) {
-        val = [value doubleValue];
+    unsigned index;
+    unsigned count = [data subCount];
+    for (index = 0; index < count && index < 10; index++) {
+        val = [data subValueAtIndex:index];
 
         // draw bar
-        [[value color] set];
+        [[data subColorAtIndex:index] set];
         h = hmax * val / max;
         PSrectfill(x, y, w, -h);
         [[NSColor blackColor] set];
@@ -247,8 +492,7 @@ static NSString *formatNumber(double n)
 
         if (!simple) {
             NSString *valueString;
-            [attributes setObject:[NSColor blackColor]
-                           forKey:NSForegroundColorAttributeName];
+            NSString *percentString;
             // draw name under bar
             PSgsave();
             if (w > fontHeight) {
@@ -260,23 +504,41 @@ static NSString *formatNumber(double n)
                 PStranslate(x + w/2 - fontHeight/2, y);
                 PSrotate(-90);
             }
-            [[value name] drawAtRTPoint:NSMakePoint(0, 0)
+            [attributes setObject:[NSColor blackColor]
+                           forKey:NSForegroundColorAttributeName];
+            [[data subNameAtIndex:index] drawAtRTPoint:NSMakePoint(0, 0)
                          withAttributes:attributes];
             PSgrestore();
             
             // draw value over bar
-            if (showPercent) {
-                valueString = [NSString stringWithFormat:@"%.1f%%",
-                                                         100*val/total];
-            } else {
-                valueString = formatNumber(val);
-            }
+            valueString = [NSString stringWithFormattedNumber:val];
+            percentString = [NSString stringWithFormat:@"%.1f%%",
+                            100 * val / total];
 
-            if ((hmax - h) >= fontHeight) {
+            if ((hmax - h) >= fontHeight && h >= fontHeight) {
                 [valueString drawAtCBPoint:NSMakePoint(x+w/2, y-h)
                             withAttributes:attributes];
-            } else {
-                [attributes setObject:[[value color] contrastingWhiteOrBlackColor]
+                [attributes setObject:[[data subColorAtIndex:index] contrastingWhiteOrBlackColor]
+                               forKey:NSForegroundColorAttributeName];
+                [percentString drawAtCTPoint:NSMakePoint(x+w/2, y-h)
+                            withAttributes:attributes];
+            } else if ((hmax - h) >= fontHeight * 1.9) {
+                [valueString drawAtCBPoint:NSMakePoint(x+w/2, y-h - .9*fontHeight)
+                            withAttributes:attributes];
+                [percentString drawAtCBPoint:NSMakePoint(x+w/2, y-h)
+                            withAttributes:attributes];
+            } else if (h >= fontHeight * 1.9) {
+                [attributes setObject:[[data subColorAtIndex:index] contrastingWhiteOrBlackColor]
+                               forKey:NSForegroundColorAttributeName];
+                [valueString drawAtCTPoint:NSMakePoint(x+w/2, y-h)
+                            withAttributes:attributes];
+                [percentString drawAtCTPoint:NSMakePoint(x+w/2, y-h + .9*fontHeight)
+                            withAttributes:attributes];
+            } else if ((hmax - h) >= fontHeight) {
+                [valueString drawAtCBPoint:NSMakePoint(x+w/2, y-h)
+                            withAttributes:attributes];
+            } else if (h >= fontHeight) {
+                [attributes setObject:[[data subColorAtIndex:index] contrastingWhiteOrBlackColor]
                                forKey:NSForegroundColorAttributeName];
                 [valueString drawAtCTPoint:NSMakePoint(x+w/2, y-h)
                             withAttributes:attributes];
@@ -287,198 +549,252 @@ static NSString *formatNumber(double n)
     }
 }
 
+- (void)addPieSliceWithName:(NSString *)sliceName
+               initialAngle:(float)angle1
+                      color:(NSColor *)color
+                      value:(float)val
+                 totalValue:(float)total
+{
+    float angle2;
+    float midangle;
+    float fraction;
+    PieSlice *slice;
+    NSString *complement;
+    
+    fraction = val / total;
+    angle2 = angle1 + 360 * fraction;
+    midangle = (angle1 + angle2) / 2;
+
+    complement = [NSString stringWithFormat:@"%@s, %.1f%%",
+                    [NSString stringWithFormattedNumber:val], 100 * fraction];
+    slice = [PieSlice sliceWithInitialAngle:angle1
+                                 finalAngle:angle2
+                                      color:color
+                                       name:sliceName
+                                 complement:complement
+                                       cell:self];
+    [slices addObject:slice];
+}
+
+- (NSArray *)slicesFromAngle:(float)a1 toAngle:(float)a2
+{
+    unsigned index;
+    unsigned count;
+    float midAngle;
+    float lastAngle;
+    PieSlice *slice;
+    NSMutableArray *selectedSlices;
+    BOOL firstPass;
+    unsigned secondPassIndex;
+
+    lastAngle = -HUGE_VAL;
+    firstPass = YES;
+    secondPassIndex = 0;
+    selectedSlices = [NSMutableArray array];
+    count = [slices count];
+    for (index = 0; index < count; index++) {
+        slice = [slices objectAtIndex:index];
+        midAngle = [slice midAngle];
+        if (midAngle >= 360) midAngle -= 360;
+        if (midAngle >= a2) continue;
+        if (midAngle < a1) continue;
+        if (firstPass && (midAngle < lastAngle)) {
+            firstPass = NO;
+        }
+        if (firstPass) {
+            [selectedSlices addObject:slice];
+            lastAngle = midAngle;
+        } else {
+            [selectedSlices insertObject:slice atIndex:secondPassIndex++];
+        }
+    }
+    return selectedSlices;
+}
+
+// Adjust the positions of labels so that they do not intersect.
+// can be made better, with a left adjusting and a right adjusting function,
+// and by allowing labels to use more vertical space, maybe passing
+// multiple times by the slices.
+- (void)adjustSlicesFromAngle:(float)a1
+                      toAngle:(float)a2
+                     quadrant:(int)quadrant
+                         xRef:(float)xref
+{
+    float ypos;
+    NSEnumerator *eachSlice;
+    PieSlice *slice;
+    float vsignal;
+    float hsignal;
+    float midAngle;
+    NSPoint pos;
+    NSArray *selectedSlices;
+
+    selectedSlices = [self slicesFromAngle:a1 toAngle:a2];
+    if (quadrant == 1 || quadrant == 3) {
+        eachSlice = [selectedSlices reverseObjectEnumerator];
+    } else {
+        eachSlice = [selectedSlices objectEnumerator];
+    }
+    
+    if (quadrant == 1 || quadrant == 2) {
+        vsignal = -1;
+    } else {
+        vsignal = 1;
+    }
+    
+    if (quadrant == 1 || quadrant == 4) {
+        hsignal = 1;
+    } else {
+        hsignal = -1;
+    }
+
+    ypos = -HUGE_VAL * vsignal;
+    while ((slice = [eachSlice nextObject]) != nil) {
+        midAngle = [slice midAngle];
+        pos = [slice labelPosition];
+        ypos += vsignal * 17;
+        if (vsignal * (pos.y - ypos) >= 0) {
+            ypos = pos.y;
+        } else {
+            pos.x += hsignal * sin(midAngle*M_PI/180) * (pos.y - ypos);
+            pos.y = ypos;
+        }
+        [slice setLabelPosition:pos width:xref - hsignal * pos.x];
+    }
+}
+
+- (void)adjustLabelPositionsInFrame:(NSRect)cellFrame
+{
+    float minX;
+    float maxX;
+    minX = -5;
+    maxX = NSMaxX(cellFrame) - 5;
+    [self adjustSlicesFromAngle:0   toAngle:90  quadrant:1 xRef:maxX];
+    [self adjustSlicesFromAngle:90  toAngle:150 quadrant:2 xRef:minX];
+    [self adjustSlicesFromAngle:150 toAngle:270 quadrant:3 xRef:minX];
+    [self adjustSlicesFromAngle:270 toAngle:360 quadrant:4 xRef:maxX];
+}
+
+- (void)makeLabelLinesPath
+{
+    Assign(labelLinesPath, [NSBezierPath bezierPath]);
+    [labelLinesPath setLineWidth:1];
+    [labelLinesPath setLineJoinStyle:NSRoundLineJoinStyle];
+    [slices makeObjectsPerformSelector:@selector(appendLabelLinesToPath:)
+                            withObject:labelLinesPath];
+}
+
+- (void)makeDivisionsPath
+{
+    Assign(divisionsPath, [NSBezierPath bezierPath]);
+    [divisionsPath setLineWidth:2];
+    [divisionsPath setLineJoinStyle:NSRoundLineJoinStyle];
+    [divisionsPath appendBezierPathWithArcWithCenter:center
+                                              radius:radius
+                                          startAngle:0
+                                            endAngle:360];
+    [divisionsPath moveToPoint:NSMakePoint(center.x + radius * .3, center.y)];
+    [divisionsPath appendBezierPathWithArcWithCenter:center
+                                              radius:radius * .3
+                                          startAngle:0
+                                            endAngle:360];
+    [slices makeObjectsPerformSelector:@selector(appendDivisionLinesToPath:)
+                            withObject:divisionsPath];
+}
+
+- (void)makeSlicesWithFrame:(NSRect)cellFrame
+{
+    int index;
+    int count;
+    float angle0;
+    float angle;
+    float val;
+    float total;
+    float others = 0;
+    int nothers = 0;
+
+    Assign(slices, [NSMutableArray array]);
+
+    // take totalizers
+    total = [data totalValue];
+    if (total == 0)
+        return;
+
+    // calculate center, radius of pie circle
+    center = NSMakePoint(NSMidX(cellFrame), NSMidY(cellFrame) - 3);
+    radius = MIN(NSWidth(cellFrame) * .5 - 20,
+                 NSHeight(cellFrame) * .5 - 17);
+
+    // Make pie slices
+    angle0 = (initialAngle != nil) ? [initialAngle floatValue] : 0;
+    angle = angle0;
+    count = [data subCount];
+    for (index = 0; index < count; index++) {
+        val = [data subValueAtIndex:index];
+        if ((val/total) < .05 && (nothers > 0 || index < (count-1))) {
+            others += val;
+            nothers++;
+            continue;
+        }
+
+        [self addPieSliceWithName:[data subNameAtIndex:index]
+                     initialAngle:angle
+                            color:[data subColorAtIndex:index]
+                            value:val
+                       totalValue:total];
+
+        // next segment starts where this one ends
+        angle +=  360 * val / total;
+    }
+    if (nothers > 0) {
+        NSString *sliceName;
+        sliceName = [NSString stringWithFormat:@"%d Others", nothers];
+        [self addPieSliceWithName:sliceName
+                     initialAngle:angle
+                            color:[NSColor controlColor]
+                            value:others
+                       totalValue:total];
+        angle += 360 * others / total;
+    }
+    float unusedAngle;
+    unusedAngle = angle0+360 - angle;
+    if (unusedAngle > .1) {
+        val = unusedAngle/360 * total;
+        [self addPieSliceWithName:@"None"
+                     initialAngle:angle
+                            color:[NSColor controlColor]
+                            value:val
+                       totalValue:total];
+    }
+
+    [self adjustLabelPositionsInFrame:cellFrame];
+    [self makeLabelLinesPath];
+    [self makeDivisionsPath];
+}
 
 - (void)drawInteriorWithFramePie:(NSRect)cellFrame inView:(NSView *)controlView
 {
-    StatValue *value;
-    NSEnumerator *valEnum;
-    float radius, angle1, angle2, mid_angle;
-    NSPoint center;
-    float val, total;
-    float others = 0;
-    float fontHeight = 0;
-    NSFont *font = nil;
-    NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
-
     if (nil == data) {
         [dataProvider provideDataForCell:self];
         if (nil == data)
             return;
     }
-
-    // take totalizers
-    total = [data sum];
-    if (total == 0)
-        return;
-
-    if (!simple) {
-        // set font for slice names
-        font = [NSFont userFontOfSize:10];
-        [attributes setObject:font
-                       forKey:NSFontAttributeName];
-        fontHeight = [font ascender] - [font descender];
+    if (nil == slices) {
+        [self makeSlicesWithFrame:cellFrame];
     }
 
-    // calculate center, radius of pie circle
-    center = NSMakePoint(NSMidX(cellFrame), NSMidY(cellFrame));
-    radius = MIN(NSWidth(cellFrame) * .5 - 20,
-                 NSHeight(cellFrame) * .5 - fontHeight - 4);
+    [slices makeObjectsPerformSelector:@selector(draw)];
+    [slices makeObjectsPerformSelector:@selector(drawLabel)];
 
-    // Fill pie slices
-    angle1 = (initialAngle != nil) ? [initialAngle floatValue] : 0;
-    valEnum = [data objectEnumerator];
-    while (value = [valEnum nextObject]) {
-        val = [value doubleValue];
-        if ((val/total) < .05) {
-            others += val;
-            continue;
-        }
-
-        angle2 = angle1 + 360 * val / total;
-
-        // draw the pie segment and border
-        PSnewpath();
-        PSmoveto(center.x, center.y);
-        PSarc(center.x, center.y, radius, angle1, angle2);
-        PSclosepath();
-        [[value color] set];
-        PSfill();
-
-        // next segment starts where this one ends
-        angle1 = angle2;
-    }
-
-    // draw slices' separators
-    PSnewpath();
-    angle1 = (initialAngle != nil) ? [initialAngle floatValue] : 0;
-    valEnum = [data objectEnumerator];
-    while (value = [valEnum nextObject]) {
-        val = [value doubleValue];
-        if ((val/total) < .05) continue;
-
-        angle2 = angle1 + 360 * val / total;
-
-        PSmoveto(center.x, center.y);
-        PSarc(center.x, center.y, radius, angle1, angle2);
-
-        // next segment starts where this one ends
-        angle1 = angle2;
-    }
-    if (others > 0) {
-        angle2 = angle1 + 360 * others / total;
-
-        PSmoveto(center.x, center.y);
-        PSarc(center.x, center.y, radius, angle1, angle2);
-    }
-    PSclosepath();
     [[NSColor blackColor] set];
-    PSsetlinewidth(2);
-    PSsetlinejoin(1); // rounded
-
-    PSstroke();
-
-    if (!simple) {
-        NSString *valueString;
-        NSColor *sliceTextColor;
-        NSPoint sliceCenter;
-
-        // draw lines from slices to where text will be
-        angle1 = (initialAngle != nil) ? [initialAngle floatValue] : 0;
-        valEnum = [data objectEnumerator];
-        while (value = [valEnum nextObject]) {
-            val = [value doubleValue];
-            if ((val/total) < .05) continue;
-
-            angle2 = angle1 + 360 * val / total;
-
-            // angle in the middle of the slice (in radians)
-            mid_angle = (angle1 + angle2) / 2;
-            if (mid_angle > 360) mid_angle -= 360;
-            // convert to radians
-            mid_angle = M_PI * mid_angle / 180;
-
-            PSmoveto(center.x+(radius*1.05)*cos(mid_angle),
-                     center.y+(radius*1.05)*sin(mid_angle));
-            PSlineto(center.x+(radius*1.15)*cos(mid_angle),
-                     center.y+(radius*1.15)*sin(mid_angle));
-            if (mid_angle > M_PI_2 && mid_angle < 3 * M_PI_2) {
-                PSrlineto(-10, 0);
-            } else {
-                PSrlineto(10, 0);
-            }
-
-            // next segment starts where this one ends
-            angle1 = angle2;
-        }
-        PSsetlinewidth(1);
-        PSstroke();
-
-        // draw slice value inside and name outside
-        angle1 = (initialAngle != nil) ? [initialAngle floatValue] : 0;
-        valEnum = [data objectEnumerator];
-        while (value = [valEnum nextObject]) {
-            val = [value doubleValue];
-            if ((val/total) < .05) continue;
-
-            angle2 = angle1 + 360 * val / total;
-
-            // angle in the middle of the slice (in radians)
-            mid_angle = (angle1 + angle2) / 2;
-            if (mid_angle > 360) mid_angle -= 360;
-            // convert to radians
-            mid_angle = M_PI * mid_angle / 180;
-
-            // write value inside slice
-            // what to write
-            if (showPercent) {
-                valueString = [NSString stringWithFormat:@"%.1f%%",
-                                                         100*val/total];
-            } else {
-                valueString = formatNumber(val);
-                //valueString = [NSString stringWithFormat:@"%.2f", val];
-            }
-            // color to write (black or white, the one with better contrast)
-            sliceTextColor = [[value color] contrastingWhiteOrBlackColor];
-
-            [attributes setObject:sliceTextColor
-                           forKey:NSForegroundColorAttributeName];
-            // where to write
-            sliceCenter = NSMakePoint(center.x+(radius*.7)*cos(mid_angle),
-                                      center.y+(radius*.7)*sin(mid_angle));
-            [valueString drawAtCCPoint:sliceCenter withAttributes:attributes];
-
-            // draw the name of the slice
-            [attributes setObject:[NSColor blackColor]
-                           forKey:NSForegroundColorAttributeName];
-
-            if (mid_angle > M_PI_2 && mid_angle < 3 * M_PI_2) {
-                NSPoint point;
-                point = NSMakePoint(center.x+(radius*1.15)*cos(mid_angle) - 12,
-                                    center.y+(radius*1.15)*sin(mid_angle));
-                [[value name] drawAtRCPoint:point withAttributes:attributes];
-            } else {
-                NSPoint point;
-                point = NSMakePoint(center.x+(radius*1.15)*cos(mid_angle) + 12,
-                                    center.y+(radius*1.15)*sin(mid_angle));
-                [[value name] drawAtLCPoint:point withAttributes:attributes];
-            }
-
-            // next segment starts where this one ends
-            angle1 = angle2;
-        }
-
-    }
+    [divisionsPath stroke];
+    [labelLinesPath stroke];
 }
 
 
 - (void)setGraphType:(int)t
 {
     type = t;
-}
-
-- (void)setShowPercent:(BOOL)yn
-{
-    showPercent = yn;
 }
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView

@@ -47,6 +47,11 @@
     return [condensedArray durationAtIndex:i];
 }
 
+- (double)exclusiveDuration
+{
+    return [self duration] - [condensedArray totalDuration];
+}
+
 - (int)imbricationLevel
 {
     return imbricationLevel;

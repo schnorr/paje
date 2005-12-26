@@ -17,12 +17,11 @@
     along with Pajé; if not, write to the Free Software Foundation, Inc.,
     59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 */
-/*
- */
 
 #include "StatViewer.h"
 
 #include "../General/Macros.h"
+#include "StatArray.h"
 
 @implementation StatViewer
 - initWithController:(PajeTraceController *)c
@@ -94,12 +93,16 @@
 
 - (void)dataChangedForEntityType:(PajeEntityType *)entityType
 {
-    [self invalidateValues];
+    if ([entityType isEqual:[self selectedEntityType]]) {
+        [self invalidateValues];
+    }
 }
 
 - (void)colorChangedForEntityType:(PajeEntityType *)entityType
 {
-    [self invalidateValues];
+    if ([entityType isEqual:[self selectedEntityType]]) {
+        [self invalidateCellCaches];
+    }
 }
 
 - (void)setStartTime:(NSDate *)time
@@ -185,6 +188,12 @@
     [matrix setNeedsDisplay];
 }
 
+- (void)invalidateCellCaches
+{
+    [[matrix cells] makeObjectsPerformSelector:@selector(discardCache)];
+    [matrix setNeedsDisplay];
+}
+
 - (BOOL)isEntity:(PajeEntity *)internalEntity
         inEntity:(PajeEntity *)externalEntity
 {
@@ -206,10 +215,9 @@
 - (void)provideDataForCell:(PieCell *)cell
 {
     NSEnumerator *enumerator;
-    PajeEntity *entity;
     id array;
     PajeContainer *container;
-    NSMutableArray *stack;
+    double minDuration;
 
     if (startTime == nil) {
         [self setStartTime:[super startTime]];
@@ -222,61 +230,27 @@
     //NSAssert(container, @"Invalid container in StatViewer cell");
     if (container == nil) return;
 
-    array = [[StatArray alloc] initWithName:[self nameForEntity:container]];
-    stack = [NSMutableArray array];
-
+    minDuration = [endTime timeIntervalSinceDate:startTime]/500;
     enumerator = [self enumeratorOfEntitiesTyped:[self selectedEntityType]
                                      inContainer:container
                                         fromTime:startTime
                                           toTime:endTime
-                                     minDuration:[endTime timeIntervalSinceDate:startTime]/100];
+                                     minDuration:minDuration];
+
     enumerator = [[enumerator allObjects] reverseObjectEnumerator];
-    while ((entity = [enumerator nextObject]) != nil) {
-        StatValue *v;
-        double duration;
-        NSDate *entityStart;
-        NSDate *entityEnd;
-        
-        entityStart = [self startTimeForEntity:entity];
-        entityEnd = [self endTimeForEntity:entity];
-        duration = [[endTime earlierDate:entityEnd]
-                       timeIntervalSinceDate:[startTime laterDate:entityStart]];
-        if (duration == 0) duration = 1; // for events; should be a separate mth
-        
-        while ([stack count] > 0) {
-            PajeEntity *topEntity;
-            topEntity = [stack lastObject];
-            if ([self isEntity:entity inEntity:topEntity]) {
-                v = [StatValue valueWithValue:-duration
-                                        color:[self colorForEntity:topEntity]
-                                         name:[self nameForEntity:topEntity]];
-                [array addObject:v];
-                break;
-            } else {
-                [stack removeLastObject];
-            }
-        }
-        [stack addObject:entity];
+    array = [[StatArray stateArrayWithName:[container name]
+                                      type:[self selectedEntityType]
+                                 startTime:startTime
+                                   endTime:endTime
+                                    filter:self
+                          entityEnumerator:enumerator] retain];
 
-        v = [StatValue valueWithValue:duration
-                                color:[self colorForEntity:entity]
-                                 name:[self nameForEntity:entity]];
-        [array addObject:v];
-    }
-
-    [array setSum:[endTime timeIntervalSinceDate:startTime]];
     [cell setData:array];
     [cell setGraphType:[[graphTypeSelector selectedItem] tag]];
-    [cell setShowPercent:[[percentSelector selectedCell] tag]];
     [array release];
 }
 
 - (IBAction)entityTypeSelectorChanged:(id)sender
-{
-    [self invalidateValues];
-}
-
-- (IBAction)percentSelectorChanged:(id)sender
 {
     [self invalidateValues];
 }
@@ -291,7 +265,6 @@
     for (i=0; i<rows; i++) {
         cell = [matrix cellAtRow:i column:0];
         [cell setGraphType:[[graphTypeSelector selectedItem] tag]];
-        [cell setShowPercent:[[percentSelector selectedCell] tag]];
     }
     [matrix setNeedsDisplay];
 }
@@ -300,7 +273,7 @@
 {
     [[matrix cells] makeObjectsPerformSelector:@selector(setInitialAngle:)
                                     withObject:sender];
-    [matrix display];
+    [self invalidateCellCaches];
 }
 
 - (void)windowDidResize:(NSNotification *)notification
@@ -308,15 +281,16 @@
         NSSize cellSize;
         NSRect matrixFrame;
 
+        if (![window isVisible]) return;
+
 #if 1
-        cellSize = [matrix cellSize];
-        matrixFrame = [matrix frame];
+        matrixFrame = [[matrix superview] frame];
         cellSize.width = NSWidth(matrixFrame);
         cellSize.height = 3 * cellSize.width / 5;
         [matrix setCellSize:cellSize];
         [matrix setIntercellSpacing:NSMakeSize(0, 0)];
         [matrix sizeToCells];
-        [matrix setNeedsDisplay];
+        [self invalidateCellCaches];
 #else
         [matrix setAutosizesCells:YES];
         [matrix setValidateSize:NO];

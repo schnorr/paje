@@ -34,6 +34,7 @@
     if (self != nil) {
         array = [[NSMutableArray alloc] init];
         sorted = YES;
+        totalDuration = 0;
     }
     return self;
 }
@@ -98,6 +99,7 @@
         association = [Association associationWithObject:name double:duration];
         [array addObject:association];
     }
+    totalDuration += duration;
 
     sorted = NO;
 }
@@ -128,6 +130,10 @@
     unsigned i;
     NSRange range;
     
+    if (other == nil) {
+        return;
+    }
+    
     range = NSMakeRange(0, [array count]);
 
     count = [other count];
@@ -135,7 +141,7 @@
         NSString *name;
         double duration;
         Association *association;
-    
+
         name = [other nameAtIndex:i];
         duration = [other durationAtIndex:i];
         association = [self associationWithName:name inRange:range];
@@ -147,22 +153,28 @@
             [array addObject:association];
         }
     }
+    totalDuration += [other totalDuration];
 
     sorted = NO;
+}
+
+- (double)totalDuration
+{
+    return totalDuration;
 }
 
 // NSCoding Protocol
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:array];
+    [coder encodeValuesOfObjCTypes:"@d", &array, &totalDuration];
 }
 
 - (id)initWithCoder:(NSCoder *)coder
 {
     self = [super init];
     if (self != nil) {
-        [coder decodeValueOfObjCType:@encode(id) at:&array];
+        [coder decodeValuesOfObjCTypes:"@d", &array, &totalDuration];
         sorted = NO;
     }
     return self;

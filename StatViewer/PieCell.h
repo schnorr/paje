@@ -27,7 +27,6 @@
    */
 #include <AppKit/AppKit.h>
 #include "StatArray.h"
-#include "StatValue.h"
 
 @interface PieCell : NSCell
 {
@@ -36,17 +35,31 @@
     NSNumber *initialAngle;
     BOOL simple;              // true if undecorated display
     int type;
-    BOOL showPercent;
+    NSPoint center;
+    float radius;
+    NSMutableArray *slices;
+    NSBezierPath *divisionsPath;
+    NSBezierPath *labelLinesPath;
+    NSDictionary *labelAttributes;
+    NSDictionary *complementAttributes;
 }
 
 - (void)setDataProvider:(id)provider;
 - (void)setData:(StatArray *)d;
 
+- (void)discardCache;
+
+- (NSPoint)center;
+- (float)radius;
+
+- (NSDictionary *)labelAttributes;
+- (NSDictionary *)complementAttributes;
+
+
 // overrides from NSCell:
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
+
 - (void)setInitialAngle:(NSNumber *)angle;
 - (void)setGraphType:(int)t;
-- (void)setShowPercent:(BOOL)yn;
 @end
-#include "StatViewer.h"
 #endif

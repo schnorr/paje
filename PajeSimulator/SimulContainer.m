@@ -118,6 +118,9 @@
     return [self retain];
 }
 
+
+// FIXME: popped states do not accumulate in containing state
+// (see popUserStateOfType:withEvent:
 - (void)stopWithEvent:(PajeEvent *)event
 {
     id entity;

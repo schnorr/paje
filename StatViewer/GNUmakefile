@@ -6,21 +6,19 @@ BUNDLE_NAME = StatViewer
 
 StatViewer_PRINCIPAL_CLASS = StatViewer
 
-ADDITIONAL_INCLUDE_DIRS = -I../General.bproj
+ADDITIONAL_INCLUDE_DIRS = -I../General
 
 StatViewer_RESOURCE_FILES = StatViewer.gorm
 
 StatViewer_OBJC_FILES = \
-        PieCell.m \
         StatViewer.m \
-        StatArray.m \
-        StatValue.m
+        PieCell.m \
+        StatArray.m
 
 StatViewer_HEADER_FILES = \
-        PieCell.h \
         StatViewer.h \
-        StatArray.h \
-        StatValue.h
+        PieCell.h \
+        StatArray.h
 
 -include GNUmakefile.preamble
 include $(GNUSTEP_MAKEFILES)/bundle.make

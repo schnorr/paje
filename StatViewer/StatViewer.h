@@ -34,7 +34,6 @@
     NSDate *endTime;
     IBOutlet NSPopUpButton *entityTypeSelector;
     IBOutlet NSPopUpButton *graphTypeSelector;
-    id percentSelector;
     id durationField;
 }
 - (void)awakeFromNib;
@@ -46,9 +45,11 @@
 - (void)changeInitialAngle:(id)sender;
 - (IBAction)graphTypeSelectorChanged:(id)sender;
 - (IBAction)entityTypeSelectorChanged:(id)sender;
-- (IBAction)percentSelectorChanged:(id)sender;
+
+- (PajeEntityType *)selectedEntityType;
 
 - (void)invalidateValues;
+- (void)invalidateCellCaches;
 - (void)provideDataForCell:(PieCell *)cell;
 
 - (void)windowDidResize:(NSNotification *)notification;

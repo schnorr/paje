@@ -30,6 +30,7 @@
 @interface CondensedEntitiesArray : NSObject <NSCoding>
 {
     NSMutableArray *array;
+    double totalDuration;
     BOOL sorted;
 }
 
@@ -48,6 +49,7 @@
 - (void)addName:(NSString *)name count:(unsigned)count;
 - (unsigned)countAtIndex:(unsigned)index;
 
+- (double)totalDuration;
 
 - (void)addArray:(CondensedEntitiesArray *)other;
 @end

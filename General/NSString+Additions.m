@@ -25,6 +25,33 @@
     return [NSString stringWithCharacters:&c length:1];
 }
 
++ (NSString *)stringWithFormattedNumber:(double)n
+{
+    static char *p = "TGMk m\xb5np";
+    int i = 4;
+    BOOL neg = (n < 0);
+
+    if (neg)
+        n = -n;
+    if (n < 1e-12)
+        return neg ? @"-0" : @"0";
+    if (n > 999e12)
+        return neg ? @"-Inf" : @"Inf";
+    while (n < 1) {
+        n *= 1000;
+        i++;
+    }
+    while (n > 1000) {
+        n /= 1000;
+        i--;
+    }
+    if (n < 10)
+        return [NSString stringWithFormat:@"%s%.1f%c", neg?"-":"", n, p[i]];
+    return [NSString stringWithFormat:@"%s%d%c", neg?"-":"", (int)n, p[i]];
+}
+
+
+
 #define UNICHAR_BUFF_SIZE 1024
 
 // Adapted from Mike Ferris' TextExtras
@@ -108,5 +135,61 @@
 + (NSString *)stringWithRange:(NSRange)range
 {
     return NSStringFromRange(range);
+}
+@end
+
+
+@implementation NSString (PajeNSStringPositionDrawing)
+- (void)drawAtLTPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes
+{
+    [self drawAtPoint:aPoint withAttributes:attributes];
+}
+- (void)drawAtLCPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes
+{
+    NSSize size = [self sizeWithAttributes:attributes];
+    NSPoint newPoint = NSMakePoint(aPoint.x, aPoint.y - size.height/2);
+    [self drawAtPoint:newPoint withAttributes:attributes];
+}
+- (void)drawAtLBPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes
+{
+    NSSize size = [self sizeWithAttributes:attributes];
+    NSPoint newPoint = NSMakePoint(aPoint.x, aPoint.y - size.height);
+    [self drawAtPoint:newPoint withAttributes:attributes];
+}
+- (void)drawAtCTPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes
+{
+    NSSize size = [self sizeWithAttributes:attributes];
+    NSPoint newPoint = NSMakePoint(aPoint.x - size.width/2, aPoint.y);
+    [self drawAtPoint:newPoint withAttributes:attributes];
+}
+- (void)drawAtCCPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes
+{
+    NSSize size = [self sizeWithAttributes:attributes];
+    NSPoint newPoint = NSMakePoint(aPoint.x - size.width/2, aPoint.y - size.height/2);
+    [self drawAtPoint:newPoint withAttributes:attributes];
+}
+- (void)drawAtCBPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes
+{
+    NSSize size = [self sizeWithAttributes:attributes];
+    NSPoint newPoint = NSMakePoint(aPoint.x - size.width/2, aPoint.y - size.height);
+    [self drawAtPoint:newPoint withAttributes:attributes];
+}
+- (void)drawAtRTPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes
+{
+    NSSize size = [self sizeWithAttributes:attributes];
+    NSPoint newPoint = NSMakePoint(aPoint.x - size.width, aPoint.y);
+    [self drawAtPoint:newPoint withAttributes:attributes];
+}
+- (void)drawAtRCPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes
+{
+    NSSize size = [self sizeWithAttributes:attributes];
+    NSPoint newPoint = NSMakePoint(aPoint.x - size.width, aPoint.y - size.height/2);
+    [self drawAtPoint:newPoint withAttributes:attributes];
+}
+- (void)drawAtRBPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes
+{
+    NSSize size = [self sizeWithAttributes:attributes];
+    NSPoint newPoint = NSMakePoint(aPoint.x - size.width, aPoint.y - size.height);
+    [self drawAtPoint:newPoint withAttributes:attributes];
 }
 @end

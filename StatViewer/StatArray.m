@@ -20,130 +20,278 @@
 /* StatArray.m created by benhur on Fri 26-Sep-1997 */
 
 #include "StatArray.h"
-#include "StatValue.h"
-#include <math.h>
+#include "../General/Macros.h"
 
-@implementation StatArray
-
-+ (StatArray *)arrayWithName:(NSString *)theName
+@interface StatStateArray : StatArray
 {
-    return [[[self alloc] initWithName:theName] autorelease];
+    CondensedEntitiesArray *condensedArray;
+    NSDate *startTime;
+    NSDate *endTime;
 }
 
 - (id)initWithName:(NSString *)theName
+              type:(PajeEntityType *)type
+         startTime:(NSDate *)start
+           endTime:(NSDate *)end
+            filter:(PajeFilter *)f
+  entityEnumerator:(NSEnumerator *)en;
+
+- (void)addEntitiesFromEnumerator:(NSEnumerator *)enumerator;
+@end
+
+@implementation StatArray
+
++ (StatArray *)stateArrayWithName:(NSString *)theName
+                             type:(PajeEntityType *)type
+                        startTime:(NSDate *)start
+                          endTime:(NSDate *)end
+                           filter:(PajeFilter *)f
+                 entityEnumerator:(NSEnumerator *)en
 {
-    [super init];
+    return [[[StatStateArray alloc] initWithName:theName
+                                            type:type
+                                       startTime:start
+                                         endTime:end
+                                          filter:f
+                                entityEnumerator:en] autorelease];
+}
 
-    array = [[NSMutableSet alloc] init];
-    name = [theName retain];
-    sum = 0;
-    max = -HUGE_VAL;
-    min = HUGE_VAL;
-
+- (id)initWithName:(NSString *)theName
+              type:(PajeEntityType *)type
+            filter:(PajeFilter *)f
+{
+    self = [super init];
+    if (self != nil) {
+        Assign(name, theName);
+        Assign(entityType, type);
+        filter = f;
+    }
     return self;
 }
-
-- (id)init
-{
-    return [self initWithName:@""];
-}
-
-#ifdef GNUSTEP
-- (id)initWithCapacity:(unsigned)c
-{
-    return self;
-}
-#endif
 
 - (void)dealloc
 {
-    [array release];
-    [name release];
+    Assign(name, nil);
+    Assign(entityType, nil);
     [super dealloc];
-}
-
-- (void)addObject:(id/*<StatValue>*/)object
-{
-    double v = [object doubleValue];
-    double v2 = v;
-    id obj = [array member:object];
-
-    if (obj) {
-        [obj addToValue:v];
-        v2 = [obj value];
-    } else
-        [array addObject:object];
-
-    sum += v;
-    if (v2 > max) max = v2;
-    if (v2 < min) min = v2;
-}
-
-- (void)addValue:(double)v toName:(NSString *)n
-{
-    double v2 = v;
-    id obj = [array member:n];
-
-    if (obj) {
-        [obj addToValue:v];
-        v2 = [obj value];
-    } else
-        [array addObject:[StatValue valueWithValue:v
-                                             color:[NSColor blackColor]
-                                              name:n]];
-
-    sum += v;
-    if (v2 > max) max = v2;
-    if (v2 < min) min = v2;
-}
-
-- (void)removeAllObjects
-{
-    [array removeAllObjects];
-    sum = 0;
-    max = -HUGE_VAL;
-    min = HUGE_VAL;
-}
-
-- (unsigned)count
-{
-    return [array count];
-}
-
-- (NSEnumerator *)objectEnumerator
-{
-    return [array objectEnumerator];
-}
-
-
-- (double)sum
-{
-    return sum;
-}
-
-- (void)setSum:(double)value
-{
-    sum = value;
-}
-
-- (double)maxValue
-{
-    return max;
-}
-
-- (double)minValue
-{
-    return min;
-}
-
-- (void)setName:(NSString *)newName
-{
-    [name release];
-    name = [newName retain];
 }
 
 - (NSString *)name
 {
     return name;
+}
+
+- (double)totalValue
+{
+    [self subclassResponsibility:_cmd];
+    return 0;
+}
+
+- (double)maxValue
+{
+    [self subclassResponsibility:_cmd];
+    return 0;
+}
+
+- (double)minValue
+{
+    [self subclassResponsibility:_cmd];
+    return 0;
+}
+
+- (unsigned)subCount
+{
+    [self subclassResponsibility:_cmd];
+    return 0;
+}
+
+- (NSString *)subNameAtIndex:(unsigned)index
+{
+    [self subclassResponsibility:_cmd];
+    return nil;
+}
+
+- (NSColor *)subColorAtIndex:(unsigned)index
+{
+    [self subclassResponsibility:_cmd];
+    return nil;
+}
+
+- (double)subValueAtIndex:(unsigned)index
+{
+    [self subclassResponsibility:_cmd];
+    return 0;
+}
+
+@end
+
+
+
+@implementation StatStateArray
+- (id)initWithName:(NSString *)theName
+              type:(PajeEntityType *)type
+         startTime:(NSDate *)start
+           endTime:(NSDate *)end
+            filter:(PajeFilter *)f
+  entityEnumerator:(NSEnumerator *)en
+{
+    self = [super initWithName:theName
+                          type:type
+                        filter:f];
+    if (self != nil) {
+        Assign(startTime, start);
+        Assign(endTime, end);
+        condensedArray = [[CondensedEntitiesArray alloc] init];
+        [self addEntitiesFromEnumerator:en];
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    Assign(condensedArray, nil);
+    Assign(startTime, nil);
+    Assign(endTime, nil);
+    [super dealloc];
+}
+
+
+- (void)addEntitiesFromEnumerator:(NSEnumerator *)enumerator
+{
+    PajeEntity *entity;
+    int top = -1;
+    BOOL incomplete[100];
+    NSDate *start[100];
+    NSString *names[100];
+    double duration[100];
+
+    while ((entity = [enumerator nextObject]) != nil) {
+        NSDate *entityStart;
+        NSDate *entityEnd;
+        BOOL entityIsAggregate;
+        BOOL entityIsIncomplete;
+        double entityDuration;
+        double entityDurationInSelection;
+        
+        entityStart = [filter startTimeForEntity:entity];
+        entityEnd = [filter endTimeForEntity:entity];
+        if ([entityStart isLaterThanDate:endTime]
+            || [entityEnd isEarlierThanDate:startTime]) {
+            continue;
+        }
+        //entityDuration = [filter durationForEntity:entity];
+        entityDuration = [entity duration];
+        entityIsAggregate = [filter isAggregateEntity:entity];
+        
+        while (top >= 0 && [entityEnd isEarlierThanDate:start[top]]) {
+            if (incomplete[top] && duration[top] > 0) {
+                [condensedArray addName:names[top]
+                               duration:duration[top]];
+            }
+            top--;
+        }
+
+        entityIsIncomplete = NO;
+        entityDurationInSelection = entityDuration;
+        if ([entityStart isEarlierThanDate:startTime]) {
+            entityIsIncomplete = YES;
+            entityDurationInSelection
+                              -= [startTime timeIntervalSinceDate:entityStart];
+        }
+        if ([entityEnd isLaterThanDate:endTime]) {
+            entityIsIncomplete = YES;
+            entityDurationInSelection
+                              -= [entityEnd timeIntervalSinceDate:endTime];
+        }
+        
+        if (!entityIsAggregate) {
+            NSString *entityName;
+            entityName = [filter nameForEntity:entity];
+
+            if (top >= 0 && incomplete[top]) {
+                duration[top] -= entityDurationInSelection;
+            }
+            top++;
+            incomplete[top] = entityIsIncomplete;
+            start[top] = entityStart;
+            if (entityIsIncomplete) {
+                names[top] = entityName;
+                duration[top] = entityDurationInSelection;
+            } else {
+                double entityExclusiveDuration;
+                //entityExclusiveDuration = [filter exclusiveDurationForEntity:entity];
+                entityExclusiveDuration = [entity exclusiveDuration];
+                [condensedArray addName:entityName
+                               duration:entityExclusiveDuration];
+            }
+            //condensedEntitiesCount ++;
+        } else {
+            double correctionFactor;
+            double correctedDuration;
+            double entityExclusiveDuration;
+            //entityExclusiveDuration = [filter exclusiveDurationForEntity:entity];
+            entityExclusiveDuration = [entity exclusiveDuration];
+            correctionFactor = entityDurationInSelection / entityDuration;
+            correctedDuration = (entityDuration - entityExclusiveDuration)
+                              * correctionFactor;
+            if (correctedDuration > entityDurationInSelection) {
+                correctedDuration = entityDurationInSelection;
+            }
+            if (top >= 0 && incomplete[top]) {
+                duration[top] -= correctedDuration;
+            }
+            // BUG: should be corrected by correctionFactor
+            [condensedArray addArray:[entity condensedEntities]];
+            //[condensedArray addArray:[filter condensedEntitiesForEntity:entity]];
+            //condensedEntitiesCount += [entity condensedEntitiesCount];
+        }
+        
+    }
+    while (top >= 0) {
+        if (incomplete[top]
+            && duration[top]/[endTime timeIntervalSinceDate:startTime] > 1e-5) {
+            [condensedArray addName:names[top]
+                           duration:duration[top]];
+        }
+        top--;
+    }
+}
+
+
+- (double)totalValue
+{
+    return [endTime timeIntervalSinceDate:startTime];
+}
+
+- (double)maxValue
+{
+    return [self subValueAtIndex:0];
+}
+
+- (double)minValue
+{
+    return [self subValueAtIndex:[self subCount] - 1];
+}
+
+
+- (unsigned)subCount
+{
+    return [condensedArray count];
+}
+
+- (NSString *)subNameAtIndex:(unsigned)i
+{
+    return [condensedArray nameAtIndex:i];
+}
+
+- (NSColor *)subColorAtIndex:(unsigned)i
+{
+    return [filter colorForName:[condensedArray nameAtIndex:i]
+                   ofEntityType:entityType];
+}
+
+- (double)subValueAtIndex:(unsigned)i
+{
+    return [condensedArray durationAtIndex:i];
 }
 @end

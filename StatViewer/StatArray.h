@@ -21,31 +21,38 @@
 #define _StatArray_h_
 /* StatArray.h created by benhur on Fri 26-Sep-1997 */
 
-#include <AppKit/AppKit.h>
+#include <Foundation/Foundation.h>
+#include "../General/PajeType.h"
+#include "../General/PajeFilter.h"
+#include "../General/CondensedEntitiesArray.h"
 
-@interface StatArray : NSMutableSet
+@interface StatArray : NSObject
 {
-    NSMutableSet *array;
-    double sum;
-    double max;
-    double min;
     NSString *name;
+    PajeEntityType *entityType;
+    PajeFilter *filter;
 }
 
-+ (StatArray *)arrayWithName:(NSString *)theName;
-- (id)init;
-- (id)initWithName:(NSString *)theName;
++ (StatArray *)stateArrayWithName:(NSString *)theName
+                             type:(PajeEntityType *)type
+                        startTime:(NSDate *)start
+                          endTime:(NSDate *)end
+                           filter:(PajeFilter *)f
+                 entityEnumerator:(NSEnumerator *)en;
 
-- (void)addObject:(id/*<StatValue>*/)object;
-- (unsigned)count;
-- (NSEnumerator *)objectEnumerator;
+- (id)initWithName:(NSString *)theName
+              type:(PajeEntityType *)type
+            filter:(PajeFilter *)f;
 
-- (double)sum;
-- (void)setSum:(double)value;
-- (double)maxValue;
-- (double)minValue;
-- (void)setName:(NSString *)newName;
 - (NSString *)name;
 
+- (double)totalValue;
+- (double)maxValue;
+- (double)minValue;
+
+- (unsigned)subCount;
+- (NSString *)subNameAtIndex:(unsigned)index;
+- (NSColor *)subColorAtIndex:(unsigned)index;
+- (double)subValueAtIndex:(unsigned)index;
 @end
 #endif

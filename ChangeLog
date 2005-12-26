@@ -1,4 +1,18 @@
 2005-12-26  Benhur Stein <benhur@inf.ufsm.br>
+	* General/CondensedEntitiesArray.[hm]: added totalDuration variable
+          and access methods
+	* StorageController/AggregateState.m: -exclusiveDuration: add method
+	* General/NSString+Additions.[hm]: added string drawing methods from
+          PieCell
+	* PajeSimulator/SimulContainer.m: added a FIXME comment to stopWithEvent
+	* StatViewer/GNUmakefile: removed StatValue class
+	* StatViewer/StatValue.[hm]: removed files
+	* StatViewer/PieCell.[hm]: major change in pie drawing code
+	* StatViewer/StatArray.[hm]: mostly rewritten
+	* StatViewer/StatViewer.gorm: modified interface
+	* StatViewer/StatViewer.[hm]: reflect interface changes
+
+2005-12-26  Benhur Stein <benhur@inf.ufsm.br>
 	* PajeSimulator/PajeSimul.m: -inputEntity: check for unknown event
 
 2005-10-14  Benhur Stein <benhur@inf.ufsm.br>

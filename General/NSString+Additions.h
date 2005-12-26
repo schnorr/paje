@@ -24,10 +24,34 @@
 
 @interface NSString (Additions)
 + (NSString *)stringWithCharacter:(unichar)c;
++ (NSString *)stringWithFormattedNumber:(double)n;
 - (NSRange)rangeForLineNumber:(unsigned)lineNumber;
 - (unsigned)lineNumberAtIndex:(unsigned)index;
 - (NSRange)rangeValue;
 + (NSString *)stringWithRange:(NSRange)range;
 @end
+
+
+#include <AppKit/NSStringDrawing.h>
+
+@interface NSString (PajeNSStringPositionDrawing)
+// additions to NSString to support drawing them in many positions
+// relative to a given point. Uses NSStringAdditions methods to do this.
+// Should not be called if the focus is not locked to some view.
+// All methods are of the form: drawAtXYPoint: ...,
+// where X can be L, C or R, meaning that the x coordinate of aPoint
+// should be at the left, center or right of the string, and
+// Y can be B, C or T (bottom, center or top)
+- (void)drawAtLTPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes;
+- (void)drawAtLCPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes;
+- (void)drawAtLBPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes;
+- (void)drawAtCTPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes;
+- (void)drawAtCCPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes;
+- (void)drawAtCBPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes;
+- (void)drawAtRTPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes;
+- (void)drawAtRCPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes;
+- (void)drawAtRBPoint:(NSPoint)aPoint withAttributes:(NSDictionary *)attributes;
+@end
+
 
 #endif
