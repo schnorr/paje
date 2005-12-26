@@ -1,3 +1,6 @@
+2005-12-26  Benhur Stein <benhur@inf.ufsm.br>
+	* PajeSimulator/PajeSimul.m: -inputEntity: check for unknown event
+
 2005-10-14  Benhur Stein <benhur@inf.ufsm.br>
 	* PajeSimulator/UserState.m: encode/decode new variables
 

@@ -299,7 +299,11 @@ NSInvocation *invocation;
 #else
     void (*f)(id, SEL, id);
     f = NSMapGet(invocationTable, [event pajeEventName]);
-    f(self, 0, event);
+    if (f != NULL) {
+        f(self, 0, event);
+    } else {
+        NSLog(@"Unknown event \"%@\"", [event pajeEventName]);
+    }
 #endif
     
     eventCount++;
