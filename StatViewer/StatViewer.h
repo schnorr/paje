@@ -23,7 +23,6 @@
 #include <AppKit/AppKit.h>
 #include "PieCell.h"
 #include "StatArray.h"
-#include "StatValue.h"
 #include "../General/PajeFilter.h"
 
 @interface StatViewer: PajeFilter <PajeTool>

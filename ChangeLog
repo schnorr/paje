@@ -1,4 +1,8 @@
 2005-12-26  Benhur Stein <benhur@inf.ufsm.br>
+	* StatViewer/StatViewer.[hm]: correctly declare cell; remove .h
+          inclusion
+
+2005-12-26  Benhur Stein <benhur@inf.ufsm.br>
 	* General/CondensedEntitiesArray.[hm]: added totalDuration variable
           and access methods
 	* StorageController/AggregateState.m: -exclusiveDuration: add method

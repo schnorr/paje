@@ -39,7 +39,7 @@
 
 - (void)awakeFromNib
 {
-    id cell;
+    PieCell *cell;
     NSSize cellSize = NSZeroSize;
     NSString *cellSizeString;
 
