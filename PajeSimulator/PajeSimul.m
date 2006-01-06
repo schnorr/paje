@@ -248,7 +248,6 @@ NSInvocation *invocation;
 
 - (void)inputEntity:(PajeEvent *)event
 {
-    NSInvocation *invocation;
     id time;
 
     [self rootContainer];
@@ -291,6 +290,7 @@ NSInvocation *invocation;
     }
     // invoke the method that simulates this event
 #ifndef MAP
+    NSInvocation *invocation;
     invocation = [invocationTable objectForKey:[event pajeEventName]];
     if (invocation) {
         [invocation setArgument:&event atIndex:2];

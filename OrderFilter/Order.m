@@ -46,7 +46,7 @@
         win = [view window];
 
         // view is an NSBox. we need its contents.
-        view = [[view contentView] retain];
+        view = [[(NSBox *)view contentView] retain];
 
         hierarchyBrowser = [[HierarchyBrowser alloc] initWithFilter:self];
         [hierarchyBrowser setContainersOnly:YES];

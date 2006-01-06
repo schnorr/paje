@@ -275,13 +275,18 @@
 
 - (void)setConfiguration:(id)config
 {
+    NSDictionary *configuration;
     NSMutableDictionary *hiddenContainers;
     NSEnumerator *keyEnum;
     id key;
     NSArray *value;
     NSArray *hiddenTypes;
 
-    hiddenContainers = [[config objectForKey:@"HiddenContainers"] unifyStrings];
+    NSParameterAssert([config isKindOfClass:[NSDictionary class]]);
+    configuration = config;
+
+    hiddenContainers = [[configuration objectForKey:@"HiddenContainers"]
+                                                                unifyStrings];
 
     keyEnum = [hiddenContainers keyEnumerator];
     while ((key = [keyEnum nextObject]) != nil) {
@@ -289,7 +294,8 @@
 	[filters setObject:[NSMutableSet setWithArray:value] forKey:key];
     }
 
-    hiddenTypes = [[config objectForKey:@"HiddenContainerTypes"] unifyStrings];
+    hiddenTypes = [[configuration objectForKey:@"HiddenContainerTypes"]
+                                                               unifyStrings];
     Assign(hiddenEntityTypes, [NSMutableSet setWithArray:hiddenTypes]);
     [self hierarchyChanged];
     [super dataChangedForEntityType:nil];

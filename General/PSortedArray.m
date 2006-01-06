@@ -234,12 +234,16 @@ NSDate *delta_d_t0;
 {
     unsigned index = [self indexOfFirstObjectNotBeforeValue:value];
 
-    if (index < [array count]
-        && [[[array objectAtIndex:index] performSelector:valueSelector]
-            compare:value] == NSOrderedSame)
-        return index;
-    if (index > 0)
+    if (index < [array count]) {
+        id arrValue;
+        arrValue = [[array objectAtIndex:index] performSelector:valueSelector];
+        if ([value compare:arrValue] == NSOrderedSame) {
+            return index;
+        }
+    }
+    if (index > 0) {
         return index - 1;
+    }
     return NSNotFound;
 }
 
@@ -247,10 +251,13 @@ NSDate *delta_d_t0;
 {
     unsigned index = [self indexOfFirstObjectNotBeforeValue:value];
 
-    if (index < [array count]
-        && [[[array objectAtIndex:index] performSelector:valueSelector]
-            isEqual:value])
-        return index;
+    if (index < [array count]) {
+        id arrValue;
+        arrValue = [[array objectAtIndex:index] performSelector:valueSelector];
+        if ([value compare:arrValue] == NSOrderedSame) {
+            return index;
+        }
+    }
     return NSNotFound;
 }
 

@@ -599,10 +599,13 @@ static NSMutableArray *allInstances;
 
 - (IBAction)entityClicked:(id)sender
 {
+    NSCell *cell;
     if ([sender isKindOfClass:[NSMatrix class]]) {
-        sender = [sender selectedCell];
+        cell = [sender selectedCell];
+    } else {
+        cell = sender;
     }
-    [self inspectEntity:[sender representedObject] withFilter:filter];
+    [self inspectEntity:[cell representedObject] withFilter:filter];
 }
 
 - (IBAction)colorChanged:(id)sender

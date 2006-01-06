@@ -155,7 +155,7 @@ static PajeController *uniqueController;
     int		result;
     NSString   *directory;
     NSString   *filename;
-    NSArray    *filetypes = [NSArray arrayWithObjects:@"trace", nil];
+    //NSArray    *filetypes = [NSArray arrayWithObjects:@"trace", nil];
 
     filename = [[NSUserDefaults standardUserDefaults]
                                       stringForKey:@"LastOpenFile"];

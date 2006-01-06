@@ -576,6 +576,7 @@
 
 - (void)setConfiguration:(id)config
 {
+    NSDictionary *configuration;
     NSMutableDictionary *hiddenNames;
     NSMutableArray *hiddenTypes;
     NSEnumerator *keyEnum;
@@ -583,7 +584,9 @@
     PajeEntityType *entityType;
     int i;
 
-    hiddenNames = [[config objectForKey:@"HiddenNames"] unifyStrings];
+    NSParameterAssert([config isKindOfClass:[NSDictionary class]]);
+    configuration = config;
+    hiddenNames = [[configuration objectForKey:@"HiddenNames"] unifyStrings];
 
     keyEnum = [hiddenNames keyEnumerator];
     while ((entityTypeName = [keyEnum nextObject]) != nil) {
@@ -596,7 +599,8 @@
         }
     }
 
-    hiddenTypes = [[config objectForKey:@"HiddenEntityTypes"] unifyStrings];
+    hiddenTypes = [[configuration objectForKey:@"HiddenEntityTypes"]
+                                                               unifyStrings];
     for (i = 0; i < [hiddenTypes count];) {
         entityTypeName = [hiddenTypes objectAtIndex:i];
         entityType = [self entityTypeWithName:entityTypeName];

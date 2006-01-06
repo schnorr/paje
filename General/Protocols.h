@@ -112,7 +112,7 @@ typedef enum {
 @end
 
 @protocol PajeComponent <NSObject>
-- (void)setOutputComponent:(id<PajeComponent>)comp;
+//- (void)setOutputComponent:(id<PajeComponent>)comp;
 - (void)encodeCheckPointWithCoder:(NSCoder *)coder;
 - (void)decodeCheckPointWithCoder:(NSCoder *)coder;
 @end
@@ -165,7 +165,7 @@ typedef enum {
 
 
 @protocol PajeInspector
-+ (id <PajeInspector>)inspector;
+//+ (id <PajeInspector>)inspector;
 - (void)inspect:(id)sender;
 @end
 

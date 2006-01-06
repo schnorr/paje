@@ -337,6 +337,8 @@ NSDictionary *containerShapeFunctionsDictionary;
         return [linkShapeFunctionsDictionary allValues];
     case PajeContainerDrawingType:
         return [containerShapeFunctionsDictionary allValues];
+    default:
+        return [NSArray array];
     }
     return [NSArray array];
 }

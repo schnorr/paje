@@ -175,17 +175,17 @@
 
 - (ShapeFunction *)selectedShapeFunction
 {
-    return [[shapeMatrix selectedCell] representedObject];
+    return [(NSCell *)[shapeMatrix selectedCell] representedObject];
 }
 
 - (DrawFunction *)selectedDrawFunction
 {
-    return [[drawMatrix selectedCell] representedObject];
+    return [(NSCell *)[drawMatrix selectedCell] representedObject];
 }
 
 - (DrawFunction *)selectedHighlightFunction
 {
-    return [[highlightMatrix selectedCell] representedObject];
+    return [(NSCell *)[highlightMatrix selectedCell] representedObject];
 }
 
 - (void)setupShapeMatrix

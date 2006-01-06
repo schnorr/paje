@@ -94,8 +94,10 @@
 
 - (PajeEntityType *)selectedEntityType
 {
+    NSCell *selectedCell;
     PajeEntity *selectedEntity;
-    selectedEntity = [[containersBrowser selectedCell] representedObject];
+    selectedCell = [containersBrowser selectedCell];
+    selectedEntity = [selectedCell representedObject];
     return [selectedEntity entityType];
 }
 
@@ -140,7 +142,8 @@
 
 - (PajeContainer *)selectedParentContainer
 {
-    return [[[containersBrowser selectedCell] representedObject] container];
+    return [[(NSCell *)[containersBrowser selectedCell] representedObject]
+	                                                             container];
 }
 
 
@@ -220,7 +223,9 @@
     if (column == 0) {
         upperContainer = [filter rootInstance];
     } else {
-        upperContainer = [[sender selectedCellInColumn:column-1] representedObject];
+        NSCell *selectedCell;
+        selectedCell = [sender selectedCellInColumn:column-1];
+        upperContainer = [selectedCell representedObject];
     }
 
     cell = [containerTypesBrowser selectedCellInColumn:column];
@@ -262,7 +267,7 @@
     if (column == 0) {
         containerType = [filter rootEntityType];
     } else {
-        containerType = [[sender selectedCellInColumn:column-1]
+        containerType = [(NSCell *)[sender selectedCellInColumn:column-1]
                                  representedObject];
     }
     rows=0;

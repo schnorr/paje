@@ -1,3 +1,12 @@
+2006-01-06  Benhur Stein <benhur@inf.ufsm.br>
+	* ContainerFilter/ContainerSelector.m,
+	EntityTypeFilter/EntityTypeSelector.m, General/Association.m,
+	General/HierarchyBrowser.m, General/PSortedArray.m,
+	General/PajeEntityInspector.m, General/Protocols.h,
+	OrderFilter/Order.m, Paje/PajeController.m, PajeSimulator/PajeSimul.m,
+	SpaceTimeViewer/STLayoutEditor.m, SpaceTimeViewer/Shape.m: remove
+	compiler warnings
+
 2005-12-26  Benhur Stein <benhur@inf.ufsm.br>
 	* StatViewer/StatViewer.[hm]: correctly declare cell; remove .h
           inclusion
