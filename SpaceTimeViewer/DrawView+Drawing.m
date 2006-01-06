@@ -532,9 +532,6 @@ do { \
                               drawFunction:[layoutDescriptor drawFunction]];
             break;
         case PajeStateDrawingType:
-            // States are ordered by endTime, inset states come first and 
-            // should be drawn last -- reverse the enumeration
-            enumerator = [[enumerator allObjects] reverseObjectEnumerator];
             [self drawStatesWithDescriptor:(STStateTypeLayout *)layoutDescriptor
                                inContainer:container
                             fromEnumerator:enumerator
@@ -547,8 +544,8 @@ do { \
                              drawFunction:[layoutDescriptor drawFunction]];
             break;
         case PajeVariableDrawingType:
-            enumerator = [[enumerator allObjects] reverseObjectEnumerator];
-            [self drawValuesWithDescriptor:(STVariableTypeLayout *)layoutDescriptor
+            [self drawValuesWithDescriptor:(STVariableTypeLayout *)
+                                                           layoutDescriptor
                                inContainer:container
                             fromEnumerator:enumerator
                               drawFunction:[layoutDescriptor drawFunction]];

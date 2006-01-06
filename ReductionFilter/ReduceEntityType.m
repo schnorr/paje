@@ -226,16 +226,19 @@
         && [container isEqual:[array container]]
         && ![start isEarlierThanDate:[array startTime]]
         && ![end isLaterThanDate:[array endTime]]) {
-        return [array objectEnumeratorOfClass:entityClass
-                                     fromTime:start toTime:end];
+        //return [array objectEnumeratorOfClass:entityClass
+        //                             fromTime:start toTime:end];
+        return [[[array objectEnumeratorOfClass:entityClass
+                                     fromTime:start toTime:end] allObjects] reverseObjectEnumerator];
     }
 
-    if (array) [array release];
+    if (array != nil) [array release];
     origEnum = [component enumeratorOfEntitiesTyped:entityTypeToReduce
                                         inContainer:container
                                            fromTime:start
                                              toTime:end
                                         minDuration:0];
+    origEnum = [[origEnum allObjects] reverseObjectEnumerator];
     array = [[BusyArray alloc] initWithEntityType:self
                                         container:container
                                         startTime:start
@@ -255,6 +258,7 @@
     if (limitsChanged)
         [component dataChangedForEntityType:self];
 
-    return [array objectEnumeratorOfClass:entityClass];
+    //return [array objectEnumeratorOfClass:entityClass];
+    return [[[array objectEnumeratorOfClass:entityClass] allObjects] reverseObjectEnumerator];
 }
 @end

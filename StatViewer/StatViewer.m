@@ -237,7 +237,6 @@
                                           toTime:endTime
                                      minDuration:minDuration];
 
-    enumerator = [[enumerator allObjects] reverseObjectEnumerator];
     array = [[StatArray stateArrayWithName:[container name]
                                       type:[self selectedEntityType]
                                  startTime:startTime

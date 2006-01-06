@@ -237,14 +237,18 @@
                            [container enumeratorOfEntitiesTyped:entityType
                                                        fromTime:start
                                                          toTime:end]];
+        multiEnum = [[multiEnum allObjects] reverseObjectEnumerator];
         return multiEnum;
     }
 
     // if container should contain entityType directly, we have no entities!
     if ([[entityType containerType] isEqual:[container entityType]]) {
-        return [container enumeratorOfEntitiesTyped:entityType
-                                           fromTime:start
-                                             toTime:end];
+        NSEnumerator *en;
+        en = [container enumeratorOfEntitiesTyped:entityType
+                                         fromTime:start
+                                           toTime:end];
+        en = [[en allObjects] reverseObjectEnumerator];
+        return en;
     }
     
     // container does not contain entityType's directly.
@@ -265,6 +269,7 @@
 
         }
     }
+    multiEnum = [[multiEnum allObjects] reverseObjectEnumerator];
     return multiEnum;
 }
 
@@ -303,7 +308,6 @@
         aggregator = [EventAggregator aggregatorWithMaxDuration:minDuration];
     }
     filtered = [NSMutableArray array];
-    en = [[en allObjects] reverseObjectEnumerator];
     while ((state = [en nextObject]) != nil) {
         if (![aggregator addEntity:state]) {
             aggregate = [aggregator aggregate];
@@ -321,7 +325,7 @@
     if (aggregate != nil) {
         [filtered addObject:aggregate];
     }
-    return [filtered reverseObjectEnumerator];
+    return [filtered objectEnumerator];
 }
 
 - (NSEnumerator *)enumeratorOfContainersTyped:(PajeEntityType *)entityType

@@ -157,20 +157,9 @@ BOOL line_hit(double px, double py,
                                        minDuration:SMALL_ENTITY_DURATION];
     while ((entity = [enumerator nextObject]) != nil) {
         if ([self isPoint:point insideEntity:entity]) {
-            // find the entity whose center is closest to point
-//            NSRect r = [self rectForEntity:entity];
-//            float dx = NSMidX(r) - point.x;
-//            float dy = NSMidY(r) - point.y;
-//            float distance = dx * dx + dy * dy;
-//            if (distance < closestDistance) {
-//                closestDistance = distance;
-//NSLog(@"closest:%@ -> %@", closestEntity, entity);
-                closestEntity = entity;
-break;
-//            }
+            closestEntity = entity;
         }
     }
-//    NSLog(@"search %@ in %@: %@", edesc, container, closestEntity);
     return closestEntity;
 }
 
