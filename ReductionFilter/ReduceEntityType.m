@@ -156,15 +156,20 @@
     Assign(minValue, nil);
     Assign(maxValue, nil);
     if (array != nil) {
-        [c getMinValue:&minValue maxValue:&maxValue forArray:array pajeComponent:component];
+        [entityClass getMinValue:&minValue
+                        maxValue:&maxValue
+                        forArray:array
+                   pajeComponent:component];
         [minValue retain];
         [maxValue retain];
     }
 }
+
 - (Class)entityClass
 {
     return entityClass;
 }
+
 - (PajeDrawingType)drawingType
 {
     return PajeVariableDrawingType;
@@ -179,6 +184,7 @@
     Assign(minValue, nil);
     Assign(maxValue, nil);
 }
+
 - (PajeEntityType *)entityTypeToReduce
 {
     return entityTypeToReduce;
@@ -191,6 +197,7 @@
     Assign(minValue, nil);
     Assign(maxValue, nil);
 }
+
 - (void)addNamesToFilter:(NSArray *)names
 {
     [filterNames addObjectsFromArray:names];
@@ -226,10 +233,9 @@
         && [container isEqual:[array container]]
         && ![start isEarlierThanDate:[array startTime]]
         && ![end isLaterThanDate:[array endTime]]) {
-        //return [array objectEnumeratorOfClass:entityClass
-        //                             fromTime:start toTime:end];
-        return [[[array objectEnumeratorOfClass:entityClass
-                                     fromTime:start toTime:end] allObjects] reverseObjectEnumerator];
+        return [array reverseObjectEnumeratorOfClass:entityClass
+                                            fromTime:start
+                                              toTime:end];
     }
 
     if (array != nil) [array release];
@@ -238,7 +244,6 @@
                                            fromTime:start
                                              toTime:end
                                         minDuration:0];
-    origEnum = [[origEnum allObjects] reverseObjectEnumerator];
     array = [[BusyArray alloc] initWithEntityType:self
                                         container:container
                                         startTime:start
@@ -246,7 +251,10 @@
                                        enumerator:origEnum
                                        nameFilter:filterNames];
 
-    [entityClass getMinValue:&min maxValue:&max forArray:array pajeComponent:component];
+    [entityClass getMinValue:&min
+                    maxValue:&max
+                    forArray:array
+               pajeComponent:component];
     if ((minValue == nil) || ([minValue compare:min] == NSOrderedDescending)) {
         Assign(minValue, min);
         limitsChanged = YES;
@@ -258,7 +266,6 @@
     if (limitsChanged)
         [component dataChangedForEntityType:self];
 
-    //return [array objectEnumeratorOfClass:entityClass];
-    return [[[array objectEnumeratorOfClass:entityClass] allObjects] reverseObjectEnumerator];
+    return [array reverseObjectEnumeratorOfClass:entityClass];
 }
 @end

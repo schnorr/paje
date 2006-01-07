@@ -1,4 +1,9 @@
 2006-01-06  Benhur Stein <benhur@inf.ufsm.br>
+	* ReductionFilter/BusyArray.h, ReductionFilter/BusyArray.m,
+	  ReductionFilter/ReduceEntityType.m: code cleanup & better reverse
+	  enumeration
+
+2006-01-06  Benhur Stein <benhur@inf.ufsm.br>
 	* ReductionFilter/ReduceEntityType.m,
 	  SpaceTimeViewer/DrawView+Drawing.m,
 	  SpaceTimeViewer/DrawView+Finding.m, StatViewer/StatViewer.m,
