@@ -213,6 +213,7 @@ void PSInit(void){}
         hasZoomed = NO;
         Assign(oldMiddleTime, nil);
     }
+    newVisible.origin.x = (int)newVisible.origin.x;
     return newVisible;
 }
 
@@ -628,26 +629,21 @@ BOOL dontdraw;
 
 - (void)drawRect:(NSRect)rect
 {
-    NSDate *drawStartTime;
-    NSDate *drawEndTime;
 
     if (startTime == nil) return;
 
 [self verifyTimes:self];
-    // draws some more pixels, for the graphs that expand their limits (events)
-    drawStartTime = XtoTIME(NSMinX(rect) - 5);
-    drawEndTime   = XtoTIME(NSMaxX(rect) + 5);
 
 #ifdef GNUSTEP
     // Big rectangles are not drawn by GNUstep. Cut them with cutRect.
     cutRect = NSInsetRect([self visibleRect], -2.0, -2.0);
 #endif
-    
+
     NS_DURING
 
         // set blackground
         [self drawBackgroundInRect:rect];
-        
+
         PSsetlinewidth(1);
 
         [self drawInstance:[controller rootInstance]
