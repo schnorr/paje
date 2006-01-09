@@ -241,7 +241,6 @@ do { \
         if ([filter isAggregateEntity:entity]) {
             [bp moveToPoint:NSMakePoint(x, y)];
             [bp lineToPoint:NSMakePoint(x+w, y+newHeight)];
-            float xi = x;
             unsigned i;
             unsigned count = [filter subCountForEntity:entity];
             for (i = 0; i < count; i++) {
@@ -261,7 +260,6 @@ do { \
             color = [filter colorForEntity:entity];
             [color set];
             NSRectFill(rect);
-            //[bp fill];
 
             if (drawNames && ow > smallEntityWidth && newHeight > 8) {
                 [name replaceCharactersInRange:NSMakeRange(0, [name length])

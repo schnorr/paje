@@ -1,3 +1,8 @@
+2006-01-08  Benhur Stein <benhur@inf.ufsm.br>
+	* SpaceTimeViewer/DrawView+Drawing.m SpaceTimeViewer/DrawView+Mouse.m 
+	  SpaceTimeViewer/DrawView.h SpaceTimeViewer/DrawView.m 
+	  SpaceTimeViewer/STController.m: cleanup in time selection code
+
 2006-01-07  Benhur Stein <benhur@inf.ufsm.br>
 	* SpaceTimeViewer/DrawView+Drawing.m, SpaceTimeViewer/DrawView.m: code
 	  cleanup & use NSBezierPath to draw states

@@ -23,6 +23,7 @@
 // all these methods are overriding methods defined in NSView.
 
 #include "DrawView.h"
+#include "../General/Macros.h"
 
 @implementation DrawView (Mouse)
 
@@ -73,11 +74,10 @@
     NSPoint point;
     PajeEntity *entityUnderCursor;
 
-    //point = [self convertPoint:[event locationInWindow] fromView:nil];
-    point = [self convertPoint:[[self window] mouseLocationOutsideOfEventStream] fromView:nil];
+    point = [[self window] mouseLocationOutsideOfEventStream];
+    point = [self convertPoint:[event locationInWindow] fromView:nil];
 
     if (!NSMouseInRect(point, [self visibleRect], [self isFlipped])) {
-//        NSLog(@"mouseMoved when not inside: %@", [event description]);
         return;
     }
 
@@ -87,58 +87,55 @@
         entityUnderCursor = [self findEntityAtPoint:point];
         [self setHighlightedEntity:entityUnderCursor];
     }
-    
+
+    [self setCursorTime:XtoTIME(point.x)];
+}
+
+- (void)setCursorTime:(NSDate *)time
+{
 #ifdef GNUSTEP
-        [cursorTimeField setStringValue:[NSString stringWithFormat:@"%.6f",
-        [XtoTIME(point.x) timeIntervalSinceReferenceDate] * timeUnitDivisor/*[XtoTIME(point.x) description]*/]];
+    [cursorTimeField setStringValue:[NSString stringWithFormat:@"%.6f",
+                [time timeIntervalSinceReferenceDate] * timeUnitDivisor]];
 #else
-//    [cursorTimeField setDoubleValue:[XtoTIME(point.x) timeIntervalSinceDate:startTime]];
-    [cursorTimeField setDoubleValue:[XtoTIME(point.x) timeIntervalSinceReferenceDate] * timeUnitDivisor/*[XtoTIME(point.x) description]*/];
+    [cursorTimeField setDoubleValue:
+                [time timeIntervalSinceReferenceDate] * timeUnitDivisor];
 #endif
 }
 
 - (void)mouseDown:(NSEvent *)event
 {
-    NSPoint cursorPoint = [self convertPoint:[event locationInWindow]
-                                    fromView:nil];
-
+    NSPoint cursorPoint;
+    NSDate *cursorTime;
+    
     if (highlightedEntity && ![highlightedEntity isContainer]) {
         return;
     }
     [self setHighlightedEntity:nil];
+
+    cursorPoint = [self convertPoint:[event locationInWindow] fromView:nil];
+    cursorTime = XtoTIME(cursorPoint.x);
 
     isMakingSelection = YES;
     
     // if there is a selection and the shift key is pressed, the
     // previous selection is changed.
     if (selectionExists && ([event modifierFlags] & NSShiftKeyMask)) {
-        // if the cursor is closer to the anchor point, the anchor will
-        // move. exchange it with the last mouse point.
-        selectionAnchorPoint.x = TIMEtoX(selectionStartTime);
-        selectionLastPoint.x = TIMEtoX(selectionEndTime);
-        if (ABS(cursorPoint.x - selectionLastPoint.x)
-            > ABS(cursorPoint.x - selectionAnchorPoint.x)) {
-            NSPoint tmp = selectionAnchorPoint;
-            selectionAnchorPoint = selectionLastPoint;
-            selectionLastPoint = tmp;
+        // Move the selection anchor to the side most distant from the cursor.
+        double selectionStartX;
+        double selectionEndX;
+        selectionStartX = TIMEtoX(selectionStartTime);
+        selectionEndX = TIMEtoX(selectionEndTime);
+        if (ABS([cursorTime timeIntervalSinceDate:selectionEndTime])
+            > ABS([cursorTime timeIntervalSinceDate:selectionStartTime])) {
+            Assign(selectionAnchorTime, selectionEndTime);
+        } else {
+            Assign(selectionAnchorTime, selectionStartTime);
         }
-        [self changeSelectionWithPoint:cursorPoint];
-        return;
+    } else {
+        // current selection will be forgotten; start new selection
+        Assign(selectionAnchorTime, cursorTime);
     }
-
-    // the previous selection is deleted, 
-    // and the anchor point is set to where the cursor is.
-    if (selectionExists) {
-        [self setNeedsDisplayInSelection];
-        selectionExists = NO;
-        [zoomToSelectionButton setEnabled:NO];
-        [selectionEndTime release];
-        selectionEndTime = nil;
-        [selectionStartTime release];
-        selectionStartTime = nil;
-    }
-    selectionAnchorPoint = cursorPoint;
-    selectionLastPoint = selectionAnchorPoint;
+    [self changeSelectionWithPoint:cursorPoint];
 }
 
 - (void)mouseDragged:(NSEvent *)event
@@ -150,17 +147,7 @@
 
     cursorPoint = [self convertPoint:[event locationInWindow] fromView:nil];
 
-    // test if cursor has moved enough
-    if (!selectionExists
-        && (ABS(cursorPoint.x - selectionAnchorPoint.x) > 2)) {
-        if (highlightedEntity)
-            [self setHighlightedEntity:nil];
-        selectionExists = YES;
-        [zoomToSelectionButton setEnabled:YES];
-    }
-    if (selectionExists) {
-        [self changeSelectionWithPoint:cursorPoint];
-    }
+    [self changeSelectionWithPoint:cursorPoint];
 }
 
 - (void)mouseUp:(NSEvent *)event
@@ -169,10 +156,6 @@
         [filter inspectEntity:highlightedEntity];
     }
 
-    if (selectionExists) {
-        [controller setSelectionStartTime:selectionStartTime
-				  endTime:selectionEndTime];
-    }
     isMakingSelection = NO;
 }
 

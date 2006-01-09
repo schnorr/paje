@@ -677,71 +677,98 @@ BOOL dontdraw;
            && [pointInTime isEarlierThanDate:selectionEndTime];
 }
 
-- (void)changeSelectionWithPoint:(NSPoint)point
+- (void)timeSelectionChanged
 {
     NSRect redisplayRect;
+    NSDate *newSelectionStartTime;
+    NSDate *newSelectionEndTime;
+    double ox1, ox2, nx1, nx2;
+
+    newSelectionStartTime = [controller selectionStartTime];
+    newSelectionEndTime = [controller selectionEndTime];
+    ox1 = TIMEtoX(selectionStartTime);
+    ox2 = TIMEtoX(selectionEndTime);
+    nx1 = TIMEtoX(newSelectionStartTime);
+    nx2 = TIMEtoX(newSelectionEndTime);
+    if (newSelectionStartTime == nil || nx1 == nx2) {
+        if (selectionExists) {
+            [self setNeedsDisplayFromX:ox1 toX:ox2];
+            Assign(selectionStartTime, nil);
+            Assign(selectionEndTime, nil);
+            selectionExists = NO;
+            [zoomToSelectionButton setEnabled:NO];
+        }
+        return;
+    }
+    if (!selectionExists) {
+        Assign(selectionStartTime, newSelectionStartTime);
+        Assign(selectionEndTime, newSelectionEndTime);
+        selectionExists = YES;
+        [zoomToSelectionButton setEnabled:YES];
+        [self setNeedsDisplayFromX:nx1 toX:nx2];
+        return;
+    }
+
+    if (ox2 < nx1 || nx2 < ox1) {
+        [self setNeedsDisplayFromX:ox1 toX:ox2];
+        Assign(selectionStartTime, newSelectionStartTime);
+        Assign(selectionEndTime, newSelectionEndTime);
+        [self setNeedsDisplayFromX:nx1 toX:nx2];
+        return;
+    }
+
+    redisplayRect = [self visibleRect];
+    if (nx1 != ox1) {
+        [self setNeedsDisplayFromX:MIN(nx1, ox1) toX:MAX(nx1, ox1)];
+    }
+    if (nx2 != ox2) {
+        [self setNeedsDisplayFromX:MIN(nx2, ox2) toX:MAX(nx2, ox2)];
+    }
+
+    Assign(selectionStartTime, newSelectionStartTime);
+    Assign(selectionEndTime, newSelectionEndTime);
+}
+
+- (void)changeSelectionWithPoint:(NSPoint)point
+{
     NSDate *cursorTime;
     NSRect frameRect = [self frame];
 
-//NSLog(@"sel-last:%@ pt=%@", NSStringFromPoint(selectionLastPoint), //NSStringFromPoint(point));
-//NSLog(@"frame=%@", NSStringFromRect(frameRect));
     if (point.x < NSMinX(frameRect)) point.x = NSMinX(frameRect);
     if (point.x > NSMaxX(frameRect)) point.x = NSMaxX(frameRect);
-//NSLog(@"pt=%@", NSStringFromPoint(point));
-
-    if (point.x == selectionLastPoint.x)
-        return;
 
     cursorTime = XtoTIME(point.x);
-    //[cursorTimeField setDoubleValue:[cursorTime timeIntervalSinceDate:startTime] * timeUnitDivisor];
-    [cursorTimeField setDoubleValue:[cursorTime timeIntervalSinceReferenceDate] * timeUnitDivisor];
+    [self setCursorTime:cursorTime];
 
-    redisplayRect = [self visibleRect];
-    if (point.x < selectionLastPoint.x) {
-        redisplayRect.origin.x = point.x;
-        redisplayRect.size.width = selectionLastPoint.x - redisplayRect.origin.x + 1;
+    if ([cursorTime isEarlierThanDate:selectionAnchorTime]) {
+        [controller setSelectionStartTime:cursorTime
+                                  endTime:selectionAnchorTime];
     } else {
-        redisplayRect.origin.x = selectionLastPoint.x - 2;
-        redisplayRect.size.width = point.x - redisplayRect.origin.x + 1;
+        [controller setSelectionStartTime:selectionAnchorTime
+                                  endTime:cursorTime];
     }
 
-    [selectionStartTime release];
-    [selectionEndTime release];
-    if (point.x < selectionAnchorPoint.x) {
-        selectionStartTime = [cursorTime retain];
-        selectionEndTime = [XtoTIME(selectionAnchorPoint.x) retain];
-    } else {
-        selectionEndTime = [cursorTime retain];
-        selectionStartTime = [XtoTIME(selectionAnchorPoint.x) retain];
-    }
-
-    selectionLastPoint = point;
-
-    [self setNeedsDisplayInRect:redisplayRect];
-    [self scrollRectToVisible:redisplayRect];
-    [controller setSelectionStartTime:selectionStartTime
-                              endTime:selectionEndTime];
+    // scroll point to visible
+    NSRect visibleRect;
+    visibleRect = [self visibleRect];
+    visibleRect.origin.x = point.x;
+    visibleRect.size.width = 1;
+    [self scrollRectToVisible:visibleRect];
 }
 
-- (void)setNeedsDisplayInSelection
+- (void)setNeedsDisplayFromX:(double)x1 toX:(double)x2
 {
     NSRect redisplayRect = [self visibleRect];
-    redisplayRect.origin.x = TIMEtoX(selectionStartTime);
-    redisplayRect.size.width = TIMEtoX(selectionEndTime) - redisplayRect.origin.x + 1;
+    redisplayRect.origin.x = x1;
+    redisplayRect.size.width = x2 - x1;
+    redisplayRect = NSIntegralRect(redisplayRect);
     [self setNeedsDisplayInRect:redisplayRect];
 }
 
 - (void)selectAll:(id)sender
 {
-    if (selectionExists) {
-        [selectionStartTime release];
-        [selectionEndTime release];
-    }
-    selectionStartTime = [startTime retain];
-    selectionEndTime = [endTime retain];
-    selectionExists = YES;
-    [controller setSelectionStartTime:selectionStartTime
-			      endTime:selectionEndTime];
+    [controller setSelectionStartTime:startTime
+                              endTime:endTime];
 }
 
 

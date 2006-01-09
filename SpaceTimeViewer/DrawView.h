@@ -71,8 +71,7 @@
     NSColor  *backgroundColor;
     NSColor  *selectedBackgroundColor;
 
-    NSPoint   selectionAnchorPoint;
-    NSPoint   selectionLastPoint;
+    NSDate   *selectionAnchorTime;
     NSDate   *selectionStartTime;
     NSDate   *selectionEndTime;
     BOOL      isMakingSelection;
@@ -116,7 +115,8 @@
 - (void)highlightEntities:(NSArray *)entities;
 
 - (void)changeSelectionWithPoint:(NSPoint)point;
-- (void)setNeedsDisplayInSelection;
+- (void)setNeedsDisplayFromX:(double)x1 toX:(double)x2;
+- (void)timeSelectionChanged;
 
 - (PajeFilter *)filter;
 
@@ -132,6 +132,7 @@
 - (void)mouseDown:(NSEvent *)event;
 - (void)mouseDragged:(NSEvent *)event;
 - (void)mouseUp:(NSEvent *)event;
+- (void)setCursorTime:(NSDate *)time;
 @end
 
 @interface DrawView (Drawing)

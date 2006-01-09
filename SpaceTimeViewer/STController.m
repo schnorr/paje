@@ -245,7 +245,7 @@
 
 - (void)timeSelectionChanged
 {
-    [drawView setNeedsDisplay:YES];
+    [drawView timeSelectionChanged];
 }
 
 - (void)containerSelectionChanged
