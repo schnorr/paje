@@ -610,22 +610,9 @@ void PSInit(void){}
 
         [selectedBackgroundColor set];
         NSRectFill(selectionRect);
-        
-        /*
-        [[NSColor darkGrayColor] set];
-        PSmoveto(NSMinX(selectionRect), NSMinY(selectionRect));
-        PSlineto(NSMinX(selectionRect), NSMaxY(selectionRect));
-        PSmoveto(NSMaxX(selectionRect), NSMinY(selectionRect));
-        PSlineto(NSMaxX(selectionRect), NSMaxY(selectionRect));
-        PSstroke();
-        */
     }
 }
 
-void PSStrokeLine(float x, float y, float w, float h);
-
-int CiTR;
-BOOL dontdraw;
 
 - (void)drawRect:(NSRect)rect
 {
@@ -690,7 +677,7 @@ BOOL dontdraw;
     ox2 = TIMEtoX(selectionEndTime);
     nx1 = TIMEtoX(newSelectionStartTime);
     nx2 = TIMEtoX(newSelectionEndTime);
-    if (newSelectionStartTime == nil || nx1 == nx2) {
+    if (newSelectionStartTime == nil || nx1 >= nx2) {
         if (selectionExists) {
             [self setNeedsDisplayFromX:ox1 toX:ox2];
             Assign(selectionStartTime, nil);
@@ -794,7 +781,7 @@ return NSDragOperationCopy;
 }
 
 #ifdef GNUSTEP
-// this shouldn't be needed (should be the defaul behaviour of NSView)
+// this shouldn't be needed (should be the default behaviour of NSView)
 - (BOOL) prepareForDragOperation: (id <NSDraggingInfo>)sender
 {
     return YES;
