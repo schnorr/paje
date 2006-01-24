@@ -1,4 +1,8 @@
 2006-01-24  Benhur Stein <benhur@inf.ufsm.br>
+	* PajeSimulator/SimulContainer.[hm], PajeSimul+Events.m: move
+          simulation of newEvent events to container, like other events.
+
+2006-01-24  Benhur Stein <benhur@inf.ufsm.br>
 	* General/ChunkArray.[hm]: new files
           (from branch by Edmar Pessoa Araújo Neto)
         * General/PSortedArray.[hm]: -removeObjectsInRange: new method

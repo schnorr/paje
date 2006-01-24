@@ -479,21 +479,17 @@
 - (void)pajeNewEvent:(PajeEvent *)event
 {
     PajeEventType *entityType;
-    PajeContainer *container;
+    SimulContainer *container;
     id entityValue;
-    UserEvent *userEntity;
 
     [self _getEntityType:&entityType
                    value:&entityValue
                container:&container
                fromEvent:event];
 
-    userEntity = [UserEvent eventWithType:entityType
-                                     name:entityValue
-                                container:container
-                                    event:event];
-
-    [self outputEntity:userEntity];
+    [container newEventWithType:entityType
+                          value:entityValue
+                      withEvent:event];
 }
 
 - (void)pajeSetState:(PajeEvent *)event

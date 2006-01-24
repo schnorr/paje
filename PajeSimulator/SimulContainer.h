@@ -70,6 +70,9 @@
 - (id)popEntityOfType:(PajeEntityType *)entityType;
 - (id)popEntity;
 
+- (void)newEventWithType:(id)type
+                   value:(id)value
+               withEvent:(PajeEvent *)event;
 - (void)setUserStateOfType:(PajeEntityType *)entityType
                    toValue:(id)value
                  withEvent:(PajeEvent *)event;

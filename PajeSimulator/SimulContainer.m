@@ -262,6 +262,19 @@ retry:
     return entity;
 }
 
+- (void)newEventWithType:(id)type
+                   value:(id)value
+               withEvent:(PajeEvent *)event
+{
+    UserEvent *newEvent;
+    newEvent = [UserEvent eventWithType:type
+                                   name:value
+                              container:self
+                                  event:event];
+
+    [simulator outputEntity:newEvent];
+}
+
 - (void)setUserStateOfType:(id)type
                    toValue:(id)value
                  withEvent:(PajeEvent *)event
