@@ -17,6 +17,7 @@ General_OBJC_FILES = \
 	NSString+Additions.m \
 	NSMatrix+Additions.m \
 	NSObject+Additions.m \
+	NSArray+Additions.m \
 	UniqueString.m \
 	NSDate+Additions.m \
 	MultiEnumerator.m \
@@ -33,7 +34,9 @@ General_OBJC_FILES = \
 	PajeEvent.m \
 	SourceTextController.m \
 	Association.m \
-	CondensedEntitiesArray.m
+	CondensedEntitiesArray.m \
+	EntityChunk.m \
+	ChunkArray.m
 
 General_HEADER_FILES = \
 	Comparing.h \
@@ -49,6 +52,7 @@ General_HEADER_FILES = \
 	NSString+Additions.h \
 	NSMatrix+Additions.h \
 	NSObject+Additions.h \
+	NSArray+Additions.h \
 	UniqueString.h \
 	FoundationAdditions.h \
 	NSDate+Additions.h \
@@ -66,7 +70,9 @@ General_HEADER_FILES = \
 	PajeEvent.h \
 	SourceTextController.h \
 	Association.h \
-	CondensedEntitiesArray.h
+	CondensedEntitiesArray.h \
+	EntityChunk.h \
+	ChunkArray.h
 
 General_RESOURCE_FILES = \
 	HierarchyBrowser.gorm \
@@ -89,8 +95,11 @@ PROJECT_HEADERS = \
 	SourceCodeReference.h \
 	NSDictionary+Additions.h \
 	NSString+Additions.h \
+	NSArray+Additions.h \
 	PajeFilter.h \
-	CondensedEntitiesArray.h
+	CondensedEntitiesArray.h \
+	entityChunk.h \
+	ChunkArray.h
 
 -include GNUmakefile.preamble
 include $(GNUSTEP_MAKEFILES)/bundle.make

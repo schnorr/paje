@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 1998, 1999, 2000, 2001, 2003, 2004 Benhur Stein
+    Copyright (c) 1998--2005 Benhur Stein
     
     This file is part of Pajé.
 
@@ -17,28 +17,39 @@
     along with Pajé; if not, write to the Free Software Foundation, Inc.,
     59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 */
-#ifndef _FoundationAdditions_h_
-#define _FoundationAdditions_h_
+#ifndef _ChunkArray_h_
+#define _ChunkArray_h_
 
 //
-// FoundationAdditions.h
+// ChunkArray
 //
-// Some methods that are not declared or that are added as categories
-// to some foundation classes.
+// contains an array of EntityChunks, sorted by time
+// can enumerate entities that lay in a time interval
+//
+// Author: Edmar Pessoa Araújo Neto
 //
 
-#include <Foundation/Foundation.h>
 
-#include "NSObject+Additions.h"
-#include "NSString+Additions.h"
-#include "NSMatrix+Additions.h"
-#include "NSDate+Additions.h"
-#include "NSArray+Additions.h"
+#include "PSortedArray.h"
+#include "EntityChunk.h"
 
-@interface NSBundle (UndeclaredMethods)
-// this method is defined in Openstep/Rhapsody, it exists in OS4.1, but
-// is not declared
-- (void)load;
+
+@interface ChunkArray : NSObject
+{
+    PSortedArray *chunks;
+}
+
+- (id)init;
+
+- (void)dealloc;
+
+- (NSEnumerator *)enumeratorOfEntitiesFromTime:(NSDate *)startTime
+                                        toTime:(NSDate *)endTime;
+
+- (void)addChunk:(EntityChunk *)chunk;
+
+- (void)removeChunksBeforeTime:(NSDate *)time;
+- (void)removeChunksAfterTime:(NSDate *)time;
 @end
 
 #endif

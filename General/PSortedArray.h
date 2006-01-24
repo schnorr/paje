@@ -36,6 +36,7 @@
 - (unsigned)count;
 - (id)objectAtIndex:(unsigned)index;
 - (void)removeObjectAtIndex:(unsigned)index;
+- (void)removeObjectsInRange:(NSRange)aRange;
 - (void)removeObject:(id)obj;
 - (void)removeObjectIdenticalTo:(id)obj;
 - (void)addObject:(id)obj;

@@ -278,6 +278,10 @@ NSDate *delta_d_t0;
     return [array objectEnumerator];
 }
 
+- (void) removeObjectsInRange: (NSRange)aRange
+{
+    [array removeObjectsInRange:aRange];
+}
 
 // NSCoding Protocol
 - (void)encodeWithCoder:(NSCoder *)coder
