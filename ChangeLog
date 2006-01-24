@@ -1,3 +1,7 @@
+2006-01-24  Benhur Stein <benhur@inf.ufsm.br>
+	* General/NSArray+Additions.[hm]: new files, implement range enumeration
+	  of objects in an array (from branch by Edmar Pessoa Araújo Neto)
+
 2006-01-08  Benhur Stein <benhur@inf.ufsm.br>
 	* SpaceTimeViewer/DrawView+Drawing.m SpaceTimeViewer/DrawView+Mouse.m 
 	  SpaceTimeViewer/DrawView.h SpaceTimeViewer/DrawView.m 
