@@ -1,3 +1,7 @@
+2006-01-25  Benhur Stein <benhur@inf.ufsm.br>
+        * General/PSortedArray.[hm]: -reverseEnumerator* new methods;
+          removed specific enumerator, use range enumerator in array instead.
+
 2006-01-24  Benhur Stein <benhur@inf.ufsm.br>
 	* PajeSimulator/SimulContainer.[hm], PajeSimul+Events.m: move
           simulation of newEvent events to container, like other events.

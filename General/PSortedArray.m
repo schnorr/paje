@@ -21,35 +21,7 @@
 
 #include "PSortedArray.h"
 
-@interface PSortedArrayEnumerator : NSEnumerator
-{
-    PSortedArray *array;
-    unsigned index;
-}
-@end
-@implementation PSortedArrayEnumerator
-- (id)initWithArray:(PSortedArray *)anArray andIndex:(unsigned)anIndex
-{
-    array = [anArray retain];
-    index = anIndex;
-    return self;
-}
-
-- (void)dealloc
-{
-    [array release];
-    [super dealloc];
-}
-
-- (id)nextObject
-{
-    if (index < [array count])
-        return [array objectAtIndex:index++];
-    else
-        return nil;
-}
-@end
-
+#include "NSArray+Additions.h"
 
 
 @implementation PSortedArray
@@ -266,17 +238,36 @@ NSDate *delta_d_t0;
     return [self indexOfObjectWithValue:[anObject performSelector:valueSelector]];
 }
 
-- (NSEnumerator *)objectEnumeratorAfterValue:(id<Comparing>)value
-{
-    return [[[PSortedArrayEnumerator alloc]
-        initWithArray:self andIndex:[self indexOfFirstObjectNotBeforeValue:value]]
-        autorelease];
-}
-
 - (NSEnumerator *)objectEnumerator
 {
     return [array objectEnumerator];
 }
+
+- (NSEnumerator *)reverseObjectEnumerator
+{
+    return [array reverseObjectEnumerator];
+}
+
+- (NSEnumerator *)objectEnumeratorAfterValue:(id<Comparing>)value
+{
+    int firstIndex;
+    NSRange range;
+
+    firstIndex = [self indexOfFirstObjectNotBeforeValue:value];
+    range = NSMakeRange(firstIndex, [array count] - firstIndex);
+    return [array objectEnumeratorWithRange:range];
+}
+
+- (NSEnumerator *)reverseObjectEnumeratorAfterValue:(id<Comparing>)value
+{
+    int firstIndex;
+    NSRange range;
+
+    firstIndex = [self indexOfFirstObjectNotBeforeValue:value];
+    range = NSMakeRange(firstIndex, [array count] - firstIndex);
+    return [array reverseObjectEnumeratorWithRange:range];
+}
+
 
 - (void) removeObjectsInRange: (NSRange)aRange
 {

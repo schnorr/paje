@@ -33,21 +33,28 @@
 
 + (PSortedArray *)sortedArrayWithSelector:(SEL)sel;
 - (id)initWithSelector:(SEL)sel;
+
 - (unsigned)count;
 - (id)objectAtIndex:(unsigned)index;
+- (void)addObject:(id)obj;
+
 - (void)removeObjectAtIndex:(unsigned)index;
 - (void)removeObjectsInRange:(NSRange)aRange;
 - (void)removeObject:(id)obj;
 - (void)removeObjectIdenticalTo:(id)obj;
-- (void)addObject:(id)obj;
+- (void)removeObjectsBeforeValue:(id<Comparing>)value;
+
 - (void)verifyPositionOfObjectIdenticalTo:(id)obj;
+
 - (NSEnumerator *)objectEnumerator;
 - (NSEnumerator *)objectEnumeratorAfterValue:(id<Comparing>)value;
+- (NSEnumerator *)reverseObjectEnumerator;
+- (NSEnumerator *)reverseObjectEnumeratorAfterValue:(id<Comparing>)value;
+
 - (unsigned)indexOfFirstObjectNotBeforeValue:(id<Comparing>)value;
 - (unsigned)indexOfLastObjectNotAfterValue:(id<Comparing>)value;
 - (unsigned)indexOfObjectWithValue:(id<Comparing>)value;
 - (unsigned)indexOfObject:(id)obj;
-- (void)removeObjectsBeforeValue:(id<Comparing>)value;
 
 // NSCoding Protocol
 - (void)encodeWithCoder:(NSCoder *)coder;
