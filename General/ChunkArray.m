@@ -99,9 +99,10 @@
 - (void)removeChunksBeforeTime:(NSDate *)time
 {
     int index;
-    index = [chunks indexOfFirstObjectNotBeforeValue:time];
-    if (index >= 1) {
-        [chunks removeObjectsInRange:NSMakeRange(0, index)];
+
+    index = [chunks indexOfLastObjectNotAfterValue:time];
+    if (index != NSNotFound) {
+        [chunks removeObjectsInRange:NSMakeRange(0, index+1)];
     }
 }
 
@@ -109,10 +110,17 @@
 {
     int index;
     int count;
-    count = [chunks count];
-    index = [chunks indexOfLastObjectNotAfterValue:time] + 1;
-    if (index < count) {
-        [chunks removeObjectsInRange:NSMakeRange(index, count - index)];
+    index = [chunks indexOfLastObjectNotAfterValue:time];
+    if (index == NSNotFound) {
+        // all chunks are after time --- remove them all
+        [chunks removeAllObjects];
+    } else {
+        // index is the last not after time; the next index is after time
+        index++;
+        count = [chunks count];
+        if (index < count) {
+            [chunks removeObjectsInRange:NSMakeRange(index, count - index)];
+        }
     }
 }
 

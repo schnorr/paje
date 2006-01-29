@@ -63,12 +63,12 @@
     return entityType;
 }
 
-- (BOOL)isEqual:(OrderKey *)other
+- (BOOL)isEqual:(id)other
 {
     if (![other isKindOfClass:[OrderKey class]])
         return NO;
-    return [entityType isEqual:[other entityType]]
-        && [container isEqual:[other container]];
+    return [entityType isEqual:[(OrderKey *)other entityType]]
+        && [container isEqual:[(OrderKey *)other container]];
 }
 
 - (unsigned)hash

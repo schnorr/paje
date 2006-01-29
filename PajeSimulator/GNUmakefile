@@ -50,7 +50,8 @@ PajeSimulator_HEADERS= \
         SimulContainer.h \
         UserEvent.h \
         UserLink.h \
-        UserState.h 
+        UserState.h \
+	SimulChunk.h
 
 #
 # Class files
@@ -62,7 +63,8 @@ PajeSimulator_OBJC_FILES= \
         SimulContainer.m \
         UserEvent.m \
         UserLink.m \
-        UserState.m 
+        UserState.m \
+	SimulChunk.m
 
 #
 # C files

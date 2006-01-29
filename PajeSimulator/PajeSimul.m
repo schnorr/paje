@@ -228,12 +228,15 @@ NSInvocation *invocation;
 - (void)setCurrentTime:(NSDate *)time
 {
     Assign(currentTime, time);
-    if (startTime == nil || [time isEarlierThanDate:startTime]) {
-        Assign(startTime, time);
-    }
     if (endTime == nil || [time isLaterThanDate:endTime]) {
         Assign(endTime, time);
+        if (startTime == nil) {
+            Assign(startTime, time);
+        }
+    } else if ([time isEarlierThanDate:startTime]) {
+        Assign(startTime, time);
     }
+//    NSLog(@"simul times: (%f-%f) %f", [startTime timeIntervalSinceReferenceDate], [endTime timeIntervalSinceReferenceDate], [currentTime timeIntervalSinceReferenceDate]);
 }
 
 - (NSDate *)currentTime
@@ -244,6 +247,11 @@ NSInvocation *invocation;
 - (int)eventCount
 {
     return eventCount;
+}
+
+- (PajeEntityType *)entityTypeWithName:(NSString *)name
+{
+    return [userTypes objectForKey:name];
 }
 
 - (void)inputEntity:(PajeEvent *)event
@@ -349,6 +357,31 @@ NSInvocation *invocation;
     [super outputEntity:entity];
 }
 
+- (void)outputChunk:(id)entity
+{
+    [super outputEntity:entity];
+}
+
+
+- (void)endOfChunkInContainer:(SimulContainer *)container
+{
+    NSEnumerator *subContainerEnumerator;
+    SimulContainer *subContainer;
+
+    [container endOfChunk];
+
+    subContainerEnumerator = [[container subContainers] objectEnumerator];
+    while ((subContainer = [subContainerEnumerator nextObject]) != nil) {
+        [self endOfChunkInContainer:subContainer];
+    }
+}
+
+- (void)endOfChunk
+{
+    [self endOfChunkInContainer:rootContainer];
+}
+
+
 - (void)encodeCheckPointWithCoder:(NSCoder *)coder
 {
     NSEnumerator *containerEnum;
@@ -357,8 +390,8 @@ NSInvocation *invocation;
 
     c = [[NSMutableSet alloc] init];
 
-    [coder encodeObject:startTime];
-    [coder encodeObject:endTime];
+//    [coder encodeObject:startTime];
+//    [coder encodeObject:endTime];
     [coder encodeObject:currentTime];
     [coder encodeValueOfObjCType:@encode(int) at:&eventCount];
     // FIXME: should be saved by type
@@ -378,8 +411,8 @@ NSInvocation *invocation;
 {
     NSString *containerName;
     
-    Assign(startTime, [coder decodeObject]);
-    Assign(endTime, [coder decodeObject]);
+//    Assign(startTime, [coder decodeObject]);
+//    Assign(endTime, [coder decodeObject]);
     Assign(currentTime, [coder decodeObject]);
     [coder decodeValueOfObjCType:@encode(int) at:&eventCount];
 
@@ -392,7 +425,7 @@ NSInvocation *invocation;
         NSLog(@"known: %@", userNumberToContainer);
             [self error:@"Decoding unknown container '%@'", containerName];
         }
-        NSDebugMLLog(@"tim", @"found container %@", containerName);
+        NSDebugMLLog(@"enc", @"found container %@", containerName);
         [container decodeCheckPointWithCoder:coder];
     }
 }

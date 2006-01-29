@@ -187,6 +187,7 @@
         NSDebugMLLog(@"tim", @"will read chunk starting at %@",
                                 [simulator currentTime]);
         [reader readNextChunk];
+        [simulator endOfChunk];
         [self writeCheckPoint];
 
     NS_HANDLER

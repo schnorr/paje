@@ -120,7 +120,7 @@
 {
     self = [super init];
     if (self != nil) {
-        object = [coder decodeObject];
+        object = [[coder decodeObject] retain];
         [coder decodeValueOfObjCType:@encode(double) at:&value];
     }
     return self;

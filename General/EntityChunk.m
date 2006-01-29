@@ -23,21 +23,21 @@
 
 @implementation EntityChunk
 
-- (id)initWithEntityType:(PajeEntityType *)et
+- (id)initWithEntityType:(PajeEntityType *)type
                container:(PajeContainer *)pc
 {
     self = [super init];
     if (self != nil) {
-        Assign(container, pc);
-        Assign(entityType, et);
+        entityType = type;    // not retained
+        container = pc;       // not retained
     }
     return self;
 }
 
 - (void)dealloc
 {
-    Assign(container, nil);
-    Assign(entityType, nil);
+    container = nil;
+    entityType = nil;
     Assign(startTime, nil);
     Assign(endTime, nil);
     [super dealloc];
@@ -92,6 +92,12 @@
     return nil;
 }
 
+- (NSEnumerator *)enumeratorOfAllEntities
+{
+    [self subclassResponsibility:_cmd];
+    return nil;
+}
+
 - (NSEnumerator *)enumeratorOfEntitiesBeforeTime:(NSDate *)time
 {
     [self subclassResponsibility:_cmd];
@@ -105,4 +111,13 @@
     return nil;
 }
 
+- (id)copyWithZone:(NSZone *)z
+{
+    EntityChunk *copy;
+    copy = [[[self class] alloc] initWithEntityType:entityType
+                                          container:container];
+    [copy setStartTime:startTime];
+    [copy setEndTime:endTime];
+    return copy;
+}
 @end

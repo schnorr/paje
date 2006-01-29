@@ -48,7 +48,7 @@
     [layoutDescriptors release];
     [layoutController release];
 #ifdef GNUSTEP
-    // GNUstep bug #13382
+    // workaround GNUstep bug #13382
     {
     int rc;
     rc = [drawView retainCount];

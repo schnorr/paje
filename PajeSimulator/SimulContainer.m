@@ -24,6 +24,7 @@
 //
 
 #include "SimulContainer.h"
+#include "SimulChunk.h"
 #include "UserState.h"
 #include "UserLink.h"
 #include "../General/Macros.h"
@@ -118,32 +119,26 @@
     return [self retain];
 }
 
-
-// FIXME: popped states do not accumulate in containing state
-// (see popUserStateOfType:withEvent:
 - (void)stopWithEvent:(PajeEvent *)event
 {
-    id entity;
-    id subContainer;
-    NSEnumerator *subEnum;
-
     if (lastTime != nil) {
         return;
     }
     [self setLastTime:[event time]];
 
-    while ((entity = [self popEntity]) != nil) {
-        /*if ([entity isKindOfClass:[UserLink class]])
-            if ([entity destContainer] == nil)
-                [entity setDestContainer:self destEvent:event];
-            else
-                [entity setSourceContainer:self sourceEvent:event];
-        else*/
-            [entity setEndEvent:event];
-//NSLog(@"stop %@ with event %@ = %@ st=%@ et=%@", self, event, entity, [entity startTime], [entity endTime]);
-        if (![entity isKindOfClass:[UserLink class]])
-        [simulator outputEntity:entity];
+    NSEnumerator *chunkEnumerator;
+    EventChunk *chunk;
+
+    chunkEnumerator = [userEntities objectEnumerator];
+    while ((chunk = [chunkEnumerator nextObject]) != nil) {
+        [chunk stopWithEvent:event];
+        [chunk setEndTime:[simulator currentTime]];
+        [simulator outputChunk:chunk];
     }
+    [userEntities removeAllObjects];
+
+    NSEnumerator *subEnum;
+    SimulContainer *subContainer;
 
     subEnum = [subContainers objectEnumerator];
     while ((subContainer = [subEnum nextObject]) != nil) {
@@ -151,116 +146,36 @@
     }
 }
 
-- (id)entityOfType:(id)type
+- (void)endOfChunk
 {
-    id entity = [userEntities objectForKey:type];
+    NSEnumerator *chunkEnumerator;
+    EventChunk *chunk;
+
+    chunkEnumerator = [userEntities objectEnumerator];
+    while ((chunk = [chunkEnumerator nextObject]) != nil) {
+        EventChunk *completedChunk;
+        completedChunk = [chunk copy];
+        [completedChunk setEndTime:[simulator currentTime]];
+        [simulator outputChunk:completedChunk];
+        [completedChunk release];
+        [chunk removeAllCompletedEntities];
+        [chunk setStartTime:[simulator currentTime]];
+    }
+}
+
+- (SimulChunk *)chunkOfType:(id)type
+{
+    id chunk = [userEntities objectForKey:type];
     
-    if (![entity isKindOfClass:[NSArray class]]) {
-        return entity; // can be nil
+    if (chunk == nil) {
+        chunk = [SimulChunk chunkWithEntityType:type
+                                      container:self];
+        [userEntities setObject:chunk forKey:type];
     }
     
-    return [(NSArray *)entity lastObject];
+    return chunk;
 }
 
-- (void)setEntity:(id)entity ofType:(id)type
-{
-    id oldEntity = [userEntities objectForKey:type];
-
-    if (oldEntity != nil && [oldEntity isKindOfClass:[NSMutableArray class]]) {
-        NSMutableArray *array = (NSMutableArray *)oldEntity;
-        unsigned count = [array count];
-        if ([entity respondsToSelector:@selector(setImbricationLevel:)]) {
-            [entity setImbricationLevel:(count>0) ? count-1 : 0];
-        }
-        if (count == 0) {
-            [array addObject:entity];
-        } else {
-            [array replaceObjectAtIndex:count-1 withObject:entity];
-        }
-    } else {
-        [userEntities setObject:entity forKey:type];
-    }
-}
-
-- (void)pushEntity:(id)entity ofType:(id)type
-{
-    NSMutableArray *array = nil;
-    id oldEntity = [userEntities objectForKey:type];
-
-    if (oldEntity == nil) {
-        [userEntities setObject:entity forKey:type];
-    } else if ([oldEntity isKindOfClass:[NSMutableArray class]]) {
-        array = (NSMutableArray *)oldEntity;
-        [array addObject:entity];
-    } else {
-        array = [NSMutableArray arrayWithObjects:oldEntity, entity, nil];
-        [userEntities setObject:array forKey:type];
-    }
-    if ([entity respondsToSelector:@selector(setImbricationLevel:)]) {
-        if (array != nil) {
-            [entity setImbricationLevel:[array count]-1];
-        } else {
-            [entity setImbricationLevel:0];
-        }
-    }
-}
-
-- (id)popEntityOfType:(id)type
-{
-    NSMutableArray *array;
-    id entity = [userEntities objectForKey:type];
-
-    if (entity) {
-        if ([entity isKindOfClass:[NSMutableArray class]]) {
-            array = (NSMutableArray *)entity;
-            entity = [array lastObject];
-            if (entity) {
-                [[entity retain] autorelease];
-                [array removeLastObject];
-            }
-        } else {
-            [[entity retain] autorelease];
-            [userEntities removeObjectForKey:type];
-        }
-    }
-
-    return entity;
-}
-
-- (id)popEntity
-{
-    NSArray *entityTypes;
-    NSMutableArray *entities;
-    id type;
-    id entity;
-
-retry:
-    entityTypes = [userEntities allKeys];
-    if ([entityTypes count] == 0)
-        return nil;
-
-    type = [entityTypes objectAtIndex:0];
-    entity = [userEntities objectForKey:type];
-
-    if (entity) {
-        if ([entity isKindOfClass:[NSMutableArray class]]) {
-            entities = (NSMutableArray *)entity;
-            entity = [entities lastObject];
-            if (entity) {
-                [[entity retain] autorelease];
-                [entities removeLastObject];
-            } else {
-                [userEntities removeObjectForKey:type];
-                goto retry;
-            }
-        } else {
-            [[entity retain] autorelease];
-            [userEntities removeObjectForKey:type];
-        }
-    }
-
-    return entity;
-}
 
 - (void)newEventWithType:(id)type
                    value:(id)value
@@ -272,30 +187,31 @@ retry:
                               container:self
                                   event:event];
 
-    [simulator outputEntity:newEvent];
+    [[self chunkOfType:type] addEntity:newEvent];
 }
 
 - (void)setUserStateOfType:(id)type
                    toValue:(id)value
                  withEvent:(PajeEvent *)event
 {
-    UserState *currentUserState, *newUserState;
+    UserState *oldUserState;
+    UserState *newUserState;
+    StateChunk *chunk;
+
+    chunk = (StateChunk *)[self chunkOfType:type];
+
+    oldUserState = [chunk topEntity];
+    if (oldUserState != nil) {
+        [oldUserState setEndEvent:event];
+        [chunk addEntity:oldUserState];
+        [chunk removeTopEntity];
+    }
 
     newUserState = [UserState stateOfType:type
                                     value:value
                                 container:self
                                startEvent:event];
-
-    currentUserState = [self entityOfType:type];
-    if (currentUserState != nil) {
-        [currentUserState setEndEvent:event];
-        //[simulator entityChangedEndTime:currentUserState];
-        [simulator outputEntity:currentUserState];
-    }
-
-    [self setEntity:newUserState ofType:type];
-
-    //[simulator outputEntity:newUserState];
+    [chunk pushEntity:newUserState];
 }
 
 - (void)pushUserStateOfType:(PajeEntityType *)type
@@ -303,31 +219,35 @@ retry:
                   withEvent:(PajeEvent *)event
 {
     UserState *newUserState;
+    StateChunk *chunk;
+
+    chunk = (StateChunk *)[self chunkOfType:type];
 
     newUserState = [UserState stateOfType:type
                                     value:value
                                 container:self
                                startEvent:event];
 
-    [self pushEntity:newUserState ofType:type];
-
-//    [simulator outputEntity:newUserState];
+    [chunk pushEntity:newUserState];
 }
 
 - (void)popUserStateOfType:(id)type
                  withEvent:(PajeEvent *)event
 {
-    UserState *currentUserState;
-    UserState *newCurrentUserState;
+    UserState *poppedUserState;
+    UserState *newTopUserState;
+    StateChunk *chunk;
 
-    currentUserState = [self popEntityOfType:type];
-    if (currentUserState != nil) {
-        [currentUserState setEndEvent:event];
-        [simulator outputEntity:currentUserState];
-//        [simulator entityChangedEndTime:currentUserState];
-        newCurrentUserState = [self entityOfType:type];
-        if (newCurrentUserState != nil) {
-            [newCurrentUserState addInnerState:currentUserState];
+    chunk = (StateChunk *)[self chunkOfType:type];
+
+    poppedUserState = [chunk topEntity];
+    if (poppedUserState != nil) {
+        [poppedUserState setEndEvent:event];
+        [chunk addEntity:poppedUserState];
+        [chunk removeTopEntity];
+        newTopUserState = [chunk topEntity];
+        if (newTopUserState != nil) {
+            [newTopUserState addInnerState:poppedUserState];
         }
     } else {
         NSWarnMLog(@"No user state to pop with event %@", event);
@@ -372,9 +292,12 @@ retry:
     UserState *currentUserState;
     id oldValue;
     id newValue;
+    VariableChunk *chunk;
 
-    currentUserState = [self entityOfType:type];
-    if (currentUserState) {
+    chunk = (VariableChunk *)[self chunkOfType:type];
+
+    currentUserState = [chunk topEntity];
+    if (currentUserState != nil) {
         oldValue = [currentUserState value];
         newValue = [NSNumber numberWithDouble:
             [oldValue doubleValue] + [value doubleValue]];
@@ -393,9 +316,12 @@ retry:
     UserState *currentUserState;
     id oldValue;
     id newValue;
+    VariableChunk *chunk;
 
-    currentUserState = [self entityOfType:type];
-    if (currentUserState) {
+    chunk = (VariableChunk *)[self chunkOfType:type];
+
+    currentUserState = [chunk topEntity];
+    if (currentUserState != nil) {
         oldValue = [currentUserState value];
         newValue = [NSNumber numberWithDouble:
             [oldValue doubleValue] - [value doubleValue]];
@@ -420,43 +346,45 @@ retry:
 
 - (void)startUserLinkOfType:(PajeEntityType *)type
                       value:(id)value
-            sourceContainer:(PajeContainer *)sourceContainer
+            sourceContainer:(PajeContainer *)cont
                         key:(id)key
                   withEvent:(PajeEvent *)event
 {
-    NSMutableArray *pendingLinks = [userEntities objectForKey:type];
+    NSMutableArray *pendingLinks;
     UserLink *link = nil;
     unsigned index = 0;
     BOOL found = NO;
     int sourceLogicalTime;
-    
-    sourceLogicalTime = [(SimulContainer *)sourceContainer logicalTime];
+    LinkChunk *chunk;
+    SimulContainer *sourceContainer = (SimulContainer *)cont;
+    SimulContainer *destContainer;
+
+    chunk = (LinkChunk *)[self chunkOfType:type];
+    pendingLinks = [chunk incompleteEntities];
+
+    sourceLogicalTime = [sourceContainer logicalTime];
 
     sourceLogicalTime++;
-    [(SimulContainer *)sourceContainer setLogicalTime:sourceLogicalTime];
-    
-    if (!pendingLinks) {
-        pendingLinks = [NSMutableArray array];
-        [userEntities setObject:pendingLinks forKey:type];
-    } else {
-        unsigned count = [pendingLinks count];
-        for (index = 0; index < count; index++) {
-            link = [pendingLinks objectAtIndex:index];
-            if ([link canBeStartedWithValue:value key:key]) {
-                found = YES;
-                break;
-            }
+    [sourceContainer setLogicalTime:sourceLogicalTime];
+
+    unsigned count = [pendingLinks count];
+    for (index = 0; index < count; index++) {
+        link = [pendingLinks objectAtIndex:index];
+        if ([link canBeStartedWithValue:value key:key]) {
+            found = YES;
+            break;
         }
     }
 
     if (found) {
         [link setSourceContainer:sourceContainer sourceEvent:event];
         [link setStartLogicalTime:sourceLogicalTime];
-        if ([(SimulContainer *)[link destContainer] logicalTime] < sourceLogicalTime+1) {
-            [(SimulContainer *)[link destContainer] setLogicalTime:sourceLogicalTime+1];
+        destContainer = (SimulContainer *)[link destContainer];
+        if ([destContainer logicalTime] < sourceLogicalTime+1) {
+            [destContainer setLogicalTime:sourceLogicalTime+1];
             [link setEndLogicalTime:sourceLogicalTime+1];
         }
-        [simulator outputEntity:link];
+        [chunk addEntity:link];
         [pendingLinks removeObjectAtIndex:index];
     } else {
         link = [UserLink linkOfType:type
@@ -472,32 +400,31 @@ retry:
 
 - (void)endUserLinkOfType:(PajeEntityType *)type
                     value:(id)value
-            destContainer:(PajeContainer *)destContainer
+            destContainer:(PajeContainer *)cont
                       key:(id)key
                 withEvent:(PajeEvent *)event
 {
-    NSMutableArray *pendingLinks = [userEntities objectForKey:type];
+    NSMutableArray *pendingLinks;
     UserLink *link = nil;
     unsigned index = 0;
     BOOL found = NO;
     int destLogicalTime;
-    
-    destLogicalTime = [(SimulContainer *)destContainer logicalTime];
+    LinkChunk *chunk;
+    SimulContainer *destContainer = (SimulContainer *)cont;
 
+    chunk = (LinkChunk *)[self chunkOfType:type];
+    pendingLinks = [chunk incompleteEntities];
+
+    destLogicalTime = [destContainer logicalTime];
     destLogicalTime++;
-    [(SimulContainer *)destContainer setLogicalTime:destLogicalTime];
+    [destContainer setLogicalTime:destLogicalTime];
 
-    if (pendingLinks == nil) {
-        pendingLinks = [NSMutableArray array];
-        [userEntities setObject:pendingLinks forKey:type];
-    } else {
-        unsigned count = [pendingLinks count];
-        for (index = 0; index < count; index++) {
-            link = [pendingLinks objectAtIndex:index];
-            if ([link canBeEndedWithValue:value key:key]) {
-                found = YES;
-                break;
-            }
+    unsigned count = [pendingLinks count];
+    for (index = 0; index < count; index++) {
+        link = [pendingLinks objectAtIndex:index];
+        if ([link canBeEndedWithValue:value key:key]) {
+            found = YES;
+            break;
         }
     }
 
@@ -505,11 +432,11 @@ retry:
         int lt = [link startLogicalTime]+1;
         if (lt > destLogicalTime) {
             destLogicalTime = lt;
-            [(SimulContainer *)destContainer setLogicalTime: lt];
+            [destContainer setLogicalTime: lt];
         }
         [link setEndLogicalTime:destLogicalTime];
         [link setDestContainer:destContainer destEvent:event];
-        [simulator outputEntity:link];
+        [chunk addEntity:link];
         [pendingLinks removeObjectAtIndex:index];
     } else {
         link = [UserLink linkOfType:type
@@ -557,36 +484,62 @@ retry:
 
 - (void)encodeCheckPointWithCoder:(NSCoder *)coder
 {
-    NSDebugMLLog(@"tim", @"encoding %@ (lt=%@ %d ue=%@)",
-                         self, lastTime, logicalTime, userEntities);
+    //NSDebugMLLog(@"enc", @"encoding %@ (lt=%@ %d ue=%@)",
+    //                     self, lastTime, logicalTime, userEntities);
     [coder encodeObject:lastTime];
     [coder encodeObject:[NSNumber numberWithInt:logicalTime]];
-    [coder encodeObject:userEntities];
+
+    NSMutableDictionary *incompleteEntitiesByType;
+    incompleteEntitiesByType = [[NSMutableDictionary alloc] init];
+
+    NSEnumerator *chunkEnum;
+    EventChunk *chunk;
+    chunkEnum = [userEntities objectEnumerator];
+    while ((chunk = [chunkEnum nextObject]) != nil) {
+        NSArray *incomplete = [chunk incompleteEntities];
+        if (incomplete != nil) {
+            [incompleteEntitiesByType setObject:incomplete
+                                         forKey:[[chunk entityType] name]];
+        }
+    }
+    [coder encodeObject:incompleteEntitiesByType];
+    [incompleteEntitiesByType release];
 }
 
 - (void)decodeCheckPointWithCoder:(NSCoder *)coder
 {
     [self setLastTime:[coder decodeObject]];
     [self setLogicalTime:[[coder decodeObject] intValue]];
-    Assign(userEntities, [coder decodeObject]);
-//FIXME: entities are decoded without container (containers cannot be decoded),
-//       must set it.
-{int i;
-NSArray *keys= [userEntities allValues];
-for (i=0;i<[keys count];i++) {
-if (![[keys objectAtIndex:i] isKindOfClass:[NSArray class]]) {
-[[keys objectAtIndex:i] setContainer:self];
-} else {
-int j;
-NSArray *v= [keys objectAtIndex:i];
-for (j=0;j<[v count];j++) {
-[[v objectAtIndex:j] setContainer:self];
-}
-}
-}
-}
-    NSDebugMLLog(@"tim", @"decoded %@ (lt=%@ %d ue=%@)",
-                         self, lastTime, logicalTime, userEntities);
+
+    [userEntities removeAllObjects];
+    NSMutableDictionary *incompleteEntitiesByType;
+    incompleteEntitiesByType = [coder decodeObject];
+
+    NSEnumerator *entityTypeNameEnum;
+    NSString *entityTypeName;
+    
+    entityTypeNameEnum = [incompleteEntitiesByType keyEnumerator];
+    while ((entityTypeName = [entityTypeNameEnum nextObject]) != nil) {
+        PajeEntityType *chunkEntityType;
+        SimulChunk *chunk;
+        chunkEntityType = [simulator entityTypeWithName:entityTypeName];
+        NSMutableArray *incompleteEntities
+                = [incompleteEntitiesByType objectForKey:entityTypeName];
+        [incompleteEntities makeObjectsPerformSelector:@selector(setContainer:)
+                                            withObject:self];
+        [incompleteEntities makeObjectsPerformSelector:@selector(setEntityType:)
+                                            withObject:chunkEntityType];
+        chunk = [SimulChunk chunkWithEntityType:chunkEntityType
+                                      container:self
+                             incompleteEntities:incompleteEntities];
+        [userEntities setObject:chunk forKey:chunkEntityType];
+    }
+    //NSDebugMLLog(@"enc", @"decoded %@ (lt=%@ %d ue=%@)",
+    //                     self, lastTime, logicalTime, userEntities);
 }
 
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+    [NSException raise:@"SimulContainer should not be encoded" format:nil];
+}
 @end

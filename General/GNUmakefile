@@ -8,7 +8,6 @@ General_OBJC_FILES = \
 	Comparing.m \
 	FilteredEnumerator.m \
 	PSortedArray.m \
-	TimeList.m \
 	TranslationTable.m \
 	PTime.m \
 	NSUserDefaults+Additions.m \
@@ -43,7 +42,6 @@ General_HEADER_FILES = \
 	FilteredEnumerator.h \
 	Protocols.h \
 	PSortedArray.h \
-	TimeList.h \
 	TranslationTable.h \
 	PTime.h \
 	NSUserDefaults+Additions.h \
@@ -98,7 +96,7 @@ PROJECT_HEADERS = \
 	NSArray+Additions.h \
 	PajeFilter.h \
 	CondensedEntitiesArray.h \
-	entityChunk.h \
+	EntityChunk.h \
 	ChunkArray.h
 
 -include GNUmakefile.preamble

@@ -60,6 +60,7 @@
     [matrix setPrototype:cell];
     [matrix putCell:cell atRow:0 column:0];
     [matrix setIntercellSpacing:NSMakeSize(0, 0)];
+    [cell release];
     
     // notify that we are a Tool
     [self registerTool:self];
@@ -72,6 +73,7 @@
     [entityTypeSelector removeAllItems];
     [[matrix cells] makeObjectsPerformSelector:@selector(setRepresentedObject:)
                                     withObject:nil];
+    [matrix removeFromSuperview];
     [window release];
     [super dealloc];
 }

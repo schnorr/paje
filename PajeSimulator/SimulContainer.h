@@ -29,6 +29,7 @@
 #include <Foundation/Foundation.h>
 #include "../General/PajeContainer.h"
 #include "../General/PajeEvent.h"
+#include "SimulChunk.h"
 
 @interface SimulContainer : PajeContainer
 {
@@ -64,11 +65,8 @@
 
 - (void)setLastTime:(NSDate *)time;
 
-- (id)entityOfType:(PajeEntityType *)entityType;
-- (void)setEntity:(id)entity ofType:(PajeEntityType *)entityType;
-- (void)pushEntity:(id)entity ofType:(PajeEntityType *)entityType;
-- (id)popEntityOfType:(PajeEntityType *)entityType;
-- (id)popEntity;
+- (SimulChunk *)chunkOfType:(id)type;
+
 
 - (void)newEventWithType:(id)type
                    value:(id)value
@@ -108,6 +106,8 @@
 
 - (int)logicalTime;
 - (void)setLogicalTime:(int)lt;
+
+- (void)endOfChunk;
 
 - (void)reset;
 - (void)encodeCheckPointWithCoder:(NSCoder *)coder;

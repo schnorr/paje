@@ -45,7 +45,7 @@
 - (id)container;
 - (id)entityType;
 
-- (BOOL)isEqual:(OrderKey *)other;
+- (BOOL)isEqual:(id)other;
 - (unsigned)hash;
 @end
 

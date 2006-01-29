@@ -383,12 +383,14 @@ ofContainersTyped:(PajeEntityType *)containerType
     return [OrderKey keyWithEntityType:entityType container:container];
 }
 
-- (void)setConfiguration:(id)config
+- (void)setConfiguration:(id)cfg
 {
     NSEnumerator *keyDescriptionEnumerator;
     NSString *keyDescription;
     OrderKey *key;
+    NSDictionary *config;
 
+    config = cfg;
     if (![config isKindOfClass:[NSDictionary class]]) {
         return;
     }

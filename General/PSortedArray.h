@@ -25,7 +25,7 @@
 #include <Foundation/Foundation.h>
 #include "Comparing.h"
 
-@interface PSortedArray : NSObject//NSMutableArray
+@interface PSortedArray : NSObject <NSCoding, NSCopying>
 {
     NSMutableArray *array;
     SEL valueSelector;
@@ -43,6 +43,7 @@
 - (void)removeObject:(id)obj;
 - (void)removeObjectIdenticalTo:(id)obj;
 - (void)removeObjectsBeforeValue:(id<Comparing>)value;
+- (void)removeAllObjects;
 
 - (void)verifyPositionOfObjectIdenticalTo:(id)obj;
 
@@ -59,6 +60,10 @@
 // NSCoding Protocol
 - (void)encodeWithCoder:(NSCoder *)coder;
 - (id)initWithCoder:(NSCoder *)coder;
+
+// NSCopying Protocol
+- (id)copyWithZone:(NSZone *)zone;
+
 @end
 
 #endif

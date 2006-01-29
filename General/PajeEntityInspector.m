@@ -142,6 +142,7 @@ static NSMutableArray *allInstances;
 - (void)dealloc
 {
     Assign(inspectedEntity, nil);
+    Assign(filter, nil);
 
     Assign(relatedEntitiesBox, nil);
     Assign(archivedBox, nil);

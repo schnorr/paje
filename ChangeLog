@@ -1,3 +1,40 @@
+2006-01-29  Benhur Stein <benhur@inf.ufsm.br>
+        * General/Association.m: retain decoded object
+        * General/ChunkArray.m: correct removing of chunks
+        * General/EntityChunk: implement NSCopying protocol; do not retain
+          entityType and container
+        * General/PSortedArray.[hm]: implement NSCopying protocol
+        * General/PajeEntity.m: do not encode entityType and container;
+          new method setEntityType:
+        * General/PajeEntityInspector.m: release filter on dealloc
+        * OrderFilter/Order.m: remove compilation warning
+        * OrderFilter/OrderKey.[hm]: remove compilation warning
+        * PajeSimulator/EventNames.h: remove compilation warning
+        * PajeSimulator/PajeSimul+Events.m: commented some warnings on entity
+          redefinition
+        * PajeSimulator/PajeSimul.[hm]: remove encoding of start/endTime
+        * PajeSimulator/SimulContainer.[hm]: cleanup and remove some methods;
+          more changes to operate with chunks; redone writing of checkpoints,
+          they are much smaller now
+        * StatViewer/StatViewer.m: remove one memory leak (there are more)
+        * StorageController/Encapsulate.m: make it work with chunks and
+          chunkarrays
+
+2006-01-25  Benhur Stein <benhur@inf.ufsm.br>
+        * General/Protocols.h: add endOfChunk method to PajeSimulator protocol
+        * Paje/PajeTraceController.m: call endOfChunk on simulator
+        * PajeSimulator/PajeSimul.[hm]: new method endOfChunk
+        * General/EntityChunk.[hm]: enumeratorOfAllEntities new method
+        * General/PSortedArray.[hm]: removeAllObjects new method; implement 
+          NSCopying protocol
+        * PajeSimulator/SimulContainer.[hm]: chunkOfType: new method; change
+          simulation to put new entities in chunks instead of sending to
+          encapsulator; endOfChunk new method;
+        * PajeSimulator/SimulChunk: new class
+        * PajeSimulator/GNUmakefile: add SimulChunk
+          (altered from branch by Edmar Pessoa Araújo Neto)
+	* General/TimeList.[hm]: removed class
+
 2006-01-25  Benhur Stein <benhur@inf.ufsm.br>
         * General/PSortedArray.[hm]: -reverseEnumerator* new methods;
           removed specific enumerator, use range enumerator in array instead.

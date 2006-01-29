@@ -34,8 +34,10 @@
 - (id)initWithSelector:(SEL)sel
 {
     [super init];
-    array = [[NSMutableArray array] retain];
-    valueSelector = sel;
+    if (self != nil) {
+        array = [[NSMutableArray array] retain];
+        valueSelector = sel;
+    }
     return self;
 }
 
@@ -94,6 +96,12 @@
     if (index > 0)
         [array removeObjectsInRange:NSMakeRange(0, index)];
 }
+
+- (void)removeAllObjects
+{
+    [array removeAllObjects];
+}
+
 
 - (void)addObject:(id)obj
 {
@@ -288,6 +296,19 @@ NSDate *delta_d_t0;
     array = [[coder decodeObject] retain];
     [coder decodeValueOfObjCType:@encode(SEL) at:&valueSelector];
     return self;
+}
+
+
+// NSCopying Protocol
+- (id)copyWithZone:(NSZone *)zone
+{
+    PSortedArray *copy;
+    copy = [[[self class] alloc] init];
+    if (copy != nil) {
+        copy->valueSelector = valueSelector;
+        copy->array = [array copy];
+    }
+    return copy;
 }
 
 - (NSString *)description

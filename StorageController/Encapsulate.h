@@ -24,6 +24,7 @@
 
 #include "AnchorFilter.h"
 #include "../General/Protocols.h"
+#include "../General/ChunkArray.h"
 
 @interface Encapsulate : AnchorFilter <PajeStorageController>
 {
@@ -35,12 +36,12 @@
 
     NSMutableDictionary *entityLists;   // dictionary (by entity type) of
                                         // dictionaries (by container) of
-                                        // TimeList's of entities
+                                        // ChunkArrays
 }
 
 - (id)initWithController:(PajeTraceController *)c;
 
-- (void)addEntity:(PajeEntity *)entity;
+- (void)addChunk:(EntityChunk *)entity;
 
 - (void)removeObjectsBeforeTime:(NSDate *)time;
 - (void)removeObjectsAfterTime:(NSDate *)time;

@@ -90,16 +90,16 @@
         [self error:@"Unknown container type" inEvent:event];
     }
 
-    // new type should not exist
+    // new type should not exist (but may, if replaying)
     if ([userTypes objectForKey:newContainerTypeName] != nil) {
-        NSWarnLog(@"Redefining container type %@ with event %@",
-                  newContainerTypeName, event);
+        //NSWarnLog(@"Redefining container type %@ with event %@",
+        //          newContainerTypeName, event);
         return;
     }
     if (newContainerTypeAlias != nil 
         && [userTypes objectForKey:newContainerTypeAlias] != nil) {
-        NSWarnLog(@"Redefining container type alias %@ with event %@",
-                  newContainerTypeAlias, event);
+        //NSWarnLog(@"Redefining container type alias %@ with event %@",
+        //          newContainerTypeAlias, event);
         return;
     }
 
@@ -161,14 +161,14 @@
 
     // new type should not exist
     if ([userTypes objectForKey:newEntityTypeName] != nil) {
-        NSWarnLog(@"Redefining entity type %@ with event %@",
-                  newEntityTypeName, event);
+        //NSWarnLog(@"Redefining entity type %@ with event %@",
+        //          newEntityTypeName, event);
         return;
     }
     if (newEntityTypeAlias != nil 
         && [userTypes objectForKey:newEntityTypeAlias] != nil) {
-        NSWarnLog(@"Redefining entity type alias %@ with event %@",
-                  newEntityTypeAlias, event);
+        //NSWarnLog(@"Redefining entity type alias %@ with event %@",
+        //          newEntityTypeAlias, event);
         return;
     }
 
@@ -208,14 +208,14 @@
 
     // new type should not exist
     if ([userTypes objectForKey:newEntityTypeName] != nil) {
-        NSWarnLog(@"Redefining entity type %@ with event %@",
-                  newEntityTypeName, event);
+        //NSWarnLog(@"Redefining entity type %@ with event %@",
+        //          newEntityTypeName, event);
         return;
     }
     if (newEntityTypeAlias != nil 
         && [userTypes objectForKey:newEntityTypeAlias] != nil) {
-        NSWarnLog(@"Redefining entity type alias %@ with event %@",
-                  newEntityTypeAlias, event);
+        //NSWarnLog(@"Redefining entity type alias %@ with event %@",
+        //          newEntityTypeAlias, event);
         return;
     }
 
@@ -361,8 +361,8 @@
     if ([self containerOfNumber:newContainerName 
                            type:typeOfNewContainer
                         inEvent:event] != nil) {
-        NSWarnLog(@"Redefining container %@ in event %@",
-                  newContainerName, event);
+        //NSWarnLog(@"Redefining container %@ in event %@",
+        //          newContainerName, event);
         return;
     }
 
@@ -373,8 +373,8 @@
         && [self containerOfNumber:newContainerAlias 
                               type:typeOfNewContainer
                            inEvent:event] != nil) {
-        NSWarnLog(@"Redefining container alias %@ in event %@",
-                  newContainerAlias, event);
+        //NSWarnLog(@"Redefining container alias %@ in event %@",
+        //          newContainerAlias, event);
         return;
     }
 

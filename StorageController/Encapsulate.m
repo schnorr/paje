@@ -27,7 +27,6 @@
    */
 
 #include "Encapsulate.h"
-#include "../General/TimeList.h"
 #include "../General/MultiEnumerator.h"
 #include "../General/PajeEntity.h"
 #include "../General/Macros.h"
@@ -73,7 +72,8 @@
 - (void)inputEntity:(id)entity
 /*"There's new data in the input port. Encapsulate it."*/
 {
-    [self addEntity:entity];
+    //[self addEntity:entity];
+    [self addChunk:entity];
     traceChanged = YES;
 
     if (!timerActive) {
@@ -84,65 +84,45 @@
     }
 }
 
-- (void)addEntity:(PajeEntity *)entity
+- (void)addChunk:(EntityChunk *)chunk
 {
-    PajeEntityType *entityType = [entity entityType];
-    NSMutableDictionary *dict = [entityLists objectForKey:entityType];
-    PajeContainer *container = [entity container];
-    TimeList *list;
+    PajeEntityType *entityType = [chunk entityType];
+    PajeContainer *container = [chunk container];
+    ChunkArray *chunks;
     
     //KLUDGE to identify last date in memory.
     // (doesn't work if events are not seen)
     // FIXME this should be calculated on demand
-    if (1 || [entity drawingType] == PajeEventDrawingType) {
-        NSDate *time = [entity lastTime];
-        if(endTimeInMemory == nil || [time isLaterThanDate:endTimeInMemory]) {
-            Assign(endTimeInMemory, time);
-        }
-        time = [entity firstTime];
-        if (startTimeInMemory == nil 
-            || [time isEarlierThanDate:startTimeInMemory]) {
-            Assign(startTimeInMemory, time);
-        }
+    NSDate *time = [chunk endTime];
+    if(endTimeInMemory == nil || [time isLaterThanDate:endTimeInMemory]) {
+        Assign(endTimeInMemory, time);
+    }
+    time = [chunk startTime];
+    if (startTimeInMemory == nil 
+        || [time isEarlierThanDate:startTimeInMemory]) {
+        Assign(startTimeInMemory, time);
     }
     //ENDKLUDGE
 
-    if (!dict) {
+    NSMutableDictionary *dict = [entityLists objectForKey:entityType];
+    if (dict == nil) {
         // unknown entity type -- create a new dict for it
         dict = [[NSMutableDictionary alloc] init];
         [entityLists setObject:dict forKey:entityType];
         [dict release];
     }
 
-    list = [dict objectForKey:container];
+    chunks = [dict objectForKey:container];
 
-    if (!list) {
-        // unknown container for this entity type -- create a new list for it
-        list = [[TimeList alloc] init];
-        [dict setObject:list forKey:container];
-        [list release]; // dict is retaining it
+    if (chunks == nil) {
+        // unknown container for this entity type -- create a new array for it
+        chunks = [[ChunkArray alloc] init];
+        [dict setObject:chunks forKey:container];
+        [chunks release]; // dict is retaining it
     }
 
-    [list addObject:entity];
+    [chunks addChunk:chunk];
 }
-
-- (void)entityChangedEndTime:(id<PajeEntity>)entity
-{
-    PajeEntityType *entityType = [entity entityType];
-    NSMutableDictionary *dict = [entityLists objectForKey:entityType];
-    id container = [entity container];
-    TimeList *list;
-
-    list = [dict objectForKey:container];
-
-    if (!list) {
-        NSWarnMLog(@"entity %@ not found", entity);
-        return;
-    }
-
-    [list objectChangedEndTime:entity];
-}
-
 
 - (void)send
 /*"notifies that data has changed."*/
@@ -153,7 +133,9 @@
     // FIXME should send more specific notification
     [self hierarchyChanged];
     traceChanged = NO;
-    [self performSelector:@selector(timeElapsed:) withObject:self afterDelay:0.5];
+    [self performSelector:@selector(timeElapsed:)
+               withObject:self
+               afterDelay:0.5];
     timerActive = YES;
 }
 
@@ -218,7 +200,7 @@
                                      toTime:(NSDate *)end
 {
     NSDictionary *dict;
-    TimeList *list;
+    ChunkArray *chunks;
     NSEnumerator *subcontainerEnum;
     id subcontainer;
     MultiEnumerator *multiEnum;
@@ -228,27 +210,14 @@
     
     dict = [entityLists objectForKey:entityType];
     // if container directly contains entityType's
-    list = [dict objectForKey:container];
-    if (list != nil) {
-        multiEnum = [MultiEnumerator enumerator];
-        [multiEnum addEnumerator:[list timeEnumeratorFromTime:start
-                                                       toTime:end]];
-        [multiEnum addEnumerator:
-                           [container enumeratorOfEntitiesTyped:entityType
-                                                       fromTime:start
-                                                         toTime:end]];
-        multiEnum = [[multiEnum allObjects] reverseObjectEnumerator];
-        return multiEnum;
+    chunks = [dict objectForKey:container];
+    if (chunks != nil) {
+        return [chunks enumeratorOfEntitiesFromTime:start toTime:end];
     }
 
     // if container should contain entityType directly, we have no entities!
     if ([[entityType containerType] isEqual:[container entityType]]) {
-        NSEnumerator *en;
-        en = [container enumeratorOfEntitiesTyped:entityType
-                                         fromTime:start
-                                           toTime:end];
-        en = [[en allObjects] reverseObjectEnumerator];
-        return en;
+        return nil;
     }
     
     // container does not contain entityType's directly.
@@ -258,18 +227,12 @@
                                              inContainer:container];
     multiEnum = [MultiEnumerator enumerator];
     while ((subcontainer = [subcontainerEnum nextObject]) != nil) {
-        list = [dict objectForKey:subcontainer];
-        if (list != nil) {
-            [multiEnum addEnumerator:[list timeEnumeratorFromTime:start
-                                                           toTime:end]];
-            [multiEnum addEnumerator:
-                               [container enumeratorOfEntitiesTyped:entityType
-                                                           fromTime:start
-                                                             toTime:end]];
-
+        chunks = [dict objectForKey:subcontainer];
+        if (chunks != nil) {
+            [multiEnum addEnumerator:[chunks enumeratorOfEntitiesFromTime:start
+                                                                   toTime:end]];
         }
     }
-    multiEnum = [[multiEnum allObjects] reverseObjectEnumerator];
     return multiEnum;
 }
 
@@ -361,17 +324,11 @@
 
     e = [entityLists objectEnumerator];
     while ((d = [e nextObject]) != nil) {
-#if 0
-        //xxx waiting for NSDictionary to implement makeObjectsPerformSelector:
-        [d makeObjectsPerformSelector:@selector(removeObjectsBeforeTime:) withOb
-ject:time];
-#else
         NSEnumerator *e2 = [d objectEnumerator];
-        TimeList *l;
+        ChunkArray *l;
         while ((l = [e2 nextObject]) != nil) {
-            [l removeObjectsBeforeTime:time];
+            [l removeChunksBeforeTime:time];
         }
-#endif
     }
 
     Assign(startTimeInMemory, time);
@@ -392,17 +349,11 @@ ject:time];
 
     e = [entityLists objectEnumerator];
     while ((d = [e nextObject]) != nil) {
-#if 0
-        //xxx waiting for NSDictionary to implement makeObjectsPerformSelector:
-        [d makeObjectsPerformSelector:@selector(removeObjectsAfterTime:) withObj
-ect:time];
-#else
         NSEnumerator *e2 = [d objectEnumerator];
-        TimeList *l;
+        ChunkArray *l;
         while ((l = [e2 nextObject]) != nil) {
-            [l removeObjectsAfterTime:time];
+            [l removeChunksAfterTime:time];
         }
-#endif
     }
 
     Assign(endTimeInMemory, time);

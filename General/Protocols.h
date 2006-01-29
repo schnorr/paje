@@ -155,6 +155,7 @@ typedef enum {
 @protocol PajeSimulator
 - (int)eventCount;
 - (NSDate *)currentTime;
+- (void)endOfChunk;
 @end
 
 @protocol PajeStorageController

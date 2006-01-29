@@ -27,7 +27,7 @@
 
 
 #if defined(INIT_STRINGS)
-#  define CONSTANT_STRING(str, init) str##EventName = [UniqueString stringWithString:init]
+#  define CONSTANT_STRING(str, init) str##EventName = (NSString*)[UniqueString stringWithString:init]
 #else
 #  if defined(DEFINE_STRINGS)
 #    define CONSTANT_STRING(str, init) NSString *str##EventName

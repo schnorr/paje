@@ -17,52 +17,27 @@
     along with Pajé; if not, write to the Free Software Foundation, Inc.,
     59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 */
-#ifndef _EntityChunk_h_ 
-#define _EntityChunk_h_ 
+#ifndef _SimulChunk_h_ 
+#define _SimulChunk_h_ 
 
-//
-// EntityChunk
-//
-// contains entities of a type in a container in a slice of time
-// (this is an abstract class, concrete subclasses are in PajeSimulator)
-//
-// Author: Edmar Pessoa Araújo Neto
-//
+#include "../General/EntityChunk.h"
+#include "../General/PSortedArray.h"
+#include "../General/MultiEnumerator.h"
+#include "UserState.h"
 
-#include <Foundation/Foundation.h>
+@interface SimulChunk : EntityChunk
++ (SimulChunk *)chunkWithEntityType:(PajeEntityType *)type
+                          container:(PajeContainer *)pc
+                 incompleteEntities:(NSMutableArray *)array;
++ (SimulChunk *)chunkWithEntityType:(PajeEntityType *)type
+                          container:(PajeContainer *)pc;
 
-#include "PajeEntity.h"
-#include "PajeType.h"
-#include "PajeContainer.h"
-
-
-@interface EntityChunk : NSObject <NSCopying>
-{
-    PajeContainer *container;
-    PajeEntityType *entityType;
-    NSDate *startTime;
-    NSDate *endTime;
-}
 
 - (id)initWithEntityType:(PajeEntityType *)type
+               container:(PajeContainer *)pc
+      incompleteEntities:(NSMutableArray *)array;
+- (id)initWithEntityType:(PajeEntityType *)type
                container:(PajeContainer *)pc;
-
-- (void)dealloc;
-
-
-/*
- * Accessors
- */
-
-- (PajeContainer *)container;
-- (PajeEntityType *)entityType;
-
-- (void)setStartTime:(NSDate *)time;
-- (NSDate *)startTime;
-
-- (void)setEndTime:(NSDate *)time;
-- (NSDate *)endTime;
-
 
 /*
  * entity enumerators
@@ -78,9 +53,39 @@
 - (NSEnumerator *)enumeratorOfEntitiesFromTime:(NSDate *)sliceStartTime
                                         toTime:(NSDate *)sliceEndTime;
 
-// filter method for enumerator
-- (BOOL)isEntity:(PajeEntity *)entity laterThan:(NSDate *)time;
+- (void)removeAllCompletedEntities;
 
+- (NSMutableArray *)incompleteEntities;
+
+// Simulation
+- (void)addEntity:(PajeEntity *)entity;
+
+- (void)stopWithEvent:(PajeEvent *)event;
+
+// for states
+- (void)pushEntity:(PajeEntity *)entity;
+- (UserState *)topEntity;
+- (void)removeTopEntity;
+@end
+
+@interface EventChunk : SimulChunk
+{
+    PSortedArray *entities;
+}
+@end
+
+
+@interface StateChunk : EventChunk
+{
+    NSMutableArray *incompleteEntities;
+}
+
+@end
+
+
+@interface LinkChunk : StateChunk
+@end
+@interface VariableChunk : StateChunk
 @end
 
 #endif

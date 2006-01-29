@@ -33,10 +33,12 @@
 #include "../General/PajeFilter.h"
 #include "../General/PajeEvent.h"
 
+#include "SimulContainer.h"
+
 #define MAP
 @interface PajeSimul : PajeComponent <PajeSimulator>
 {
-    PajeContainer *rootContainer;
+    SimulContainer *rootContainer;
 #ifdef MAP
     NSMapTable *invocationTable;
 #else
@@ -74,7 +76,12 @@
 - (NSDate *)endTime;
 - (NSDate *)currentTime;
 
+- (PajeEntityType *)entityTypeWithName:(NSString *)name;
+
 - (int)eventCount;
+
+- (void)endOfChunk;
+- (void)outputChunk:(id)entity;
 
 - (void)encodeCheckPointWithCoder:(NSCoder *)coder;
 - (void)decodeCheckPointWithCoder:(NSCoder *)coder;

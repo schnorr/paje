@@ -80,6 +80,11 @@
     container = c;
 }
 
+- (void)setEntityType:(PajeEntityType *)type
+{
+        entityType = type;
+}
+
 - (BOOL)isContainedBy:(PajeContainer *)cont
 {
     if ((container == nil)) {
@@ -257,19 +262,18 @@
 // NSCoding protocol
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:entityType];
+    // entityType and container are not encoded. They must be set explicity
+    // after decoding
     [coder encodeObject:name];
-    [coder encodeObject:container];
 }
 
 - (id)initWithCoder:(NSCoder *)coder
 {
-    id o1, o2, o3;
-    o1 = [coder decodeObject];
-    o2 = [coder decodeObject];
-    o3 = [coder decodeObject];
-    return [self initWithType:o1
-                         name:o2
-                    container:o3];
+    id n;
+    n = [coder decodeObject];
+    return [self initWithType:nil
+                         name:n
+                    container:nil];
 }
+
 @end
