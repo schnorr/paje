@@ -228,6 +228,20 @@
     return nil;
 }
 
+- (void)pushEntity:(PajeEntity *)entity
+{
+    [self addEntity:entity];
+}
+
+- (UserState *)topEntity
+{
+    return nil;
+}
+
+- (void)removeTopEntity
+{
+}
+
 
 - (void)addEntity:(PajeEntity *)entity
 {

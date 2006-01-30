@@ -1,3 +1,6 @@
+2006-01-30  Benhur Stein <benhur@inf.ufsm.br>
+	* PajeSimulator/SimulChunk.m: implement missing methods in  EventChunk
+
 2006-01-29  Benhur Stein <benhur@inf.ufsm.br>
         * General/Association.m: retain decoded object
         * General/ChunkArray.m: correct removing of chunks
