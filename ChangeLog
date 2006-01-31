@@ -1,3 +1,8 @@
+2006-01-31  Benhur Stein <benhur@inf.ufsm.br>
+	* Tracers: new directory
+	* Tracers/JRastro: new directory, placeholder for JRastro, a tracer
+	  for java programs.
+
 2006-01-30  Benhur Stein <benhur@inf.ufsm.br>
 	* PajeSimulator/SimulChunk.m: implement missing methods in  EventChunk
 
