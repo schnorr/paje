@@ -1,0 +1,8 @@
+
+
+make all -> compila tudo.
+make install -> instala a biblioteca no Diretorio RASTRO_DIR=""
+make uninstall -> desinstala a biblioteca do Diretorio RASTRO_DIR=""
+make clean -> limpa todo o diretorio.
+
+
