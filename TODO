@@ -1,8 +1,8 @@
-- make memory cache work again (encapsulator)
+- make memory cache work again (encapsulator) - done
 - make focus (on time and/or on containers)
 - individualize sizes by container in drawview (or have 2 sizes)
-- limit drawview size when zooming in
-- make statview work again
+- limit drawview size when zooming in - done
+- make statview work again - done
 - make grouping of containers work again
 - reuse vertical space for containers (layout in spacetime)
 - implement searching
