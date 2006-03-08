@@ -42,7 +42,7 @@
     NSMutableSet *knownEventTypes;
 }
 
-+ (id/*PajeEntityType **/)typeWithName:(NSString *)n
++ (PajeEntityType *)typeWithName:(NSString *)n
                    containerType:(PajeContainerType *)type
                            event:(PajeEvent *)e;
 - (id)initWithName:(NSString *)n
@@ -78,6 +78,10 @@
     NSMutableDictionary *idToInstance;
     NSMutableArray *containedTypes;
 }
+
++ (PajeContainerType *)typeWithName:(NSString *)n
+                      containerType:(PajeContainerType *)type
+                              event:(PajeEvent *)e;
 
 - (void)addInstance:(PajeContainer *)instance;
 - (PajeContainer *)instanceWithId:(NSString *)containerId;

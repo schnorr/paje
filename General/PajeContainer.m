@@ -40,7 +40,7 @@
 }
 
 - (id)initWithType:(PajeEntityType *)type
-              name:(id)n
+              name:(NSString *)n
          container:(PajeContainer *)c
 {
     self = [super initWithType:type

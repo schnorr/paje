@@ -53,12 +53,12 @@
     [super dealloc];
 }
 
-- (void)setInputComponent:(id)component
+- (void)setInputComponent:(PajeComponent *)component
 {
-    inputComponent = component;
+    inputComponent = (id)component;
 }
 
-- (void)setOutputComponent:(id)component
+- (void)setOutputComponent:(PajeComponent *)component
 {
     if (outputComponent != nil) { // HACK
         if ([outputComponent isKindOfClass: [NSMutableArray class]]) {

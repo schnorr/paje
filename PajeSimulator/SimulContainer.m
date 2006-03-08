@@ -190,7 +190,7 @@
     [[self chunkOfType:type] addEntity:newEvent];
 }
 
-- (void)setUserStateOfType:(id)type
+- (void)setUserStateOfType:(PajeEntityType *)type
                    toValue:(id)value
                  withEvent:(PajeEvent *)event
 {
@@ -231,7 +231,7 @@
     [chunk pushEntity:newUserState];
 }
 
-- (void)popUserStateOfType:(id)type
+- (void)popUserStateOfType:(PajeEntityType *)type
                  withEvent:(PajeEvent *)event
 {
     UserState *poppedUserState;

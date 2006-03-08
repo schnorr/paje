@@ -40,7 +40,7 @@
     return [NSString stringWithFormat:@"%.6f", [self timeIntervalSinceReferenceDate]];
 }
 
-- (NSString *)descriptionWithLocale:(id)l
+- (NSString *)descriptionWithLocale:(NSDictionary *)locale
 {
     return [NSString stringWithFormat:@"%.6f", [self timeIntervalSinceReferenceDate]];
 }

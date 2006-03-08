@@ -138,7 +138,7 @@ ofContainersTyped:(PajeEntityType *)containerType
        
 // Command a filter to change the color of a given value of an entity type.
 - (void)setColor:(NSColor *)color
-         forName:(id)name
+         forName:(NSString *)name
     ofEntityType:(PajeEntityType *)entityType;
 
 // Command a filter to change the color for all entities of a given type

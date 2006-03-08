@@ -81,7 +81,7 @@
 // (colors dropped in a cell change the color of the 
 // entity type it represents)
 //
-- (unsigned int)matrix:(NSMatrix *)m draggingUpdated:(id <NSDraggingInfo>)sender;
+- (NSDragOperation)matrix:(NSMatrix *)m draggingUpdated:(id <NSDraggingInfo>)sender;
 - (BOOL)matrix:(NSMatrix *)m performDragOperation:(id <NSDraggingInfo>)sender;
 - (void)matrix:(NSMatrix *)m draggingExited:(id <NSDraggingInfo>)sender;
 // help method for highlighting the destination cell

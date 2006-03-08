@@ -1,3 +1,11 @@
+2006-03-08  Benhur Stein <benhur@inf.ufsm.br>
+	* ContainerFilter/ContainerSelector.h,
+	  EntityTypeFilter/EntityTypeSelector.h, NSDate+Additions.m,
+	  General/PajeContainer.m, General/PajeEvent.m, General/PajeFilter.h,
+	  General/PajeFilter.m, General/PajeType.h,
+	  PajeSimulator/SimulContainer.m, SpaceTimeViewer/DrawView.h:
+	  remove some warnings when compiling on gcc4
+
 2006-02-10  Benhur Stein <benhur@inf.ufsm.br>
 	* GNUmakefile: change installation dir to GNUSTEP_LOCAL_ROOT;
 	  installation in GNUSTEP_USER_ROOT is buggy on GNUstep

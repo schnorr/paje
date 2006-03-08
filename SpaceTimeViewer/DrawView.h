@@ -104,7 +104,7 @@
 
 - (void)setPointsPerSecond:(double)pps;
 - (double)pointsPerSecond;
-- (id)startTime;
+- (NSDate *)startTime;
 
 - (NSColor *)backgroundColor;
 - (void)setBackgroundColor:(NSColor *)color;

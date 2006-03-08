@@ -105,7 +105,7 @@
 //        [self name], [self thread], [[self time] description]];
 }
 #endif
-- (id)pajeEventName    {return [self objectForKey:@"PajeEventName"];}
+- (NSString *)pajeEventName    {return [self objectForKey:@"PajeEventName"];}
 - (NSDate *)time      {return [self objectForKey:@"Time"];}
 
 - (NSArray *)fieldNames
