@@ -79,7 +79,7 @@
                                         toTime:(NSDate *)sliceEndTime;
 
 // filter method for enumerator
-- (BOOL)isEntity:(PajeEntity *)entity laterThan:(NSDate *)time;
+- (id)filterEntity:(PajeEntity *)entity laterThan:(NSDate *)time;
 
 @end
 

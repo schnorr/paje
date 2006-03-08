@@ -192,7 +192,7 @@
                                         toTime:(NSDate *)sliceEndTime
 {
     NSEnumerator *enAfterStart;
-    SEL filterSelector = @selector(isEntity:laterThan:);
+    SEL filterSelector = @selector(filterEntity:laterThan:);
     
     enAfterStart = [self enumeratorOfCompleteEntitiesAfterTime:sliceStartTime];
     return [FilteredEnumerator enumeratorWithEnumerator:enAfterStart
@@ -204,7 +204,7 @@
 - (NSEnumerator *)enumeratorOfEntitiesBeforeTime:(NSDate *)time
 {
     NSEnumerator *enAll;
-    SEL filterSelector = @selector(isEntity:laterThan:);
+    SEL filterSelector = @selector(filterEntity:laterThan:);
     
     enAll = [self enumeratorOfAllEntities];
     return [FilteredEnumerator enumeratorWithEnumerator:enAll
@@ -346,7 +346,7 @@
                                         toTime:(NSDate *)sliceEndTime
 {
     MultiEnumerator *multiEnum;
-    SEL filterSelector = @selector(isEntity:laterThan:);
+    SEL filterSelector = @selector(filterEntity:laterThan:);
     
     multiEnum = [MultiEnumerator enumerator];
     [multiEnum addEnumerator:[incompleteEntities objectEnumerator]];

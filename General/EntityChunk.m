@@ -74,9 +74,13 @@
     Assign(endTime, time);
 }
 
-- (BOOL)isEntity:(PajeEntity *)entity laterThan:(NSDate *)time
+- (id)filterEntity:(PajeEntity *)entity laterThan:(NSDate *)time
 {
-    return [[entity startTime] isLaterThanDate:time];
+    if ([[entity startTime] isLaterThanDate:time]) {
+        return nil;
+    } else {
+        return entity;
+    }
 }
 
 

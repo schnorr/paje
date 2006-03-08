@@ -63,7 +63,7 @@
     while ((obj = [originalEnumerator nextObject]) != nil
            && ([filter performSelector:selector
                             withObject:obj
-                            withObject:context])) {
+                            withObject:context] == nil)) {
         ;
     }
     return obj;

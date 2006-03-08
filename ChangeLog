@@ -1,4 +1,10 @@
 2006-03-08  Benhur Stein <benhur@inf.ufsm.br>
+	* General/EntityChunk.[hm]: change signature of filtering method
+          (isEntity:laterThan: becames filterEntity:laterThan:)
+        * PajeSimulator/SimulChunk.m: use it
+        * General/FilteredEnumerator.m: use new signature on performed method
+
+2006-03-08  Benhur Stein <benhur@inf.ufsm.br>
 	* General/HierarchyBrowser.m, General/PajeType.m: remove some more
 	  GCC4 warnings
 
