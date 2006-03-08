@@ -439,10 +439,10 @@
     filter = [filters objectForKey:entityType];
     if (filter != nil) {
         return [[[FilteredEnumerator alloc] 
-                           initWithEnumerator:origEnum
-                                       filter:self
-                                     selector:@selector(isHiddenEntity:filter:)
-                                      context:filter] autorelease];
+                        initWithEnumerator:origEnum
+                                    filter:self
+                                  selector:@selector(filterHiddenEntity:filter:)
+                                   context:filter] autorelease];
     } else {
         return origEnum;
     }
@@ -453,10 +453,14 @@
     return [hiddenEntityTypes member:entityType] != nil;
 }
 
-- (BOOL)isHiddenEntity:(PajeEntity *)entity
-                filter:(NSSet *)filter
+- (BOOL)filterHiddenEntity:(PajeEntity *)entity
+                    filter:(NSSet *)filter
 {
-    return [filter containsObject:[self nameForEntity:entity]];
+    if ([filter containsObject:[self nameForEntity:entity]]) {
+        return nil;
+    } else {
+        return entity;
+    }
 }
 
 - (NSArray *)allNamesForEntityType:(PajeEntityType *)entityType

@@ -483,10 +483,14 @@
     return filteredTypes;
 }
 
-- (BOOL)isHiddenContainer:(PajeContainer *)container
-                   filter:(NSSet *)filter
+- (id)filterHiddenContainer:(PajeContainer *)container
+                     filter:(NSSet *)filter
 {
-    return [filter containsObject:[self nameForEntity:container]];
+    if ([filter containsObject:[self nameForEntity:container]]) {
+        return nil;
+    } else {
+        return container;
+    }
 }
 
 - (NSEnumerator *)enumeratorOfContainersTyped:(PajeContainerType *)entityType
@@ -505,7 +509,11 @@
 
     filter = [self filterForEntityType:entityType];
     if (filter != nil) {
-        return [[[FilteredEnumerator alloc] initWithEnumerator:origEnum filter:self selector:@selector(isHiddenContainer:filter:) context:filter] autorelease];
+        return [[[FilteredEnumerator alloc]
+                    initWithEnumerator:origEnum
+                                filter:self
+                              selector:@selector(filterHiddenContainer:filter:)
+                               context:filter] autorelease];
     } else {
         return origEnum;
     }

@@ -1,4 +1,8 @@
 2006-03-08  Benhur Stein <benhur@inf.ufsm.br>
+	* FieldFilter/FieldFilter.m, EntityTypeFilter/EntityTypeSelector.m,
+          ContainerFilter/ContainerSelector.m: change filtering method for GCC4
+
+2006-03-08  Benhur Stein <benhur@inf.ufsm.br>
 	* General/EntityChunk.[hm]: change signature of filtering method
           (isEntity:laterThan: becames filterEntity:laterThan:)
         * PajeSimulator/SimulChunk.m: use it

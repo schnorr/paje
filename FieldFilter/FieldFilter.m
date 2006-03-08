@@ -246,7 +246,7 @@
 // returns YES if entity should be filtered (not shown)
 //
 
-- (BOOL)filterEntity:(PajeEntity *)entity
+- (id)filterEntity:(PajeEntity *)entity
 withFilterDescriptor:(FieldFilterDescriptor *)fdesc
 {
     id entityValue;
@@ -268,7 +268,7 @@ withFilterDescriptor:(FieldFilterDescriptor *)fdesc
         result = [entityValue floatValue] < [filterValue floatValue];
         break;
     }
-    return result;
+    return result ? nil : entity;
 }
 
 
@@ -310,7 +310,7 @@ withFilterDescriptor:(FieldFilterDescriptor *)fdesc
     fdesc = [filterDescriptors objectForKey:[self entityTypeForEntity:entity]];
     if (fdesc != NULL && [fdesc action] == HIGHLIGHT) {
         return [self filterEntity:(PajeEntity *)entity
-             withFilterDescriptor:fdesc];
+             withFilterDescriptor:fdesc] == nil;
     }
     return [super isSelectedEntity:entity];
 }
