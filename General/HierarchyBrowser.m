@@ -75,7 +75,7 @@
     [containersBrowser reloadColumn:[containersBrowser /*selected*/lastColumn]];
 }
 
-- (void)setFilter:(id)f
+- (void)setFilter:(PajeFilter *)f
 {
     filter = f; // not retained
     [self refresh];

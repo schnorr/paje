@@ -91,9 +91,9 @@
     return name;
 }
 
-- (PajeEntityType *)containerType
+- (PajeContainerType *)containerType
 {
-    if (containerType == nil) return self;    //HACK
+    if (containerType == nil) return (id)self;    //HACK
     return containerType;
 }
 
