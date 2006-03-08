@@ -1,4 +1,8 @@
 2006-03-08  Benhur Stein <benhur@inf.ufsm.br>
+        * General/NSMatrix+Additions.m: remove uses of performSelector:
+          returning BOOL (GCC4 incompatibility)
+
+2006-03-08  Benhur Stein <benhur@inf.ufsm.br>
 	* FieldFilter/FieldFilter.m, EntityTypeFilter/EntityTypeSelector.m,
           ContainerFilter/ContainerSelector.m: change filtering method for GCC4
 

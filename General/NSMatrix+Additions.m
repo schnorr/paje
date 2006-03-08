@@ -29,48 +29,53 @@
     else
         return NSDragOperationNone;//[super draggingEntered:sender];
 }
+
 - (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender
 {
     id del = [self delegate];
     SEL sel = @selector(matrix:draggingUpdated:);
     if (del && [del respondsToSelector:sel])
-        return (unsigned int)[del performSelector:sel withObject:self withObject:sender];
+        return [del matrix:self draggingUpdated:sender];
     else
         return NSDragOperationNone;//[super draggingUpdated:sender];
 }
+
 - (void)draggingExited:(id <NSDraggingInfo>)sender
 {
     id del = [self delegate];
     SEL sel = @selector(matrix:draggingExited:);
     if (del && [del respondsToSelector:sel])
-        [del performSelector:sel withObject:self withObject:sender];
+        [del matrix:self draggingExited:sender];
     else
         return;//[super draggingExited:sender];
 }
+
 - (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender
 {
     id del = [self delegate];
     SEL sel = @selector(matrix:prepareForDragOperation:);
     if (del && [del respondsToSelector:sel])
-        return (BOOL)(int)[del performSelector:sel withObject:self withObject:sender];
+        return [del matrix:self prepareForDragOperation:sender];
     else
         return NO;//[super prepareForDragOperation:sender];
 }
+
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
 {
     id del = [self delegate];
     SEL sel = @selector(matrix:performDragOperation:);
     if (del && [del respondsToSelector:sel])
-        return (BOOL)(int)[del performSelector:sel withObject:self withObject:sender];
+        return [del matrix:self performDragOperation:sender];
     else
         return NO;//[super performDragOperation:sender];
 }
+
 - (void)concludeDragOperation:(id <NSDraggingInfo>)sender
 {
     id del = [self delegate];
     SEL sel = @selector(matrix:concludeDragOperation:);
     if (del && [del respondsToSelector:sel])
-        [del performSelector:sel withObject:self withObject:sender];
+        [del matrix:self concludeDragOperation:sender];
     else
         return;//[super concludeDragOperation:sender];
 }
