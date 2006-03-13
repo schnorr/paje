@@ -1,3 +1,6 @@
+2006-03-13  (1.4.0) Vincent Danjean <Vincent.Danjean@ens-lyon.org>
+        * New release. All new features seem to work.
+
 2006-03-08  Benhur Stein <benhur@inf.ufsm.br>
         * General/NSMatrix+Additions.m: remove uses of performSelector:
           returning BOOL (GCC4 incompatibility)
