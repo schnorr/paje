@@ -27,7 +27,8 @@
 {
     NSMutableArray *traceControllers;
     PajeTraceController *currentTraceController;
-    
+    NSMutableDictionary *bundles;
+
     IBOutlet NSWindow *filtersWindow;
     IBOutlet NSPopUpButton *filtersPopUp;
     IBOutlet NSBox *filtersDummyView;
@@ -38,6 +39,8 @@
 + (PajeController *)controller;
 - (void)filterChanged:(id)sender;
 - (void)filterMenuSelected:(id)sender;
+
+- (NSBundle *)bundleWithName:(NSString *)name;
 
 - (void)print:(id)sender;
 - (void)open:(id)sender;

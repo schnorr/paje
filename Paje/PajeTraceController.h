@@ -34,15 +34,14 @@
     id <PajeReader> reader;
     id <PajeSimulator> simulator;
     id encapsulator;
-    NSMutableArray *components;
+    NSMutableDictionary *components;
     
     NSMutableDictionary *filters;
     NSMutableArray *tools;
 
-    NSString *checkPointDirectory;
-    PSortedArray *checkPoints;
-    
     NSString *configurationName;
+
+    PSortedArray *chunkDates;
 }
 
 - (void)registerFilter:(PajeFilter *)filter;
@@ -51,15 +50,10 @@
 - (NSDictionary *)filters;
 - (NSArray *)tools;
 
-- (void)readChunk:(id)sender;
-
-- (void)createCheckPointDirectory;
-- (void)destroyCheckPointDirectory;
-- (NSString *)checkPointDirectory;
-
-- (void)writeCheckPoint;
-- (void)gotoCheckPoint:(PajeCheckPoint *)checkPoint;
-- (void)traceFault:(NSNotification *)notification;
+- (void)readNextChunk:(id)sender;
+- (void)readChunk:(int)chunkNumber;
+- (void)startChunk:(int)chunkNumber;
+- (void)endOfChunk;
 
 - (BOOL)openFile:(NSString *)filename;
 

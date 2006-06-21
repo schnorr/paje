@@ -93,6 +93,22 @@
     return nil;
 }
 
+- (NSEnumerator *)enumeratorOfEntitiesTyped:(PajeEntityType *)type
+                                   fromTime:(NSDate *)start
+                                     toTime:(NSDate *)end
+{
+    [self _subclassResponsibility:_cmd];
+    return nil;
+}
+
+- (NSEnumerator *)enumeratorOfCompleteEntitiesTyped:(PajeEntityType *)type
+                                           fromTime:(NSDate *)start
+                                             toTime:(NSDate *)end
+{
+    [self _subclassResponsibility:_cmd];
+    return nil;
+}
+
 // NSCoding protocol
 - (void)encodeWithCoder:(NSCoder *)coder
 {

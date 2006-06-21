@@ -39,6 +39,11 @@
 @implementation MultiEnumerator
 
 
++ (MultiEnumerator *)enumeratorWithEnumerator:(NSEnumerator *)en
+{
+    return [[[self alloc] initWithEnumeratorArray:[NSArray arrayWithObject:en]] autorelease];
+}
+
 + (MultiEnumerator *)enumeratorWithEnumeratorArray:(NSArray *)array
 {
     return [[[self alloc] initWithEnumeratorArray:array] autorelease];
@@ -51,8 +56,10 @@
 
 - (id)initWithEnumeratorArray:(NSArray *)array;
 {
-    [super init];
-    origEnums = [array mutableCopy];
+    self = [super init];
+    if (self != nil) {
+        origEnums = [array mutableCopy];
+    }
     return self;
 }
 

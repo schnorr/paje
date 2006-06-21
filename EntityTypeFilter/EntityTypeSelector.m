@@ -453,8 +453,8 @@
     return [hiddenEntityTypes member:entityType] != nil;
 }
 
-- (BOOL)filterHiddenEntity:(PajeEntity *)entity
-                    filter:(NSSet *)filter
+- (id)filterHiddenEntity:(PajeEntity *)entity
+                  filter:(NSSet *)filter
 {
     if ([filter containsObject:[self nameForEntity:entity]]) {
         return nil;

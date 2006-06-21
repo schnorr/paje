@@ -26,7 +26,7 @@
 #include "../General/Protocols.h"
 #include "../General/ChunkArray.h"
 
-@interface Encapsulate : AnchorFilter <PajeStorageController>
+@interface Encapsulate : AnchorFilter
 {
     BOOL                 traceChanged;
     BOOL                 timerActive;
@@ -43,8 +43,6 @@
 
 - (void)addChunk:(EntityChunk *)entity;
 
-- (void)removeObjectsBeforeTime:(NSDate *)time;
-- (void)removeObjectsAfterTime:(NSDate *)time;
 - (NSDate *)startTimeInMemory;
 
 @end

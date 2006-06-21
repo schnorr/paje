@@ -18,7 +18,8 @@ StorageController_OBJC_FILES = \
         AggregateEvent.m \
         AggregateState.m \
         EventAggregator.m \
-        StateAggregator.m
+        StateAggregator.m \
+	AggregatingChunkArray.m
 
 StorageController_HEADER_FILES = \
         AnchorFilter.h \
@@ -26,7 +27,8 @@ StorageController_HEADER_FILES = \
         AggregateEvent.h \
         AggregateState.h \
         EventAggregator.h \
-        StateAggregator.h
+        StateAggregator.h \
+	AggregatingChunkArray.h
 
 OTHERSRCS = Makefile.preamble Makefile Makefile.postamble m.template \
 h.template

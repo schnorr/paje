@@ -53,7 +53,6 @@
     va_list args;
 
     va_start(args, format);
-    //NSLogv(format, args);
     [NSException raise:@"PajeSimulException" format:format arguments:args];
     va_end(args);
 }
@@ -193,6 +192,10 @@ NSInvocation *invocation;
         relatedEntities = [[NSMutableDictionary alloc] init];
 
         [self _initInvocationTable];
+
+        chunkInfo = [[NSMutableArray alloc] init];
+        currentChunkNumber = 0;
+        currentTime = [[NSDate distantPast] retain];
     }
 
     return self;
@@ -212,6 +215,7 @@ NSInvocation *invocation;
     [startTime release];
     [endTime release];
     [currentTime release];
+    [chunkInfo release];
     [super dealloc];
 }
 
@@ -228,15 +232,9 @@ NSInvocation *invocation;
 - (void)setCurrentTime:(NSDate *)time
 {
     Assign(currentTime, time);
-    if (endTime == nil || [time isLaterThanDate:endTime]) {
-        Assign(endTime, time);
-        if (startTime == nil) {
-            Assign(startTime, time);
-        }
-    } else if ([time isEarlierThanDate:startTime]) {
+    if (startTime == nil) {
         Assign(startTime, time);
     }
-//    NSLog(@"simul times: (%f-%f) %f", [startTime timeIntervalSinceReferenceDate], [endTime timeIntervalSinceReferenceDate], [currentTime timeIntervalSinceReferenceDate]);
 }
 
 - (NSDate *)currentTime
@@ -359,9 +357,23 @@ NSInvocation *invocation;
 
 - (void)outputChunk:(id)entity
 {
+if (replaying) return;
     [super outputEntity:entity];
 }
 
+
+- (void)startChunkInContainer:(SimulContainer *)container
+{
+    NSEnumerator *subContainerEnumerator;
+    SimulContainer *subContainer;
+
+    [container startChunk];
+
+    subContainerEnumerator = [[container subContainers] objectEnumerator];
+    while ((subContainer = [subContainerEnumerator nextObject]) != nil) {
+        [self startChunkInContainer:subContainer];
+    }
+}
 
 - (void)endOfChunkInContainer:(SimulContainer *)container
 {
@@ -369,6 +381,10 @@ NSInvocation *invocation;
     SimulContainer *subContainer;
 
     [container endOfChunk];
+    
+    if (endTime == nil || [endTime isEarlierThanDate:currentTime]) {
+        Assign(endTime, currentTime);
+    }
 
     subContainerEnumerator = [[container subContainers] objectEnumerator];
     while ((subContainer = [subContainerEnumerator nextObject]) != nil) {
@@ -376,59 +392,149 @@ NSInvocation *invocation;
     }
 }
 
-- (void)endOfChunk
+- (void)emptyChunk:(int)chunkNumber inContainer:(SimulContainer *)container
 {
-    [self endOfChunkInContainer:rootContainer];
+    NSEnumerator *subContainerEnumerator;
+    SimulContainer *subContainer;
+
+    [container emptyChunk:chunkNumber];
+    
+    subContainerEnumerator = [[container subContainers] objectEnumerator];
+    while ((subContainer = [subContainerEnumerator nextObject]) != nil) {
+        [self emptyChunk:chunkNumber inContainer:subContainer];
+    }
 }
 
-
-- (void)encodeCheckPointWithCoder:(NSCoder *)coder
+- (id)chunkState
 {
     NSEnumerator *containerEnum;
     SimulContainer *container;
-    NSMutableSet *c;
+    NSMutableDictionary *state;
 
-    c = [[NSMutableSet alloc] init];
+    state = [NSMutableDictionary dictionary];
 
-//    [coder encodeObject:startTime];
-//    [coder encodeObject:endTime];
-    [coder encodeObject:currentTime];
-    [coder encodeValueOfObjCType:@encode(int) at:&eventCount];
+    [state setObject:currentTime forKey:@"_currentTime"];
+    [state setObject:[NSNumber numberWithInt:eventCount] forKey:@"_eventCount"];
+
     // FIXME: should be saved by type
     containerEnum = [[userNumberToContainer allValues] objectEnumerator];
     while ((container = [containerEnum nextObject]) != nil) {
-        if (![c containsObject:[container alias]]) {
-            [c addObject:[container alias]];
-            [coder encodeObject:[container alias]];
-            [container encodeCheckPointWithCoder:coder];
+        id key = [container alias];
+        if (nil == [state objectForKey:key]) {
+            [state setObject:[container chunkState] forKey:key];
         }
     }
-    [coder encodeObject:nil];
-    [c release];
+    
+    return state;
 }
 
-- (void)decodeCheckPointWithCoder:(NSCoder *)coder
+- (void)setChunkState:(id)obj
 {
-    NSString *containerName;
-    
-//    Assign(startTime, [coder decodeObject]);
-//    Assign(endTime, [coder decodeObject]);
-    Assign(currentTime, [coder decodeObject]);
-    [coder decodeValueOfObjCType:@encode(int) at:&eventCount];
+    NSDictionary *state = (NSDictionary *)obj;
+
+    [self setCurrentTime:[state objectForKey:@"_currentTime"]];
+    eventCount = [[state objectForKey:@"_eventCount"] intValue];
 
     [self _resetContainers];
 
-    while ((containerName = [coder decodeObject]) != nil) {
+    NSEnumerator *keyEnum;
+    id key;
+    keyEnum = [state keyEnumerator];
+    while ((key = [keyEnum nextObject]) != nil) {
         SimulContainer *container;
-        container = [userNumberToContainer objectForKey:containerName];
+        container = [userNumberToContainer objectForKey:key];
         if (container == nil) {
-        NSLog(@"known: %@", userNumberToContainer);
-            [self error:@"Decoding unknown container '%@'", containerName];
+            if (![key isEqual:@"_currentTime"]
+                && ![key isEqual:@"_eventCount"]) {
+                [self error:@"Decoding unknown container '%@'", key];
+            }
+        } else {
+            [container setChunkState:[state objectForKey:key]];
         }
-        NSDebugMLLog(@"enc", @"found container %@", containerName);
-        [container decodeCheckPointWithCoder:coder];
     }
 }
+
+- (int)currentChunkNumber
+{
+    return currentChunkNumber;
+}
+
+- (void)startChunk:(int)chunkNumber
+{
+    if (chunkNumber != currentChunkNumber) {
+        if (chunkNumber >= [chunkInfo count]) {
+            // cannot position in an unread place
+            [self error:@"Cannot start unknown chunk"];
+        }
+
+        [self setChunkState:[chunkInfo objectAtIndex:chunkNumber]];
+
+        currentChunkNumber = chunkNumber;
+    } else {
+        // let's register the first chunk position
+        if ([chunkInfo count] == 0) {
+
+            [chunkInfo addObject:[self chunkState]];
+
+        }
+    }
+
+    if (currentChunkNumber == [chunkInfo count] - 1) {
+        replaying = NO;
+    } else {
+        replaying = YES;
+    }
+
+    [self startChunkInContainer:rootContainer];
+
+    // keep the ball rolling (tell other components)
+    [super startChunk:chunkNumber];
+}
+
+
+- (void)endOfChunk
+{
+    [self endOfChunkInContainer:rootContainer];
+
+    currentChunkNumber++;
+    // if we're at the end of the known world, let's register its position
+    if (currentChunkNumber == [chunkInfo count]) {
+
+        [chunkInfo addObject:[self chunkState]];
+
+    }
+    [super endOfChunk];
+}
+
+- (void)emptyChunk:(int)chunkNumber
+{
+    [self emptyChunk:chunkNumber inContainer:rootContainer];
+}
+
+- (void)notifyMissingChunk:(int)chunkNumber
+{
+    NSDictionary *userInfo;
+    userInfo = [NSDictionary dictionaryWithObject:
+                                 [NSNumber numberWithInt:chunkNumber]
+                                           forKey:@"ChunkNumber"];
+    [[NSNotificationCenter defaultCenter]
+                  postNotificationName:@"PajeChunkNotInMemoryNotification"
+                                object:self
+                              userInfo:userInfo];
+}
+
+- (void)getChunksUntilTime:(NSDate *)time
+{
+    while ([currentTime isEarlierThanDate:time]) {
+        int chunkNumber = [chunkInfo count] - 1;
+        [self notifyMissingChunk:chunkNumber];
+        // if no chunk has been read, give up
+        if ([chunkInfo count] == chunkNumber) {
+            break;
+        }
+    }
+}
+
 
 - (id)copyWithZone:(NSZone *)zone
 {

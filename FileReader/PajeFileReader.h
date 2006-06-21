@@ -24,13 +24,16 @@
 #include <Foundation/Foundation.h>
 #include "../General/PajeFilter.h"
 
-#define CHUNK_SIZE 1000000
+#define CHUNK_SIZE 1500000
 
-@interface PajeFileReader: PajeComponent <PajeReader>
+@interface FileReader: PajeComponent <PajeReader>
 {
     NSFileHandle *inputFile;
     NSString *inputFilename;
     BOOL hasMoreData;
+
+    NSMutableArray *chunkInfo;
+    unsigned currentChunk;
 }
 
 - (id)initWithController:(PajeTraceController *)c;
@@ -39,6 +42,9 @@
 - (NSString *)inputFilename;
 - (void)readNextChunk;
 - (BOOL)hasMoreData;
+
+- (void)startChunk:(int)chunkNumber;
+- (void)endOfChunk;
 
 - (void)raise:(NSString *)reason;
 

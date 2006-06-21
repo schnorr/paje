@@ -57,9 +57,24 @@
     return [array objectAtIndex:index];
 }
 
+- (id)lastObject
+{
+    return [array lastObject];
+}
+
+- (void)removeLastObject
+{
+    [array removeLastObject];
+}
+
 - (void)removeObjectAtIndex:(unsigned)index
 {
     [array removeObjectAtIndex:index];
+}
+
+- (void) removeObjectsInRange: (NSRange)aRange
+{
+    [array removeObjectsInRange:aRange];
 }
 
 - (void)removeObject:(id)obj
@@ -210,21 +225,50 @@ NSDate *delta_d_t0;
         return lo;
 }
 
-- (unsigned)indexOfLastObjectNotAfterValue:(id<Comparing>)value
+- (unsigned)indexOfFirstObjectAfterValue:(id<Comparing>)value
 {
+    if (value == nil) {
+        return 0;
+    }
     unsigned index = [self indexOfFirstObjectNotBeforeValue:value];
 
-    if (index < [array count]) {
+    while (index < [array count]) {
         id arrValue;
         arrValue = [[array objectAtIndex:index] performSelector:valueSelector];
-        if ([value compare:arrValue] == NSOrderedSame) {
-            return index;
+        if ([value compare:arrValue] == NSOrderedAscending) {
+            break;
+        }
+        index++;
+    }
+    return index;
+}
+
+- (unsigned)indexOfLastObjectBeforeValue:(id<Comparing>)value;
+{
+    if (value == nil) {
+        return 0;
+    }
+    unsigned index = [self indexOfFirstObjectNotBeforeValue:value];
+
+    while (index > 0) {
+        id arrValue;
+        index --;
+        arrValue = [[array objectAtIndex:index] performSelector:valueSelector];
+        if ([value compare:arrValue] == NSOrderedDescending) {
+            break;
         }
     }
+    return index;
+}
+
+- (unsigned)indexOfLastObjectNotAfterValue:(id<Comparing>)value
+{
+    unsigned index = [self indexOfFirstObjectAfterValue:value];
+
     if (index > 0) {
         return index - 1;
     }
-    return NSNotFound;
+    return index;
 }
 
 - (unsigned)indexOfObjectWithValue:(id<Comparing>)value
@@ -261,7 +305,7 @@ NSDate *delta_d_t0;
     int firstIndex;
     NSRange range;
 
-    firstIndex = [self indexOfFirstObjectNotBeforeValue:value];
+    firstIndex = [self indexOfFirstObjectAfterValue:value];
     range = NSMakeRange(firstIndex, [array count] - firstIndex);
     return [array objectEnumeratorWithRange:range];
 }
@@ -271,16 +315,11 @@ NSDate *delta_d_t0;
     int firstIndex;
     NSRange range;
 
-    firstIndex = [self indexOfFirstObjectNotBeforeValue:value];
+    firstIndex = [self indexOfFirstObjectAfterValue:value];
     range = NSMakeRange(firstIndex, [array count] - firstIndex);
     return [array reverseObjectEnumeratorWithRange:range];
 }
 
-
-- (void) removeObjectsInRange: (NSRange)aRange
-{
-    [array removeObjectsInRange:aRange];
-}
 
 // NSCoding Protocol
 - (void)encodeWithCoder:(NSCoder *)coder

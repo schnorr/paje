@@ -31,11 +31,13 @@
 #include "../General/PajeEvent.h"
 #include "SimulChunk.h"
 
+@class PajeSimul;
+
 @interface SimulContainer : PajeContainer
 {
     NSDate *creationTime;
     NSDate *lastTime;
-    id simulator;
+    PajeSimul *simulator;
     NSString *alias;
     NSMutableDictionary *userEntities; // key = entityType
     NSMutableDictionary *minValues; // key = entityType
@@ -63,10 +65,12 @@
 
 - (void)stopWithEvent:(PajeEvent*)event;
 
+- (BOOL)isStopped;
+
 - (void)setLastTime:(NSDate *)time;
 
 - (SimulChunk *)chunkOfType:(id)type;
-
+- (SimulChunk *)previousChunkOfType:(id)type;
 
 - (void)newEventWithType:(id)type
                    value:(id)value
@@ -107,11 +111,15 @@
 - (int)logicalTime;
 - (void)setLogicalTime:(int)lt;
 
+- (void)startChunk;
 - (void)endOfChunk;
 
+- (void)emptyChunk:(int)chunkNumber;
+
 - (void)reset;
-- (void)encodeCheckPointWithCoder:(NSCoder *)coder;
-- (void)decodeCheckPointWithCoder:(NSCoder *)coder;
+
+- (id)chunkState;
+- (void)setChunkState:(id)state;
 
 @end
 

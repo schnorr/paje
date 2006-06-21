@@ -22,11 +22,17 @@
 #include "../General/UniqueString.h"
 #include "../General/Macros.h"
 
-@implementation PajeFileReader
+@implementation FileReader
 
 - (id)initWithController:(PajeTraceController *)c
 {
-    [super initWithController:c];
+    self = [super initWithController:c];
+
+    if (self != nil) {
+        chunkInfo = [[NSMutableArray alloc] init];
+        currentChunk = 0;
+        hasMoreData = NO;
+    }
 
     return self;
 }
@@ -60,12 +66,59 @@
 {
     [inputFilename release];
     [inputFile release];
+    [chunkInfo release];
     [super dealloc];
 }
 
 - (NSString *)traceDescription
 {
     return [inputFilename stringByAbbreviatingWithTildeInPath];
+}
+
+// A new chunk will start.
+// Position the file in the good position, if not yet there.
+- (void)startChunk:(int)chunkNumber
+{
+    if (chunkNumber != currentChunk) {
+        if (chunkNumber >= [chunkInfo count]) {
+            // cannot position in an unread place
+            NSLog(@"Chunk after end: %d (%d)", chunkNumber, [chunkInfo count]);
+            [self raise:@"Cannot start unknown chunk"];
+        }
+
+        unsigned long long position;
+        position = [[chunkInfo objectAtIndex:chunkNumber] longLongValue];
+        [inputFile seekToFileOffset:position];
+        hasMoreData = YES;
+
+        currentChunk = chunkNumber;
+    } else {
+        // let's register the first chunk position
+        if ([chunkInfo count] == 0) {
+
+            unsigned long long position;
+            position = [inputFile offsetInFile];
+            [chunkInfo addObject:[NSNumber numberWithLongLong:position]];
+
+        }
+    }
+
+    // keep the ball rolling (tell other components)
+    [super startChunk:chunkNumber];
+}
+
+// The current chunk has ended.
+- (void)endOfChunk
+{
+    currentChunk++;
+    // if we're at the end of the known world, let's register its position
+    if (currentChunk == [chunkInfo count]) {
+        unsigned long long position;
+        position = [inputFile offsetInFile];
+        [chunkInfo addObject:[NSNumber numberWithLongLong:position]];
+
+    }
+    [super endOfChunk];
 }
 
 - (void)raise:(NSString *)reason
@@ -91,6 +144,9 @@
 
 - (void)setInputFilename:(NSString *)filename
 {
+    if (inputFilename != nil) {
+        [self raise:@"Already has an open file"];
+    }
     Assign(inputFilename, filename);
     Assign(inputFile, [NSFileHandle fileHandleForReadingAtPath:filename]);
 
@@ -102,7 +158,7 @@
 
 - (void)inputEntity:(id)entity
 {    
-    [self raise:@"Configuration error: should not receive programmed input"];
+    [self raise:@"Configuration error:" " PajeFileReader should be first component"];
 }
 
 - (void)readNextChunk

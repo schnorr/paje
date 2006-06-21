@@ -44,6 +44,13 @@
 
 - (void)addSubContainer:(PajeContainer *)subcontainer;
 - (NSArray *)subContainers;
+
+- (NSEnumerator *)enumeratorOfEntitiesTyped:(PajeEntityType *)type
+                                   fromTime:(NSDate *)start
+                                     toTime:(NSDate *)end;
+- (NSEnumerator *)enumeratorOfCompleteEntitiesTyped:(PajeEntityType *)type
+                                           fromTime:(NSDate *)start
+                                             toTime:(NSDate *)end;
 @end
 
 #endif

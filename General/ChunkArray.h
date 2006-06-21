@@ -37,6 +37,7 @@
 @interface ChunkArray : NSObject
 {
     PSortedArray *chunks;
+    int firstIndex;
 }
 
 - (id)init;
@@ -45,11 +46,12 @@
 
 - (NSEnumerator *)enumeratorOfEntitiesFromTime:(NSDate *)startTime
                                         toTime:(NSDate *)endTime;
+- (NSEnumerator *)enumeratorOfCompleteEntitiesFromTime:(NSDate *)startTime
+                                                toTime:(NSDate *)endTime;
 
 - (void)addChunk:(EntityChunk *)chunk;
 
-- (void)removeChunksBeforeTime:(NSDate *)time;
-- (void)removeChunksAfterTime:(NSDate *)time;
+- (EntityChunk *)chunkAtIndex:(int)index;
+- (void)setFirstIndex:(int)index;
 @end
-
 #endif

@@ -66,6 +66,11 @@
     [super dealloc];
 }
 
+- (void)setEvent:(PajeEvent *)e
+{
+    Assign(event, e);
+}
+
 - (NSDate *)time
 {
     return [event time];

@@ -15,7 +15,7 @@
     PajeEntity *entity;
     PajeEntity *lastEntity;
     
-    entityEnum = [entities objectEnumerator];
+    entityEnum = [entities reverseObjectEnumerator];
     entity = [entityEnum nextObject];
 
     NSParameterAssert(entity != nil);

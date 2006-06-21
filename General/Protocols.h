@@ -148,7 +148,9 @@ typedef enum {
 @protocol PajeReader
 - (void)setInputFilename:(NSString *)filename;
 - (NSString *)inputFilename;
+- (void)startChunk:(int)chunkNumber;
 - (void)readNextChunk;
+- (void)endOfChunk;
 - (BOOL)hasMoreData;
 @end
 
@@ -156,11 +158,6 @@ typedef enum {
 - (int)eventCount;
 - (NSDate *)currentTime;
 - (void)endOfChunk;
-@end
-
-@protocol PajeStorageController
-- (void)removeObjectsBeforeTime:(NSDate *)time;
-- (void)removeObjectsAfterTime:(NSDate *)time;
 @end
 
 

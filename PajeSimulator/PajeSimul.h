@@ -33,7 +33,7 @@
 #include "../General/PajeFilter.h"
 #include "../General/PajeEvent.h"
 
-#include "SimulContainer.h"
+@class SimulContainer;
 
 #define MAP
 @interface PajeSimul : PajeComponent <PajeSimulator>
@@ -60,6 +60,11 @@
     
     /* arrays of entities related to a key */
     NSMutableDictionary *relatedEntities;
+
+    NSMutableArray *chunkInfo;
+    unsigned currentChunkNumber;
+
+    BOOL replaying;
 }
 
 - (id)initWithController:(PajeTraceController *)c;
@@ -83,8 +88,11 @@
 - (void)endOfChunk;
 - (void)outputChunk:(id)entity;
 
-- (void)encodeCheckPointWithCoder:(NSCoder *)coder;
-- (void)decodeCheckPointWithCoder:(NSCoder *)coder;
+- (id)chunkState;
+- (void)setChunkState:(id)state;
+- (int)currentChunkNumber;
+
+- (void)getChunksUntilTime:(NSDate *)time;
 @end
 
 @interface PajeSimul (UserEvents)

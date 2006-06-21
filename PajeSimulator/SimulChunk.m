@@ -19,13 +19,12 @@
 */
 
 #include "SimulChunk.h"
-#include "../General/FilteredEnumerator.h"
+
 #include "../General/Macros.h"
 
 @implementation SimulChunk
 + (SimulChunk *)chunkWithEntityType:(PajeEntityType *)type
                           container:(PajeContainer *)pc
-                 incompleteEntities:(NSMutableArray *)array
 {
     Class class;
     switch ([type drawingType]) {
@@ -47,64 +46,25 @@
     }
 
     return [[[class alloc] initWithEntityType:type
-                                    container:pc
-                           incompleteEntities:array] autorelease];
+                                    container:pc] autorelease];
 }
 
-+ (SimulChunk *)chunkWithEntityType:(PajeEntityType *)type
-                          container:(PajeContainer *)pc
-{
-    return [self chunkWithEntityType:type
-                           container:pc
-                  incompleteEntities:nil];
-}
-
-- (id)initWithEntityType:(PajeEntityType *)type
-               container:(PajeContainer *)pc
-      incompleteEntities:(NSMutableArray *)array
-{
-    NSParameterAssert(array == nil);
-    return [super initWithEntityType:type container:pc];
-}
 
 - (id)initWithEntityType:(PajeEntityType *)type
                container:(PajeContainer *)pc
 {
-    return [self initWithEntityType:type container:pc incompleteEntities:nil];
+    self = [super initWithEntityType:type container:pc];
+    if (self != nil) {
+	lastChunk = NO;
+    }
+    return self;
 }
 
-
-- (NSEnumerator *)enumeratorOfAllCompleteEntities
+- (void)dealloc
 {
-    [self _subclassResponsibility:_cmd];
-    return nil;
-}
-- (NSEnumerator *)enumeratorOfCompleteEntitiesAfterTime:(NSDate *)time
-{
-    [self _subclassResponsibility:_cmd];
-    return nil;
+    [super dealloc];
 }
 
-
-// all entities, including those that finish after the chunk's endTime
-- (NSEnumerator *)enumeratorOfAllEntities
-{
-    [self _subclassResponsibility:_cmd];
-    return nil;
-}
-
-- (NSEnumerator *)enumeratorOfEntitiesBeforeTime:(NSDate *)time
-{
-    [self _subclassResponsibility:_cmd];
-    return nil;
-}
-
-- (NSEnumerator *)enumeratorOfEntitiesFromTime:(NSDate *)sliceStartTime
-                                        toTime:(NSDate *)sliceEndTime
-{
-    [self _subclassResponsibility:_cmd];
-    return nil;
-}
 
 
 - (void)removeAllCompletedEntities
@@ -112,11 +72,14 @@
     [self _subclassResponsibility:_cmd];
 }
 
-
-- (NSMutableArray *)incompleteEntities
+- (void)setIncompleteEntities:(NSArray *)array
 {
     [self _subclassResponsibility:_cmd];
-    return nil;
+}
+
+- (NSArray *)incompleteEntities
+{
+    return [NSArray array];
 }
 
 
@@ -132,20 +95,91 @@
     [self _subclassResponsibility:_cmd];
 }
 
+// for events
+- (void)newEventEvent:(PajeEvent *)event
+                value:(id)value
+{
+    NSLog(@"Ignoring 'newEvent' event for non event entity type. Event: %@",
+        event);
+}
+
 
 // for states
-- (void)pushEntity:(PajeEntity *)entity
+- (void)setStateEvent:(PajeEvent *)event
+                value:(id)value
 {
-    [self _subclassResponsibility:_cmd];
+    NSLog(@"Ignoring 'setState' event for non state entity type. Event: %@",
+        event);
 }
 
-- (UserState *)topEntity
+- (void)pushStateEvent:(PajeEvent *)event
+                 value:(id)value
 {
-    [self _subclassResponsibility:_cmd];
-    return nil;
+    NSLog(@"Ignoring 'pushState' event for non state entity type. Event: %@",
+        event);
 }
 
-- (void)removeTopEntity
+- (void)popStateEvent:(PajeEvent *)event
+{
+    NSLog(@"Ignoring 'popState' event for non state entity type. Event: %@",
+        event);
+}
+
+
+// for links
+- (void)startLinkEvent:(PajeEvent *)event
+                 value:(id)value
+       sourceContainer:(PajeContainer *)cont
+                   key:(id)key;
+{
+    NSLog(@"Ignoring 'startLink' event for non link entity type. Event: %@",
+        event);
+}
+
+- (void)endLinkEvent:(PajeEvent *)event
+               value:(id)value
+       destContainer:(PajeContainer *)cont
+                 key:(id)key
+{
+    NSLog(@"Ignoring 'endLink' event for non link entity type. Event: %@",
+        event);
+}
+
+// for variables
+- (void)setVariableEvent:(PajeEvent *)event
+                   value:(id)value
+{
+    NSLog(@"Ignoring 'setVariable' event for non variable entity type."
+           " Event: %@", event);
+}
+
+- (void)addVariableEvent:(PajeEvent *)event
+                   value:(id)value
+{
+    NSLog(@"Ignoring 'addVariable' event for non variable entity type."
+           " Event: %@", event);
+}
+
+- (void)subVariableEvent:(PajeEvent *)event
+                   value:(id)value
+{
+    NSLog(@"Ignoring 'subVariable' event for non variable entity type."
+           " Event: %@", event);
+}
+
+
+- (void)setPreviousChunkIncompleteEntities:(NSArray *)array
+{
+    NSAssert([array count] == 0, @"");
+}
+
+
+- (BOOL)isLastChunk
+{
+    return lastChunk;
+}
+
+- (void)endOfChunkWithTime:(NSDate *)time
 {
     [self _subclassResponsibility:_cmd];
 }
@@ -156,11 +190,9 @@
 
 - (id)initWithEntityType:(PajeEntityType *)type
                container:(PajeContainer *)pc
-      incompleteEntities:(NSMutableArray *)array
 {
     self = [super initWithEntityType:type
-                           container:pc
-                  incompleteEntities:array];
+                           container:pc];
     if (self != nil) {
         entities = [[PSortedArray alloc] initWithSelector:@selector(endTime)];
     }
@@ -173,44 +205,10 @@
     [super dealloc];
 }
 
-- (NSEnumerator *)enumeratorOfAllEntities
-{
-    return [entities reverseObjectEnumerator];
-}
 
-- (NSEnumerator *)enumeratorOfAllCompleteEntities
+- (PSortedArray *)completeEntities
 {
-    return [entities reverseObjectEnumerator];
-}
-
-- (NSEnumerator *)enumeratorOfCompleteEntitiesAfterTime:(NSDate *)time
-{
-    return [entities reverseObjectEnumeratorAfterValue:(id<Comparing>)time];
-}
-
-- (NSEnumerator *)enumeratorOfEntitiesFromTime:(NSDate *)sliceStartTime
-                                        toTime:(NSDate *)sliceEndTime
-{
-    NSEnumerator *enAfterStart;
-    SEL filterSelector = @selector(filterEntity:laterThan:);
-    
-    enAfterStart = [self enumeratorOfCompleteEntitiesAfterTime:sliceStartTime];
-    return [FilteredEnumerator enumeratorWithEnumerator:enAfterStart
-                                                 filter:self
-                                               selector:filterSelector
-                                                context:sliceEndTime];
-}
-
-- (NSEnumerator *)enumeratorOfEntitiesBeforeTime:(NSDate *)time
-{
-    NSEnumerator *enAll;
-    SEL filterSelector = @selector(filterEntity:laterThan:);
-    
-    enAll = [self enumeratorOfAllEntities];
-    return [FilteredEnumerator enumeratorWithEnumerator:enAll
-                                                 filter:self
-                                               selector:filterSelector
-                                                context:time];
+    return entities;
 }
 
 - (void)removeAllCompletedEntities
@@ -218,47 +216,57 @@
     [entities removeAllObjects];
 }
 
-- (void)setIncompleteEntities:(NSMutableArray *)array
+- (void)setIncompleteEntities:(NSArray *)array
 {
     [self _subclassResponsibility:_cmd];
 }
 
-- (NSMutableArray *)incompleteEntities
-{
-    return nil;
-}
-
-- (void)pushEntity:(PajeEntity *)entity
-{
-    [self addEntity:entity];
-}
-
-- (UserState *)topEntity
-{
-    return nil;
-}
-
-- (void)removeTopEntity
-{
-}
 
 
 - (void)addEntity:(PajeEntity *)entity
 {
+    NSAssert([self canInsert], @"adding entities to inactive chunk");
     [entities addObject:entity];
 }
 
 - (void)stopWithEvent:(PajeEvent *)event
 {
+    [self setEndTime:[event time]];
+    lastChunk = YES;
 }
 
-- (id)copyWithZone:(NSZone *)z
+- (void)activate
 {
-    EventChunk *copy;
-    copy = [super copyWithZone:z];
-    [copy->entities release];
-    copy->entities = [entities copy];
-    return copy;
+    [super activate];
+    entities = [[PSortedArray alloc] initWithSelector:@selector(endTime)];
+}
+
+- (void)empty
+{
+    if ([self isZombie]) {
+        return;
+    }
+    [super empty];
+    Assign(entities, nil);
+}
+
+- (void)endOfChunkWithTime:(NSDate *)time
+{
+    [super freeze];
+    // make arrays immutable?
+    if (!lastChunk) [self setEndTime:time];
+}
+
+- (void)newEventEvent:(PajeEvent *)event
+                value:(id)value
+{
+    UserEvent *newEvent;
+    newEvent = [UserEvent eventWithType:entityType
+                                   name:value
+                              container:container
+                                  event:event];
+
+    [self addEntity:newEvent];
 }
 @end
 
@@ -267,15 +275,10 @@
 
 - (id)initWithEntityType:(PajeEntityType *)type
                container:(PajeContainer *)pc
-      incompleteEntities:(NSMutableArray *)array
 {
-    self = [super initWithEntityType:type container:pc incompleteEntities:nil];
+    self = [super initWithEntityType:type container:pc];
     if (self != nil) {
-        if (array != nil) {
-            Assign(incompleteEntities, array);
-        } else {
-            incompleteEntities = [[NSMutableArray alloc] init];
-        }
+//        [self setPreviousChunkIncompleteEntities:[NSArray array]];
     }
     return self;
 }
@@ -283,93 +286,358 @@
 - (void)dealloc
 {
     Assign(incompleteEntities, nil);
+    Assign(simulationStack, nil);
     [super dealloc];
 }
 
-- (void)setIncompleteEntities:(NSMutableArray *)array
+- (void)setIncompleteEntities:(NSArray *)array
 {
-    Assign(incompleteEntities, array);
+    if (incompleteEntities != nil) {
+        [incompleteEntities release];
+        incompleteEntities = nil;
+    }
+    if (array != nil) {
+        incompleteEntities = [array copy];
+    }
 }
 
-- (NSMutableArray *)incompleteEntities
+- (NSArray *)incompleteEntities
 {
     return incompleteEntities;
 }
 
-
-- (void)pushEntity:(PajeEntity *)entity
+- (void)setStateEvent:(PajeEvent *)event
+                value:(id)value
 {
-    [incompleteEntities addObject:entity];
-    if ([entity respondsToSelector:@selector(setImbricationLevel:)]) {
-        [(UserState *)entity setImbricationLevel:[incompleteEntities count]-1];
+    if ([simulationStack count] > 0) {
+        [self popStateEvent:event];
+    }
+    [self pushStateEvent:event
+                   value:value];
+}
+
+- (void)pushStateEvent:(PajeEvent *)event
+                 value:(id)value
+{
+    UserState *state = nil;
+    int imbricationLevel;
+
+    imbricationLevel = [simulationStack count];
+    // if this chunk is being resimulated and the new state already
+    // exists as an incomplete state, reuse it; else create a new one.
+    if (imbricationLevel == resimulationStackLevel
+        && imbricationLevel < [incompleteEntities count]) {
+        state = [incompleteEntities objectAtIndex:imbricationLevel];
+        if ([[state startTime] isEqualToDate:[event time]]
+            && [[state value] isEqual:value]) {
+            resimulationStackLevel++;
+        } else {
+            state = nil;
+        }
+        
+    }
+    if (state == nil) {
+        state = [UserState stateOfType:entityType
+                                 value:value
+                             container:container
+                            startEvent:event];
+        [state setImbricationLevel:imbricationLevel];
+    }
+    [simulationStack addObject:state];
+}
+
+- (void)popStateEvent:(PajeEvent *)event
+{
+    UserState *poppedState;
+    UserState *newTopState;
+
+    poppedState = (UserState *)[simulationStack lastObject];
+    if (poppedState != nil) {
+        [poppedState setEndEvent:event];
+        [self addEntity:poppedState];
+        [simulationStack removeLastObject];
+        newTopState = (UserState *)[simulationStack lastObject];
+        if (newTopState != nil) {
+            int stackLevel = [simulationStack count];
+            if (stackLevel > resimulationStackLevel) {
+                [newTopState addInnerState:poppedState];
+            } else if (stackLevel < resimulationStackLevel) {
+                resimulationStackLevel = stackLevel;
+            }
+        }
+    } else {
+        NSWarnMLog(@"No user state to pop with event %@", event);
     }
 }
 
-- (UserState *)topEntity
+- (void)setPreviousChunkIncompleteEntities:(NSArray *)newStack
 {
-    return (UserState *)[incompleteEntities lastObject];
+    if (simulationStack != nil) {
+        [simulationStack release];
+        simulationStack = nil;
+    }
+    if (newStack != nil) {
+        simulationStack = [newStack mutableCopy];
+        if (incompleteEntities != nil) { // resimulating
+            resimulationStackLevel = [simulationStack count];
+        } else {
+            resimulationStackLevel = -1;
+        }
+    }
 }
 
-- (void)removeTopEntity
+
+- (void)stopWithEvent:(PajeEvent *)event
 {
-    [incompleteEntities removeLastObject];
+    while ([simulationStack count] > 0) {
+        [self popStateEvent:event];
+    }
+
+    [super stopWithEvent:event];
+}
+
+
+- (void)activate
+{
+    [super activate];
+    // someone must setPreviousChunkIncompleteEntities, or won't work
+}
+
+- (void)endOfChunkWithTime:(NSDate *)time
+{
+    [self setIncompleteEntities:simulationStack];
+    Assign(simulationStack, nil);;
+    [super endOfChunkWithTime:time];
+}
+
+@end
+
+#include "SimulContainer.h"
+
+@implementation LinkChunk
+- (void)startLinkEvent:(PajeEvent *)event
+                 value:(id)value
+       sourceContainer:(PajeContainer *)cont
+                   key:(id)key
+{
+    UserLink *link = nil;
+    unsigned index = 0;
+    BOOL found = NO;
+    int sourceLogicalTime;
+    SimulContainer *sourceContainer = (SimulContainer *)cont;
+    SimulContainer *destContainer;
+
+    sourceLogicalTime = [sourceContainer logicalTime];
+
+    sourceLogicalTime++;
+    [sourceContainer setLogicalTime:sourceLogicalTime];
+
+    unsigned count = [pendingLinks count];
+    for (index = 0; index < count; index++) {
+        link = [pendingLinks objectAtIndex:index];
+        if ([link canBeStartedWithValue:value key:key]) {
+            found = YES;
+            break;
+        }
+    }
+
+    if (found) {
+        [link setSourceContainer:sourceContainer sourceEvent:event];
+        [link setStartLogicalTime:sourceLogicalTime];
+        destContainer = (SimulContainer *)[link destContainer];
+        if ([destContainer logicalTime] < sourceLogicalTime + 1) {
+            [destContainer setLogicalTime:sourceLogicalTime + 1];
+            [link setEndLogicalTime:sourceLogicalTime + 1];
+        }
+        [self addEntity:link];
+        [pendingLinks removeObjectAtIndex:index];
+    } else {
+        // TODO: search incompletes
+        link = [UserLink linkOfType:entityType
+                              value:value
+                                key:key
+                          container:container
+                    sourceContainer:sourceContainer
+                        sourceEvent:event];
+        [pendingLinks addObject:link];
+        [link setStartLogicalTime:sourceLogicalTime];
+   }
+}
+
+- (void)endLinkEvent:(PajeEvent *)event
+               value:(id)value
+       destContainer:(PajeContainer *)cont
+                 key:(id)key
+{
+    UserLink *link = nil;
+    unsigned index = 0;
+    BOOL found = NO;
+    int destLogicalTime;
+    SimulContainer *destContainer = (SimulContainer *)cont;
+
+    destLogicalTime = [destContainer logicalTime];
+    destLogicalTime++;
+    [destContainer setLogicalTime:destLogicalTime];
+
+    unsigned count = [pendingLinks count];
+    for (index = 0; index < count; index++) {
+        link = [pendingLinks objectAtIndex:index];
+        if ([link canBeEndedWithValue:value key:key]) {
+            found = YES;
+            break;
+        }
+    }
+
+    if (found) {
+        int lt = [link startLogicalTime] + 1;
+        if (lt > destLogicalTime) {
+            destLogicalTime = lt;
+            [destContainer setLogicalTime:lt];
+        }
+        [link setEndLogicalTime:destLogicalTime];
+        [link setDestContainer:destContainer destEvent:event];
+        [self addEntity:link];
+        [pendingLinks removeObjectAtIndex:index];
+    } else {
+        // search link in incomplete entities
+//        for (in
+        link = [UserLink linkOfType:entityType
+                              value:value
+                                key:key
+                          container:container
+                      destContainer:destContainer
+                          destEvent:event];
+        [link setEndLogicalTime:destLogicalTime];
+        [pendingLinks addObject:link];
+   }
+}
+
+
+- (void)setPreviousChunkIncompleteEntities:(NSArray *)array
+{
+    if (pendingLinks != nil) {
+        [pendingLinks release];
+        pendingLinks = nil;
+    }
+    if (array != nil) {
+        pendingLinks = [array mutableCopy];
+    }
 }
 
 - (void)stopWithEvent:(PajeEvent *)event
 {
-    UserState *poppedUserState;
-    UserState *newTopUserState;
+    while ([pendingLinks count] > 0) {
+        NSLog(@"incomplete links at end of container: %@", pendingLinks);
+    }
 
-    poppedUserState = [self topEntity];
-    while (poppedUserState != nil) {
-        [poppedUserState setEndEvent:event];
-        [self addEntity:poppedUserState];
-        [self removeTopEntity];
-        newTopUserState = [self topEntity];
-        if (newTopUserState != nil) {
-            [newTopUserState addInnerState:poppedUserState];
-        }
-        poppedUserState = newTopUserState;
+    [super stopWithEvent:event];
+}
+
+
+- (void)activate
+{
+    [super activate];
+    // someone must setPreviousChunkIncompleteEntities, or won't work
+}
+
+- (void)endOfChunkWithTime:(NSDate *)time
+{
+    [self setIncompleteEntities:pendingLinks];
+    Assign(pendingLinks, nil);;
+    [super endOfChunkWithTime:time];
+}
+
+@end
+
+@implementation VariableChunk
+// For the time being, variables are implemented as states.
+// FIXME: should be implemented as variables.
+- (id)topEntity
+{
+    return [simulationStack lastObject];
+}
+
+- (void)setVariableEvent:(PajeEvent *)event
+                   value:(id)value
+{
+    [container _verifyMinMaxOfEntityType:entityType withValue:value];
+    [self setStateEvent:event
+                  value:[value stringValue]];
+}
+
+- (void)addVariableEvent:(PajeEvent *)event
+                   value:(id)value
+{
+    UserState *currentUserState;
+    id oldValue;
+    id newValue;
+
+    currentUserState = [self topEntity];
+    if (currentUserState != nil) {
+        oldValue = [currentUserState value];
+        newValue = [NSNumber numberWithDouble:
+            [oldValue doubleValue] + [value doubleValue]];
+    } else {
+        newValue = value;
+    }
+
+    [self setVariableEvent:event
+                     value:newValue];
+}
+
+- (void)subVariableEvent:(PajeEvent *)event
+                   value:(id)value
+{
+    UserState *currentUserState;
+    id oldValue;
+    id newValue;
+
+    currentUserState = [self topEntity];
+    if (currentUserState != nil) {
+        oldValue = [currentUserState value];
+        newValue = [NSNumber numberWithDouble:
+            [oldValue doubleValue] - [value doubleValue]];
+    } else {
+        newValue = [NSNumber numberWithDouble:-[value doubleValue]];
+    }
+
+    [self setVariableEvent:event
+                     value:newValue];
+}
+
+@end
+
+@implementation AggregateStateChunk
+- (BOOL)canEnumerate
+{
+    return chunkState2 != empty;
+}
+
+- (BOOL)canInsert
+{
+    return chunkState2 != empty;
+}
+
+- (void)empty
+{
+    if (chunkState2 == frozen) {
+        [super empty];
     }
 }
 
-
-- (NSEnumerator *)enumeratorOfAllEntities
+- (PajeEntity *)firstIncomplete
 {
-    MultiEnumerator *multiEnum = [MultiEnumerator enumerator];
-    [multiEnum addEnumerator:[incompleteEntities objectEnumerator]];
-    [multiEnum addEnumerator:[entities reverseObjectEnumerator]];
-    return multiEnum;
+    return [[self incompleteEntities] lastObject];
 }
 
-- (NSEnumerator *)enumeratorOfEntitiesFromTime:(NSDate *)sliceStartTime
-                                        toTime:(NSDate *)sliceEndTime
+- (void)setEntityCount:(int)newCount
 {
-    MultiEnumerator *multiEnum;
-    SEL filterSelector = @selector(filterEntity:laterThan:);
-    
-    multiEnum = [MultiEnumerator enumerator];
-    [multiEnum addEnumerator:[incompleteEntities objectEnumerator]];
-    [multiEnum addEnumerator:
-                [self enumeratorOfCompleteEntitiesAfterTime:sliceStartTime]];
-    return [FilteredEnumerator enumeratorWithEnumerator:multiEnum
-                                                 filter:self
-                                               selector:filterSelector
-                                                context:sliceEndTime];
+    int n;
+    PSortedArray *array;
+    array = [self completeEntities];
+    n = [array count] - newCount;
+    if (n > 0) {
+        [array removeObjectsInRange:NSMakeRange(newCount, n)];
+    }
 }
-
-- (id)copyWithZone:(NSZone *)z
-{
-    StateChunk *copy;
-    copy = [super copyWithZone:z];
-    [copy->incompleteEntities release];
-    copy->incompleteEntities = [incompleteEntities copy];
-    return copy;
-}
-@end
-
-
-@implementation LinkChunk
-@end
-@implementation VariableChunk
 @end

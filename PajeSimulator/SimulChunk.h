@@ -21,51 +21,70 @@
 #define _SimulChunk_h_ 
 
 #include "../General/EntityChunk.h"
-#include "../General/PSortedArray.h"
 #include "../General/MultiEnumerator.h"
 #include "UserState.h"
+#include "UserLink.h"
 
 @interface SimulChunk : EntityChunk
-+ (SimulChunk *)chunkWithEntityType:(PajeEntityType *)type
-                          container:(PajeContainer *)pc
-                 incompleteEntities:(NSMutableArray *)array;
+{
+    BOOL lastChunk;
+}
+
 + (SimulChunk *)chunkWithEntityType:(PajeEntityType *)type
                           container:(PajeContainer *)pc;
 
 
 - (id)initWithEntityType:(PajeEntityType *)type
-               container:(PajeContainer *)pc
-      incompleteEntities:(NSMutableArray *)array;
-- (id)initWithEntityType:(PajeEntityType *)type
                container:(PajeContainer *)pc;
 
-/*
- * entity enumerators
- */
-
-// only entities that finish inside the chunk's time boundaries
-- (NSEnumerator *)enumeratorOfAllCompleteEntities;
-- (NSEnumerator *)enumeratorOfCompleteEntitiesAfterTime:(NSDate *)time;
-
-// all entities, including those that finish after the chunk's endTime
-- (NSEnumerator *)enumeratorOfAllEntities;
-- (NSEnumerator *)enumeratorOfEntitiesBeforeTime:(NSDate *)time;
-- (NSEnumerator *)enumeratorOfEntitiesFromTime:(NSDate *)sliceStartTime
-                                        toTime:(NSDate *)sliceEndTime;
 
 - (void)removeAllCompletedEntities;
 
-- (NSMutableArray *)incompleteEntities;
+- (void)setIncompleteEntities:(NSArray *)array;
+- (NSArray *)incompleteEntities;
 
 // Simulation
 - (void)addEntity:(PajeEntity *)entity;
 
 - (void)stopWithEvent:(PajeEvent *)event;
 
+- (void)setPreviousChunkIncompleteEntities:(NSArray *)array;
+
+// for events
+- (void)newEventEvent:(PajeEvent *)event
+                value:(id)value;
+
 // for states
-- (void)pushEntity:(PajeEntity *)entity;
-- (UserState *)topEntity;
-- (void)removeTopEntity;
+- (void)setStateEvent:(PajeEvent *)event
+                value:(id)value;
+- (void)pushStateEvent:(PajeEvent *)event
+                 value:(id)value;
+- (void)popStateEvent:(PajeEvent *)event;
+
+// for links
+- (void)startLinkEvent:(PajeEvent *)event
+                 value:(id)value
+       sourceContainer:(PajeContainer *)cont
+                   key:(id)key;
+- (void)endLinkEvent:(PajeEvent *)event
+               value:(id)value
+       destContainer:(PajeContainer *)cont
+                 key:(id)key;
+
+// for variables
+- (void)setVariableEvent:(PajeEvent *)event
+                   value:(id)value;
+- (void)addVariableEvent:(PajeEvent *)event
+                   value:(id)value;
+- (void)subVariableEvent:(PajeEvent *)event
+                   value:(id)value;
+
+
+// true if chunk is last of container
+- (BOOL)isLastChunk;
+
+// sent to an active chunk to finish it
+- (void)endOfChunkWithTime:(NSDate *)time;
 @end
 
 @interface EventChunk : SimulChunk
@@ -77,15 +96,23 @@
 
 @interface StateChunk : EventChunk
 {
-    NSMutableArray *incompleteEntities;
+    NSArray *incompleteEntities;
+    NSMutableArray *simulationStack;
+    int resimulationStackLevel;
 }
 
 @end
 
 
 @interface LinkChunk : StateChunk
+{
+    NSMutableArray *pendingLinks;
+}
 @end
 @interface VariableChunk : StateChunk
 @end
 
+@interface AggregateStateChunk : StateChunk
+- (PajeEntity *)firstIncomplete;
+@end
 #endif

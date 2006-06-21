@@ -34,6 +34,7 @@
 }
 
 + (MultiEnumerator *)enumeratorWithEnumeratorArray:(NSArray *)array;
++ (MultiEnumerator *)enumeratorWithEnumerator:(NSEnumerator *)en;
 + (MultiEnumerator *)enumerator;
 - (id)initWithEnumeratorArray:(NSArray *)array;
 

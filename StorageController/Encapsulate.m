@@ -33,6 +33,13 @@
 #include "../General/NSDate+Additions.h"
 
 #include "StateAggregator.h"
+#include "AggregatingChunkArray.h"
+
+#include <math.h>
+double log2(double);
+double pow(double, double);
+#define DURtoSLOT(dur)  (log2(dur) + 15)
+#define SLOTtoDUR(slot) pow(2.0, (slot) - 15.0)
 
 @implementation Encapsulate
 
@@ -103,6 +110,7 @@
         Assign(startTimeInMemory, time);
     }
     //ENDKLUDGE
+return;
 
     NSMutableDictionary *dict = [entityLists objectForKey:entityType];
     if (dict == nil) {
@@ -135,7 +143,7 @@
     traceChanged = NO;
     [self performSelector:@selector(timeElapsed:)
                withObject:self
-               afterDelay:0.5];
+               afterDelay:0.005];
     timerActive = YES;
 }
 
@@ -176,6 +184,7 @@
 
 - (void)verifyStartTime:(NSDate *)start endTime:(NSDate *)end
 {
+return;
     NSDebugMLLog(@"tim", @"[%@:%@] [%@:%@]",
                 start, end, startTimeInMemory, endTimeInMemory);
     if ([start isEarlierThanDate:startTimeInMemory]
@@ -186,6 +195,8 @@
             end, @"EndTime",
             nil];
         NSDebugMLLog(@"tim", @"notify [%@:%@] [%@:%@]",
+                    start, end, startTimeInMemory, endTimeInMemory);
+        NSLog(@"fault:[%@:%@] [%@:%@]",
                     start, end, startTimeInMemory, endTimeInMemory);
         [[NSNotificationCenter defaultCenter]
                       postNotificationName:@"PajeTraceNotInMemoryNotification"
@@ -199,18 +210,74 @@
                                    fromTime:(NSDate *)start
                                      toTime:(NSDate *)end
 {
-    NSDictionary *dict;
-    ChunkArray *chunks;
-    NSEnumerator *subcontainerEnum;
-    id subcontainer;
-    MultiEnumerator *multiEnum;
-    PajeEntityType *parentType;
-    
-    [self verifyStartTime:start endTime:end];
-    
+    return [container enumeratorOfEntitiesTyped:entityType
+                                       fromTime:start
+                                         toTime:end];
+}
+
+- (NSEnumerator *)enumeratorOfCompleteEntitiesTyped:(PajeEntityType *)entityType
+                                        inContainer:(PajeContainer *)container
+                                           fromTime:(NSDate *)start
+                                             toTime:(NSDate *)end
+{
+    return [container enumeratorOfCompleteEntitiesTyped:entityType
+                                               fromTime:start
+                                                 toTime:end];
+}
+
+
+- (ChunkArray *)chunkArrayForEntityType:(PajeEntityType *)entityType
+                              container:(PajeContainer *)container
+                            minDuration:(double)minDuration
+{
+    NSMutableDictionary *dict;
     dict = [entityLists objectForKey:entityType];
+    if (dict == nil) {
+        dict = [NSMutableDictionary dictionary];
+        [entityLists setObject:dict forKey:entityType];
+    }
+    
+    NSMutableArray *array;
+    array = [dict objectForKey:container];
+    if (array == nil) {
+        array = [NSMutableArray array];
+        [dict setObject:array forKey:container];
+    }
+
+    ChunkArray *chunks;
+    int index = DURtoSLOT(minDuration);
+    while (index >= [array count]) {
+        chunks = [[AggregatingChunkArray alloc] 
+                        initWithEntityType:entityType
+                                 container:container
+                                dataSource:self
+                       aggregatingDuration:SLOTtoDUR([array count])];
+        [array addObject:chunks];
+    }
+    chunks = [array objectAtIndex:index];
+    return chunks;
+}
+
+- (NSEnumerator *)enumeratorOfEntitiesTyped:(PajeEntityType *)entityType
+                                inContainer:(PajeContainer *)container
+                                   fromTime:(NSDate *)start
+                                     toTime:(NSDate *)end
+                                minDuration:(double)minDuration
+{
+    if ([entityType drawingType] != PajeStateDrawingType
+        || DURtoSLOT(minDuration) < 0) {
+        return [self enumeratorOfEntitiesTyped:entityType
+                                   inContainer:container
+                                      fromTime:start
+                                        toTime:end];
+    }
+
+    ChunkArray *chunks;
+
     // if container directly contains entityType's
-    chunks = [dict objectForKey:container];
+    chunks = [self chunkArrayForEntityType:entityType
+                                 container:container
+                               minDuration:minDuration];
     if (chunks != nil) {
         return [chunks enumeratorOfEntitiesFromTime:start toTime:end];
     }
@@ -222,12 +289,20 @@
     
     // container does not contain entityType's directly.
     // Try containers in-between.
+    NSEnumerator *subcontainerEnum;
+    id subcontainer;
+    MultiEnumerator *multiEnum;
+    PajeEntityType *parentType;
+
     parentType = [entityType containerType];
     subcontainerEnum = [self enumeratorOfContainersTyped:parentType
                                              inContainer:container];
     multiEnum = [MultiEnumerator enumerator];
     while ((subcontainer = [subcontainerEnum nextObject]) != nil) {
-        chunks = [dict objectForKey:subcontainer];
+        //chunks = [dict objectForKey:subcontainer];
+        chunks = [self chunkArrayForEntityType:entityType
+                                     container:subcontainer
+                                   minDuration:minDuration];
         if (chunks != nil) {
             [multiEnum addEnumerator:[chunks enumeratorOfEntitiesFromTime:start
                                                                    toTime:end]];
@@ -236,60 +311,61 @@
     return multiEnum;
 }
 
-- (NSEnumerator *)enumeratorOfEntitiesTyped:(PajeEntityType *)entityType
-                                inContainer:(PajeContainer *)container
-                                   fromTime:(NSDate *)start
-                                     toTime:(NSDate *)end
-                                minDuration:(double)minDuration
+
+- (NSEnumerator *)enumeratorOfCompleteEntitiesTyped:(PajeEntityType *)entityType
+                                        inContainer:(PajeContainer *)container
+                                           fromTime:(NSDate *)start
+                                             toTime:(NSDate *)end
+                                        minDuration:(double)minDuration
 {
-    NSEnumerator *en;
-    
-    if (0 && minDuration > 1e-6) {
-    en = [self enumeratorOfEntitiesTyped:entityType
-                             inContainer:container
-                                fromTime:[start addTimeInterval:-minDuration]
-                                  toTime:[end addTimeInterval:minDuration]
-                             minDuration:minDuration/2];
-    } else
-    en = [self enumeratorOfEntitiesTyped:entityType
-                             inContainer:container
-                                fromTime:[start addTimeInterval:-minDuration]
-                                  toTime:[end addTimeInterval:minDuration]];
-    if (minDuration <= 1e-6
-        || ([entityType drawingType] != PajeStateDrawingType
-            && [entityType drawingType] != PajeEventDrawingType)) {
-        return en;
+    if ([entityType drawingType] != PajeStateDrawingType
+        || DURtoSLOT(minDuration) < 0) {
+        return [self enumeratorOfCompleteEntitiesTyped:entityType
+                                           inContainer:container
+                                              fromTime:start
+                                                toTime:end];
     }
-    EntityAggregator *aggregator;
-    PajeEntity *state;
-    NSMutableArray *filtered;
-    PajeEntity *aggregate;
-    
-    if ([entityType drawingType] == PajeStateDrawingType) {
-        aggregator = [StateAggregator aggregatorWithMaxDuration:minDuration];
-    } else {
-        aggregator = [EventAggregator aggregatorWithMaxDuration:minDuration];
+
+    ChunkArray *chunks;
+
+    // if container directly contains entityType's
+    chunks = [self chunkArrayForEntityType:entityType
+                                 container:container
+                               minDuration:minDuration];
+    if (chunks != nil) {
+        return [chunks enumeratorOfCompleteEntitiesFromTime:start toTime:end];
     }
-    filtered = [NSMutableArray array];
-    while ((state = [en nextObject]) != nil) {
-        if (![aggregator addEntity:state]) {
-            aggregate = [aggregator aggregate];
-            if (aggregate != nil) {
-                [filtered addObject:aggregate];
-                if (![aggregator addEntity:state]) {
-                    [filtered addObject:state];
-                }
-            } else {
-                [filtered addObject:state];
-            }
+
+    // if container should contain entityType directly, we have no entities!
+    if ([[entityType containerType] isEqual:[container entityType]]) {
+        return nil;
+    }
+    
+    // container does not contain entityType's directly.
+    // Try containers in-between.
+    NSEnumerator *subcontainerEnum;
+    id subcontainer;
+    MultiEnumerator *multiEnum;
+    PajeEntityType *parentType;
+
+    parentType = [entityType containerType];
+    subcontainerEnum = [self enumeratorOfContainersTyped:parentType
+                                             inContainer:container];
+    multiEnum = [MultiEnumerator enumerator];
+    while ((subcontainer = [subcontainerEnum nextObject]) != nil) {
+        //chunks = [dict objectForKey:subcontainer];
+        chunks = [self chunkArrayForEntityType:entityType
+                                     container:subcontainer
+                                   minDuration:minDuration];
+        if (chunks != nil) {
+            [multiEnum addEnumerator:
+                    [chunks enumeratorOfCompleteEntitiesFromTime:start
+                                                          toTime:end]];
         }
     }
-    aggregate = [aggregator aggregate];
-    if (aggregate != nil) {
-        [filtered addObject:aggregate];
-    }
-    return [filtered objectEnumerator];
+    return multiEnum;
 }
+
 
 - (NSEnumerator *)enumeratorOfContainersTyped:(PajeEntityType *)entityType
                                   inContainer:(PajeContainer *)container
@@ -307,61 +383,18 @@
             }
         }
     }
-//    return [[instancesInContainer sortedArrayUsingSelector:@selector(compare:)]
-//                  objectEnumerator];
+    //[instancesInContainer sortUsingSelector:@selector(compare:)];
     return [instancesInContainer objectEnumerator];
 }
 
 
-- (void)removeObjectsBeforeTime:(NSDate *)time
+- (void)startChunk:(int)chunkNumber
 {
-    NSEnumerator *e;
-    NSMutableDictionary *d;
-
-    if (![time isLaterThanDate:startTimeInMemory]) {
-        return;
-    }
-
-    e = [entityLists objectEnumerator];
-    while ((d = [e nextObject]) != nil) {
-        NSEnumerator *e2 = [d objectEnumerator];
-        ChunkArray *l;
-        while ((l = [e2 nextObject]) != nil) {
-            [l removeChunksBeforeTime:time];
-        }
-    }
-
-    Assign(startTimeInMemory, time);
-
-    if ([time isLaterThanDate:endTimeInMemory]) {
-        Assign(endTimeInMemory, time);
-    }
+    // the components following this should not be interested in this method
 }
 
-- (void)removeObjectsAfterTime:(NSDate *)time
+- (void)endOfChunk
 {
-    NSEnumerator *e;
-    NSMutableDictionary *d;
-
-    if (![time isEarlierThanDate:endTimeInMemory]) {
-        return;
-    }
-
-    e = [entityLists objectEnumerator];
-    while ((d = [e nextObject]) != nil) {
-        NSEnumerator *e2 = [d objectEnumerator];
-        ChunkArray *l;
-        while ((l = [e2 nextObject]) != nil) {
-            [l removeChunksAfterTime:time];
-        }
-    }
-
-    Assign(endTimeInMemory, time);
-
-    if ([time isEarlierThanDate:startTimeInMemory]) {
-        Assign(startTimeInMemory, time);
-    }
+    // the components following this should not be interested in this method
 }
-
-
 @end

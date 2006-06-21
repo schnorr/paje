@@ -35,22 +35,29 @@ static NSString *COLOR_VALUE = @"Color";
 
 - (id)initWithController:(PajeTraceController *)c
 {
-    [super initWithController:c];
+    self = [super initWithController:c];
 
-    status = OUT_DEF;
-    eventBeingDefined.fieldTypes = [[NSMutableArray alloc] init];
-    eventBeingDefined.fieldNames = [[NSMutableArray alloc] init];
+    if (self != nil) {
+        status = OUT_DEF;
+        eventBeingDefined.fieldTypes = [[NSMutableArray alloc] init];
+        eventBeingDefined.fieldNames = [[NSMutableArray alloc] init];
 
-    eventNames = [[NSMutableDictionary dictionary] retain];
-    eventFieldTypes = [[NSMutableDictionary dictionary] retain];
-    eventFieldNames = [[NSMutableDictionary dictionary] retain];
-    scanner = nil;
-    percent = [[NSCharacterSet characterSetWithCharactersInString:@"%"] retain];
-    alphanum = [[NSMutableCharacterSet characterSetWithCharactersInString:
-        @"%0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"] retain];
-//alphanumericCharacterSet];
-//    [alphanum addCharactersInString:@"_"];
-    delimiter = [[NSCharacterSet whitespaceAndNewlineCharacterSet] retain];
+        eventNames = [[NSMutableDictionary dictionary] retain];
+        eventFieldTypes = [[NSMutableDictionary dictionary] retain];
+        eventFieldNames = [[NSMutableDictionary dictionary] retain];
+        scanner = nil;
+        percent = [[NSCharacterSet characterSetWithCharactersInString:@"%"] retain];
+        alphanum = [[NSMutableCharacterSet characterSetWithCharactersInString:
+            @"%0123456789_"
+             "abcdefghijklmnopqrstuvwxyz"
+             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"] retain];
+        //alphanumericCharacterSet];
+        //    [alphanum addCharactersInString:@"_"];
+        delimiter = [[NSCharacterSet whitespaceAndNewlineCharacterSet] retain];
+
+        chunkInfo = [[NSMutableArray alloc] init];
+        currentChunk = 0;
+    }
 
     return self;
 }
@@ -82,8 +89,55 @@ static NSString *COLOR_VALUE = @"Color";
     [alphanum release];
     [delimiter release];
     [scanner release];
+    [chunkInfo release];
     [super dealloc];
 }
+
+- (void)startChunk:(int)chunkNumber
+{
+    if (chunkNumber != currentChunk) {
+        if (chunkNumber >= [chunkInfo count]) {
+            // cannot position in an unread place
+            [self raise:@"Cannot start unknown chunk"];
+        }
+
+        NSArray *info;
+        info = [chunkInfo objectAtIndex:chunkNumber];
+        eventCount = [[info objectAtIndex:0] intValue];
+        lineCount = [[info objectAtIndex:1] intValue];
+
+        currentChunk = chunkNumber;
+    } else {
+        // let's register the first chunk position
+        if ([chunkInfo count] == 0) {
+
+            [chunkInfo addObject:[NSArray arrayWithObjects:
+                [NSNumber numberWithInt:eventCount],
+                [NSNumber numberWithInt:lineCount], nil]];
+
+        }
+    }
+
+    // keep the ball rolling (tell other components)
+    [super startChunk:chunkNumber];
+}
+
+// The current chunk has ended.
+- (void)endOfChunk
+{
+    currentChunk++;
+    // if we're at the end of the known world, let's register its position
+    if (currentChunk == [chunkInfo count]) {
+
+        [chunkInfo addObject:[NSArray arrayWithObjects:
+            [NSNumber numberWithInt:eventCount],
+            [NSNumber numberWithInt:lineCount], nil]];
+
+    }
+    [super endOfChunk];
+}
+
+
 
 - (void)reset
 {

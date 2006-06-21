@@ -60,11 +60,13 @@
 - (id)nextObject
 {
     id obj;
-    while ((obj = [originalEnumerator nextObject]) != nil
-           && ([filter performSelector:selector
-                            withObject:obj
-                            withObject:context] == nil)) {
-        ;
+    while (YES) {
+        obj = [originalEnumerator nextObject];
+        if (obj == nil) break;
+        obj = [filter performSelector:selector
+                           withObject:obj
+                           withObject:context];
+        if (obj != nil) break;
     }
     return obj;
 }

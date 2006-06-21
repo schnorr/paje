@@ -47,6 +47,7 @@
              event:(PajeEvent *)e;
 - (void)dealloc;
 
+- (void)setEvent:(PajeEvent *)e;
 - (NSDate *)time;
 @end
 

@@ -34,21 +34,28 @@
 #include "PajeEntity.h"
 #include "PajeType.h"
 #include "PajeContainer.h"
+#include "PSortedArray.h"
 
 
-@interface EntityChunk : NSObject <NSCopying>
+@interface EntityChunk : NSObject //<NSCopying>
 {
     PajeContainer *container;
     PajeEntityType *entityType;
     NSDate *startTime;
     NSDate *endTime;
+    
+    enum { active, frozen, empty } chunkState2;
+
+    EntityChunk *prev;
+    EntityChunk *next;
 }
+
++ (void)emptyLeastRecentlyUsedChunks;
 
 - (id)initWithEntityType:(PajeEntityType *)type
                container:(PajeContainer *)pc;
 
 - (void)dealloc;
-
 
 /*
  * Accessors
@@ -65,8 +72,42 @@
 
 
 /*
- * entity enumerators
+ * Accessing chunk state
  */
+
+// can receive more entities
+- (BOOL)isActive;
+
+// cannot receive more entities; can be enumerated
+- (BOOL)isFull;
+
+// chunk with entities removed
+- (BOOL)isZombie;
+
+- (BOOL)canEnumerate;
+- (BOOL)canInsert;
+
+/*
+ * Changing chunk state
+ */
+
+// sent to a zombie to refill it
+- (void)activate;
+
+// sent to an active chunk to make it full
+- (void)freeze;
+
+// sent to a full chunk to empty it (make a zombie)
+- (void)empty;
+
+
+/*
+ * entity enumerators (must be in reverse [-endTime] order)
+ */
+
+// auxiliary methods used when creating enumerators
+- (PSortedArray *)completeEntities;
+- (NSArray *)incompleteEntities;
 
 // only entities that finish inside the chunk's time boundaries
 - (NSEnumerator *)enumeratorOfAllCompleteEntities;
@@ -78,9 +119,17 @@
 - (NSEnumerator *)enumeratorOfEntitiesFromTime:(NSDate *)sliceStartTime
                                         toTime:(NSDate *)sliceEndTime;
 
-// filter method for enumerator
-- (id)filterEntity:(PajeEntity *)entity laterThan:(NSDate *)time;
+// only completed entities, in non-reverse order
+- (NSEnumerator *)fwEnumeratorOfAllCompleteEntities;
+- (NSEnumerator *)fwEnumeratorOfCompleteEntitiesAfterTime:(NSDate *)time;
+- (NSEnumerator *)fwEnumeratorOfCompleteEntitiesUntilTime:(NSDate *)time;
+- (NSEnumerator *)fwEnumeratorOfCompleteEntitiesAfterTime:(NSDate *)start
+                                                untilTime:(NSDate *)end;
 
+- (int)entityCount;
+- (id)lastEntity;
+
+- (void)addEntity:(PajeEntity *)entity;
 @end
 
 #endif

@@ -63,6 +63,7 @@ static PajeController *uniqueController;
     } else {
         // initialisation code here
         Assign(traceControllers, [NSMutableArray array]);
+        Assign(bundles, [NSMutableDictionary dictionary]);
         
         uniqueController = self;
     }
@@ -104,6 +105,7 @@ static PajeController *uniqueController;
         bundlePath = [path stringByAppendingPathComponent:bundleName];
         bundle = [NSBundle bundleWithPath:bundlePath];
         if ([bundle load]) {
+            [bundles setObject:bundle forKey:name];
             return bundle;
         }
     }
@@ -111,9 +113,24 @@ static PajeController *uniqueController;
     return nil;
 }
 
+- (NSBundle *)bundleWithName:(NSString *)name
+{
+    NSBundle *bundle;
+
+    bundle = [bundles objectForKey:name];
+    if (bundle == nil) {
+        [self loadBundleNamed:name];
+        bundle = [bundles objectForKey:name];
+    }
+
+    return bundle;
+}
+
 - (void)loadAllBundles
 {
+return;
     [self loadBundleNamed:@"General"];
+return;
     [self loadBundleNamed:@"FileReader"];
     [self loadBundleNamed:@"PajeEventDecoder"];
     [self loadBundleNamed:@"PajeSimulator"];

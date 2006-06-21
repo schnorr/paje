@@ -4,15 +4,50 @@
 #include "../General/Macros.h"
 
 @implementation EntityAggregator
-+ (EntityAggregator *)aggregatorWithMaxDuration:(double)duration
++ (EntityAggregator *)aggregatorWithAggregationDuration:(double)duration
 {
-    [self subclassResponsibility:_cmd];
-    return nil;
+    return [[[self alloc] initWithAggregationDuration:duration] autorelease];
 }
-- (id)initWithMaxDuration:(double)duration
+
++ (EntityAggregator *)aggregatorWithEntities:(NSArray *)array
+                         aggregationDuration:(double)duration
 {
-    [self subclassResponsibility:_cmd];
-    return nil;
+    return [[[self alloc] initWithEntities:array
+                       aggregationDuration:duration] autorelease];
+}
+
+- (id)initWithAggregationDuration:(double)duration
+{
+    self = [super init];
+    if (self != nil) {
+        entities = [[NSMutableArray alloc] init];
+        aggregationDuration = duration;
+    }
+    return self;
+
+}
+
+- (id)initWithEntities:(NSArray *)array
+   aggregationDuration:(double)duration
+{
+    self = [super init];
+    if (self != nil) {
+        entities = [array mutableCopy];
+        aggregationDuration = duration;
+    }
+    return self;
+
+}
+
+- (double)aggregationDuration
+{
+    return aggregationDuration;
+}
+
+- (void)dealloc
+{
+    Assign(entities, nil);
+    [super dealloc];
 }
 
 - (BOOL)addEntity:(PajeEntity *)entity
@@ -26,50 +61,49 @@
     [self subclassResponsibility:_cmd];
     return nil;
 }
+
+- (NSArray *)entities
+{
+    return entities;
+}
+
+- (int)entityCount
+{
+    return [entities count];
+}
+
+- (id)copyWithZone:(NSZone *)z
+{
+    EntityAggregator *new;
+    new = [[[self class] allocWithZone:z] init];
+    new->entities = [entities mutableCopyWithZone:z];
+    new->startTime = startTime;
+    new->aggregationDuration = aggregationDuration;
+    return new;
+}
+
 @end
 
 
 
 @implementation EventAggregator
 
-+ (EntityAggregator *)aggregatorWithMaxDuration:(double)duration
-{
-    return [[[self alloc] initWithMaxDuration:duration] autorelease];
-}
-
-- (id)initWithMaxDuration:(double)duration
-{
-    self = [super init];
-    if (self != nil) {
-        entities = [[NSMutableArray alloc] init];
-        maxDuration = duration;
-    }
-    return self;
-
-}
-
-- (void)dealloc
-{
-    Assign(entities, nil);
-    [super dealloc];
-}
-
 - (BOOL)addEntity:(PajeEntity *)entity
 {
     double newDuration;
 
-    if ([entity duration] > maxDuration) {
+    if ([entity duration] > aggregationDuration) {
         return NO;
     }
 
     if ([entities count] == 0) {
-        endTime = [entity time];
+        startTime = [entity time];
         [entities addObject:entity];
         return YES;
     }
 
-    newDuration = [endTime timeIntervalSinceDate:[entity time]];
-    if (newDuration <= maxDuration) {
+    newDuration = [[entity time] timeIntervalSinceDate:startTime];
+    if (newDuration <= aggregationDuration) {
         [entities addObject:entity];
         return YES;
     } else {
@@ -92,6 +126,7 @@
         event = [entities objectAtIndex:0];
     }
     [entities removeAllObjects];
+    startTime = nil;
     return event;
 }
 @end

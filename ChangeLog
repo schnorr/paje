@@ -1,3 +1,71 @@
+2006-06-20  Benhur Stein <benhur@inf.ufsm.br>
+        * PajeSimulator/UserEvent.[hm]: -setEvent: new method
+        * PajeSimulator/UserLink.[hm]: remove direct access to event ivar
+        * StorageController/EventAggregator.[hm]: changed maxDuration to
+          aggregationDuration; added a new initialization method; refactored
+          some methods; changed to agglomerate events added in increasing
+          date; added copyWithZone: method
+        * StorageController/StateAggregator.[hm]: some refactoring;
+          changed aggregation to work with states being added in increasing 
+          endTime order; added copyWithZone: method
+        * StorageController/AggregateState.m: get entities in reverse order
+        * StorageController/AggregatingChunkArray.[hm]: new class
+        * StorageController/GNUmakefile: include new class
+        * General/ChunkArray.[hm]: new method for enumeration of only completed
+          entities, necessary for state aggregation; chunks are now ordered
+          by startTime; send notification when accessing an empty chunk (chunks
+          are no longer removed, they are emptied)
+        * StorageController/Encapsulate.[hm]: Most functionality removed -- no
+          longer enumerates entities, enumeration is now done directly by
+          containers. New code for controlling aggregation of states. 
+          This will eventually go into a new filter.
+        * EntityChunk.[hm]: chunks can be emptied. A chunk keeps its state.
+          Three new methods to change state (-freeze, -activate, -empty).
+          The class keeps a list in LRU order of all chunks, to be emptied by
+          controller. New enumerators for accessing data in forward or reverse
+          order (forward enums needed by agglomerators). Some methods from
+          SimulChunk migrated to here.
+        * General/EntityDescriptor.h: add missing newline at end of file.
+        * EntityTypeFilter/EntityTypeSelector.m: change method decl
+        * General/FilteredEnumerator.m: -nextObject rewriten
+        * General/MultiEnumerator.[hm]: new initializer
+        * General/PSortedArray.[hm]: new auxiliary methods (lastObject,
+          indexOfFirstObjectAfterValue:, indexOfLastObjectBeforeValue:)
+        * General/PajeContainer.[hm]: declare new enumeration methods
+        * Paje/PajeController.[hm]: new method -bundleWithName: for loading/
+          keeping track of loaded bundles
+        * Paje/PajeTraceController.[hm]: new way of loading/connecting bundles,
+          following a config structure (still fixed, should be read from
+          a config file); remove code for checkpointing, now all info needed
+          for resimulation is kept by containers, indexed by "chunkNumber";
+          reading of each chunk is started by calling startChunk:, components
+          must know how to restart a chunk;
+          new support for conversion of time into chunkNumber.
+        * many files: removed encode/decodeCheckPointWithCoder: method
+        * PajeEventDecoder.[hm]: keep info for each chunk;
+          implement -startChunk: and endOfChunk; some cleaning on -init.
+        * PajeFileReader.[hm]: same thing; change class name to FileReader
+        * PajeSimulator/PajeSimul.[hm]: same thing; 
+        * PajeSimulator/PajeSimul+Events.m: some optimizations for when
+          simulation is being replayed
+        * General/Protocols.h: add -startChunk: and -endOfChunk methods
+        * PajeSimulator/SimulChunk.[hm]: some methods refactored into super;
+          implement simulation of each entity event here (from SimulContainer);
+          better error for illegal events (in wrong entity type).
+          Each chunk now keeps the entities that finish in its lifetime
+          (those are freed when the chunk is emptied) and entities that
+          exist during its lifetime but finish after it (those are never
+          freed and are used for resimulating). AggregateStateChunk: new
+          subclass to help with aggregation of states (should not be here).
+          still needs some refactoring and better implementation of 'variable'
+          entities.
+        * SimulContainer.[hm]: methods for reverse/forward enumeration of
+          entities; moved most of entity simulation into SimulChunk.
+        * General/PajeFilter.[hm]: declare new methods -startChunk:,
+          -endOfChunk,
+          -enumeratorOfCompleteEntitiesTyped:inContainer:fromTime:toTime:
+          minDuration:
+
 2006-03-13  (1.4.0) Vincent Danjean <Vincent.Danjean@ens-lyon.org>
         * New release. All new features seem to work.
 

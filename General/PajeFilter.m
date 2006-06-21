@@ -126,6 +126,30 @@
 {
     [controller registerTool:filter];
 }
+
+- (void)startChunk:(int)chunkNumber
+{
+    if ([outputComponent isKindOfClass:[NSArray class]]) {// HACK
+        [NSException raise:@"Unimplemented"
+                    format:@"[-startChunk:]"
+                            " not implemented for group of components\n"
+                            "Simplify your component graph"];
+    } else {
+        [outputComponent startChunk:chunkNumber];
+    }
+}
+
+- (void)endOfChunk
+{
+    if ([outputComponent isKindOfClass:[NSArray class]]) {// HACK
+        [NSException raise:@"Unimplemented"
+                    format:@"[-endOfChunk]"
+                            " not implemented for group of components\n"
+                            "Simplify your component graph"];
+    } else {
+        [outputComponent endOfChunk];
+    }
+}
 @end
 
 
@@ -335,6 +359,19 @@ ofContainersTyped:(PajeEntityType *)containerType
                                             fromTime:start
                                               toTime:end
                                          minDuration:minDuration];
+}
+
+- (NSEnumerator *)enumeratorOfCompleteEntitiesTyped:(PajeEntityType *)entityType
+                                        inContainer:(PajeContainer *)container
+                                           fromTime:(NSDate *)start
+                                             toTime:(NSDate *)end
+                                        minDuration:(double)minDuration
+{
+    return [inputComponent enumeratorOfCompleteEntitiesTyped:entityType
+                                                 inContainer:container
+                                                    fromTime:start
+                                                      toTime:end
+                                                 minDuration:minDuration];
 }
 
 - (NSEnumerator *)enumeratorOfContainersTyped:(PajeEntityType *)entityType

@@ -64,6 +64,8 @@
     PajeContainerType *containerType;
     PajeContainerType *newContainerType;
 
+    if (replaying) return;
+
     // get fields from event
     newContainerTypeName   = [event objectForKey:@"Name"];
     newContainerTypeAlias  = [event objectForKey:@"Alias"];
@@ -125,6 +127,8 @@
     PajeContainerType *sourceContainerType;
     PajeContainerType *destContainerType;
     PajeEntityType *newEntityType;
+
+    if (replaying) return;
 
     // get fields from event
     newEntityTypeName         = [event objectForKey:@"Name"];
@@ -192,6 +196,8 @@
 
     PajeContainerType *containerType;
     PajeEntityType *newEntityType;
+
+    if (replaying) return;
 
     // get fields from event
     newEntityTypeName   = [event objectForKey:@"Name"];
@@ -276,6 +282,8 @@
 
     PajeEntityType *entityType;
 
+    if (replaying) return;
+
     // get fields from event
     newEntityValueName   = [event objectForKey:@"Name"];
     newEntityValueAlias  = [event objectForKey:@"Alias"];
@@ -325,6 +333,8 @@
     PajeContainerType *typeOfNewContainer;
     PajeContainer *container;
     PajeContainer *newContainer;
+
+    if (replaying) return;
 
     // get fields from event
     newContainerName       = [event objectForKey:@"Name"];
@@ -407,6 +417,8 @@
     PajeContainerType *containerType;
 
     SimulContainer *container;
+
+//    if (replaying) return;
 
     // get fields from event
     containerId         = [event objectForKey:@"Name"];

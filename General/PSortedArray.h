@@ -37,6 +37,7 @@
 - (unsigned)count;
 - (id)objectAtIndex:(unsigned)index;
 - (void)addObject:(id)obj;
+- (id)lastObject;
 
 - (void)removeObjectAtIndex:(unsigned)index;
 - (void)removeObjectsInRange:(NSRange)aRange;
@@ -53,7 +54,9 @@
 - (NSEnumerator *)reverseObjectEnumeratorAfterValue:(id<Comparing>)value;
 
 - (unsigned)indexOfFirstObjectNotBeforeValue:(id<Comparing>)value;
+- (unsigned)indexOfFirstObjectAfterValue:(id<Comparing>)value;
 - (unsigned)indexOfLastObjectNotAfterValue:(id<Comparing>)value;
+- (unsigned)indexOfLastObjectBeforeValue:(id<Comparing>)value;
 - (unsigned)indexOfObjectWithValue:(id<Comparing>)value;
 - (unsigned)indexOfObject:(id)obj;
 

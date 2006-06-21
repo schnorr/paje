@@ -49,6 +49,9 @@
     NSCharacterSet *percent;
     NSCharacterSet *delimiter;
     NSMutableCharacterSet *alphanum;
+
+    NSMutableArray *chunkInfo;
+    unsigned currentChunk;
 }
 
 - (id)initWithController:(PajeTraceController *)c;

@@ -108,7 +108,7 @@
                sourceEvent:(PajeEvent *)e
 {
     sourceContainer = sc;   // not retained
-    Assign(event, e);
+    [self setEvent:e];
 }
 
 - (void)setDestContainer:(PajeContainer *)dc
@@ -194,7 +194,7 @@
 //if (startLogicalTime != nil)
 //    return startLogicalTime;
     if (event != nil) {
-        return [event time];
+        return [super startTime];
     } else if (sourceContainer != nil) {
         return [sourceContainer endTime];
     } else {

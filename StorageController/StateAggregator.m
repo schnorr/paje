@@ -4,82 +4,141 @@
 #include "../General/Macros.h"
 
 @implementation StateAggregator
-+ (EntityAggregator *)aggregatorWithMaxDuration:(double)duration
-{
-    return [[[self alloc] initWithMaxDuration:duration] autorelease];
-}
 
-- (id)initWithMaxDuration:(double)duration
-{
-    self = [super init];
-    if (self != nil) {
-        entities = [[NSMutableArray alloc] init];
-        maxDuration = duration;
-    }
-    return self;
-
-}
-
-- (void)dealloc
-{
-    Assign(entities, nil);
-    [super dealloc];
-}
-
-/* entity should be on the same imbricationLevel as the first.
-   While simulator doesn't make condensed info, it should get bigger
-   imbricationLevels as well */
+/* Try to aggregate one more state.
+   Returns YES if state can be aggregated, NO if it cannot.
+   States must be entered in endTime order.
+*/
 - (BOOL)addEntity:(PajeEntity *)entity
 {
     int entityImbricationLevel;
     double newDuration;
 
-    if ([entity duration] > maxDuration) {
+    // cannot aggregate a too wide entity
+    if ([entity duration] > aggregationDuration) {
+        return NO;
+    }
+
+    // if there are no other entities, just add the new one
+    if (startTime == nil) {
+        startTime = [entity startTime];
+        imbricationLevel = [entity imbricationLevel];
+        [entities addObject:entity];
+        return YES;
+    }
+
+    // if adding the new entity would make this too wide, it cannot yet be
+    // added -> must aggregate some and try again 
+    newDuration = [[entity endTime] timeIntervalSinceDate:startTime];
+    if (newDuration > aggregationDuration) {
         return NO;
     }
 
     entityImbricationLevel = [entity imbricationLevel];
-    if ([entities count] == 0) {
-        endTime = [entity endTime];
+
+    if (entityImbricationLevel < imbricationLevel) {
+        NSDate *entityStartTime = [entity startTime];
+        PajeEntity *lastObject;
+        // remove states that are inside new one (may happen when refilling)
+        while ((lastObject = [entities lastObject]) != nil) {
+            int lastImbricationLevel = [lastObject imbricationLevel];
+            NSDate *lastStartTime = [lastObject startTime];
+            if (lastImbricationLevel > entityImbricationLevel
+                || (lastImbricationLevel == entityImbricationLevel 
+                    && ![lastStartTime isEarlierThanDate:entityStartTime])) {
+                [entities removeLastObject];
+            } else {
+                break;
+            }
+        }
+        if ([entities count] == 0) {
+            // new state will be first
+            startTime = entityStartTime;
+        }
         imbricationLevel = entityImbricationLevel;
         [entities addObject:entity];
         return YES;
     }
 
-    if (entityImbricationLevel < imbricationLevel) {
-        return NO;
-    }
     if (entityImbricationLevel > imbricationLevel) {
+        imbricationLevel = entityImbricationLevel;
+        [entities addObject:entity];
         return YES;
     }
 
-    newDuration = [endTime timeIntervalSinceDate:[entity startTime]];
-    if (newDuration <= maxDuration) {
-        [entities addObject:entity];
-        return YES;
-    } else {
-        return NO;
+    // same imbrication level
+    if ([entity isAggregate]) {
+        // special case: reaggregating already aggregated state
+        // (when refilling emptied chunk)
+        NSDate *entityStartTime = [entity startTime];
+        PajeEntity *lastObject;
+        while ((lastObject = [entities lastObject]) != nil
+               && ![[lastObject startTime] isEarlierThanDate:entityStartTime]) {
+            [entities removeLastObject];
+        }
+        if ([entities count] == 0) {
+            // new state will be first
+            startTime = entityStartTime;
+        }
     }
+    [entities addObject:entity];
+    return YES;
 }
+
 
 - (PajeEntity *)aggregate
 {
     PajeEntity *state;
     unsigned count;
     
-    count = [entities count];
-    if (count == 0) {
+    if (startTime == nil) {
         return nil;
     }
-    if (count > 1) {
-        state = [AggregateState stateWithStates:entities];
-    } else {
+    count = [entities count];
+    if (count == 1) {
         state = [entities objectAtIndex:0];
         if ([state subCount] > 0) {
             state = [AggregateState stateWithStates:entities];
         }
+        [entities removeAllObjects];
+        startTime = nil;
+        return state;
     }
-    [entities removeAllObjects];
+
+    int firstImbricationLevel;
+    int lastIndex;
+    
+    firstImbricationLevel = [[entities objectAtIndex:0] imbricationLevel];
+    if (firstImbricationLevel == imbricationLevel) {
+        lastIndex = count - 1;
+    } else {
+        lastIndex = 0;
+        while (lastIndex < count - 1) {
+            state = [entities objectAtIndex:lastIndex + 1];
+            if ([state imbricationLevel] != firstImbricationLevel) {
+                break;
+            }
+            lastIndex++;
+        }
+    }
+    if (lastIndex == count - 1) {
+        state = [AggregateState stateWithStates:entities];
+        [entities removeAllObjects];
+        startTime = nil;
+    } else {
+        NSRange r = NSMakeRange(0, lastIndex + 1);
+        startTime = [state startTime];
+        state = [AggregateState stateWithStates:[entities subarrayWithRange:r]];
+        [entities removeObjectsInRange:r];
+    }
     return state;
+}
+
+- (id)copyWithZone:(NSZone *)z
+{
+    StateAggregator *new;
+    new = [super copyWithZone:z];
+    new->imbricationLevel = imbricationLevel;
+    return new;
 }
 @end

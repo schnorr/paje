@@ -65,6 +65,9 @@
 - (NSView *)filterView;
 - (NSString *)filterKeyEquivalent;
 - (id)filterDelegate;
+
+- (void)startChunk:(int)chunkNumber;
+- (void)endOfChunk;
 @end
 
 @interface PajeFilter : PajeComponent
@@ -189,11 +192,23 @@ ofContainersTyped:(PajeEntityType *)containerType
 // time interval. minDuration is a hint to the minimum duration of an
 // entity of interest -- shorter entities could be condensed if possible.
 // Container must be of a type ancestral of entityType in the hierarchy.
+// Entities are sorted by reverse endTime.
 - (NSEnumerator *)enumeratorOfEntitiesTyped:(PajeEntityType *)entityType
                                 inContainer:(PajeContainer *)container
                                    fromTime:(NSDate *)start
                                      toTime:(NSDate *)end
                                 minDuration:(double)minDuration;
+
+// All entities of a given type that are in a container and end in a certain
+// time interval. minDuration is a hint to the minimum duration of an
+// entity of interest -- shorter entities could be condensed if possible.
+// Container must be of a type ancestral of entityType in the hierarchy.
+// Entities are sorted by endTime
+- (NSEnumerator *)enumeratorOfCompleteEntitiesTyped:(PajeEntityType *)entityType
+                                        inContainer:(PajeContainer *)container
+                                           fromTime:(NSDate *)start
+                                             toTime:(NSDate *)end
+                                        minDuration:(double)minDuration;
 
 // All containers of a given type contained by container. Container must be
 // of a type ancestral of entityType in the hierarchy.
