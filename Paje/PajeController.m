@@ -128,7 +128,6 @@ static PajeController *uniqueController;
 
 - (void)loadAllBundles
 {
-return;
     [self loadBundleNamed:@"General"];
 return;
     [self loadBundleNamed:@"FileReader"];

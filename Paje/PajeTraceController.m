@@ -156,7 +156,7 @@
 + (NSArray *)defaultComponentGraph
 {
     NSArray *graph;
-/*
+
     graph = [@"( ( FileReader, \
                    PajeEventDecoder, \
                    PajeSimulator, \
@@ -171,7 +171,8 @@
                  ), \
                  ( ImbricationFilter, \
                    StatViewer ) )" propertyList];
-*/
+
+    /*
     graph = [@"( ( PajeFileReader, \
                    PajeEventDecoder, \
                    PajeSimul, \
@@ -181,6 +182,7 @@
                  ), \
                  ( InsetLimit, \
                    StatViewer ) )" propertyList];
+		   */
     return graph;
 }
 
@@ -188,14 +190,14 @@
 {
     [self addComponentSequences:[[self class] defaultComponentGraph]];
 
-/*
     reader = [self componentWithName:@"FileReader"];
     simulator = [self componentWithName:@"PajeSimulator"];
     encapsulator = [self componentWithName:@"StorageController"];
-*/
+/*
     reader = [self componentWithName:@"PajeFileReader"];
     simulator = [self componentWithName:@"PajeSimul"];
     encapsulator = [self componentWithName:@"Encapsulate"];
+*/
 }
 
 
