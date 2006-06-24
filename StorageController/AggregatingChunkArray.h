@@ -46,13 +46,28 @@
     BOOL finished;
 }
 
++ (id)arrayWithEntityType:(PajeEntityType *)eType
+                container:(PajeContainer *)c
+               dataSource:(PajeFilter *)source
+      aggregatingDuration:(double)duration;
+
 - (id)initWithEntityType:(PajeEntityType *)eType
                container:(PajeContainer *)c
               dataSource:(PajeFilter *)source
      aggregatingDuration:(double)duration;
 
-- (void)finishChunk;
-- (void)createChunk;
-- (EntityChunk *)lastChunk;
+// returns YES if all entities of this container/type have been aggregated once.
+- (BOOL)aggregationFinished;
+
+- (NSEnumerator *)originalEnumeratorFromTime:(NSDate *)t1
+                                      toTime:(NSDate *)t2
+                                 minDuration:(double)duration;
+- (NSEnumerator *)originalCompleteEnumeratorFromTime:(NSDate *)t1
+                                              toTime:(NSDate *)t2
+                                         minDuration:(double)duration;
+
+// to be implemented by subclasses
+- (void)aggregateEntitiesUntilTime:(NSDate *)time;
+- (void)refillChunkAtIndex:(int)chunkIndex;
 @end
 #endif

@@ -62,6 +62,19 @@
     return nil;
 }
 
+
+- (PajeEntity *)aggregateBefore:(NSDate *)limit
+{
+    if (startTime == nil) {
+        return nil;
+    }
+    if ([limit timeIntervalSinceDate:startTime] < aggregationDuration) {
+        return nil;
+    }
+
+    return [self aggregate];
+}
+
 - (NSArray *)entities
 {
     return entities;
@@ -97,12 +110,12 @@
     }
 
     if ([entities count] == 0) {
-        startTime = [entity time];
+        startTime = [entity startTime];
         [entities addObject:entity];
         return YES;
     }
 
-    newDuration = [[entity time] timeIntervalSinceDate:startTime];
+    newDuration = [[entity endTime] timeIntervalSinceDate:startTime];
     if (newDuration <= aggregationDuration) {
         [entities addObject:entity];
         return YES;
@@ -116,10 +129,12 @@
     PajeEntity *event;
     unsigned count;
     
-    count = [entities count];
-    if (count == 0) {
+    if (startTime == nil) {
         return nil;
     }
+
+    count = [entities count];
+    NSAssert(count != 0, NSInternalInconsistencyException);
     if (count > 1) {
         event = [AggregateEvent eventWithEvents:entities];
     } else {

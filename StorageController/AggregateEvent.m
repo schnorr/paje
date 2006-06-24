@@ -25,7 +25,7 @@
                      container:[entity container]];
     if (self != nil) {
         condensedArray = [[CondensedEntitiesArray alloc] init];
-        Assign(endTime, [entity endTime]);
+        Assign(startTime, [entity startTime]);
         do {
             [condensedArray addArray:[entity condensedEntities]];
             condensedEntitiesCount += [entity condensedEntitiesCount];
@@ -35,7 +35,7 @@
             }
             lastEntity = entity;
         } while ((entity = [entityEnum nextObject]) != nil);
-        Assign(startTime, [lastEntity startTime]);
+        Assign(endTime, [lastEntity endTime]);
     }
     return self;
 }

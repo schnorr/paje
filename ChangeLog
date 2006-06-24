@@ -1,3 +1,22 @@
+2006-06-24  Benhur Stein <benhur@inf.ufsm.br>
+        * StorageController/AggregateEvent.m: get startTime and endTime of
+          entity to aggregate separetely (for when it is already an aggregation)
+        * StorageController/AggregatingChunkArray.[hm]: new initialisation
+          method that returns a subclass depending on entityType;
+          new AggregatingEventChunkArray subclass;
+          in aggregateEntitiesUntilTime:, try to aggregate entities at end, when
+          there is an interval without entities just before time.
+        * StorageController/Encapsulate.m: use new initialisation method;
+          support for aggregating events as well as states
+        * StorageController/EventAggregator.[hm]: new method aggregateBefore:;
+          take into account possibility of aggregated events have different
+          start and end times (when already aggregated).
+
+2006-06-22  Benhur Stein <benhur@inf.ufsm.br>
+	* StorageController/AggregatingChunkArray.[hm]: refactored to define
+	  private subclasses for each entity type
+	* StorageController/Encapsulate.m: use new interface to AggChArr.
+
 2006-06-20  Benhur Stein <benhur@inf.ufsm.br>
         * PajeSimulator/UserEvent.[hm]: -setEvent: new method
         * PajeSimulator/UserLink.[hm]: remove direct access to event ivar

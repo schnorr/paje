@@ -247,8 +247,8 @@ return;
     ChunkArray *chunks;
     int index = DURtoSLOT(minDuration);
     while (index >= [array count]) {
-        chunks = [[AggregatingChunkArray alloc] 
-                        initWithEntityType:entityType
+        chunks = [AggregatingChunkArray
+                       arrayWithEntityType:entityType
                                  container:container
                                 dataSource:self
                        aggregatingDuration:SLOTtoDUR([array count])];
@@ -264,7 +264,8 @@ return;
                                      toTime:(NSDate *)end
                                 minDuration:(double)minDuration
 {
-    if ([entityType drawingType] != PajeStateDrawingType
+    if (([entityType drawingType] != PajeStateDrawingType
+         && [entityType drawingType] != PajeEventDrawingType)
         || DURtoSLOT(minDuration) < 0) {
         return [self enumeratorOfEntitiesTyped:entityType
                                    inContainer:container
@@ -318,7 +319,8 @@ return;
                                              toTime:(NSDate *)end
                                         minDuration:(double)minDuration
 {
-    if ([entityType drawingType] != PajeStateDrawingType
+    if (([entityType drawingType] != PajeStateDrawingType
+         && [entityType drawingType] != PajeEventDrawingType)
         || DURtoSLOT(minDuration) < 0) {
         return [self enumeratorOfCompleteEntitiesTyped:entityType
                                            inContainer:container

@@ -22,6 +22,7 @@
 
 - (BOOL)addEntity:(PajeEntity *)entity;
 - (PajeEntity *)aggregate;
+- (PajeEntity *)aggregateBefore:(NSDate *)limit;
 
 - (NSArray *)entities;
 - (int)entityCount;
