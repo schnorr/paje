@@ -120,23 +120,21 @@
 
 
 @implementation STVariableLayoutEditor
+- (STEntityTypeLayout *)layoutDescriptor
+{
+    return layoutDescriptor;
+}
+
 
 - (void)setLayoutDescriptor:(STEntityTypeLayout *)descriptor
 {
     NSParameterAssert([descriptor isKindOfClass:[STVariableTypeLayout class]]);
     layoutDescriptor = (STVariableTypeLayout *)descriptor;
     
-    [heightField    setFloatValue:[layoutDescriptor height]];
+    [self setupShapeMatrix];
+    [self setupDrawMatrices];
     [lineWidthField setFloatValue:[layoutDescriptor lineWidth]];
-    [minValueField  setFloatValue:[layoutDescriptor minValue]];
-    [maxValueField  setFloatValue:[layoutDescriptor maxValue]];
-    [threeDSwitch  setState:[layoutDescriptor threeD]];
-}
-
-- (IBAction)heightChanged:(id)sender
-{
-    [layoutDescriptor setHeight:[sender floatValue]];
-    [controller layoutEdited];
+    [showMinMaxSwitch  setState:[layoutDescriptor showMinMax]];
 }
 
 - (IBAction)lineWidthChanged:(id)sender
@@ -145,23 +143,79 @@
     [controller layoutEdited];
 }
 
-- (IBAction)minValueChanged:(id)sender
+- (IBAction)showMinMaxChanged:(id)sender
 {
-    [layoutDescriptor setMinValue:[sender floatValue]];
+    [layoutDescriptor setShowMinMax:[sender state]];
     [controller layoutEdited];
 }
 
-- (IBAction)maxValueChanged:(id)sender
+- (NSRect)rectForImageOfSize:(NSSize)size
 {
-    [layoutDescriptor setMaxValue:[sender floatValue]];
-    [controller layoutEdited];
+    return NSMakeRect(0, 0, size.width, size.height);
 }
 
-- (IBAction)threeDChanged:(id)sender
+
+- (void)drawShape:(ShapeImageRep *)image
 {
-    [layoutDescriptor setThreeD:[sender state]];
-    [controller layoutEdited];
+    shapefunction *pathFunction;
+    drawfunction *drawFunction;
+    NSRect rect;
+    NSBezierPath *path;
+
+    pathFunction = [(ShapeFunction *)[image function] function];
+    drawFunction = [[self selectedDrawFunction] function];
+    if (drawFunction == NULL) {
+        drawFunction = [[DrawFunction drawFunctionWithName:@"PSFillAndFrameBlack"] function];
+    }
+
+    rect = [self rectForImageOfSize:[image size]];
+
+    path = [NSBezierPath bezierPath];
+    //pathFunction(path, rect);
+    [path moveToPoint:NSMakePoint(NSMaxX(rect)+5, NSMidY(rect))];
+    pathFunction(path, NSMakeRect(40, 15, 10, 0));
+    pathFunction(path, NSMakeRect(30, 15, 10, 0));
+    pathFunction(path, NSMakeRect(20, 10, 10, 0));
+    pathFunction(path, NSMakeRect(15, 30, 5, 0));
+    pathFunction(path, NSMakeRect(3, 10, 12, 0));
+    pathFunction(path, NSMakeRect(-10, 10, 13, 0));
+    //[path moveToPoint:NSMakePoint(0,0)];
+    //[path lineToPoint:NSMakePoint(10,20)];
+    //[self flipPath:path height:[image size].height];
+    drawFunction(path, [NSColor brownColor]);
 }
+
+- (void)drawDraw:(ShapeImageRep *)image
+{
+    shapefunction *pathFunction;
+    drawfunction *drawFunction;
+    NSRect rect;
+    NSBezierPath *path;
+
+    pathFunction = [[self selectedShapeFunction] function];
+    drawFunction = [(DrawFunction *)[image function] function];
+    if (pathFunction == NULL) {
+        pathFunction = [[ShapeFunction shapeFunctionWithName:@"PSRect"] function];
+    }
+
+    rect = [self rectForImageOfSize:[image size]];
+
+    path = [NSBezierPath bezierPath];
+    //pathFunction(path, rect);
+    [path moveToPoint:NSMakePoint(NSMaxX(rect), NSMidY(rect))];
+    pathFunction(path, NSMakeRect(40, 15, 10, 0));
+    pathFunction(path, NSMakeRect(30, 15, 10, 0));
+    pathFunction(path, NSMakeRect(20, 10, 10, 0));
+    pathFunction(path, NSMakeRect(15, 30, 5, 0));
+    pathFunction(path, NSMakeRect(3, 10, 12, 0));
+    pathFunction(path, NSMakeRect(-10, 10, 13, 0));
+    //[path moveToPoint:NSMakePoint(0,0)];
+    //[path lineToPoint:NSMakePoint(10,20)];
+    //[self flipPath:path height:[image size].height];
+    drawFunction(path, [[NSColor brownColor] highlightWithLevel:.2]);
+}
+
+
 @end
 
 
@@ -181,11 +235,6 @@
 - (DrawFunction *)selectedDrawFunction
 {
     return [(NSCell *)[drawMatrix selectedCell] representedObject];
-}
-
-- (DrawFunction *)selectedHighlightFunction
-{
-    return [(NSCell *)[highlightMatrix selectedCell] representedObject];
 }
 
 - (void)setupShapeMatrix
@@ -214,8 +263,8 @@
                             initWithDrawSelector:@selector(drawShape:)
                                         delegate:self] autorelease];
         [imageRep setFunction:shapeFunction];
-        image = [NSImage allocWithZone:[self zone]];
-        [[image initWithSize:size] autorelease];
+        image = [[[NSImage allocWithZone:[self zone]]
+                                    initWithSize:size] autorelease];
 #ifdef GNUSTEP
 	[imageRep setSize:size];
 #endif
@@ -247,22 +296,18 @@
     NSEnumerator *drawFunctionsEnumerator;
     DrawFunction *drawFunction;
     DrawFunction *selectedDrawFunction;
-    DrawFunction *selectedHighlightFunction;
     int col = 0;
 
     layoutDescriptor = [self layoutDescriptor];
     selectedDrawFunction = [layoutDescriptor drawFunction];
-    selectedHighlightFunction = [layoutDescriptor highlightFunction];
     
     drawFunctions = [DrawFunction drawFunctions];
     
     [drawMatrix renewRows:1 columns:[drawFunctions count]];
-    [highlightMatrix renewRows:1 columns:[drawFunctions count]];
     
     drawFunctionsEnumerator = [drawFunctions objectEnumerator];
     while ((drawFunction = [drawFunctionsEnumerator nextObject]) != nil) {
         NSButtonCell *drawCell;
-        NSButtonCell *highlightCell;
         imageRep = [[[ShapeImageRep alloc]
                                 initWithDrawSelector:@selector(drawDraw:)
                                             delegate:self] autorelease];
@@ -275,76 +320,77 @@
         [image addRepresentation:imageRep];
         [image setBackgroundColor:[NSColor clearColor]];
         drawCell = [drawMatrix cellAtRow:0 column:col];
-        highlightCell = [highlightMatrix cellAtRow:0 column:col];
         [drawCell setImage:image];
-        [highlightCell setImage:image];
         [drawCell setRepresentedObject:drawFunction];
-        [highlightCell setRepresentedObject:drawFunction];
         [drawCell setButtonType:NSOnOffButton];
-        [highlightCell setButtonType:NSOnOffButton];
         if (selectedDrawFunction == drawFunction) {
             [drawMatrix selectCellAtRow:0 column:col];
-        }
-        if (selectedHighlightFunction == drawFunction) {
-            [highlightMatrix selectCellAtRow:0 column:col];
         }
         col++;
     }
     [drawMatrix sizeToCells];
-    [highlightMatrix sizeToCells];
     
 #ifdef GNUSTEP
     [drawMatrix setNeedsDisplay:YES];
-    [highlightMatrix setNeedsDisplay:YES];
 #endif
+}
+
+- (void)flipPath:(NSBezierPath *)path height:(float)height
+{
+    NSAffineTransform *transform;
+
+    transform = [NSAffineTransform transform];
+    [transform translateXBy:0 yBy:height];
+    [transform scaleXBy:1 yBy:-1];
+    [path transformUsingAffineTransform:transform];
 }
 
 - (void)drawShape:(ShapeImageRep *)image
 {
     STEntityTypeLayout *layoutDescriptor;
-    shapefunction *path;
-    drawfunction *draw;
+    shapefunction *pathFunction;
+    drawfunction *drawFunction;
     NSRect rect;
+    NSBezierPath *path;
 
     layoutDescriptor = [self layoutDescriptor];
 
-    path = [(ShapeFunction *)[image function] function];
-    draw = [[self selectedDrawFunction] function];
-    if (draw == NULL) {
-        draw = [[DrawFunction drawFunctionWithName:@"PSFillAndFrameBlack"] function];
+    pathFunction = [(ShapeFunction *)[image function] function];
+    drawFunction = [[self selectedDrawFunction] function];
+    if (drawFunction == NULL) {
+        drawFunction = [[DrawFunction drawFunctionWithName:@"PSFillAndFrameBlack"] function];
     }
 
     rect = [self rectForImageOfSize:[image size]];
 
-    [[NSColor brownColor] set];
-    PSgsave();
-    path(NSMinX(rect), NSMinY(rect), NSWidth(rect), NSHeight(rect));
-    draw();
-    PSgrestore();
+    path = [NSBezierPath bezierPath];
+    pathFunction(path, rect);
+    [self flipPath:path height:[image size].height];
+    drawFunction(path, [NSColor brownColor]);
 }
 
 - (void)drawDraw:(ShapeImageRep *)image
 {
     STEntityTypeLayout *layoutDescriptor;
-    shapefunction *path;
-    drawfunction *draw;
+    shapefunction *pathFunction;
+    drawfunction *drawFunction;
     NSRect rect;
+    NSBezierPath *path;
 
     layoutDescriptor = [self layoutDescriptor];
 
-    path = [[self selectedShapeFunction] function];
-    draw = [(DrawFunction *)[image function] function];
-    if (path == NULL) {
-        path = [[ShapeFunction shapeFunctionWithName:@"PSRect"] function];
+    pathFunction = [[self selectedShapeFunction] function];
+    drawFunction = [(DrawFunction *)[image function] function];
+    if (pathFunction == NULL) {
+        pathFunction = [[ShapeFunction shapeFunctionWithName:@"PSRect"] function];
     }
 
     rect = [self rectForImageOfSize:[image size]];
 
-    [[[NSColor brownColor] highlightWithLevel:.2] set];
-    PSgsave();
-    path(NSMinX(rect), NSMinY(rect), NSWidth(rect), NSHeight(rect));
-    draw();
-    PSgrestore();
+    path = [NSBezierPath bezierPath];
+    pathFunction(path, rect);
+    [self flipPath:path height:[image size].height];
+    drawFunction(path, [[NSColor brownColor] highlightWithLevel:.2]);
 }
 
 
@@ -360,10 +406,6 @@
     for (i=0; i<count; i++)
         [[[drawMatrix cellAtRow:0 column:i] image] recache];
     [drawMatrix setNeedsDisplay:YES];
-    [highlightMatrix getNumberOfRows:&x columns:&count];
-    for (i=0; i<count; i++)
-        [[[highlightMatrix cellAtRow:0 column:i] image] recache];
-    [highlightMatrix setNeedsDisplay:YES];
 
     [controller layoutEdited];
 }
@@ -375,15 +417,6 @@
     layoutDescriptor = [self layoutDescriptor];
     [layoutDescriptor setDrawFunction:[self selectedDrawFunction]];
 
-    [self recacheAll];
-}
-
-- (IBAction)highlightFunctionSelected:(id)sender
-{
-    STEntityTypeLayout *layoutDescriptor;
-
-    layoutDescriptor = [self layoutDescriptor];
-    [layoutDescriptor setHighlightFunction:[self selectedHighlightFunction]];
     [self recacheAll];
 }
 
@@ -446,7 +479,7 @@
     x = size.width / 2;
     w = [layoutDescriptor width];
     h = [layoutDescriptor height];
-    y = size.height / 2 - h / 2;
+    y = size.height / 2;
 
     return NSMakeRect(x, y, w, h);
 }
@@ -498,8 +531,8 @@
     x = 5;
     w = size.width - 10;
     h = [layoutDescriptor height];
-    if (h > size.height) {
-        h = size.height;
+    if (h > size.height - 10) {
+        h = size.height - 10;
     }
     y = size.height / 2 - h / 2;
 

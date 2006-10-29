@@ -26,45 +26,90 @@
 #include <values.h>
 #endif
 
+#include "../General/Association.h"
+
 @implementation DrawView (Drawing)
+
+- (void)highlightPath:(NSBezierPath *)hp
+{
+    float originalLineWidth = [hp lineWidth];
+///*
+    //NSRect vr = NSInsetRect([hp bounds], -30, -30);
+    NSRect vr = [self visibleRect];
+    NSBezierPath *cp = [NSBezierPath bezierPath];
+
+    [NSGraphicsContext saveGraphicsState];
+
+    [cp setWindingRule:NSNonZeroWindingRule];
+    [cp moveToPoint:NSMakePoint(NSMinX(vr), NSMinY(vr))];
+    [cp lineToPoint:NSMakePoint(NSMinX(vr), NSMaxY(vr))];
+    [cp lineToPoint:NSMakePoint(NSMaxX(vr), NSMaxY(vr))];
+    [cp lineToPoint:NSMakePoint(NSMaxX(vr), NSMinY(vr))];
+    [cp closePath];
+    [cp appendBezierPath:hp];
+    [cp addClip];
+
+    [[NSColor colorWithCalibratedRed:1 green:0.4 blue:0 alpha:0.4] set];
+    [hp setLineWidth:4];
+    [hp stroke];
+    //[hp setLineWidth:7];
+    //[hp stroke];
+    [hp setLineWidth:10];
+    [hp stroke];
+    //[[NSColor blackColor] set];
+    //[hp setLineWidth:1];
+    //[hp stroke];
+
+    [NSGraphicsContext restoreGraphicsState];
+//*/
+/*
+    [[[NSColor yellowColor] colorWithAlphaComponent:0.25] set];
+            [hp setLineWidth:14];
+            [hp stroke];
+            [hp setLineWidth:17];
+            [hp stroke];
+            [hp setLineWidth:20];
+            [hp stroke];
+*/
+
+    [hp setLineWidth:originalLineWidth];
+}
+
 
 - (void)drawEventsWithDescriptor:(STEventTypeLayout *)layout
                      inContainer:(PajeContainer *)container
                   fromEnumerator:(NSEnumerator *)enumerator
-                    drawFunction:(DrawFunction *)drawFunction
 {
-    shapefunction *path;
-    drawfunction *draw;
-    drawfunction *highlight;
+    shapefunction *pathFunction;
+    drawfunction *drawFunction;
+    NSBezierPath *path;
     NSColor *color;
-    NSColor *lastColor = nil;
     id entity;
     float x, y, w, h;
     BOOL drawNames;
+    BOOL sup;
     NSMutableAttributedString *name;
-    NSDictionary *attributes;
-    
-    attributes = [NSDictionary dictionaryWithObjectsAndKeys:
-                            [NSFont systemFontOfSize:8], @"NSFontAttributeName",
-                            nil];
 
     drawNames = [layout drawsName];
     if (drawNames) {
         name = [[NSMutableAttributedString alloc] 
                 initWithString:@""
-                    attributes:attributes];
+                    attributes:entityNameAttributes];
     }
-    
+    sup = [layout isSupEvent];
+
     y = [layout yInContainer:container];
     w = [layout width];
     h = [layout height];
-    path = [[layout shapeFunction] function];
-    draw = [drawFunction function];
-    highlight = [[layout highlightFunction] function];
-    PSgsave();
+    pathFunction = [[layout shapeFunction] function];
+    drawFunction = [[layout drawFunction] function];
+
+    path = [NSBezierPath bezierPath];
 
     while ((entity = [enumerator nextObject]) != nil) {
         x = TIMEtoX([filter timeForEntity:entity]);
+
+        [path removeAllPoints];
 
         if ([filter isAggregateEntity:entity]) {
             float x2 = TIMEtoX([filter endTimeForEntity:entity]);
@@ -73,74 +118,77 @@
             unsigned count;
             float xi = x;
             float dx;
-            int sup;
 
-            PSgsave();
             condensedEntitiesCount = [entity condensedEntitiesCount];
-            sup = [layout isSupEvent];
 
             count = [filter subCountForEntity:entity];
             for (i = 0; i < count; i++) {
                 [[filter subColorAtIndex:i forEntity:entity] set];
                 dx = (x2-x) * [filter subCountAtIndex:i forEntity:entity] 
                             / condensedEntitiesCount;
-                NSRectFill(NSMakeRect(xi, y+(sup*(-h+8))+(!sup*(h-10)), dx, 3));
+                if (sup) {
+                    NSRectFill(NSMakeRect(xi, y-(h-9), dx, 3));
+                } else {
+                    NSRectFill(NSMakeRect(xi, y+(h-11), dx, 3));
+                }
                 xi += dx;
             }
-            PSmoveto(x, y+2*sup-2*!sup);
-            PSlineto(x, y-(h-7)*sup+(h-7)*!sup);
-            PSlineto(x2, y-(h-7)*sup+(h-7)*!sup);
-            PSlineto(x2, y+2*sup-2*!sup);
+            if (sup) {
+                [[NSString stringWithFormat:@"%d", condensedEntitiesCount]
+                                        drawAtPoint:NSMakePoint(x-5, y-(h-8)-9)
+                                     withAttributes:entityNameAttributes];
+                [path moveToPoint:NSMakePoint(x2, y+2)];
+                [path lineToPoint:NSMakePoint(x2, y-(h-8))];
+                [path lineToPoint:NSMakePoint(x, y-(h-8))];
+                [path lineToPoint:NSMakePoint(x, y+2)];
+            } else {
+                [[NSString stringWithFormat:@"%d", condensedEntitiesCount]
+                                        drawAtPoint:NSMakePoint(x-5, y+(h-8))
+                                     withAttributes:entityNameAttributes];
+                [path moveToPoint:NSMakePoint(x, y-2)];
+                [path lineToPoint:NSMakePoint(x, y+(h-8))];
+                [path lineToPoint:NSMakePoint(x2, y+(h-8))];
+                [path lineToPoint:NSMakePoint(x2, y-2)];
+            }
+
             if ([filter isSelectedEntity:entity]) {
-                [[NSColor yellowColor] set];
-            } else {
-                [[NSColor blackColor] set];
+                [self highlightPath:path];
             }
-            PSstroke();
+            [[NSColor blackColor] set];
+            [path stroke];
 
-            [[NSString stringWithFormat:@"%d", condensedEntitiesCount]
-                        drawAtPoint:NSMakePoint(x, y-(h+1)*sup+(h-8)*!sup)
-                     withAttributes:attributes];
-            PSgrestore();
+        } else { // not aggregate
 
-        } else {
+            color = [filter colorForEntity:entity];
 
-        color = [filter colorForEntity:entity];
-        if (![color isEqual:lastColor]) {
-            lastColor = color;
-            [color set];
-        }
-
-        PSgsave();
-        path(x, y, w, h);
-        if ([filter isSelectedEntity:entity]) {
-            highlight();
-        } else {
-            draw();
-        }
-        PSgrestore();
-        if (drawNames) {
-            PSgsave();
-            [name replaceCharactersInRange:NSMakeRange(0, [name length])
-                                withString:[filter nameForEntity:entity]];
-            if ([layout isSupEvent]) {
-                y = y - h;
-                h = 12;
+            pathFunction(path, NSMakeRect(x, y, w, h));
+            if ([filter isSelectedEntity:entity]) {
+                [self highlightPath:path];
             }
-            x -= w;
-            NSRectFill(NSMakeRect(x, y, w * 2, h));
-            if ([[color colorUsingColorSpaceName:NSCalibratedWhiteColorSpace
-                                          device:nil] whiteComponent] > 0.5) {
-                [[NSColor blackColor] set];
-            } else {
-                [[NSColor whiteColor] set];
+            drawFunction(path, color);
+
+            if (drawNames) {
+                float yt;
+                [name replaceCharactersInRange:NSMakeRange(0, [name length])
+                                    withString:[[filter valueForEntity:entity] stringValue]];
+                if (sup) {
+                    yt = y - (h - 2 - w/2 + 5);
+                } else {
+                    yt = y + (h - 2 - w/2 + 5) - 9;
+                }
+                //NSRectFill(NSMakeRect(x - w, yt, w * 2, 12));
+                if ([[color colorUsingColorSpaceName:NSCalibratedWhiteColorSpace
+                                            device:nil] whiteComponent] > 0.5) {
+                    [[NSColor blackColor] set];
+                } else {
+                    [[NSColor whiteColor] set];
+                }
+                [name drawInRect:NSMakeRect(x - w, yt, w * 2, 12)];
             }
-            [name drawInRect:NSMakeRect(x, y, w * 2, h)];
-            PSgrestore();
+
         }
-        }
+
     }
-    PSgrestore();
 }
 
 #define drawBlackRect(x1, x2, r) \
@@ -153,13 +201,12 @@ do { \
 - (void)drawStatesWithDescriptor:(STStateTypeLayout *)layout
                      inContainer:(PajeContainer *)container
                   fromEnumerator:(NSEnumerator *)enumerator
-                    drawFunction:(DrawFunction *)drawFunction
 {
+    shapefunction *pathFunction;
+    drawfunction *drawFunction;
     float insetBy;
     NSColor *color;
-    NSColor *lcolor = [NSColor blackColor];
-    NSColor *hcolor = [NSColor yellowColor];;
-    NSBezierPath *bp = [NSBezierPath bezierPath];
+    NSBezierPath *path = [NSBezierPath bezierPath];
     id <PajeState>entity;
     float firstUndrawnX = MAXFLOAT;
     float lastUndrawnX = MAXFLOAT;
@@ -172,15 +219,15 @@ do { \
     if (drawNames) {
         name = [[NSMutableAttributedString alloc] 
                 initWithString:@""
-                    attributes:[NSDictionary dictionaryWithObjectsAndKeys:
-                            [NSFont systemFontOfSize:8], @"NSFontAttributeName",
-                            nil]];
+                    attributes:entityNameAttributes];
     }
 
     y = [layout yInContainer:container];
     h = [layout height];
     insetBy = [layout insetAmount];
-    [bp setLineWidth:1.0];
+    [path setLineWidth:1.0];
+    pathFunction = [[layout shapeFunction] function];
+    drawFunction = [[layout drawFunction] function];
 
     while ((entity = [enumerator nextObject]) != nil) {
         int imbricationLevel;
@@ -234,13 +281,14 @@ do { \
         }
 
         NSRect rect;
-        
+
         rect = NSMakeRect(x, y, w, newHeight);
-        [bp removeAllPoints];
-        [bp appendBezierPathWithRect:rect];
+        [path removeAllPoints];
+        pathFunction(path, rect);
+
         if ([filter isAggregateEntity:entity]) {
-            [bp moveToPoint:NSMakePoint(x, y)];
-            [bp lineToPoint:NSMakePoint(x+w, y+newHeight)];
+            [path moveToPoint:NSMakePoint(x, y)];
+            [path lineToPoint:NSMakePoint(x+w, y+newHeight)];
             unsigned i;
             unsigned count = [filter subCountForEntity:entity];
             for (i = 0; i < count; i++) {
@@ -253,27 +301,26 @@ do { \
                 rect.origin.x += dx;
             }
             if (rect.origin.x <= (x + w - 1)) {
-                [bp moveToPoint:NSMakePoint(rect.origin.x, y+newHeight)];
-                [bp lineToPoint:NSMakePoint(x+w, y)];
+                [path moveToPoint:NSMakePoint(rect.origin.x, y+newHeight)];
+                [path lineToPoint:NSMakePoint(x+w, y)];
             }
-        } else {
+            if ([filter isSelectedEntity:entity]) {
+                [self highlightPath:path];
+            }
+            drawFunction(path, nil);// REVER
+        } else { // !aggregate
             color = [filter colorForEntity:entity];
-            [color set];
-            NSRectFill(rect);
 
+            if ([filter isSelectedEntity:entity]) {
+                [self highlightPath:path];
+            }
+            drawFunction(path, color);
             if (drawNames && ow > smallEntityWidth && newHeight > 8) {
                 [name replaceCharactersInRange:NSMakeRange(0, [name length])
-                                    withString:[filter nameForEntity:entity]];
+                                    withString:[[filter valueForEntity:entity] stringValue]];
                 [name drawInRect:NSMakeRect(ox+2, y + newHeight - 10, ow, 10)];
             }
         }
-
-        if ([filter isSelectedEntity:entity]) {
-            [hcolor set];
-        } else {
-            [lcolor set];
-        }
-        [bp stroke];
 
     }
 
@@ -287,24 +334,48 @@ do { \
     }
 }
 
+// helper function for drawing variables.
+// adds min max traits to a path.
+static void addToMinMaxPath(NSBezierPath *path,
+                     float xMin, float xMax,
+                     float yAvg, float yMin, float yMax)
+{
+    if (yMax == yMin) {
+//        return;
+    }
+    float xAvg = (xMin + xMax) / 2;
+
+    //[path moveToPoint:NSMakePoint(xMin, yAvg)];
+    //[path lineToPoint:NSMakePoint(xMax, yAvg)];
+    //[path moveToPoint:NSMakePoint(xAvg, yMin)];
+    //[path lineToPoint:NSMakePoint(xAvg, yMax)];
+    [path moveToPoint:NSMakePoint(xAvg-5, yMin)];
+    [path lineToPoint:NSMakePoint(xAvg+5, yMin)];
+    [path moveToPoint:NSMakePoint(xAvg-5, yMax)];
+    [path lineToPoint:NSMakePoint(xAvg+5, yMax)];
+}
+
 - (void)drawValuesWithDescriptor:(STVariableTypeLayout *)layout
                      inContainer:(PajeContainer *)container
                   fromEnumerator:(NSEnumerator *)enumerator
-                    drawFunction:(DrawFunction *)drawFunction
 {
-    NSBezierPath *path;
+    shapefunction *pathFunction;
+    drawfunction *drawFunction;
+    NSBezierPath *valuePath;
+    NSBezierPath *selectedPath;
+    NSBezierPath *minMaxPath;
+    BOOL showMinMax;
     NSColor *color;
     id <PajeState>entity;
     float yMin;
     float yMax;
     float yScale;
     float yOffset;
-    float off3d;
-    float xOld;
     float yOld;
     float yvMin;
     float yvMax;
     BOOL first = YES;
+    BOOL hasHighlight = NO;
     PajeEntityType *entityType;
     
     entityType = [layout entityType];
@@ -312,9 +383,11 @@ do { \
     yMin = [layout minValue];
     yMax = [layout maxValue];
     if (yMax <= yMin) {
-        yMin = [[filter minValueForEntityType:entityType] floatValue];
-        yMax = [[filter maxValueForEntityType:entityType] floatValue];
+        yMin = [filter minValueForEntityType:entityType];
+        yMax = [filter maxValueForEntityType:entityType];
     }
+    pathFunction = [[layout shapeFunction] function];
+    drawFunction = [[layout drawFunction] function];
 
     if (yMin != yMax) {
         yScale = -([layout height] - 4) / (yMax - yMin);
@@ -322,96 +395,80 @@ do { \
         yScale = 1;
     }
 
-    off3d = [layout threeD] ? -1 : 0;
-    yOffset = [layout yInContainer:container] + 2 - (yMax * yScale) + off3d;
+    yOffset = [layout yInContainer:container] + 2 - (yMax * yScale);
 
-    path = [[NSBezierPath alloc] init];
-    [path setLineJoinStyle: NSBevelLineJoinStyle];
+    valuePath = [[NSBezierPath alloc] init];
+    [valuePath setLineJoinStyle: NSBevelLineJoinStyle];
+    selectedPath = [[NSBezierPath alloc] init];
+    [selectedPath setLineJoinStyle: NSBevelLineJoinStyle];
+
+    showMinMax = [layout showMinMax];
+    if (showMinMax) {
+        minMaxPath = [[NSBezierPath alloc] init];
+    }
 
     while ((entity = [enumerator nextObject]) != nil) {
-        float x;
+        float xStart;
+        float xEnd;
         float y;
 
-        x = TIMEtoX([filter startTimeForEntity:entity]) + off3d;
-        y = [[filter valueForEntity:entity] doubleValue] * yScale + yOffset;
+        xStart = TIMEtoX([filter startTimeForEntity:entity]);
+        xEnd = TIMEtoX([filter endTimeForEntity:entity]);
+        y = [filter doubleValueForEntity:entity] * yScale + yOffset;
+        yvMin = [filter minValueForEntity:entity] * yScale + yOffset;
+        yvMax = [filter maxValueForEntity:entity] * yScale + yOffset;
 
-        // do not draw if on same column; get max & min y values
-        if (!first && (xOld - x) < 1) {
-            if (y < yvMin) yvMin = y;
-            if (y > yvMax) yvMax = y;
-            continue;
-        }
-#ifdef GNUSTEP
-        // Very big lines are not drawn in GNUstep 
-        if (x < NSMinX(cutRect)) x = NSMinX(cutRect);
-#endif
         if (first) {
-            [path moveToPoint: NSMakePoint(NSMaxX(cutRect), y)];
-            [path lineToPoint: NSMakePoint(x, y)];
+            [valuePath moveToPoint:NSMakePoint(xEnd, y)];
+            first = NO;
         } else {
-            if (yvMin != yOld && yvMin != y) {
-                [path lineToPoint: NSMakePoint(xOld, yvMin)];
-                yOld = yvMin;
-            }
-            if (yvMax != yOld) {
-                [path lineToPoint: NSMakePoint(xOld, yvMax)];
-                yOld = yvMax;
-            }
-            if (y != yOld) {
-                [path lineToPoint: NSMakePoint(xOld, y)];
-            }
-            [path lineToPoint: NSMakePoint(x, y)];
+            pathFunction(valuePath, NSMakeRect(xStart, y, xEnd-xStart, 0));
         }
-        xOld = x;
-        yvMin = yvMax = yOld = y;
-        first = NO;
+        if ([filter isSelectedEntity:entity]) {
+            [selectedPath moveToPoint:NSMakePoint(xEnd, yOld)];
+            pathFunction(selectedPath, NSMakeRect(xStart, y, xEnd-xStart, 0));
+            hasHighlight = YES;
+        }
+        yOld = y;
+        if (showMinMax) {
+            addToMinMaxPath(minMaxPath, xStart, xEnd, y, yvMin, yvMax);
+        }
     }
 
+    if (showMinMax) {
+        [[NSColor blackColor] set];
+        [minMaxPath stroke];
+        [minMaxPath release];
+    }
+
+    if (hasHighlight) {
+        [self highlightPath:selectedPath];
+    }
     color = [filter colorForEntityType:entityType];
+    [valuePath setLineWidth:[layout lineWidth]];
+    drawFunction(valuePath, color);
 
-    if ([layout threeD]) {
-        NSAffineTransform *transform = [NSAffineTransform transform];
-        [path setLineWidth:[layout lineWidth] - 2];
-        [[color highlightWithLevel:0.3] set];
-        [path stroke];
-        [transform translateXBy: 2.0 yBy: 2.0];
-        [path transformUsingAffineTransform: transform];
-        [[color shadowWithLevel:0.3] set];
-        [path stroke];
-        [transform translateXBy: -3.0 yBy: -3.0];
-        [path transformUsingAffineTransform: transform];
-        [color set];
-        [path stroke];
-    } else {
-        [path setLineWidth:[layout lineWidth]];
-        [color set];
-        [path stroke];
-    }
-
-    [path release];
+    [valuePath release];
+    [selectedPath release];
 }
-
-
 
 - (void)drawLinksWithDescriptor:(STLinkTypeLayout *)layout
                     inContainer:(PajeContainer *)container
                  fromEnumerator:(NSEnumerator *)enumerator
-                   drawFunction:(DrawFunction *)drawFunction
 {
-    shapefunction *path;
-    drawfunction *draw;
-    drawfunction *highlight;
+    shapefunction *pathFunction;
+    drawfunction *drawFunction;
     NSColor *color;
-    NSColor *lastColor = nil;
     id <PajeLink>entity;
     float x1, x2, y1, y2;
+    NSBezierPath *path;
 
-    path = [[layout shapeFunction] function];
-    draw = [drawFunction function];
-    highlight = [[layout highlightFunction] function];
+    pathFunction = [[layout shapeFunction] function];
+    drawFunction = [[layout drawFunction] function];
 
-    PSgsave();
-    PSsetlinewidth([layout lineWidth]);
+    path = [NSBezierPath bezierPath];
+
+    [path setLineWidth:[layout lineWidth]];
 
     while ((entity = [enumerator nextObject]) != nil) {
         PajeContainer *sourceContainer;
@@ -442,32 +499,142 @@ do { \
             x2 = TIMEtoX([filter endTimeForEntity:entity]);
         }
 
+        [path removeAllPoints];
+
         color = [filter colorForEntity:entity];
-        //color = [color colorWithAlphaComponent:0.5];
-        if (![color isEqual:lastColor]) {
-            lastColor = color;
-            [color set];
-        }
 
         //if (sourceContainer && destContainer) {
-        PSgsave();
         if (sourceContainer == nil) {
             shapefunction PSIn;
-            PSIn(x2, y2, 8, 8);
+            PSIn(path, NSMakeRect(x2, y2, 8, 8));
         } else if (destContainer == nil) {
             shapefunction PSOut;
-            PSOut(x1, y1, 8, 8);
+            PSOut(path, NSMakeRect(x1, y1, 8, 8));
         } else {
-            path(x1, y1, x2-x1, y2-y1);
+            pathFunction(path, NSMakeRect(x1, y1, x2-x1, y2-y1));
         }
         if ([filter isSelectedEntity:entity]) {
-            highlight();
-        } else {
-            draw();
+            [self highlightPath:path];
         }
-        PSgrestore();
+        drawFunction(path, color);
     }
-    PSgrestore();
+}
+
+- (void)drawBackgroundForContainer:(PajeContainer *)container
+                        descriptor:(STContainerTypeLayout *)layout
+                        insideRect:(NSRect)drawRect
+{
+
+    if ([[filter selectedContainers] containsObject:container]) {
+        [[NSColor whiteColor] set];
+        NSRectFill([layout rectOfInstance:container]);
+    }
+
+    float yScale;
+    float yOffset;
+    float yMin;
+    float yMax;
+
+    yMin = [layout minValue];
+    yMax = [layout maxValue];
+
+    if (yMin >= yMax) {
+        return;
+    }
+
+    yScale = -([layout heightForVariables] - 4) / (yMax - yMin);
+
+    yOffset = NSMinY([layout rectOfInstance:container]) 
+            + [layout variablesOffset] + 2 - (yMax * yScale);
+    NSBezierPath *hashMarkPath;
+    hashMarkPath = [[NSBezierPath alloc] init];
+    NSEnumerator *en = [[layout hashMarkValues] objectEnumerator];
+    NSNumber *n;
+    while ((n = [en nextObject]) != nil) {
+        float v = [n floatValue];
+        float y = v * yScale + yOffset;
+        [hashMarkPath moveToPoint:NSMakePoint(NSMinX(drawRect), y)];
+        [hashMarkPath lineToPoint:NSMakePoint(NSMaxX(drawRect), y)];
+    }
+    [[NSColor gridColor] set];
+    [hashMarkPath stroke];
+    [hashMarkPath release];
+
+    double dt;
+    // calculate dv, delta time for at least 70 px between hash marks
+    dt = 70 / pointsPerSecond;
+
+    int i = 0;
+    while (dt < .5) {
+        dt *= 10;
+        i--;
+    }
+    while (dt >= 5) {
+        dt /= 10;
+        i++;
+    }
+
+    if (dt > 2) dt = 5;
+    else if (dt > 1) dt = 2;
+    else dt = 1;
+
+    while (i > 0) {
+        dt *= 10;
+        i--;
+    }
+    while (i < 0) {
+        dt /= 10;
+        i++;
+    }
+        
+    hashMarkPath = [[NSBezierPath alloc] init];
+
+    double t;
+    double minT;
+    double maxT;
+    minT = [XtoTIME(NSMinX(drawRect)) timeIntervalSinceReferenceDate];
+    maxT = [XtoTIME(NSMaxX(drawRect)) timeIntervalSinceReferenceDate];
+    for (t = (int)(minT/dt) * dt; t <= maxT; t += dt) {
+        float x = TIMEtoX([NSDate dateWithTimeIntervalSinceReferenceDate:t]);
+        [hashMarkPath moveToPoint:NSMakePoint(x, yMin * yScale + yOffset)];
+        [hashMarkPath lineToPoint:NSMakePoint(x, yMax * yScale + yOffset)];
+    }
+    //[[NSColor whiteColor] set];
+    [hashMarkPath stroke];
+    [hashMarkPath release];
+
+}
+
+- (void)drawEntitiesWithDescriptor:(STEntityTypeLayout *)layoutDescriptor
+                       inContainer:(PajeContainer *)container
+                    fromEnumerator:(NSEnumerator *)enumerator
+{
+    switch ([layoutDescriptor drawingType]) {
+    case PajeEventDrawingType:
+        [self drawEventsWithDescriptor:(STEventTypeLayout *)layoutDescriptor
+                           inContainer:container
+                        fromEnumerator:enumerator];
+        break;
+    case PajeStateDrawingType:
+        [self drawStatesWithDescriptor:(STStateTypeLayout *)layoutDescriptor
+                           inContainer:container
+                        fromEnumerator:enumerator];
+        break;
+    case PajeLinkDrawingType:
+        [self drawLinksWithDescriptor:(STLinkTypeLayout *)layoutDescriptor
+                          inContainer:container
+                       fromEnumerator:enumerator];
+        break;
+    case PajeVariableDrawingType:
+        [self drawValuesWithDescriptor:(STVariableTypeLayout *)layoutDescriptor
+                           inContainer:container
+                        fromEnumerator:enumerator];
+        break;
+    case PajeContainerDrawingType:
+        break;
+    default:
+        NSAssert1(0, @"Invalid drawing type %d", [layoutDescriptor drawingType]);
+    }
 }
 
 - (void)drawEntitiesWithDescriptor:(STEntityTypeLayout *)layoutDescriptor
@@ -478,23 +645,16 @@ do { \
     NSDate *drawEndTime;
     NSEnumerator *enumerator;
     NSRect rect;
+    PajeEntityType *entityType;
     PajeDrawingType drawingType;
 
     rect = [layoutDescriptor rectInContainer:container];
-    drawingType = [layoutDescriptor drawingType];
 
-/*
-    if (drawingType != PajeLinkDrawingType) {
-        NSRect r = rect;
-        r.origin.x = drawRect.origin.x;
-        r.size.width = drawRect.size.width;
-        if (NSIsEmptyRect(NSIntersectionRect(r, drawRect)))
-            return;
-    }
-*/
     if (![layoutDescriptor intersectsRect:drawRect inContainer:container]) {
         return;
     }
+    drawingType = [layoutDescriptor drawingType];
+    entityType = [layoutDescriptor entityType];
 
     float width;
     if (drawingType == PajeEventDrawingType) {
@@ -504,44 +664,52 @@ do { \
     }
     drawStartTime = XtoTIME(NSMinX(drawRect) - width);
     drawEndTime   = XtoTIME(NSMaxX(drawRect) + width);
-    enumerator = [filter enumeratorOfEntitiesTyped:[layoutDescriptor entityType]
+    if (drawingType == PajeVariableDrawingType) {
+NSLog(@"a %@ - %@", drawStartTime, drawEndTime);
+        // make sure that mid x point of first and last values are inside rect
+        // (some ways of drawing variables do not draw after/before mid point
+        PajeEntity *entity;
+        enumerator = [filter enumeratorOfEntitiesTyped:entityType
+                                           inContainer:container
+                                              fromTime:drawEndTime
+                                                toTime:drawEndTime
+                                           minDuration:SMALL_ENTITY_DURATION];
+        entity = [enumerator nextObject];
+        if (entity != nil) {
+            NSDate *entityEndTime;
+            entityEndTime = [filter endTimeForEntity:entity];
+            if ([entityEndTime isLaterThanDate:drawEndTime]) {
+                drawEndTime = XtoTIME(TIMEtoX(entityEndTime)+1);
+            }
+        }
+        enumerator = [filter enumeratorOfEntitiesTyped:entityType
+                                           inContainer:container
+                                              fromTime:drawStartTime
+                                                toTime:drawStartTime
+                                           minDuration:SMALL_ENTITY_DURATION];
+ali:
+        entity = [enumerator nextObject];
+        if (entity != nil) {
+            NSDate *entityStartTime;
+            entityStartTime = [filter startTimeForEntity:entity];
+            NSLog(@"e %@", entityStartTime);
+            if ([entityStartTime isEarlierThanDate:drawStartTime]) {
+                drawStartTime = XtoTIME(TIMEtoX(entityStartTime)-1);
+            } else {
+                goto ali;
+            }
+        }
+NSLog(@"d %@ - %@", drawStartTime, drawEndTime);
+    }
+    enumerator = [filter enumeratorOfEntitiesTyped:entityType
                                        inContainer:container
                                           fromTime:drawStartTime
                                             toTime:drawEndTime
                                        minDuration:SMALL_ENTITY_DURATION];
 
-    switch (drawingType) {
-        case PajeEventDrawingType:
-            [self drawEventsWithDescriptor:(STEventTypeLayout *)layoutDescriptor
-                               inContainer:container
-                            fromEnumerator:enumerator
-                              drawFunction:[layoutDescriptor drawFunction]];
-            break;
-        case PajeStateDrawingType:
-            [self drawStatesWithDescriptor:(STStateTypeLayout *)layoutDescriptor
-                               inContainer:container
-                            fromEnumerator:enumerator
-                              drawFunction:[layoutDescriptor drawFunction]];
-            break;
-        case PajeLinkDrawingType:
-            [self drawLinksWithDescriptor:(STLinkTypeLayout *)layoutDescriptor
-                              inContainer:container
-                           fromEnumerator:enumerator
-                             drawFunction:[layoutDescriptor drawFunction]];
-            break;
-        case PajeVariableDrawingType:
-            [self drawValuesWithDescriptor:(STVariableTypeLayout *)
-                                                           layoutDescriptor
-                               inContainer:container
-                            fromEnumerator:enumerator
-                              drawFunction:[layoutDescriptor drawFunction]];
-            break;
-        case PajeContainerDrawingType:
-            break;
-        default:
-            NSAssert1(0, @"Invalid drawing type %d", drawingType);
-    }
-
+    [self drawEntitiesWithDescriptor:layoutDescriptor
+                         inContainer:container
+                      fromEnumerator:enumerator];
 }
 
 - (void)drawInstance:(id)entity
@@ -555,10 +723,10 @@ do { \
         return;
     }
         
-    if ([[filter selectedContainers] containsObject:entity]) {
-        [[NSColor whiteColor] set];
-        NSRectFill([layoutDescriptor rectOfInstance:entity]);
-    }
+    // draw background of container
+    [self drawBackgroundForContainer:entity
+                          descriptor:layoutDescriptor
+                           insideRect:drawRect];
 
     // draw all subtypes in this container
     sublayoutEnum = [[layoutDescriptor subtypes] objectEnumerator];

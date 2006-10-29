@@ -115,7 +115,7 @@
 - (void)setInputComponent:(PajeComponent *)filter
 {
     [super setInputComponent:filter];
-    [drawView setFilter:(PajeFilter *)filter];
+    [drawView setFilter:self/*(PajeFilter *)filter*/];
 }
 
 
@@ -139,6 +139,10 @@
                                                  drawingType:drawingType
                                          containerDescriptor:cDesc
                                                   controller:self];
+    if (drawingType == PajeVariableDrawingType) {
+        [(STVariableTypeLayout*)layoutDescriptor setMinValue:[self minValueForEntityType:eType]];
+        [(STVariableTypeLayout*)layoutDescriptor setMaxValue:[self maxValueForEntityType:eType]];
+    }
     [layoutDescriptors setObject:layoutDescriptor forKey:eType];
 
     subtypeEnum = [[self containedTypesForContainerType:eType]
@@ -192,7 +196,7 @@
 
 - (void)hierarchyChanged
 {
-    [window setTitleWithRepresentedFilename:[self nameForEntity:[self rootInstance]]];
+    [window setTitleWithRepresentedFilename:[self nameForContainer:[self rootInstance]]];
 
     if ([self startTime] == nil) return;
 
@@ -264,5 +268,17 @@
 {
 //    [[NSPrintOperation printOperationWithView:[window contentView]] runOperation]; 
     [window print:sender];
+}
+
+- (BOOL)isSelectedEntity:(id)entity
+{
+    id highlightedEntities;
+    highlightedEntities = [drawView highlightedEntities];
+    if (highlightedEntities != nil) {
+        if ([highlightedEntities containsObject:entity]) {
+            return YES;
+        }
+    }
+    return [super isSelectedEntity:entity];
 }
 @end

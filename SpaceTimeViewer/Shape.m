@@ -17,25 +17,15 @@
     along with Pajé; if not, write to the Free Software Foundation, Inc.,
     59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 */
+
 #include "Shape.h"
-//#include <AppKit/AppKit.h>
-#if defined(GNUSTEP)
-#include <AppKit/PSOperators.h>
-#endif
-#if defined(__APPLE__)
-#include "PSOperators.h"
-#endif
-#if defined(NeXT)
-#import <AppKit/psopsOpenStep.h>	// For PS and DPS function prototypes
-#import "drawline.h" // for pswraps
-#endif
 #include <math.h>
 
 // 19.ago.2004 BS  creation
 
 
-void emptydrawfunction(void) {}
-void PSNoShape(float x, float y, float w, float h) {}
+static void emptydrawfunction(void) {}
+static void PSNoShape(NSBezierPath *path, NSRect rect) {}
 
 //
 // Shape Functions
@@ -45,107 +35,146 @@ void PSNoShape(float x, float y, float w, float h) {}
 
 // functions for PajeState entities' shapes
 
-void PSRect(float x, float y, float w, float h)
+static void PSRect(NSBezierPath *path, NSRect rect)
 {
-//    PSnewpath();
-    PSmoveto(x, y);
-    PSrlineto(w, 0);
-    PSrlineto(0, h);
-    PSrlineto(-w, 0);
-//    PSclosepath();
-PSrlineto(0, -h);
+    [path appendBezierPathWithRect:rect];
 }
 
 // functions for PajeEvent entities' shapes
 
 // x, y is the main point; w, h are the size of the shape
 
-void PSTriangle(float x, float y, float w, float h)
+static void PSTriangle(NSBezierPath *path, NSRect rect)
 {
-    PSnewpath();
-    PSmoveto(x, y+2);
-    PSrlineto(w/2, -(h));
-    PSrlineto(-w, 0);
-    PSclosepath();
-//PSrlineto(w/2, -h);
+    [path moveToPoint:NSMakePoint(NSMinX(rect), NSMinY(rect)+2)];
+    [path relativeLineToPoint:NSMakePoint(-NSWidth(rect)/2, -NSHeight(rect))];
+    [path relativeLineToPoint:NSMakePoint(NSWidth(rect), 0)];
+    [path closePath];
 }
 
-void PSFTriangle(float x, float y, float w, float h)
+static void PSFTriangle(NSBezierPath *path, NSRect rect)
 {
-    PSnewpath();
-    PSmoveto(x, y-2);
-    PSrlineto(w/2, h);
-    PSrlineto(-w, 0);
-    PSclosepath();
-//PSrlineto(w/2, -h);
+    [path moveToPoint:NSMakePoint(NSMinX(rect), NSMinY(rect)-2)];
+    [path relativeLineToPoint:NSMakePoint(NSWidth(rect)/2, NSHeight(rect))];
+    [path relativeLineToPoint:NSMakePoint(-NSWidth(rect), 0)];
+    [path closePath];
 }
 
-void PSPin(float x, float y, float w, float h)
+static void PSPin(NSBezierPath *path, NSRect rect)
 {
-    PSmoveto(x, y + 2);
-    PSarc(x, y - (h - w/2 - 2), w/2, 90, 450);
+    float radius = NSWidth(rect) / 2;
+    float yCenter = NSMinY(rect) - (NSHeight(rect) - radius - 2);
+
+    [path moveToPoint:NSMakePoint(NSMinX(rect), NSMinY(rect)+2)];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rect), yCenter)
+                                     radius:radius
+                                 startAngle:90.0
+                                   endAngle:450.0];
+    [path closePath];
 }
 
-void PSFPin(float x, float y, float w, float h)
+static void PSFPin(NSBezierPath *path, NSRect rect)
 {
-    PSmoveto(x, y - 2);
-    PSarc(x, y + (h - w/2 - 2), w/2, -90, 270);
+    float radius = NSWidth(rect) / 2;
+    float yCenter = NSMinY(rect) + (NSHeight(rect) - radius - 2);
+
+    [path moveToPoint:NSMakePoint(NSMinX(rect), NSMinY(rect)-2)];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rect), yCenter)
+                                     radius:radius
+                                 startAngle:-90.0
+                                   endAngle:270.0];
+    [path closePath];
 }
 
-void PSFlag(float x, float y, float w, float h)
+static void PSFlag(NSBezierPath *path, NSRect rect)
 {
-    PSmoveto(x, y + 2);
-    PSrlineto(0, -h);
-    PSrlineto(-w, 0);
-    PSrlineto(0, w);
-    PSrlineto(w, 0);
+    [path moveToPoint:NSMakePoint(NSMinX(rect), NSMinY(rect)+2)];
+    [path relativeLineToPoint:NSMakePoint(0, -(NSHeight(rect) - NSWidth(rect)))];
+    [path relativeLineToPoint:NSMakePoint(-NSWidth(rect), 0)];
+    [path relativeLineToPoint:NSMakePoint(0, -NSWidth(rect))];
+    [path relativeLineToPoint:NSMakePoint(NSWidth(rect), 0)];
+    [path closePath];
 }
 
-void PSFFlag(float x, float y, float w, float h)
+static void PSFFlag(NSBezierPath *path, NSRect rect)
 {
-    PSmoveto(x, y - 2);
-    PSrlineto(0, h);
-    PSrlineto(-w, 0);
-    PSrlineto(0, -w);
-    PSrlineto(w, 0);
+    [path moveToPoint:NSMakePoint(NSMinX(rect), NSMinY(rect)-2)];
+    [path relativeLineToPoint:NSMakePoint(0, NSHeight(rect))];
+    [path relativeLineToPoint:NSMakePoint(-NSWidth(rect), 0)];
+    [path relativeLineToPoint:NSMakePoint(0, -NSWidth(rect))];
+    [path relativeLineToPoint:NSMakePoint(NSWidth(rect), 0)];
+    [path closePath];
 }
 
-void PSRFlag(float x, float y, float w, float h)
+static void PSRFlag(NSBezierPath *path, NSRect rect)
 {
-    PSmoveto(x, y + 2);
-    PSrlineto(0, -h);
-    PSrlineto(w, 0);
-    PSrlineto(0, w);
-    PSrlineto(-w, 0);
+    [path moveToPoint:NSMakePoint(NSMinX(rect), NSMinY(rect)+2)];
+    [path relativeLineToPoint:NSMakePoint(0, -NSHeight(rect))];
+    [path relativeLineToPoint:NSMakePoint(NSWidth(rect), 0)];
+    [path relativeLineToPoint:NSMakePoint(0, NSWidth(rect))];
+    [path relativeLineToPoint:NSMakePoint(-NSWidth(rect), 0)];
+    [path closePath];
 }
 
-void PSFRFlag(float x, float y, float w, float h)
+static void PSFRFlag(NSBezierPath *path, NSRect rect)
 {
-    PSmoveto(x, y - 2);
-    PSrlineto(0, h);
-    PSrlineto(w, 0);
-    PSrlineto(0, -w);
-    PSrlineto(-w, 0);
+    [path moveToPoint:NSMakePoint(NSMinX(rect), NSMinY(rect)-2)];
+    [path relativeLineToPoint:NSMakePoint(0, NSHeight(rect) - NSWidth(rect))];
+    [path relativeLineToPoint:NSMakePoint(NSWidth(rect), 0)];
+    [path relativeLineToPoint:NSMakePoint(0, NSWidth(rect))];
+    [path relativeLineToPoint:NSMakePoint(-NSWidth(rect), 0)];
+    [path closePath];
 }
 
-void PSOut(float x, float y, float w, float h)
+static void PSSquare(NSBezierPath *path, NSRect rect)
 {
-    //PSsetlinewidth(2);
-    PSmoveto(x + w, y);
-    PSarc(x, y, w, 0, 360);
-    PSmoveto(x, y);
-    PSarc(x, y, 1, 0, 360);
+    [path moveToPoint:NSMakePoint(NSMinX(rect), NSMinY(rect)+2)];
+    [path relativeLineToPoint:NSMakePoint(0, -(NSHeight(rect)-NSWidth(rect)))];
+    [path relativeLineToPoint:NSMakePoint(-NSWidth(rect)/2, 0)];
+    [path relativeLineToPoint:NSMakePoint(0, -NSWidth(rect))];
+    [path relativeLineToPoint:NSMakePoint(NSWidth(rect), 0)];
+    [path relativeLineToPoint:NSMakePoint(0, NSWidth(rect))];
+    [path relativeLineToPoint:NSMakePoint(-NSWidth(rect)/2, 0)];
+    [path closePath];
 }
 
-void PSIn(float x, float y, float w, float h)
+static void PSFSquare(NSBezierPath *path, NSRect rect)
 {
-    //PSsetlinewidth(2);
-    PSmoveto(x + w, y);
-    PSarc(x, y, w, 0, 360);
-    PSmoveto(x, y - w/2);
-    PSrlineto(0, w);
-    PSmoveto(x - w/2, y);
-    PSrlineto(w, 0);
+    [path moveToPoint:NSMakePoint(NSMinX(rect), NSMinY(rect)-2)];
+    [path relativeLineToPoint:NSMakePoint(0, NSHeight(rect) - NSWidth(rect))];
+    [path relativeLineToPoint:NSMakePoint(NSWidth(rect)/2, 0)];
+    [path relativeLineToPoint:NSMakePoint(0, NSWidth(rect))];
+    [path relativeLineToPoint:NSMakePoint(-NSWidth(rect), 0)];
+    [path relativeLineToPoint:NSMakePoint(0, -NSWidth(rect))];
+    [path relativeLineToPoint:NSMakePoint(NSWidth(rect)/2, 0)];
+    [path closePath];
+}
+
+static void PSOut(NSBezierPath *path, NSRect rect)
+{
+    [path moveToPoint:NSMakePoint(NSMaxX(rect), NSMinY(rect))];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rect), NSMinY(rect))
+                                     radius:NSWidth(rect)
+                                 startAngle:0
+                                   endAngle:360];
+    [path moveToPoint:NSMakePoint(NSMinX(rect), NSMinY(rect))];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rect), NSMinY(rect))
+                                     radius:1
+                                 startAngle:0
+                                   endAngle:360];
+}
+
+static void PSIn(NSBezierPath *path, NSRect rect)
+{
+    [path moveToPoint:NSMakePoint(NSMaxX(rect), NSMinY(rect))];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rect), NSMinY(rect))
+                                     radius:NSWidth(rect)
+                                 startAngle:0
+                                   endAngle:360];
+    [path moveToPoint:NSMakePoint(NSMinX(rect), NSMinY(rect) - NSWidth(rect)/2)];
+    [path relativeLineToPoint:NSMakePoint(0, NSWidth(rect))];
+    [path moveToPoint:NSMakePoint(NSMinX(rect) - NSWidth(rect)/2, NSMinY(rect))];
+    [path relativeLineToPoint:NSMakePoint(NSWidth(rect), 0)];
 }
 
 // functions for PajeLink entities' shapes
@@ -153,54 +182,234 @@ void PSIn(float x, float y, float w, float h)
 // x, y is the starting point; x+w, y+h is the ending point
 // functions should not change line width
 
-void PSLine(float x, float y, float w, float h)
+static void PSLine(NSBezierPath *path, NSRect rect)
 {
-    PSmoveto(x, y);
-    PSrlineto(w, h);
+    [path moveToPoint:NSMakePoint(NSMinX(rect), NSMinY(rect))];
+    [path lineToPoint:NSMakePoint(NSMaxX(rect), NSMaxY(rect))];
 }
 
-void PSArrow(float x, float y, float w, float h)
+static void PSArrow(NSBezierPath *path, NSRect rect)
 {
     float len;
     float ang;
-    float bx, by;
+
+    len = sqrt(NSWidth(rect)*NSWidth(rect) + NSHeight(rect)*NSHeight(rect));
+    if (len > 0) {
+        NSBezierPath *arrow;
+        arrow = [NSBezierPath bezierPath];
+        [arrow moveToPoint:NSMakePoint(-7, 0)];
+        [arrow lineToPoint:NSMakePoint(-7, 2.5)];
+        [arrow lineToPoint:NSMakePoint(0, 0)];
+        [arrow lineToPoint:NSMakePoint(-7, -2.5)];
+        [arrow lineToPoint:NSMakePoint(-7, 0)];
+        ang = atan2(NSHeight(rect), NSWidth(rect)) * 180 / M_PI;
+        NSAffineTransform *transform;
+        transform = [NSAffineTransform transform];
+        [transform translateXBy:NSMaxX(rect) yBy:NSMaxY(rect)];
+        [transform rotateByDegrees:ang];
+        [arrow transformUsingAffineTransform:transform];
+        [path appendBezierPath:arrow];
+        [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rect), NSMinY(rect))
+                                         radius:1.5
+                                     startAngle:ang
+                                       endAngle:ang+360];
+    }
+}
+
+static void PSOpenArrow(NSBezierPath *path, NSRect rect)
+{
+    float len;
+    float ang;
+
+    len = sqrt(NSWidth(rect)*NSWidth(rect) + NSHeight(rect)*NSHeight(rect));
+    if (len > 0) {
+        NSBezierPath *arrow;
+        arrow = [NSBezierPath bezierPath];
+        [arrow lineToPoint:NSMakePoint(-7, 3)];
+        [arrow lineToPoint:NSMakePoint(0, 0)];
+        [arrow lineToPoint:NSMakePoint(-7, -3)];
+        [arrow moveToPoint:NSMakePoint(0, 0)];
+        ang = atan2(NSHeight(rect), NSWidth(rect)) * 180 / M_PI;
+        NSAffineTransform *transform;
+        transform = [NSAffineTransform transform];
+        [transform translateXBy:NSMaxX(rect) yBy:NSMaxY(rect)];
+        [transform rotateByDegrees:ang];
+        [arrow transformUsingAffineTransform:transform];
+        [path appendBezierPath:arrow];
+        [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rect), NSMinY(rect))
+                                         radius:1.5
+                                     startAngle:ang
+                                       endAngle:ang+360];
+    }
+}
+
+static void PSDoubleArrow(NSBezierPath *path, NSRect rect)
+{
+    float len;
+    float ang;
+
+    len = sqrt(NSWidth(rect)*NSWidth(rect) + NSHeight(rect)*NSHeight(rect));
+    if (len <= 0) {
+        return;
+    }
+
+    NSBezierPath *arrow;
+    arrow = [NSBezierPath bezierPath];
+    [arrow moveToPoint:NSMakePoint(-12, 0)];
+    [arrow lineToPoint:NSMakePoint(-12, 2.5)];
+    [arrow lineToPoint:NSMakePoint(-7, 2.5*2/7)];
+    [arrow lineToPoint:NSMakePoint(-7, 2.5)];
+    [arrow lineToPoint:NSMakePoint(0, 0)];
+    [arrow lineToPoint:NSMakePoint(-7, -2.5)];
+    [arrow lineToPoint:NSMakePoint(-7, -2.5*2/7)];
+    [arrow lineToPoint:NSMakePoint(-12, -2.5)];
+    [arrow lineToPoint:NSMakePoint(-12, 0)];
+    ang = atan2(NSHeight(rect), NSWidth(rect)) * 180 / M_PI;
+    NSAffineTransform *transform;
+    transform = [NSAffineTransform transform];
+    [transform translateXBy:NSMaxX(rect) yBy:NSMaxY(rect)];
+    [transform rotateByDegrees:ang];
+    [arrow transformUsingAffineTransform:transform];
+    [path appendBezierPath:arrow];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rect), NSMinY(rect))
+                                     radius:1.5
+                                 startAngle:ang
+                                   endAngle:ang+360];
     
-    len = sqrt(w*w + h*h);
-    if (len) {
-        ang = atan2(h, w) * 180 / M_PI;
-        PSnewpath();
-        PSmoveto(x, y);
-        PSrotate(ang);
-        PScurrentpoint(&bx, &by);
-        PSrmoveto(len - 7, 0);
-        PSrlineto(0, 2.5);
-        PSrlineto(7, -2.5);
-        PSrlineto(-7, -2.5);
-        PSclosepath();
-        PSarc(bx, by, 1.5, 0, 360);
-    }
 }
 
-void PSArrow2(float x, float y, float w, float h)
+static void PSDiamondArrow(NSBezierPath *path, NSRect rect)
 {
     float len;
     float ang;
 
-    len = sqrt(w*w + h*h);
-    if (len) {
-        ang = atan2(h, w) * 180 / M_PI;
-        PSmoveto(x, y);
-        PSrotate(ang);
-        PSrlineto(0, 2);
-        PSrlineto(0, -4);
-        PSrlineto(0, 2);	
-        PSrlineto(len - 7, 0);
-        PSrlineto(0, 2.5);
-        PSrlineto(7, -2.5);
-        PSrlineto(-7, -2.5);
-        PSrlineto(0, 2.5);
+    len = sqrt(NSWidth(rect)*NSWidth(rect) + NSHeight(rect)*NSHeight(rect));
+    if (len <= 0) {
+        return;
     }
+
+    NSBezierPath *arrow;
+    arrow = [NSBezierPath bezierPath];
+    [arrow moveToPoint:NSMakePoint(-14, 0)];
+    [arrow lineToPoint:NSMakePoint(-7, 2.5)];
+    [arrow lineToPoint:NSMakePoint(0, 0)];
+    [arrow lineToPoint:NSMakePoint(-7, -2.5)];
+    [arrow lineToPoint:NSMakePoint(-14, 0)];
+    ang = atan2(NSHeight(rect), NSWidth(rect)) * 180 / M_PI;
+    NSAffineTransform *transform;
+    transform = [NSAffineTransform transform];
+    [transform translateXBy:NSMaxX(rect) yBy:NSMaxY(rect)];
+    [transform rotateByDegrees:ang];
+    [arrow transformUsingAffineTransform:transform];
+    [path appendBezierPath:arrow];
+    [path appendBezierPathWithArcWithCenter:NSMakePoint(NSMinX(rect), NSMinY(rect))
+                                     radius:1.5
+                                 startAngle:ang
+                                   endAngle:ang+360];
+    
 }
+
+// functions for PajeVariable entities' shapes
+
+
+void PSCurveAvg(NSBezierPath *path, NSRect rect)
+{
+    float xMax = NSMaxX(rect);
+    float xAvg = NSMidX(rect);
+    float yAvg = NSMidY(rect);
+    float yCur = [path currentPoint].y;
+
+    [path curveToPoint:NSMakePoint(xAvg, yAvg)
+         controlPoint1:NSMakePoint(xMax, yCur)
+         controlPoint2:NSMakePoint(xMax, yAvg)];
+}
+
+void PSCurve(NSBezierPath *path, NSRect rect)
+{
+    float xMin = NSMinX(rect);
+    float xMax = NSMaxX(rect);
+    float x1 = xMin+2./3*(xMax-xMin);
+    float x2 = xMin+1./3*(xMax-xMin);
+    float yAvg = NSMidY(rect);
+    float yCur = [path currentPoint].y;
+
+    [path curveToPoint:NSMakePoint(xMin, yAvg)
+         controlPoint1:NSMakePoint(x1, yCur)
+         controlPoint2:NSMakePoint(x2, yAvg)];
+}
+
+void PSCurveMin2(NSBezierPath *path, NSRect rect)
+{
+    float xMin = NSMinX(rect);
+    float xMax = NSMaxX(rect);
+    float xAvg = NSMidX(rect);
+    float yAvg = NSMidY(rect);
+
+    [path curveToPoint:NSMakePoint(xMin, yAvg)
+         controlPoint1:NSMakePoint(xMax, yAvg)
+         controlPoint2:NSMakePoint(xAvg, yAvg)];
+}
+
+void PSCurveMin(NSBezierPath *path, NSRect rect)
+{
+    float xMin = NSMinX(rect);
+    float xAvg = NSMidX(rect);
+    float yAvg = NSMidY(rect);
+    float yCur = [path currentPoint].y;
+
+    [path curveToPoint:NSMakePoint(xMin, yAvg)
+         controlPoint1:NSMakePoint(xAvg, yCur)
+         controlPoint2:NSMakePoint(xAvg, yAvg)];
+}
+
+void PSBuilding(NSBezierPath *path, NSRect rect)
+{
+    float xMin = NSMinX(rect);
+    float xMax = NSMaxX(rect);
+    float yAvg = NSMidY(rect);
+
+    [path lineToPoint:NSMakePoint(xMax, yAvg)];
+    [path lineToPoint:NSMakePoint(xMin, yAvg)];
+}
+
+void PSMountain(NSBezierPath *path, NSRect rect)
+{
+    float xMin = NSMinX(rect);
+    float yAvg = NSMidY(rect);
+
+    [path lineToPoint:NSMakePoint(xMin, yAvg)];
+}
+
+void PSTimes(NSBezierPath *path, NSRect rect)
+{
+    float xMin = NSMinX(rect);
+    float yAvg = NSMidY(rect);
+
+    [path moveToPoint:NSMakePoint(xMin-3, yAvg-3)];
+    [path lineToPoint:NSMakePoint(xMin+3, yAvg+3)];
+    [path moveToPoint:NSMakePoint(xMin+3, yAvg-3)];
+    [path lineToPoint:NSMakePoint(xMin-3, yAvg+3)];
+}
+
+void PSCrosses(NSBezierPath *path, NSRect rect)
+{
+    float xMin = NSMinX(rect);
+    float yAvg = NSMidY(rect);
+
+    [path moveToPoint:NSMakePoint(xMin, yAvg-3)];
+    [path lineToPoint:NSMakePoint(xMin, yAvg+3)];
+    [path moveToPoint:NSMakePoint(xMin+3, yAvg)];
+    [path lineToPoint:NSMakePoint(xMin-3, yAvg)];
+}
+
+void PSDots(NSBezierPath *path, NSRect rect)
+{
+    float xMin = NSMinX(rect);
+    float yAvg = NSMidY(rect);
+
+    [path appendBezierPathWithOvalInRect:NSMakeRect(xMin-1.5, yAvg-1.5, 3, 3)];
+}
+
 
 // functions for PajeContainer entities' shapes
 
@@ -213,68 +422,180 @@ void PSArrow2(float x, float y, float w, float h)
 // these functions should draw an already made shape path
 // using the current color
 
-void PSDashedStroke(void)
+static void PSFill(NSBezierPath *path, NSColor *color)
 {
-    float dash[] = {2, 1};
-    //PSsetlinewidth(2);
-    PSsetdash(dash, 2, 0);
-    PSstroke();
+    if (color != nil){
+        [color set];
+        [path fill];
+    }
 }
 
-void PSFillAndFrameBlack(void)
+static void PSFrame(NSBezierPath *path, NSColor *color)
 {
-    PSgsave();
-    PSfill();
-    PSgrestore();
-    PSsetgray(0);
-    PSstroke();
+    if (color != nil){
+        [color set];
+    } else {
+        [[NSColor blackColor] set];
+    }
+    [path stroke];
 }
 
-void PSFillAndFrameGray(void)
+static void PSFillAndFrame(NSBezierPath *path, NSColor *color)
 {
-    PSgsave();
-    PSfill();
-    PSgrestore();
-    PSsetgray(0.5);
-    PSstroke();
-}
-
-void PSFillAndFrameWhite(void)
-{
-    PSgsave();
-    PSfill();
-    PSgrestore();
-    PSsetgray(1);
-    PSstroke();
+    if (color != nil){
+        [color set];
+        [path fill];
+    } else {
+        [[NSColor blackColor] set];
+    }
+    [path stroke];
 }
 
 
-void PSFrameWhite(void)
+static void PSDashedStroke(NSBezierPath *path, NSColor *color)
 {
-    PSsetgray(1);
-    PSstroke();
+    float dash[] = {5, 3};
+    [path setLineDash:dash count:2 phase:0];
+    if (color == nil){
+        color = [NSColor blackColor];
+    }
+    [color set];
+    [path stroke];
+}
+
+static void PSFillAndFrameBlack(NSBezierPath *path, NSColor *color)
+{
+    if (color != nil){
+        [color set];
+        [path fill];
+    }
+    [[NSColor blackColor] set];
+    [path stroke];
+}
+
+static void PSFillAndFrameGray(NSBezierPath *path, NSColor *color)
+{
+    if (color != nil){
+        [color set];
+        [path fill];
+    }
+    [[NSColor grayColor] set];
+    [path stroke];
+}
+
+static void PSFillAndFrameWhite(NSBezierPath *path, NSColor *color)
+{
+    if (color != nil){
+        [color set];
+        [path fill];
+    }
+    [[NSColor whiteColor] set];
+    [path stroke];
 }
 
 
-void PSFillAndDashedStrokeBlack(void)
+static void PSFrameWhite(NSBezierPath *path, NSColor *color)
 {
-    float dash[] = {2, 1};
-    PSgsave();
-    PSfill();
-    PSgrestore();
-    PSsetgray(0);
-    //PSsetlinewidth(2);
-    PSsetdash(dash, 2, 0);
-    PSstroke();
+    [[NSColor whiteColor] set];
+    [path stroke];
 }
 
+
+static void PSFillAndDashedStrokeBlack(NSBezierPath *path, NSColor *color)
+{
+    float dash[] = {5, 3};
+    [path setLineDash:dash count:2 phase:0];
+    if (color != nil) {
+        [color set];
+        [path fill];
+    }
+    [[NSColor blackColor] set];
+    [path stroke];
+}
+
+static void PS3DStroke(NSBezierPath *path, NSColor *color)
+{
+    float lineWidth;
+    lineWidth = [path lineWidth];
+    if (color == nil) {
+        color = [NSColor blackColor];
+    }
+    [color set];
+    [path stroke];
+    NSAffineTransform *transform = [NSAffineTransform transform];
+    [path setLineWidth:lineWidth + 4];
+    [[NSColor colorWithCalibratedWhite:0.2 alpha:0.1] set];
+    [transform translateXBy: 4.0 yBy: 6.0];
+    [path transformUsingAffineTransform: transform];
+    [path stroke];
+    [path setLineWidth:lineWidth];
+    [path stroke];
+    //[path setLineWidth:lineWidth - 2];
+    //[path stroke];
+    [transform translateXBy: -8.0 yBy: -12.0];
+    [path transformUsingAffineTransform: transform];
+    [transform translateXBy: 4.0 yBy: 6.0];
+
+    [path setLineWidth:lineWidth - 2];
+    [transform translateXBy: 1.0 yBy: 1.0]; // move +1,+1
+    [path transformUsingAffineTransform: transform]; // at +1,+1
+    [[color shadowWithLevel:0.3] set];
+    [path stroke];
+    [transform translateXBy: -3.0 yBy: -3.0]; // move -2,-2
+    [path transformUsingAffineTransform: transform]; // at -1,-1
+    [[color highlightWithLevel:0.3] set];
+    [path stroke];
+    [transform translateXBy: 3.0 yBy: 3.0]; // move +1,+1
+    [path transformUsingAffineTransform: transform]; // at 0,0
+    [color set];
+    [path stroke];
+}
+
+static void PS3DFill(NSBezierPath *path, NSColor *color)
+{
+    float lineWidth;
+    lineWidth = [path lineWidth];
+    if (color == nil) {
+        color = [NSColor blackColor];
+    }
+    [color set];
+    [path fill];
+    NSAffineTransform *transform = [NSAffineTransform transform];
+    [path setLineWidth:lineWidth + 4];
+    [[NSColor colorWithCalibratedWhite:0.2 alpha:0.1] set];
+    [transform translateXBy: 4.0 yBy: 6.0];
+    [path transformUsingAffineTransform: transform];
+    [path fill];
+    [path setLineWidth:lineWidth];
+    [path fill];
+    //[path setLineWidth:lineWidth - 2];
+    //[path stroke];
+    [transform translateXBy: -8.0 yBy: -12.0];
+    [path transformUsingAffineTransform: transform];
+    [transform translateXBy: 4.0 yBy: 6.0];
+
+    [path setLineWidth:lineWidth - 2];
+    [transform translateXBy: 1.0 yBy: 1.0]; // move +1,+1
+    [path transformUsingAffineTransform: transform]; // at +1,+1
+    [[color shadowWithLevel:0.3] set];
+    [path fill];
+    [transform translateXBy: -3.0 yBy: -3.0]; // move -2,-2
+    [path transformUsingAffineTransform: transform]; // at -1,-1
+    [[color highlightWithLevel:0.3] set];
+    [path fill];
+    [transform translateXBy: 3.0 yBy: 3.0]; // move +1,+1
+    [path transformUsingAffineTransform: transform]; // at 0,0
+    [color set];
+    [path fill];
+}
 
 @implementation ShapeFunction
 
-NSDictionary *stateShapeFunctionsDictionary;
-NSDictionary *eventShapeFunctionsDictionary;
-NSDictionary *linkShapeFunctionsDictionary;
-NSDictionary *containerShapeFunctionsDictionary;
+static NSDictionary *stateShapeFunctionsDictionary;
+static NSDictionary *eventShapeFunctionsDictionary;
+static NSDictionary *linkShapeFunctionsDictionary;
+static NSDictionary *variableShapeFunctionsDictionary;
+static NSDictionary *containerShapeFunctionsDictionary;
 
 
 + (void)initialize
@@ -293,6 +614,8 @@ NSDictionary *containerShapeFunctionsDictionary;
         EFUNCTION(PSFTriangle, 0, 0.5),
         EFUNCTION(PSPin, 1, 0.5),
         EFUNCTION(PSFPin, 0, 0.5),
+        EFUNCTION(PSSquare, 1, 0.5),
+        EFUNCTION(PSFSquare, 0, 0.5),
         EFUNCTION(PSFlag, 1, 0),
         EFUNCTION(PSFFlag, 0, 0),
         EFUNCTION(PSRFlag, 1, 1),
@@ -302,8 +625,21 @@ NSDictionary *containerShapeFunctionsDictionary;
         nil] retain];
     linkShapeFunctionsDictionary = [[NSDictionary dictionaryWithObjectsAndKeys:
         FUNCTION(PSArrow),
-        FUNCTION(PSArrow2),
+        FUNCTION(PSOpenArrow),
+        FUNCTION(PSDoubleArrow),
+        FUNCTION(PSDiamondArrow),
         FUNCTION(PSLine),
+        nil] retain];
+    variableShapeFunctionsDictionary = [[NSDictionary dictionaryWithObjectsAndKeys:
+        FUNCTION(PSCurveAvg),
+        FUNCTION(PSCurve),
+        FUNCTION(PSCurveMin),
+        FUNCTION(PSCurveMin2),
+        FUNCTION(PSBuilding),
+        FUNCTION(PSMountain),
+        FUNCTION(PSTimes),
+        FUNCTION(PSCrosses),
+        FUNCTION(PSDots),
         nil] retain];
     containerShapeFunctionsDictionary = [[NSDictionary dictionaryWithObjectsAndKeys:
         FUNCTION(PSNoShape),
@@ -321,6 +657,8 @@ NSDictionary *containerShapeFunctionsDictionary;
     if (f != nil) return f;
     f = [linkShapeFunctionsDictionary objectForKey:n];
     if (f != nil) return f;
+    f = [variableShapeFunctionsDictionary objectForKey:n];
+    if (f != nil) return f;
     f = [containerShapeFunctionsDictionary objectForKey:n];
     if (f != nil) return f;
     return [self shapeFunctionWithName:@"PSNoShape"];
@@ -335,6 +673,8 @@ NSDictionary *containerShapeFunctionsDictionary;
         return [eventShapeFunctionsDictionary allValues];
     case PajeLinkDrawingType:
         return [linkShapeFunctionsDictionary allValues];
+    case PajeVariableDrawingType:
+        return [variableShapeFunctionsDictionary allValues];
     case PajeContainerDrawingType:
         return [containerShapeFunctionsDictionary allValues];
     default:
@@ -405,21 +745,29 @@ NSDictionary *drawFunctionsDictionary;
 {
 #define FUNCTION(n) [self drawFunctionWithFunction:n name:@#n], @#n
     drawFunctionsDictionary = [[NSDictionary dictionaryWithObjectsAndKeys:
-        FUNCTION(PSfill),
-        FUNCTION(PSstroke),
+        FUNCTION(PSFill),
+        FUNCTION(PSFrame),
+        FUNCTION(PSFillAndFrame),
         FUNCTION(PSDashedStroke),
         FUNCTION(PSFillAndFrameBlack),
         FUNCTION(PSFillAndFrameGray),
         FUNCTION(PSFillAndFrameWhite),
         FUNCTION(PSFrameWhite),
         FUNCTION(PSFillAndDashedStrokeBlack),
+        FUNCTION(PS3DStroke),
+        FUNCTION(PS3DFill),
         nil] retain];
 #undef FUNCTION
 }
 
 + (DrawFunction *)drawFunctionWithName:(NSString *)n
 {
-    return [drawFunctionsDictionary objectForKey:n];
+    DrawFunction *function;
+    function = [drawFunctionsDictionary objectForKey:n];
+    if (function == nil) {
+        function = [drawFunctionsDictionary objectForKey:@"PSFill"];
+    }
+    return function;
 }
 
 + (NSArray *)drawFunctions

@@ -103,6 +103,7 @@ return;
 
   }
 }
+
 - (void) drawInteriorWithFrame: (NSRect)cellFrame inView: (NSView*)controlView
 {
   if (![controlView window])
@@ -112,7 +113,7 @@ return;
 
   //FIXME: Check if this is also neccessary for images,
   // Add spacing between border and inside 
-  if (_cell.is_bordered || _cell.is_bezeled)
+  if ([self isBordered] || [self isBezeled])
     {
       cellFrame.origin.x += 3;
       cellFrame.size.width -= 6;
@@ -120,7 +121,7 @@ return;
       cellFrame.size.height -= 2;
     }
 
-  switch (_cell.type)
+  switch ([self type])
     {
       case NSTextCellType:
         {
@@ -130,12 +131,12 @@ return;
 	break;
 
       case NSImageCellType:
-	if (_cell_image)
+	if ([self image])
 	  {
 	    NSSize size;
 	    NSPoint position;
 
-	    size = [_cell_image size];
+	    size = [[self image] size];
 	    position.x = MAX(NSMidX(cellFrame) - (size.width/2.),0.);
 	    position.y = MAX(NSMidY(cellFrame) - (size.height/2.),0.);
 	    /*
@@ -145,7 +146,7 @@ return;
 	     */
 	    if ([controlView isFlipped])
 	      position.y += size.height;
-	    [_cell_image compositeToPoint: position operation: NSCompositeSourceOver];
+	    [[self image] compositeToPoint: position operation: NSCompositeSourceOver];
 	  }
 	 break;
 
@@ -153,7 +154,7 @@ return;
          break;
     }
 
-  if (_cell.shows_first_responder)
+  if ([self showsFirstResponder])
     NSDottedFrameRect(cellFrame);
 
   // NB: We don't do any highlighting to make it easier for subclasses
@@ -324,6 +325,134 @@ if (maxLevel == 0) maxLevel = 1;
 }
 
 - (void)drawHashMarksAndLabelsInRect:(NSRect)drawRect
+                   forVariableLayout:(STVariableTypeLayout *)layout
+{
+    float vMin;
+    float vMax;
+    float yScale;
+    float yOffset;
+    PajeEntityType *entityType;
+    
+    entityType = [layout entityType];
+
+    vMin = [layout minValue];
+    vMax = [layout maxValue];
+    if (vMax <= vMin) {
+        vMin = [controller minValueForEntityType:entityType];
+        vMax = [controller maxValueForEntityType:entityType];
+    }
+
+    if (vMin != vMax) {
+        yScale = -([layout height] - 4) / (vMax - vMin);
+    } else {
+        yScale = 1;
+    }
+
+    yOffset = NSMinY(drawRect) + 2 - (vMax * yScale);
+
+    //y = [filter valueForEntity:entity] * yScale + yOffset;
+    [[NSColor controlColor] set];
+    //NSRectFill(drawRect);
+    NSBezierPath *path;
+    path = [NSBezierPath bezierPath];
+    [path moveToPoint:NSMakePoint(NSMaxX(drawRect), NSMinY(drawRect) + 2)];
+    [path lineToPoint:NSMakePoint(NSMaxX(drawRect), NSMaxY(drawRect) - 2)];
+    
+    NSFont *font = [NSFont systemFontOfSize: [NSFont smallSystemFontSize]];
+    NSDictionary *attr = [[NSDictionary alloc] initWithObjectsAndKeys:
+                               font, NSFontAttributeName,
+                               [NSColor blackColor], NSForegroundColorAttributeName,
+                               nil];
+
+    NSEnumerator *en = [[layout hashMarkValues] objectEnumerator];
+    NSNumber *n;
+    while ((n = [en nextObject]) != nil) {
+        NSSize size;
+        NSString *str;
+        NSString *hashValueFormat = [layout hashValueFormat];
+        float v = [n floatValue];
+        float y = v * yScale + yOffset;
+        float x;
+        [path moveToPoint:NSMakePoint(NSMaxX(drawRect) - 4, y)];
+        [path lineToPoint:NSMakePoint(NSMaxX(drawRect), y)];
+        str = [NSString stringWithFormat:hashValueFormat, v];
+        size = [str sizeWithAttributes:attr];
+        x = NSMaxX(drawRect) - size.width;
+        if (y > NSMinY(drawRect) + size.height + 1) {
+            [str drawAtPoint:NSMakePoint(x, y - size.height + 2)
+              withAttributes:attr];
+        } else {
+            [str drawAtPoint:NSMakePoint(x, y + 1)
+              withAttributes:attr];
+        }
+    }
+    [[NSColor blackColor] set];
+    [path stroke];
+    [attr release];
+}
+- (void)drawHashMarksAndLabelsInRect:(NSRect)drawRect
+                  forContainerLayout:(STContainerTypeLayout *)layout
+{
+    float vMin;
+    float vMax;
+    float yScale;
+    float yOffset;
+    PajeEntityType *entityType;
+    
+    entityType = [layout entityType];
+
+    vMin = [layout minValue];
+    vMax = [layout maxValue];
+    if (vMax <= vMin) {
+        return;
+    }
+
+    yScale = -([layout heightForVariables] - 4) / (vMax - vMin);
+
+    yOffset = NSMinY(drawRect) + 2 - (vMax * yScale)
++ [layout variablesOffset] ;
+    //y = [filter valueForEntity:entity] * yScale + yOffset;
+    [[NSColor controlColor] set];
+    //NSRectFill(drawRect);
+    NSBezierPath *path;
+    path = [NSBezierPath bezierPath];
+    [path moveToPoint:NSMakePoint(NSMaxX(drawRect), NSMinY(drawRect) + 2)];
+    [path lineToPoint:NSMakePoint(NSMaxX(drawRect), NSMaxY(drawRect) - 2)];
+    
+    NSFont *font = [NSFont systemFontOfSize: [NSFont smallSystemFontSize]];
+    NSDictionary *attr = [[NSDictionary alloc] initWithObjectsAndKeys:
+                               font, NSFontAttributeName,
+                               [NSColor blackColor], NSForegroundColorAttributeName,
+                               nil];
+
+    NSEnumerator *en = [[layout hashMarkValues] objectEnumerator];
+    NSNumber *n;
+    while ((n = [en nextObject]) != nil) {
+        NSSize size;
+        NSString *str;
+        NSString *hashValueFormat = [layout hashValueFormat];
+        float v = [n floatValue];
+        float y = v * yScale + yOffset;
+        float x;
+        [path moveToPoint:NSMakePoint(NSMaxX(drawRect) - 4, y)];
+        [path lineToPoint:NSMakePoint(NSMaxX(drawRect), y)];
+        str = [NSString stringWithFormat:hashValueFormat, v];
+        size = [str sizeWithAttributes:attr];
+        x = NSMaxX(drawRect) - size.width;
+        if (y > NSMinY(drawRect) + size.height + 1) {
+            [str drawAtPoint:NSMakePoint(x, y - size.height + 2)
+              withAttributes:attr];
+        } else {
+            [str drawAtPoint:NSMakePoint(x, y + 1)
+              withAttributes:attr];
+        }
+    }
+    [[NSColor blackColor] set];
+    [path stroke];
+    [attr release];
+}
+
+- (void)drawHashMarksAndLabelsInRect:(NSRect)drawRect
 {
 int x;
 x = maxLevel;//[thicknesses count];
@@ -347,6 +476,13 @@ if (x != maxLevel/*[thicknesses count]*/) {
     NSEnumerator *sublayoutEnum;
     STContainerTypeLayout *sublayout;
 
+if ([layout heightForVariables] > 10) {
+NSRect r = [layout rectOfInstance:container];
+r.origin.x = NSMinX(drawRect);
+r.origin.y -= offset;
+r.size.width = NSMaxX([self bounds]) - r.origin.x - 1;
+[self drawHashMarksAndLabelsInRect:r forContainerLayout:layout];
+}
     sublayoutEnum = [[layout subtypes] objectEnumerator];
     while ((sublayout = [sublayoutEnum nextObject]) != nil) {
         [self drawContainerLayout:sublayout
@@ -396,6 +532,8 @@ if (x != maxLevel/*[thicknesses count]*/) {
         }
         if (r.size.width > 2 && [layout drawingType] == PajeVariableDrawingType) {
             [self widthForLevel:level];
+//r.size.width = NSMaxX([self bounds]) - r.origin.x - 1;
+//[self drawHashMarksAndLabelsInRect:r forVariableLayout:layout];
         }
         if (![layout isContainer]) return;
         level++;

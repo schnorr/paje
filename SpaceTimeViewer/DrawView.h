@@ -32,11 +32,6 @@
  *              new entity types.
  */
 
-#ifdef GNUSTEP
-#define IBOutlet
-#define IBAction void
-#endif
-
 #include <AppKit/AppKit.h>
 #include "STEntityTypeLayout.h"
 #include "../General/Protocols.h"
@@ -48,9 +43,8 @@
 @interface DrawView: NSView
 {
     IBOutlet NSTextField *cursorTimeField; // TextField to show the time where the cursor is
-    IBOutlet NSTextField *timeUnitField;   // TextField to show the current time unit
+    NSString *cursorTimeFormat;
     IBOutlet NSTextField *entityNameField; // TextField for the name of the entity under cursor
-    IBOutlet NSMatrix *zoomButtonsMatrix;
     IBOutlet NSButton *doubleTimeScaleButton;
     IBOutlet NSButton *zoomToSelectionButton;
 
@@ -66,7 +60,9 @@
     NSDate   *endTime;         // time where trace ends
     NSDate   *oldMiddleTime;   // time at the middle of the scale before the zoom
 
-    PajeEntity *highlightedEntity;// the entity under the cursor
+    NSArray  *highlightedEntities; // entities highlighted by cursor position
+    PajeEntity *cursorEntity;  // the entity under the cursor
+
     NSTrackingRectTag trackingRectTag; // the tag of the tracking rect (adjustSize)
     NSColor  *backgroundColor;
     NSColor  *selectedBackgroundColor;
@@ -80,12 +76,11 @@
     int       smallEntityWidth;
     
 #ifdef GNUSTEP
-    NSSize    size;   // to workaround a probable bug in GNUstep
-                      // ([NSScrollView tile] is changing our frame size)
-
     // GNUstep doesn't draw rectangles that are too big. They are intersected with this.
     NSRect    cutRect;
 #endif
+
+    NSDictionary *entityNameAttributes;
 }
 
 /* instance methods */
@@ -94,6 +89,8 @@
 - (IBAction)doubleTimeScale:sender;
 - (IBAction)halveTimeScale:sender;
 - (IBAction)zoomToSelection:sender;
+
+- (IBAction)getSmallEntityWidthFrom:sender;
 
 - (void)awakeFromNib;
 
@@ -111,8 +108,9 @@
 
 - (void)drawRect:(NSRect)rect;
 
-- (void)setHighlightedEntity:(PajeEntity *)entity;
-- (void)highlightEntities:(NSArray *)entities;
+- (void)setCursorEntity:(PajeEntity *)entity;
+- (void)setHighlightedEntities:(NSArray *)entities;
+- (NSArray *)highlightedEntities;
 
 - (void)changeSelectionWithPoint:(NSPoint)point;
 - (void)setNeedsDisplayFromX:(double)x1 toX:(double)x2;
@@ -148,22 +146,21 @@
 - (void)drawEntitiesWithDescriptor:(STEntityTypeLayout *)layoutDescriptor
                        inContainer:(PajeContainer *)container
                         insideRect:(NSRect)drawRect;
+- (void)drawEntitiesWithDescriptor:(STEntityTypeLayout *)layout
+                       inContainer:(PajeContainer *)container
+                    fromEnumerator:(NSEnumerator *)enumerator;
 - (void)drawEventsWithDescriptor:(STEventTypeLayout *)layoutDescriptor
                      inContainer:(PajeContainer *)container
-                  fromEnumerator:(NSEnumerator *)enumerator
-                    drawFunction:(DrawFunction *)drawFunction;
+                  fromEnumerator:(NSEnumerator *)enumerator;
 - (void)drawStatesWithDescriptor:(STStateTypeLayout *)layoutDescriptor
                      inContainer:(PajeContainer *)container
-                  fromEnumerator:(NSEnumerator *)enumerator
-                    drawFunction:(DrawFunction *)drawFunction;
+                  fromEnumerator:(NSEnumerator *)enumerator;
 - (void)drawLinksWithDescriptor:(STLinkTypeLayout *)layoutDescriptor
                     inContainer:(PajeContainer *)container
-                 fromEnumerator:(NSEnumerator *)enumerator
-                   drawFunction:(DrawFunction *)drawFunction;
+                 fromEnumerator:(NSEnumerator *)enumerator;
 - (void)drawValuesWithDescriptor:(STVariableTypeLayout *)layoutDescriptor
                      inContainer:(PajeContainer *)container
-                  fromEnumerator:(NSEnumerator *)enumerator
-                    drawFunction:(DrawFunction *)drawFunction;
+                  fromEnumerator:(NSEnumerator *)enumerator;
 @end
 
 @interface DrawView (Finding)
@@ -194,6 +191,8 @@ BOOL line_hit(double px, double py,
                  inContainer:(PajeContainer *)container;
 
 - (NSRect)rectForEntity:(PajeEntity *)entity;
+- (NSRect)drawRectForEntity:(PajeEntity *)entity;
+- (NSRect)highlightRectForEntity:(PajeEntity *)entity;
 @end
 
 #define TIMEtoX(time) (startTime?[time timeIntervalSinceDate:startTime] * pointsPerSecond:0)

@@ -62,38 +62,16 @@
 @end
 
 
-@interface STVariableLayoutEditor : STLayoutEditor
-{
-    STVariableTypeLayout *layoutDescriptor;
-    IBOutlet NSTextField *heightField;
-    IBOutlet NSTextField *lineWidthField;
-    IBOutlet NSTextField *minValueField;
-    IBOutlet NSTextField *maxValueField;
-    IBOutlet NSButton *threeDSwitch;
-}
-
-- (void)setLayoutDescriptor:(STEntityTypeLayout *)descriptor;
-
-- (IBAction)heightChanged:(id)sender;
-- (IBAction)lineWidthChanged:(id)sender;
-- (IBAction)minValueChanged:(id)sender;
-- (IBAction)maxValueChanged:(id)sender;
-- (IBAction)threeDChanged:(id)sender;
-@end
-
-
 @interface STShapedLayoutEditor : STLayoutEditor
 {
     IBOutlet NSMatrix *shapeMatrix;
     IBOutlet NSMatrix *drawMatrix;
-    IBOutlet NSMatrix *highlightMatrix;
 }
 
 - (NSRect)rectForImageOfSize:(NSSize)size;
 
 - (ShapeFunction *)selectedShapeFunction;
 - (DrawFunction *)selectedDrawFunction;
-- (DrawFunction *)selectedHighlightFunction;
 
 - (void)setupShapeMatrix;
 - (void)setupDrawMatrices;
@@ -103,7 +81,6 @@
 - (void)recacheAll;
 
 - (IBAction)drawFunctionSelected:(id)sender;
-- (IBAction)highlightFunctionSelected:(id)sender;
 - (IBAction)shapeSelected:(id)sender;
 @end
 
@@ -150,6 +127,22 @@
 - (IBAction)insetAmountChanged:(id)sender;
 - (IBAction)displayValueChanged:(id)sender;
 @end
+
+
+
+@interface STVariableLayoutEditor : STShapedLayoutEditor
+{
+    STVariableTypeLayout *layoutDescriptor;
+    IBOutlet NSTextField *lineWidthField;
+    IBOutlet NSButton *showMinMaxSwitch;
+}
+
+- (void)setLayoutDescriptor:(STEntityTypeLayout *)descriptor;
+
+- (IBAction)lineWidthChanged:(id)sender;
+- (IBAction)showMinMaxChanged:(id)sender;
+@end
+
 
 
 #endif

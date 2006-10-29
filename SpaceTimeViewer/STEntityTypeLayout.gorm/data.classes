@@ -3,34 +3,39 @@
     FirstResponder = {
 	Actions = (
 	    "displayValueChanged:",
+	    "drawFunctionSelected:",
+	    "entityTypeSelected:",
 	    "heightChanged:",
 	    "heightForVariablesChanged:",
+	    "initWithDelegate:",
+	    "insetAmountChanged:",
 	    "lineWidthChanged:",
 	    "maxValueChanged:",
 	    "minValueChanged:",
-	    "insetAmountChanged:",
-	    "threeDChanged:",
+	    "shapeSelected:",
 	    "siblingSeparationChanged:",
 	    "subtypeSeparationChanged:",
+	    "showMinMaxChanged:",
 	    "widthChanged:"
 	);
 	Super = NSObject;
     };
     STContainerLayoutEditor = {
 	Actions = (
-	    "heightForVariablesChanged:",
 	    "siblingSeparationChanged:",
-	    "subtypeSeparationChanged:"
+	    "subtypeSeparationChanged:",
+	    "heightForVariablesChanged:"
 	);
 	Outlets = (
-	    heightForVariablesField,
 	    siblingSeparationField,
-	    subtypeSeparationField
+	    subtypeSeparationField,
+	    heightForVariablesField
 	);
 	Super = STLayoutEditor;
     };
     STEntityTypeLayoutController = {
 	Actions = (
+	    "initWithDelegate:",
 	    "entityTypeSelected:"
 	);
 	Outlets = (
@@ -38,8 +43,8 @@
 	    containerEditor,
 	    variableEditor,
 	    linkEditor,
-	    stateEditor,
-	    eventEditor
+	    eventEditor,
+	    stateEditor
 	);
 	Super = NSObject;
     };
@@ -50,9 +55,9 @@
 	    "displayValueChanged:"
 	);
 	Outlets = (
+	    displayValueSwitch,
 	    heightField,
-	    widthField,
-	    displayValueSwitch
+	    widthField
 	);
 	Super = STShapedLayoutEditor;
     };
@@ -77,13 +82,11 @@
     STShapedLayoutEditor = {
 	Actions = (
 	    "drawFunctionSelected:",
-	    "highlightFunctionSelected:",
 	    "shapeSelected:"
 	);
 	Outlets = (
 	    shapeMatrix,
-	    drawMatrix,
-	    highlightMatrix
+	    drawMatrix
 	);
 	Super = STLayoutEditor;
     };
@@ -94,27 +97,21 @@
 	    "displayValueChanged:"
 	);
 	Outlets = (
+	    displayValueSwitch,
 	    heightField,
-	    insetAmountField,
-	    displayValueSwitch
+	    insetAmountField
 	);
 	Super = STShapedLayoutEditor;
     };
     STVariableLayoutEditor = {
 	Actions = (
-	    "heightChanged:",
 	    "lineWidthChanged:",
-	    "minValueChanged:",
-	    "maxValueChanged:",
-	    "threeDChanged:"
+	    "showMinMaxChanged:"
 	);
 	Outlets = (
-	    heightField,
 	    lineWidthField,
-	    minValueField,
-	    maxValueField,
-	    threeDSwitch
+	    showMinMaxSwitch
 	);
-	Super = STLayoutEditor;
+	Super = STShapedLayoutEditor;
     };
 }

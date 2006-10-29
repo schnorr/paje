@@ -22,10 +22,25 @@
 // methods for finding entities in DrawView.
 
 #include "DrawView.h"
-#ifdef GNUSTEP
+
 #include <math.h>
 #include <values.h>
-#endif
+
+
+// returns a rectangle that is the same as rect but has positive height and width
+static NSRect positiveRect(NSRect rect)
+{
+    if (rect.size.height < 0) {
+        rect.origin.y += rect.size.height;
+        rect.size.height *= -1;
+    }
+    if (rect.size.width < 0) {
+        rect.origin.x += rect.size.width;
+        rect.size.width *= -1;
+    }
+    return rect;
+}
+
 
 @implementation DrawView (Finding)
 /*
@@ -73,7 +88,7 @@ BOOL line_hit(double px, double py,
     shapefunction *path;
     STEntityTypeLayout *entityDescriptor;
 #endif
-
+if (![entity isKindOfClass:[PajeEntity class]]) return YES;
     // couldn't make PSinfill work with an arrow...
     switch ([filter drawingTypeForEntity:entity]) {
         case PajeLinkDrawingType:
@@ -134,12 +149,12 @@ BOOL line_hit(double px, double py,
     PajeEntity *closestEntity = nil;
     PajeEntity *entity;
 
-    if ([layoutDescriptor drawingType] != PajeLinkDrawingType) {
-    NSRect rect = [layoutDescriptor rectInContainer:container];
-
-    if (!NSPointInRect(point, rect)) {
-        return nil;
+    if ([layoutDescriptor drawingType] == PajeVariableDrawingType) {
+//        return nil;
     }
+
+    if (![layoutDescriptor isPoint:point inContainer:container]) {
+        return nil;
     }
 
     float width;
@@ -239,12 +254,12 @@ BOOL line_hit(double px, double py,
     PajeEntity *entity;
     NSMutableArray *array;
 
-    if ([layoutDescriptor drawingType] != PajeLinkDrawingType) {
-    NSRect rect = [layoutDescriptor rectInContainer:container];
+//    if ([layoutDescriptor drawingType] == PajeVariableDrawingType) {
+//        return nil;
+//    }
 
-    if (!NSPointInRect(point, rect)) {
+    if (![layoutDescriptor isPoint:point inContainer:container]) {
         return nil;
-    }
     }
 
     array = [NSMutableArray array];
@@ -370,8 +385,8 @@ BOOL line_hit(double px, double py,
         case PajeVariableDrawingType:
             x1 = TIMEtoX([filter startTimeForEntity:entity]);
             x2 = TIMEtoX([filter endTimeForEntity:entity]);
-            min = [[filter minValueForEntityType:entityType] floatValue];
-            max = [[filter maxValueForEntityType:entityType] floatValue];
+            min = [filter minValueForEntityType:entityType];
+            max = [filter maxValueForEntityType:entityType];
 
             if (min != max) {
                 scale = -([layoutDescriptor height] - 4) / (max - min);
@@ -379,7 +394,7 @@ BOOL line_hit(double px, double py,
                 scale = 1;
             }
             offset = [layoutDescriptor yInContainer:[filter containerForEntity:entity]] + 2 - max * scale;
-            y1 = [[filter valueForEntity:entity] doubleValue] * scale + offset;
+            y1 = [filter doubleValueForEntity:entity] * scale + offset;
             y2 = min * scale + offset;
             rect.origin.x = x1;
             rect.size.width = (x2 - x1);
@@ -409,6 +424,22 @@ BOOL line_hit(double px, double py,
             rect = NSZeroRect;
     }
 
+    return rect;
+}
+
+- (NSRect)drawRectForEntity:(PajeEntity *)entity
+{
+    NSRect rect;
+    rect = positiveRect([self rectForEntity:entity]);
+    
+    return rect;
+}
+
+- (NSRect)highlightRectForEntity:(PajeEntity *)entity
+{
+    NSRect rect;
+    rect = positiveRect([self rectForEntity:entity]);
+    rect = NSInsetRect(rect, -10, -10);
     return rect;
 }
 @end

@@ -31,8 +31,8 @@
 #include <Foundation/Foundation.h>
 #include "../General/Protocols.h"
 
-typedef     void (shapefunction)(float x, float y, float w, float h);
-typedef     void (drawfunction)(void);
+typedef     void (shapefunction)(NSBezierPath *path, NSRect rect);
+typedef     void (drawfunction)(NSBezierPath *path, NSColor *color);
 
 @interface ShapeFunction : NSObject
 {

@@ -21,6 +21,7 @@
 #include "../General/NSUserDefaults+Additions.h"
 #include "../General/Macros.h"
 #include "STController.h"
+#include <math.h>
 
 // 25.aug.2004 BS  creation
 
@@ -78,8 +79,6 @@
             tShape, [self defaultKeyForKey:@" Path Function"],
             @"PSFillAndFrameBlack",
                 [self defaultKeyForKey:@" Draw Function"],
-            @"PSFillAndFrameWhite",
-                [self defaultKeyForKey:@" Highlight Function"],
             @"NO", [self defaultKeyForKey:@"DrawsName"],
             nil]];
 }
@@ -145,9 +144,6 @@
         name = [self defaultStringForKey:@" Draw Function"];
         Assign(drawFunction, [DrawFunction drawFunctionWithName:name]);
 
-        name = [self defaultStringForKey:@" Highlight Function"];
-        Assign(highlightFunction, [DrawFunction drawFunctionWithName:name]);
-
         containerDescriptor = cDesc;
         [containerDescriptor addSubtype:self];
     }
@@ -164,7 +160,6 @@
     Assign(entityType, nil);
     Assign(shapeFunction, nil);
     Assign(drawFunction, nil);
-    Assign(highlightFunction, nil);
     Assign(rectInContainer, nil);
     [super dealloc];
 }
@@ -187,12 +182,6 @@
     [self setDefaultString:[f name] forKey:@" Draw Function"];
 }
 
-- (void)setHighlightFunction:(DrawFunction *)f
-{
-    Assign(highlightFunction, f);
-    [self setDefaultString:[f name] forKey:@" Highlight Function"];
-}
-
 - (ShapeFunction *)shapeFunction
 {
     return shapeFunction;
@@ -201,11 +190,6 @@
 - (DrawFunction *)drawFunction
 {
     return drawFunction;
-}
-
-- (DrawFunction *)highlightFunction
-{
-    return highlightFunction;
 }
 
 
@@ -351,8 +335,6 @@
             tShape, [self defaultKeyForKey:@" Path Function"],
             @"PSFillAndFrameBlack",
                 [self defaultKeyForKey:@" Draw Function"],
-            @"PSFillAndFrameWhite",
-                [self defaultKeyForKey:@" Highlight Function"],
             nil]];
 }
 
@@ -436,8 +418,6 @@
             tShape, [self defaultKeyForKey:@" Path Function"],
             @"PSFillAndFrameBlack",
                 [self defaultKeyForKey:@" Draw Function"],
-            @"PSFillAndFrameWhite",
-                [self defaultKeyForKey:@" Highlight Function"],
             nil]];
 }
 
@@ -500,8 +480,6 @@
             tShape, [self defaultKeyForKey:@" Path Function"],
             @"PSstroke",
                 [self defaultKeyForKey:@" Draw Function"],
-            @"PSFrameWhite",
-                [self defaultKeyForKey:@" Highlight Function"],
             nil]];
 }
 
@@ -575,12 +553,10 @@
     [[NSUserDefaults standardUserDefaults] registerDefaults:
         [NSDictionary dictionaryWithObjectsAndKeys:
             tLineWidth, [self defaultKeyForKey:@"LineWidth"],
-            @"NO", [self defaultKeyForKey:@"ThreeD"],
-            @"PSNoShape", [self defaultKeyForKey:@" Path Function"],
-            @"PSstroke",
+            @"NO", [self defaultKeyForKey:@"ShowMinMax"],
+            @"PSBuilding", [self defaultKeyForKey:@" Path Function"],
+            @"PS3DStroke",
                 [self defaultKeyForKey:@" Draw Function"],
-            @"PSFrameWhite",
-                [self defaultKeyForKey:@" Highlight Function"],
             nil]];
 }
 
@@ -593,11 +569,17 @@
                           controller:controller];
     if (self != nil) {
         lineWidth = [self defaultFloatForKey:@"LineWidth"];
-        threeD = [self defaultBoolForKey:@"ThreeD"];
+        showMinMax = [self defaultBoolForKey:@"ShowMinMax"];
     }
     return self;
 }
 
+- (void)dealloc
+{
+    Assign(hashMarkValues, nil);
+    Assign(hashValueFormat, nil);
+    [super dealloc];
+}
 
 - (PajeDrawingType)drawingType
 {
@@ -615,35 +597,96 @@
     return lineWidth;
 }
 
-- (void)setThreeD:(BOOL)flag
+- (void)setShowMinMax:(BOOL)flag
 {
-    threeD = flag;
-    [self setDefaultBool:threeD forKey:@"ThreeD"];
+    showMinMax = flag;
+    [self setDefaultBool:showMinMax forKey:@"ShowMinMax"];
 }
 
-- (BOOL)threeD
+- (BOOL)showMinMax
 {
-    return threeD;
+    return showMinMax;
 }
 
 - (void)setMinValue:(float)val
 {
+    Assign(hashMarkValues, nil);
     minValue = val;
+    [containerDescriptor setMinValue:val];
 }
 
 - (float)minValue
 {
+    return [containerDescriptor minValue];
     return minValue;
 }
 
 - (void)setMaxValue:(float)val
 {
+    Assign(hashMarkValues, nil);
     maxValue = val;
+    [containerDescriptor setMaxValue:val];
 }
 
 - (float)maxValue
 {
+    return [containerDescriptor maxValue];
     return maxValue;
+}
+
+- (NSArray *)hashMarkValues
+{
+    return [containerDescriptor hashMarkValues];
+    if (hashMarkValues == nil) {
+        hashMarkValues = [[NSMutableArray alloc] init];
+
+        float v;
+        float dv;
+        dv = ([self maxValue] - [self minValue]) / ([self height] / 30);
+        if (dv == 0) goto done;
+        int i = 0;
+        while (dv < .5) {
+            dv *= 10;
+            i--;
+        }
+        while (dv >= 5) {
+            dv /= 10;
+            i++;
+        }
+
+        if (i < 0) {
+            Assign(hashValueFormat, ([NSString stringWithFormat:@"%%1.%df", -i]));
+        } else {
+            Assign(hashValueFormat, @"%1.f");
+        }
+
+        if (dv > 2) dv = 5;
+        else if (dv > 1) dv = 2;
+        else dv = 1;
+
+        while (i > 0) {
+            dv *= 10;
+            i--;
+        }
+        while (i < 0) {
+            dv /= 10;
+            i++;
+        }
+            
+        for (v = (int)([self minValue]/dv) * dv; v <= [self maxValue]; v += dv) {
+            if (v >= [self minValue] && v <= [self maxValue]) {
+                [hashMarkValues addObject:[NSNumber numberWithFloat:v]];
+            }
+        }
+    }
+done:
+    return hashMarkValues;
+}
+
+- (NSString *)hashValueFormat
+{
+    return [containerDescriptor hashValueFormat];
+    return hashValueFormat;
 }
 
 - (float)height
@@ -654,6 +697,7 @@
 - (void)setHeight:(float)val
 {
     [containerDescriptor setHeightForVariables:val];
+    Assign(hashMarkValues, nil);
 }
 
 @end
@@ -695,6 +739,9 @@
         siblingSeparation = [self defaultFloatForKey:@"SiblingSeparation"];
         subtypeSeparation = [self defaultFloatForKey:@"SubtypeSeparation"];
         heightForVariables = [self defaultFloatForKey:@"HeightForVariables"];
+
+        minValue = HUGE_VAL;
+        maxValue = -HUGE_VAL;
     }
     return self;
 }
@@ -711,6 +758,9 @@
     [variableSubtypes  release];
     [linkSubtypes      release];
     [containerSubtypes release];
+
+    [hashMarkValues    release];
+    [hashValueFormat   release];
 
     [super dealloc];
 }
@@ -974,13 +1024,21 @@
         if (subcontainersOffset != 0) {
             subcontainersOffset += subtypeSeparation;
         }
-        [self setOffset:subcontainersOffset ofSubtypes:variableSubtypes];
+        variablesOffset = subcontainersOffset;
+        [self setOffset:variablesOffset ofSubtypes:variableSubtypes];
         subcontainersOffset += [self heightForVariables];
+    } else {
+        variablesOffset = subcontainersOffset;
     }
 
     if (([containerSubtypes count] != 0) && (subcontainersOffset != 0)) {
         subcontainersOffset += subtypeSeparation;
     }
+}
+
+- (float)variablesOffset
+{
+    return variablesOffset;
 }
 
 - (void)setOffsets
@@ -992,4 +1050,86 @@
     [containerSubtypes makeObjectsPerformSelector:_cmd];
 }
 
+
+- (void)setMinValue:(float)val
+{
+    if (val < minValue) {
+        minValue = val;
+        Assign(hashMarkValues, nil);
+    }
+}
+
+- (float)minValue
+{
+    return minValue;
+}
+
+- (void)setMaxValue:(float)val
+{
+    if (val > maxValue) {
+        maxValue = val;
+        Assign(hashMarkValues, nil);
+    }
+}
+
+- (float)maxValue
+{
+    return maxValue;
+}
+
+
+- (NSArray *)hashMarkValues
+{
+    if (hashMarkValues == nil) {
+        hashMarkValues = [[NSMutableArray alloc] init];
+
+        float v;
+        float dv;
+        // calculate dv, delta value for at least 30 px between hash marks
+        dv = ([self maxValue] - [self minValue])
+           / ([self heightForVariables] / 30);
+        if (dv == 0) goto done;
+        int i = 0;
+        while (dv < .5) {
+            dv *= 10;
+            i--;
+        }
+        while (dv >= 5) {
+            dv /= 10;
+            i++;
+        }
+
+        if (i < 0) {
+            Assign(hashValueFormat, ([NSString stringWithFormat:@"%%1.%df", -i]));
+        } else {
+            Assign(hashValueFormat, @"%1.f");
+        }
+
+        if (dv > 2) dv = 5;
+        else if (dv > 1) dv = 2;
+        else dv = 1;
+
+        while (i > 0) {
+            dv *= 10;
+            i--;
+        }
+        while (i < 0) {
+            dv /= 10;
+            i++;
+        }
+            
+        for (v = (int)([self minValue]/dv) * dv; v <= [self maxValue]; v += dv) {
+            if (v >= [self minValue] && v <= [self maxValue]) {
+                [hashMarkValues addObject:[NSNumber numberWithFloat:v]];
+            }
+        }
+    }
+done:
+    return hashMarkValues;
+}
+
+- (NSString *)hashValueFormat
+{
+    return hashValueFormat;
+}
 @end

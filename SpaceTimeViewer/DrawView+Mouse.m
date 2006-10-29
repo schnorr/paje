@@ -65,7 +65,7 @@
     [[self window] setAcceptsMouseMovedEvents:NO];
     [[self window] discardEventsMatchingMask:NSMouseMovedMask beforeEvent:event];
 //    [cursorTimeField setStringValue:@""];
-    [self setHighlightedEntity:nil];
+    [self setCursorEntity:nil];
     [[self window] discardCachedImage];
 }
 
@@ -82,10 +82,11 @@
     }
 
     if ([event modifierFlags] & NSShiftKeyMask) {
-        [self highlightEntities:[self findEntitiesAtPoint:point]];
+        [self setCursorEntity:nil];
+        [self setHighlightedEntities:[self findEntitiesAtPoint:point]];
     } else {
         entityUnderCursor = [self findEntityAtPoint:point];
-        [self setHighlightedEntity:entityUnderCursor];
+        [self setCursorEntity:entityUnderCursor];
     }
 
     [self setCursorTime:XtoTIME(point.x)];
@@ -93,13 +94,8 @@
 
 - (void)setCursorTime:(NSDate *)time
 {
-#ifdef GNUSTEP
-    [cursorTimeField setStringValue:[NSString stringWithFormat:@"%.6f",
+    [cursorTimeField setStringValue:[NSString stringWithFormat:cursorTimeFormat,
                 [time timeIntervalSinceReferenceDate] * timeUnitDivisor]];
-#else
-    [cursorTimeField setDoubleValue:
-                [time timeIntervalSinceReferenceDate] * timeUnitDivisor];
-#endif
 }
 
 - (void)mouseDown:(NSEvent *)event
@@ -107,10 +103,10 @@
     NSPoint cursorPoint;
     NSDate *cursorTime;
     
-    if (highlightedEntity && ![highlightedEntity isContainer]) {
+    if (cursorEntity && ![cursorEntity isContainer]) {
         return;
     }
-    [self setHighlightedEntity:nil];
+    [self setCursorEntity:nil];
 
     cursorPoint = [self convertPoint:[event locationInWindow] fromView:nil];
     cursorTime = XtoTIME(cursorPoint.x);
@@ -152,8 +148,8 @@
 
 - (void)mouseUp:(NSEvent *)event
 {
-    if (highlightedEntity != nil) {
-        [filter inspectEntity:highlightedEntity];
+    if (cursorEntity != nil) {
+        [filter inspectEntity:cursorEntity];
     }
 
     isMakingSelection = NO;
@@ -184,14 +180,14 @@
         return;
     }
     
-    if (highlightedEntity == nil)
+    if (cursorEntity == nil)
         return;
     if ([[event characters] isEqualToString:@"c"]) {
-        [filter inspectEntity:highlightedEntity];
+        [filter inspectEntity:cursorEntity];
         return;
     }
     
-    if (![highlightedEntity respondsToSelector:@selector(imbricationLevel)])
+    if (![cursorEntity respondsToSelector:@selector(imbricationLevel)])
         return;
 
     if ([[event characters] isEqualToString:[NSString stringWithCharacter:0xf701]]
@@ -203,13 +199,13 @@
     else
         return;
 
-    imbricationLevel = [highlightedEntity imbricationLevel] - up;
+    imbricationLevel = [cursorEntity imbricationLevel] - up;
     entities = [self findEntitiesAtPoint:[self convertPoint:[[self window] mouseLocationOutsideOfEventStream] fromView:nil]];
     entitiesEnum = [entities objectEnumerator];
     while ((entity = [entitiesEnum nextObject]) != nil) {
         if ([entity respondsToSelector:@selector(imbricationLevel)]
             && [entity imbricationLevel] == imbricationLevel) {
-            [self setHighlightedEntity:entity];
+            [self setCursorEntity:entity];
             return;
         }
     }

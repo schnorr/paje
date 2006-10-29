@@ -22,8 +22,6 @@
 #include "STEntityTypeLayout.h"
 #include "DrawView.h"
 #include "../General/Macros.h"
-#include <AppKit/PSOperators.h>
-
 
 @implementation STEntityTypeLayoutController
 

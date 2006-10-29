@@ -29,23 +29,10 @@
 #include "DrawView.h"
 #include "STController.h"
 
-#ifdef GNUSTEP
-#include <AppKit/PSOperators.h>
-#endif
-#ifdef __APPLE__
-#include "PSOperators.h"
-#endif
-#if defined(NEXT)
-#import <AppKit/psopsOpenStep.h>	// For PS and DPS function prototypes
-#import "drawline.h"
-#endif
-
 #include "../General/NSUserDefaults+Additions.h"
 #include "../General/Macros.h"
 
-#if defined(GNUSTEP) || defined(__APPLE__)
-void PSInit(void){}
-#endif
+#include <math.h>
 
 #define DefaultsPrefix NSStringFromClass([self class])
 #define DefaultsKey(name) [DefaultsPrefix stringByAppendingString:name]
@@ -58,6 +45,8 @@ void PSInit(void){}
     Assign(endTime, nil);
     Assign(backgroundColor, nil);
     Assign(selectedBackgroundColor, nil);
+    Assign(entityNameAttributes, nil);
+    Assign(cursorTimeFormat, nil);
     [super dealloc];
 }
 
@@ -136,9 +125,6 @@ void PSInit(void){}
     NSImage *cursorImage;
     NSString *cursorPath;
     
-    // initialize postscript functions.
-    PSInit();
-
     // initialize instance variables
 
     pointsPerSecond = [[NSUserDefaults standardUserDefaults]
@@ -152,8 +138,7 @@ void PSInit(void){}
     filter = nil;
     trackingRectTag = 0;
     timeUnitDivisor = 1;
-    [timeUnitField setStringValue:@"s"];
-    [cursorTimeField setFloatingPointFormat:NO left:6 right:6];
+    Assign(cursorTimeFormat, @"%.6f s");
 
     [zoomToSelectionButton setEnabled:NO];
 
@@ -196,6 +181,11 @@ void PSInit(void){}
     [[self enclosingScrollView] setBackgroundColor:[self backgroundColor]/*[NSColor whiteColor]*/];
     [[self enclosingScrollView] setDrawsBackground:YES/*NO*/];
 
+
+    entityNameAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:
+                            [NSFont systemFontOfSize:8], @"NSFontAttributeName",
+                            nil];
+
     //TODO: should register as tool
 }
 
@@ -224,93 +214,67 @@ void PSInit(void){}
 
 - (void)setRulerUnit
 {
-    NSRulerView *ruler = [[self enclosingScrollView] horizontalRulerView];
+    NSString *unitName;
+    NSString *unitAbbreviation;
+    NSRulerView *ruler;
+    double logUnitsToPoints;
 
+    if (pointsPerSecond > 300000000) {
+        timeUnitDivisor = 1000000000;
+        unitName = @"nanoseconds";
+        unitAbbreviation = @"ns";
+    } else if (pointsPerSecond > 300000) {
+        timeUnitDivisor = 1000000;
+        unitName = @"microseconds";
+        unitAbbreviation = @"\xb5s";
+    } else if (pointsPerSecond > 300) {
+        timeUnitDivisor = 1000;
+        unitName = @"milliseconds";
+        unitAbbreviation = @"ms";
+    } else if (pointsPerSecond > 0.1) {
+        timeUnitDivisor = 1;
+        unitName = @"seconds";
+        unitAbbreviation = @"s";
+    } else if (pointsPerSecond > .001) {
+        timeUnitDivisor = 1.0/3600.0;
+        unitName = @"hours";
+        unitAbbreviation = @"h";
+    } else {
+        timeUnitDivisor = 1.0/3600.0/24.0;
+        unitName = @"days";
+        unitAbbreviation = @"d";
+    }
+    
+    logUnitsToPoints = log10(timeUnitDivisor/pointsPerSecond);
+    int decimals;
+    if (logUnitsToPoints > 0) {
+        decimals = 0;
+    } else {
+        decimals = -logUnitsToPoints + 0.8;
+    }
+    NSString *format;
+    format = [NSString stringWithFormat:@"%%.%df %@",
+                                decimals, unitAbbreviation];
+    Assign(cursorTimeFormat, format);
+
+    ruler = [[self enclosingScrollView] horizontalRulerView];
     if (ruler) {
         // sets ruler scale
         NSArray *upArray;
         NSArray *downArray;
-        unichar microsecond[] = {0x00b5, 's'};
 
         upArray = [NSArray arrayWithObjects:
             [NSNumber numberWithFloat:5.0], [NSNumber numberWithFloat:2.0], nil];
         downArray = [NSArray arrayWithObjects:
             [NSNumber numberWithFloat:0.5], [NSNumber numberWithFloat:0.2], nil];
-        if (pointsPerSecond > 300000000) {
-            timeUnitDivisor = 1000000000;
-            [cursorTimeField setFloatingPointFormat:NO left:12 right:0];
-            [timeUnitField setStringValue:@"ns"];
-            [NSRulerView registerUnitWithName:@"nanoseconds"
-                                 abbreviation:@"ns"
-                 unitToPointsConversionFactor:pointsPerSecond/1000000000.0
-                                  stepUpCycle:upArray
-                                stepDownCycle:downArray];
-            [ruler setMeasurementUnits: @"nanoseconds"];
-        } else if (pointsPerSecond > 300000) {
-            timeUnitDivisor = 1000000;
-            [cursorTimeField setFloatingPointFormat:NO left:12 right:0];
-            [timeUnitField setStringValue:[NSString stringWithCharacters:microsecond length:2]]; //@"us";
-            [NSRulerView registerUnitWithName:@"microseconds"
-                                 abbreviation:@"us"
-                 unitToPointsConversionFactor:pointsPerSecond/1000000.0
-                                  stepUpCycle:upArray
-                                stepDownCycle:downArray];
-            [ruler setMeasurementUnits: @"microseconds"];
-        } else if (pointsPerSecond > 300) {
-            timeUnitDivisor = 1000;
-            [cursorTimeField setFloatingPointFormat:NO left:9 right:3];
-
-            [timeUnitField setStringValue:@"ms"];
-            [NSRulerView registerUnitWithName:@"milliseconds"
-                                 abbreviation:@"ms"
-                 unitToPointsConversionFactor:pointsPerSecond/1000.0
-                                  stepUpCycle:upArray
-                                stepDownCycle:downArray];
-            [ruler setMeasurementUnits: @"milliseconds"];
-        } else if (pointsPerSecond > 0.1) {
-            timeUnitDivisor = 1;
-            [cursorTimeField setFloatingPointFormat:NO left:6 right:6];
-            [timeUnitField setStringValue:@"s"];
-            [NSRulerView registerUnitWithName:@"seconds"
-                                 abbreviation:@"s"
-                 unitToPointsConversionFactor:pointsPerSecond
-                                  stepUpCycle:upArray
-                                stepDownCycle:downArray];
-            [ruler setMeasurementUnits: @"seconds"];
-        } else if (pointsPerSecond > .001) {
-            timeUnitDivisor = 1.0/3600.0;
-            [cursorTimeField setFloatingPointFormat:NO left:6 right:6];
-            [timeUnitField setStringValue:@"h"];
-            [NSRulerView registerUnitWithName:@"hours"
-                                 abbreviation:@"h"
-                 unitToPointsConversionFactor:pointsPerSecond*3600.0
-                                  stepUpCycle:upArray
-                                stepDownCycle:downArray];
-            [ruler setMeasurementUnits: @"hours"];
-        } else {
-            timeUnitDivisor = 1.0/3600.0/24.0;
-            [cursorTimeField setFloatingPointFormat:NO left:6 right:6];
-            [timeUnitField setStringValue:@"d"];
-            [NSRulerView registerUnitWithName:@"days"
-                                 abbreviation:@"d"
-                 unitToPointsConversionFactor:pointsPerSecond*3600.0*24.0
-                                  stepUpCycle:upArray
-                                stepDownCycle:downArray];
-            [ruler setMeasurementUnits: @"days"];
-        }
+        [NSRulerView registerUnitWithName:unitName
+                             abbreviation:unitAbbreviation
+             unitToPointsConversionFactor:pointsPerSecond/timeUnitDivisor
+                              stepUpCycle:upArray
+                            stepDownCycle:downArray];
+        [ruler setMeasurementUnits:unitName];
     }
 }
-
-#ifdef GNUSTEP
-// to workaround a probable bug in GNUstep
-// ([NSScrollView tile] is changing our frame size)
-- (void)setFrame:(NSRect)r
-{
-    [super setFrame:r];
-    // I know better what my size should be. set it.
-    [self setFrameSize:size];
-}
-#endif
 
 - (void)removeFromSuperview
 {
@@ -341,13 +305,6 @@ void PSInit(void){}
         newBounds.size.height += 1;
         [self setBoundsOrigin:newBounds.origin];
         [self setFrameSize:newBounds.size];
-
-#ifdef GNUSTEP
-        // to workaround a probable bug in GNUstep
-        // ([NSScrollView tile] is changing our frame size)
-        // (see setFrame: above)
-        size = newBounds.size;
-#endif
 
         [ruler setOriginOffset:
                     TIMEtoX([NSDate dateWithTimeIntervalSinceReferenceDate:0])];
@@ -433,16 +390,28 @@ void PSInit(void){}
     }
 }
 
+- (void)getPointsPerSecondFrom:(id)source
+{
+    Assign(oldMiddleTime, XtoTIME(NSMidX([self visibleRect])));
+    [self setPointsPerSecond:[source doubleValue]];
+}
+
 - (void)doubleTimeScale:sender
 {
     Assign(oldMiddleTime, XtoTIME(NSMidX([self visibleRect])));
     [self setPointsPerSecond:pointsPerSecond * 2];
+//[self performSelector:@selector(getPointsPerSecondFrom:) withObject:[NSNumber numberWithDouble:pointsPerSecond*1.1] afterDelay:0.1];
+//[self performSelector:@selector(getPointsPerSecondFrom:) withObject:[NSNumber numberWithDouble:pointsPerSecond*1.5] afterDelay:0.2];
+//[self performSelector:@selector(getPointsPerSecondFrom:) withObject:[NSNumber numberWithDouble:pointsPerSecond*2.0] afterDelay:0.3];
 }
 
 - (void)halveTimeScale:sender
 {
     Assign(oldMiddleTime, XtoTIME(NSMidX([self visibleRect])));
     [self setPointsPerSecond:pointsPerSecond / 2];
+//[self performSelector:@selector(getPointsPerSecondFrom:) withObject:[NSNumber numberWithDouble:pointsPerSecond/1.1] afterDelay:0.1];
+//[self performSelector:@selector(getPointsPerSecondFrom:) withObject:[NSNumber numberWithDouble:pointsPerSecond/1.5] afterDelay:0.2];
+//[self performSelector:@selector(getPointsPerSecondFrom:) withObject:[NSNumber numberWithDouble:pointsPerSecond/2.0] afterDelay:0.3];
 }
 
 - (void)zoomToSelection:sender
@@ -458,6 +427,12 @@ void PSInit(void){}
                                    + TIMEtoX(selectionEndTime)) / 2));
     [self setPointsPerSecond: NSWidth(visible)
                  / [selectionEndTime timeIntervalSinceDate:selectionStartTime]];
+}
+
+- (IBAction)getSmallEntityWidthFrom:sender
+{
+    smallEntityWidth = [sender intValue];
+    [self setNeedsDisplay:YES];
 }
 
 - (double)pointsPerSecond
@@ -495,98 +470,52 @@ void PSInit(void){}
 }
 
 
-
-- (void)highlightEntity:(PajeEntity *)entity
-{
-    NSColor *color;
-    NSRect rect;
-    STEntityTypeLayout *layoutDescriptor;
-    shapefunction *path;
-    drawfunction *highlight;
-    PajeEntityType *entityType;
-
-    rect = [self rectForEntity:entity];
-
-    if (NSEqualRects(rect, NSZeroRect))
-        return;
-    
-    color = [filter colorForEntity:entity];
-    color = [color highlightWithLevel:.2];
-
-    entityType = [filter entityTypeForEntity:entity];
-    layoutDescriptor = [controller descriptorForEntityType:entityType];
-
-    if ([layoutDescriptor drawingType] == PajeEventDrawingType) {
-            [self drawEventsWithDescriptor:(STEventTypeLayout *)layoutDescriptor
-                               inContainer:[filter containerForEntity:entity]
-                            fromEnumerator:[[NSArray arrayWithObject:entity] objectEnumerator]
-                              drawFunction:[layoutDescriptor highlightFunction]];
-            return;
-    }
-
-    path = [[layoutDescriptor shapeFunction] function];
-    highlight = [[layoutDescriptor highlightFunction] function];
-
-    [color set];
-#ifdef GNUSTEP
-    // big rectangles are not drawn in GNUstep. cut them
-    // BUG: only things displayed as rectangles should be cut this way. (links won't work).
-    if ([layoutDescriptor drawingType] == PajeStateDrawingType) {
-        rect = NSIntersectionRect(rect, cutRect);
-    }
-#endif
-    PSgsave();
-    path(NSMinX(rect), NSMinY(rect), NSWidth(rect), NSHeight(rect));
-    highlight();
-    PSgrestore();
-}
-
-- (void)highlightEntities:(NSArray *)entities
+- (void)redrawEntities:(NSArray *)entities
 {
     id eEnum, entity;
 
     if (entities != nil) {
-        [self lockFocus];
-        
         eEnum = [entities objectEnumerator];
         while ((entity = [eEnum nextObject]) != nil) {
-            if ([filter canHighlightEntity:entity]) {
-                [self highlightEntity:entity];
-            }
+            [self setNeedsDisplayInRect:[self highlightRectForEntity:entity]];
         }
-        
-        [self unlockFocus];
     }
 }
 
-- (void)setHighlightedEntity:(PajeEntity *)entity
+
+- (NSArray *)highlightedEntities
+{
+    return highlightedEntities;
+}
+
+- (void)setHighlightedEntities:(NSArray *)entities
+// highlights entities, taking care of unhighlighting previous
+{
+    if (highlightedEntities != nil) {
+        [self redrawEntities:highlightedEntities];
+    }
+    Assign(highlightedEntities, entities);
+    if (highlightedEntities != nil) {
+        [self redrawEntities:highlightedEntities];
+    }
+}
+
+- (void)setCursorEntity:(PajeEntity *)entity
 // highlights entity (and related entities), taking care of unhighlighting previous
 {
-    if (entity) {
-        if (highlightedEntity != entity) {
-            if (highlightedEntity) {
-                [highlightedEntity release];
-                [[self window] restoreCachedImage];
-            } else
-                [[self window] cacheImageInRect:
-                    [self convertRect:[self visibleRect] toView:nil]];
-            highlightedEntity = [entity retain];
-
-            [entityNameField setStringValue:[filter descriptionForEntity:highlightedEntity]];
-
-            [self highlightEntities:[[filter relatedEntitiesForEntity:entity] arrayByAddingObject:highlightedEntity]];
-
-            [[self window] flushWindowIfNeeded];
-        }
+    if (entity == cursorEntity) {
+        return;
+    }
+    Assign(cursorEntity, entity);
+    if (cursorEntity != nil) {
+        NSArray *related = [filter relatedEntitiesForEntity:cursorEntity];
+        [self setHighlightedEntities:[related arrayByAddingObject:cursorEntity]];
+        [entityNameField setStringValue:[filter descriptionForEntity:cursorEntity]];
     } else {
-        if (highlightedEntity) {
-            [highlightedEntity release];
-            highlightedEntity = nil;
-            [[self window] restoreCachedImage];
-            [[self window] flushWindowIfNeeded];
-        }
+        [self setHighlightedEntities:nil];
         [entityNameField setStringValue:@""];
     }
+NSLog(@"cursor=%@", entity);
 }
 
 
@@ -616,22 +545,20 @@ void PSInit(void){}
 
 - (void)drawRect:(NSRect)rect
 {
-
     if (startTime == nil) return;
 
 [self verifyTimes:self];
+rect = NSInsetRect(rect, -10, -10);
 
 #ifdef GNUSTEP
     // Big rectangles are not drawn by GNUstep. Cut them with cutRect.
-    cutRect = NSInsetRect([self visibleRect], -2.0, -2.0);
+    cutRect = NSInsetRect([self visibleRect], -200, -200);
 #endif
 
     NS_DURING
 
         // set blackground
         [self drawBackgroundInRect:rect];
-
-        PSsetlinewidth(1);
 
         [self drawInstance:[controller rootInstance]
               ofDescriptor:[controller rootLayout]
@@ -769,11 +696,11 @@ void PSInit(void){}
 {
     NSPoint point = [self convertPoint:[sender draggingLocation] fromView:nil];
 
-    [self setHighlightedEntity:[self findEntityAtPoint:point]];
+    [self setCursorEntity:[self findEntityAtPoint:point]];
 #ifdef GNUSTEP
 return NSDragOperationCopy;
 #else
-//    if (highlightedEntity)
+//    if (cursorEntity)
         return NSDragOperationAll;
 //    else
 //        return NSDragOperationNone;
@@ -797,10 +724,10 @@ return NSDragOperationCopy;
         return NO;
     }
 
-    // if some entity is highlighted, the color has been dropped over it.
-    if (highlightedEntity != nil) {
-        [filter setColor:draggedColor forEntity:highlightedEntity];
-        [self setHighlightedEntity:nil];
+    // if some entity is under the cursor, the color has been dropped over it.
+    if (cursorEntity != nil) {
+        [filter setColor:draggedColor forEntity:cursorEntity];
+        [self setCursorEntity:nil];
     } else {
         // didn't drop on an entity, change background color
         if ([self isPointInSelection:point]) {
@@ -823,7 +750,6 @@ return NSDragOperationCopy;
  * Spit out the custom PostScript defs.
  */
 {
-    PSInit();
     [super endPrologue];
 }
 @end

@@ -1,3 +1,9 @@
+2006-10-29  Benhur Stein <benhur@inf.ufsm.br>
+	* SpaceTimeDiagram/*: major overhaul in drawing code, mainly to
+	  substitute PS functions by NSBezierPath.
+	  variables now have a vertical scale; all variables use the same
+	  scale in a container.
+
 2006-06-24  Benhur Stein <benhur@inf.ufsm.br>
         * StorageController/AggregateEvent.m: get startTime and endTime of
           entity to aggregate separetely (for when it is already an aggregation)

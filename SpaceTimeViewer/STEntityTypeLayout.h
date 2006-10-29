@@ -41,12 +41,10 @@
 {
     PajeEntityType *entityType;
 
-    ShapeFunction *shapeFunction;
     // pointer to function that creates a path of the entity representation.
-    DrawFunction *drawFunction;
+    ShapeFunction *shapeFunction;
     // pointer to function that draws a path created by pathFunction.
-    DrawFunction *highlightFunction;
-    // pointer to function that highlights a path created by pathFunction.
+    DrawFunction *drawFunction;
 
     float height;
     float offset;   // from start of container 
@@ -77,10 +75,8 @@
 
 - (void)setShapeFunction:(ShapeFunction *)f;
 - (void)setDrawFunction:(DrawFunction *)f;
-- (void)setHighlightFunction:(DrawFunction *)f;
 - (ShapeFunction *)shapeFunction;
 - (DrawFunction *)drawFunction;
-- (DrawFunction *)highlightFunction;
 
 - (void)setHeight:(float)newHeight;
 - (float)height;
@@ -158,19 +154,23 @@
     float lineWidth;
     float minValue;
     float maxValue;
-    BOOL threeD;
-    // mais coisas
+    BOOL showMinMax;
+    NSMutableArray *hashMarkValues;
+    NSString *hashValueFormat;
 }
 
 - (void)setLineWidth:(float)val;
 - (float)lineWidth;
-- (void)setThreeD:(BOOL)flag;
-- (BOOL)threeD;
+- (void)setShowMinMax:(BOOL)flag;
+- (BOOL)showMinMax;
 
 - (void)setMinValue:(float)val;
 - (float)minValue;
 - (void)setMaxValue:(float)val;
 - (float)maxValue;
+
+- (NSArray *)hashMarkValues;
+- (NSString *)hashValueFormat;
 
 @end
 
@@ -180,6 +180,7 @@
     float supEventsOffset;  // base of superior events
     float infEventsOffset;  // base of inferior events
     float subcontainersOffset;  // start of subcontainers
+    float variablesOffset;
     float heightForVariables;
     
     float siblingSeparation; // separation from other containers of same type
@@ -196,6 +197,11 @@
     NSMutableArray *variableSubtypes;
     NSMutableArray *linkSubtypes;
     NSMutableArray *containerSubtypes;
+
+    float minValue;
+    float maxValue;
+    NSMutableArray *hashMarkValues;
+    NSString *hashValueFormat;
 }
     
 - (void)setSiblingSeparation:(float)val;
@@ -216,6 +222,8 @@
 - (void)setHeightForVariables:(float)val;
 - (float)heightForVariables;
 
+- (float)variablesOffset;
+
 - (float)linkOffset;
 
 // rect of each instance of this type
@@ -232,6 +240,15 @@
 - (NSArray *)subtypes;
 
 - (void)setOffsets;
+
+- (void)setMinValue:(float)val;
+- (float)minValue;
+- (void)setMaxValue:(float)val;
+- (float)maxValue;
+
+- (NSArray *)hashMarkValues;
+- (NSString *)hashValueFormat;
+
 @end
 
 #endif
