@@ -23,7 +23,7 @@
 #include "MultiEnumerator.h"
 #include "FilteredEnumerator.h"
 
-#define CHUNKS_TO_KEEP 100000
+#define CHUNKS_TO_KEEP 10000
 
 @implementation EntityChunk
 
@@ -319,7 +319,6 @@ static int count;
         en = incEnum;
     }
 
-if ([[[self entityType] description] hasSuffix:@"active.buffer_head"]) NSLog(@"ec %@ enum %@-%@", [self class], sliceStartTime, sliceEndTime);
     return [FilteredEnumerator enumeratorWithEnumerator:en
                                                  filter:self
                                                selector:filterSelector

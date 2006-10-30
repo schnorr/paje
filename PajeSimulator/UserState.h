@@ -30,7 +30,6 @@
 
 @interface UserState : UserEvent
 {
-//    PajeEvent *endEvent;
     NSDate *endTime;
     int imbricationLevel;
     double innerDuration;

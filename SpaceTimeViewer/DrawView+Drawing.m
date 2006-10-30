@@ -665,7 +665,6 @@ static void addToMinMaxPath(NSBezierPath *path,
     drawStartTime = XtoTIME(NSMinX(drawRect) - width);
     drawEndTime   = XtoTIME(NSMaxX(drawRect) + width);
     if (drawingType == PajeVariableDrawingType) {
-NSLog(@"a %@ - %@", drawStartTime, drawEndTime);
         // make sure that mid x point of first and last values are inside rect
         // (some ways of drawing variables do not draw after/before mid point
         PajeEntity *entity;
@@ -692,14 +691,12 @@ ali:
         if (entity != nil) {
             NSDate *entityStartTime;
             entityStartTime = [filter startTimeForEntity:entity];
-            NSLog(@"e %@", entityStartTime);
             if ([entityStartTime isEarlierThanDate:drawStartTime]) {
                 drawStartTime = XtoTIME(TIMEtoX(entityStartTime)-1);
             } else {
                 goto ali;
             }
         }
-NSLog(@"d %@ - %@", drawStartTime, drawEndTime);
     }
     enumerator = [filter enumeratorOfEntitiesTyped:entityType
                                        inContainer:container

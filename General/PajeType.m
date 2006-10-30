@@ -50,17 +50,16 @@
         Assign(name, n);
         containerType = type;
 	[containerType addContainedType:self];
-        //NEWEVENT Assign(event, e);
         c = [[NSUserDefaults standardUserDefaults]
                          colorForKey:[name stringByAppendingString:@" Color"]];
         if (c == nil) {
-            //NEWEVENT c = [event valueOfFieldNamed:@"Color"];
             c = [e colorForFieldId:PajeColorFieldId];
         }
         if (c == nil) {
             c = [NSColor whiteColor];
         }
         Assign(color, c);
+        //FIXME: should get other fields from event (e.g. layout)
         fieldNames = [[NSMutableSet alloc] init];
         knownEventTypes = NSCreateHashTable(CStringHashCallBacks, 50);
     }
@@ -72,7 +71,6 @@
     Assign(name, nil);
     containerType = nil;
     Assign(color, nil);
-    //NEWEVENT Assign(event, nil);
     Assign(fieldNames, nil);
     NSFreeHashTable(knownEventTypes);
     [super dealloc];
@@ -140,7 +138,7 @@
 
 - (id)valueOfFieldNamed:(NSString *)n
 {
-    //NEWEVENT FIXME return [event valueOfFieldNamed:n];
+    // FIXME: may have fields on event that created type
     return nil;
 }
 
@@ -199,21 +197,19 @@
 {
     [coder encodeObject:name];
     [coder encodeObject:containerType];
-    //NEWEVENT [coder encodeObject:event];
     [coder encodeObject:fieldNames];
+    // FIXME: save other fields (from creation event, see -init)
 }
 
 - (id)initWithCoder:(NSCoder *)coder
 {
     id o1;
     id o2;
-    //NEWEVENT id o3;
     o1 = [coder decodeObject];
     o2 = [coder decodeObject];
-    //NEWEVENT o3 = [coder decodeObject];
     self = [self initWithName:o1
                 containerType:o2
-                        event:nil/*NEWEVENT o3*/];
+                        event:nil];
     Assign(fieldNames, [coder decodeObject]);
     return self;
 }
@@ -303,7 +299,7 @@
 {
     [super encodeWithCoder:coder];
     [coder encodeObject:allInstances];
-//FIXME -- how to encode this?
+//FIXME -- how to encode this? -- probably types should not leave memory
 //    [coder encodeObject:idToInstance];
     [coder encodeObject:containedTypes];
 }
@@ -399,11 +395,15 @@
 
 - (void)readDefaultColors
 {
+    id defaultColors;
     NSMutableDictionary *dict;
-    dict = [[[[NSUserDefaults standardUserDefaults]
-        colorDictionaryForKey:[name stringByAppendingString:@" Colors"]] mutableCopy] autorelease];
-    if (!dict)
+    defaultColors = [[NSUserDefaults standardUserDefaults]
+        colorDictionaryForKey:[name stringByAppendingString:@" Colors"]];
+    if (defaultColors != nil) {
+        dict = [[defaultColors mutableCopy] autorelease];
+    } else {
         dict = [NSMutableDictionary dictionary];
+    }
     Assign(valueToColor, dict);
 }
 

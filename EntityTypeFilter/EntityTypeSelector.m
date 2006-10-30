@@ -115,7 +115,6 @@
 {
     if (entityType == nil || [entityType isEqual:[self selectedEntityType]]) {
         [self synchronizeMatrix];
-        //[matrix setNeedsDisplay:YES];
     }
     [super colorChangedForEntityType:entityType];
 }
@@ -342,48 +341,21 @@
     filter = [filters objectForKey:entityType];
     names = [[self unfilteredObjectsForEntityType:entityType] objectEnumerator];
 
-    while ([matrix numberOfRows] > 0 && ![[matrix cellAtRow:0 column:0] isKindOfClass:[ColoredSwitchButtonCell class]]) {
+    while ([matrix numberOfRows] > 0
+            && ![[matrix cellAtRow:0 column:0]
+                            isKindOfClass:[ColoredSwitchButtonCell class]]) {
         [matrix removeRow:0];
     }
-    [matrix renewRows:[[self unfilteredObjectsForEntityType:entityType] count] columns:1];
+    [matrix renewRows:[[self unfilteredObjectsForEntityType:entityType] count]
+              columns:1];
 
     while ((entityName = [names nextObject]) != nil) {
-        //[matrix addRow];
         cell = [matrix cellAtRow:i column:0];
         [cell setState:!([filter containsObject:entityName])];
         [cell setRepresentedObject:entityName];
-#if 0
-#ifndef xxGNUSTEP
-        NSMutableAttributedString *title;
-        title = [[[NSMutableAttributedString alloc] initWithString:[entityName description]] autorelease];
-#if defined(__APPLE__)// || defined(GNUSTEP)
-        [title replaceCharactersInRange:NSMakeRange(0,0) withString:@"# "];
-        [title addAttribute:NSFontAttributeName
-                      value:[NSFont boldSystemFontOfSize:16]
-                      range:NSMakeRange(0,1)];
-        [title addAttribute:NSFontAttributeName
-                      value:[NSFont systemFontOfSize:12]
-                      range:NSMakeRange(1, [title length]-1)];
-#else
-        // 0x25a0 is unicode for a solid small square
-        [title replaceCharactersInRange:NSMakeRange(0,0)
-               withString:[NSString stringWithCharacter:0x25a0]];
-        [title replaceCharactersInRange:NSMakeRange(1,0) withString:@" "];
-#endif
-        [title addAttribute:NSForegroundColorAttributeName
-                      value:[inputComponent colorForValue:entityName
-                                             ofEntityType:entityType]
-                      range:NSMakeRange(0,1)];
-        [title fixAttributesInRange:NSMakeRange(0, [title length])];
-        [cell setAttributedTitle:title];
-#else /*!GNUSTEP*/
-        [cell setTitle:[entityName description]];
-#endif
-#else
         [cell setTitle:[entityName description]];
         [cell setColor:[inputComponent colorForValue:entityName
                                         ofEntityType:entityType]];
-#endif
         [cell setHighlightsBy:NSChangeBackgroundCellMask];
         i++;
     }

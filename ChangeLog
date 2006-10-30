@@ -1,3 +1,17 @@
+2006-10-30  Benhur Stein <benhur@inf.ufsm.br>
+        * EntityTypeFilter/EntityTypeSelector.m: indentation;
+          removed unused code
+        * General/ChunkArray.m,EntityChunk.m,PajeEvent.[hm],PajeType.[hm]:
+          removed debug or unused code
+        * SpaceTimeViewer/Shape.m: remove unused code
+        * PajeEventDecoder/PajeEventDecoder.[hm]: removed unused code
+        * PajeSimulator/PajeSimul.[hm],SimulChunk.m,UserLink.m,UserState.m:
+          removed unused code
+        * AggregatingFilter/AggregatingChunkArray.m: removed unused code
+        * StorageController/Encapsulate.m: removed unused code
+        * StorageController/*Aggreg*[hm]: removed files moved to
+          AggregatingFilter/
+
 2006-10-29  Benhur Stein <benhur@inf.ufsm.br>
 	* */*: rewrote file reading and simulation for better speed.
           (events are kept pointing into original string from file;

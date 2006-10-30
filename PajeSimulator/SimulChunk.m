@@ -676,7 +676,6 @@ if ([newIncompleteEntities count] == 1)
         }
     }
     [super endOfChunkWithTime:time];
-if ([[[self entityType] description] hasSuffix:@"active.buffer_head"]) NSLog(@"just finished:%@", self);
 }
 
 - (void)xsetEndTime:(NSDate *)time
@@ -739,7 +738,6 @@ if ([[[self entityType] description] hasSuffix:@"active.buffer_head"]) NSLog(@"j
     } else {
         en = incEnum;
     }
-if ([[[self entityType] description] hasSuffix:@"active.buffer_head"]) NSLog(@"enum %@-%@:%@+%d inc=%@", sliceStartTime, sliceEndTime, NSStringFromRange(range), incEnum!=nil, incompleteEntities);
     return en;
 }
 
@@ -788,7 +786,6 @@ if ([[[self entityType] description] hasSuffix:@"active.buffer_head"]) NSLog(@"e
     } else {
         en = incEnum;
     }
-if ([[[self entityType] description] hasSuffix:@"active.buffer_head"]) NSLog(@"enum -%@:%@+%d inc=%@", time, NSStringFromRange(range), incEnum!=nil, incompleteEntities);
     return en;
 }
 - (NSEnumerator *)xxenumeratorOfAllCompleteEntities
@@ -799,7 +796,6 @@ if ([[[self entityType] description] hasSuffix:@"active.buffer_head"]) NSLog(@"e
     NSAssert([self canEnumerate], @"enumerating non-enumerable chunk");
     [EntityChunk touch:self];
     range = NSMakeRange(0, [entities count]/* - 1*/);
-if ([[[self entityType] description] hasSuffix:@"active.buffer_head"]) NSLog(@"enum []:%@", NSStringFromRange(range));
     compEnum = [entities reverseObjectEnumeratorWithRange:range];
     
     return compEnum;

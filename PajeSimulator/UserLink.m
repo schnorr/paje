@@ -193,7 +193,6 @@
 {
 //if (startLogicalTime != nil)
 //    return startLogicalTime;
-//    if (event != nil) {
     if (time != nil) {
         return [super startTime];
     } else if (sourceContainer != nil) {

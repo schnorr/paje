@@ -129,49 +129,11 @@
     return NSStringFromClass([self class]);
 }
 
-#ifndef MAP
-#undef NS_MESSAGE
-#ifndef NS_MESSAGE
-#ifndef GNUSTEP
-NSInvocation *invocation;
-#define NS_MESSAGE(obj, meth)                                   \
-    ((invocation = [NSInvocation invocationWithMethodSignature: \
-    [obj methodSignatureForSelector: @selector(meth)]]),        \
-    [invocation setTarget: obj],                                \
-    [invocation setSelector: @selector(meth)],                  \
-    invocation)
-#else
-#define NS_MESSAGE(target, message)                             \
-    ([[[NSInvocation alloc] initWithTarget:target                \
-    selector:@selector(message), nil] autorelease])
-#endif                          // GNUSTEP
-#define ADD_INVOCATION(name) [invocationTable  \
-                                    setObject:NS_MESSAGE(self, paje##name:) \
-                                       forKey:Paje##name##EventName]
-#else                           // NS_MESSAGE
-#define ADD_INVOCATION(name) [invocationTable  \
-                                    setObject:NS_MESSAGE(self, paje##name:nil) \
-                                       forKey:Paje##name##EventName]
-#endif                          // NS_MESSAGE
-#else /* MAP */
-#ifdef OLDEVENT
-#define ADD_INVOCATION(name) NSMapInsert(invocationTable, \
-                                         Paje##name##EventName, \
-                                         [self methodForSelector:@selector(paje##name:)])
-#else
 #define ADD_INVOCATION(name) invocationTable[Paje##name##EventId] = \
                                          [self methodForSelector:@selector(paje##name:)]
-#endif
-#endif /* MAP */
 
 - (void)_initInvocationTable
 {
-#ifdef MAP
-//OLDEVENT    invocationTable = NSCreateMapTable(NSIntMapKeyCallBacks/*NSObjectMapKeyCallBacks*/,
-//OLDEVENT                                       NSIntMapValueCallBacks, 50);
-#else
-    Assign(invocationTable, [NSMutableDictionary dictionary]);
-#endif
     ADD_INVOCATION(StartTrace);
     ADD_INVOCATION(DefineContainerType);
     ADD_INVOCATION(DefineEventType);
@@ -197,10 +159,8 @@ NSInvocation *invocation;
     self = [super initWithController:c];
 
     if (self != nil) {
-//OLDEVENT        userTypes = [[NSMutableDictionary alloc] init];
         userTypes = NSCreateMapTable(CStringMapKeyCallBacks,
                                      NSObjectMapValueCallBacks, 50);
-//        userNumberToContainer = [[NSMutableDictionary alloc] init];
         relatedEntities = [[NSMutableDictionary alloc] init];
 
         [self _initInvocationTable];
@@ -216,14 +176,7 @@ NSInvocation *invocation;
 - (void)dealloc
 {
     [rootContainer release];
-#ifdef MAP
-//OLDEVENT    NSFreeMapTable(invocationTable);
-#else
-    [invocationTable release];
-#endif
-//OLDEVENT    [userTypes release];
     NSFreeMapTable(userTypes);
-//    [userNumberToContainer release];
     [relatedEntities release];
     [startTime release];
     [endTime release];
@@ -262,7 +215,6 @@ NSInvocation *invocation;
 
 - (PajeEntityType *)entityTypeWithName:(NSString *)name
 {
-//OLDEVENT    return [userTypes objectForKey:name];
     return NSMapGet(userTypes, [name cString]);
 }
 
@@ -323,25 +275,18 @@ NSInvocation *invocation;
         [self setCurrentTime:time];
     }
     // invoke the method that simulates this event
-#ifndef MAP
-    NSInvocation *invocation;
-    invocation = [invocationTable objectForKey:[event pajeEventName]];
-    if (invocation) {
-        [invocation setArgument:&event atIndex:2];
-        [invocation invoke];
+    int eventId;
+    eventId = [event pajeEventId];
+    IMP f = NULL;
+    if (eventId >= 0 
+           && eventId < (sizeof invocationTable / sizeof(invocationTable[0]))) {
+        f = invocationTable[eventId];
     }
-#else
-//OLDEVENT    void (*f)(id, SEL, id);
-    IMP f;
-//OLDEVENT    f = NSMapGet(invocationTable, [event pajeEventName]);
-    f = invocationTable[[event pajeEventId]];
     if (f != NULL) {
         f(self, 0, event);
     } else {
-//OLDEVENT        NSLog(@"Unknown event \"%@\"", [event pajeEventName]);
         NSLog(@"Unknown event \"%@\"", event);
     }
-#endif
     
     eventCount++;
 }

@@ -43,18 +43,15 @@
                      container:c
                          event:e];
     if (self != nil) {
-//        endEvent = nil;
         endTime = nil;
         imbricationLevel = 0;
         innerStates = nil;
         innerDuration = 0;
     }
-//NSLog(@"init %@ e=%@", self, e);
     return self;
 }
 - (void)dealloc
 {
-//    Assign(endEvent, nil);
     Assign(endTime, nil);
     Assign(innerStates, nil);
     [super dealloc];
@@ -62,16 +59,12 @@
 
 - (void)setEndEvent:(PajeEvent *)e
 {
-//    Assign(endEvent, e);
+    // should get extra fields?
     Assign(endTime, [e time]);
-//NSLog(@"setend %@ e=%@", self, e);
 }
 
 - (NSDate *)endTime
 {
-//    if (endEvent != nil) {
-//        return [endEvent time];
-//    }
     if (endTime != nil) {
         return endTime;
     }
@@ -148,9 +141,6 @@
                         @"Imbrication Level",
                         @"Exclusive Duration",
                         nil];
-//    if (endEvent != nil) {
-//        [localFields addObjectsFromArray:[endEvent fieldNames]];
-//    }
     [localFields addObjectsFromArray:[super fieldNames]];
     return localFields;
 }
@@ -164,9 +154,6 @@
         return [NSNumber numberWithDouble:[self exclusiveDuration]];
     }
     value = [super valueOfFieldNamed:fieldName];
-    if (value != nil)
-        return value;
-//    value = [endEvent valueOfFieldNamed:fieldName];
     return value;
 }
 
@@ -175,7 +162,6 @@
 {
     [super encodeWithCoder:coder];
     [coder encodeValuesOfObjCTypes:"@id@i",
-//            &endEvent, &imbricationLevel, &innerDuration,
             &endTime, &imbricationLevel, &innerDuration,
             &innerStates, &condensedEntitiesCount];
 }
@@ -184,7 +170,6 @@
 {
     self = [super initWithCoder:coder];
     [coder decodeValuesOfObjCTypes:"@id@i",
-//            &endEvent, &imbricationLevel, &innerDuration,
             &endTime, &imbricationLevel, &innerDuration,
             &innerStates, &condensedEntitiesCount];
     return self;

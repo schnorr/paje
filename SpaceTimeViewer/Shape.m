@@ -23,8 +23,6 @@
 
 // 19.ago.2004 BS  creation
 
-
-static void emptydrawfunction(void) {}
 static void PSNoShape(NSBezierPath *path, NSRect rect) {}
 
 //

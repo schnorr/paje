@@ -1229,7 +1229,6 @@
     if ([chunk isZombie]) {
         [self refillChunkAtIndex:endIndex];
     }
-if ([[[chunk entityType] description] hasSuffix:@"active.buffer_head"]) NSLog(@"Aarr(%@) enum %@-%@:%d-%d", [chunk class], startTime, endTime, startIndex, endIndex);
 
     // if only one chunk involved, it can enumerate for us.
     if (startIndex == endIndex) {

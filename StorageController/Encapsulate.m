@@ -32,14 +32,6 @@
 #include "../General/Macros.h"
 #include "../General/NSDate+Additions.h"
 
-//#include "AggregatingChunkArray.h"
-
-//#include <math.h>
-//double log2(double);
-//double pow(double, double);
-//#define DURtoSLOT(dur)  (log2(dur) + 15)
-//#define SLOTtoDUR(slot) pow(2.0, (slot) - 15.0)
-
 @implementation Encapsulate
 
 - (id)initWithController:(PajeTraceController *)c

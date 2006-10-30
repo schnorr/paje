@@ -35,19 +35,12 @@
 
 @class SimulContainer;
 
-#define MAP
 @interface PajeSimul : PajeComponent <PajeSimulator>
 {
     SimulContainer *rootContainer;
-#ifdef MAP
-//OLDEVENT    NSMapTable *invocationTable;
     IMP invocationTable[PajeEventIdCount];
-#else
-    NSMutableDictionary *invocationTable;
-#endif
 
     /* PajeContainerType's and PajeEntityTypes's mapped by name and alias */
-//OLDEVENT    NSMutableDictionary *userTypes;
     NSMapTable *userTypes;
 
     /* PajeContainers mapped by name and alias (used only when containerType is

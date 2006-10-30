@@ -83,7 +83,6 @@
         [self raiseMissingChunk:endIndex];
     }
 
-if ([[[chunk entityType] description] hasSuffix:@"active.buffer_head"]) NSLog(@"arr(%@) enum %@-%@:%d-%d", [chunk class], startTime, endTime, startIndex, endIndex);
     if (startIndex == endIndex) {
         return [chunk enumeratorOfEntitiesFromTime:startTime toTime:endTime];
     }
@@ -177,11 +176,6 @@ if ([[[chunk entityType] description] hasSuffix:@"active.buffer_head"]) NSLog(@"
 - (void)addChunk:(EntityChunk *)chunk
 {
     [chunks addObject:chunk];
-if ([chunks count]>2) {
-EntityChunk *c1, *c2; c1 = [chunks objectAtIndex:0];c2 = [chunks objectAtIndex:1];
-//NSLog(@"addChunk to %@ [l%@ I%@] [f%@ I%@]", [chunk entityType], [c1 lastEntity], [c1 incompleteEntities], [[c2 completeEntities] count]==0?nil: [[c2 completeEntities] objectAtIndex:0], [c2 incompleteEntities]);
-}
-if ([[[chunk entityType] description] hasSuffix:@"active.buffer_head"]) NSLog(@"firstChunk:%@", [chunks objectAtIndex:0]);
 }
 
 - (void)setFirstIndex:(int)index

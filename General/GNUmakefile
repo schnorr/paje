@@ -36,7 +36,7 @@ General_OBJC_FILES = \
 	CondensedEntitiesArray.m \
 	EntityChunk.m \
 	ChunkArray.m \
-        CStringCallBacks.m
+	CStringCallBacks.m
 
 General_HEADER_FILES = \
 	Comparing.h \
@@ -72,7 +72,7 @@ General_HEADER_FILES = \
 	CondensedEntitiesArray.h \
 	EntityChunk.h \
 	ChunkArray.h\
-        CStringCallBacks.h
+	CStringCallBacks.h
 
 General_RESOURCE_FILES = \
 	HierarchyBrowser.gorm \
@@ -100,7 +100,7 @@ PROJECT_HEADERS = \
 	CondensedEntitiesArray.h \
 	EntityChunk.h \
 	ChunkArray.h\
-        CStringCallBacks.h
+	CStringCallBacks.h
 
 -include GNUmakefile.preamble
 include $(GNUSTEP_MAKEFILES)/bundle.make

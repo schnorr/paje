@@ -515,7 +515,6 @@
         [self setHighlightedEntities:nil];
         [entityNameField setStringValue:@""];
     }
-NSLog(@"cursor=%@", entity);
 }
 
 
