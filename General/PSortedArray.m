@@ -41,6 +41,12 @@
     return self;
 }
 
+- (void)setSelector:(SEL)sel
+{
+    valueSelector = sel;
+    [array sortUsingSelector:sel];
+}
+
 - (void)dealloc
 {
     [array release];
@@ -290,6 +296,11 @@ NSDate *delta_d_t0;
     return [self indexOfObjectWithValue:[anObject performSelector:valueSelector]];
 }
 
+- (NSEnumerator *)reverseObjectEnumeratorWithRange:(NSRange)range
+{
+    return [array reverseObjectEnumeratorWithRange:range];
+}
+
 - (NSEnumerator *)objectEnumerator
 {
     return [array objectEnumerator];
@@ -319,7 +330,6 @@ NSDate *delta_d_t0;
     range = NSMakeRange(firstIndex, [array count] - firstIndex);
     return [array reverseObjectEnumeratorWithRange:range];
 }
-
 
 // NSCoding Protocol
 - (void)encodeWithCoder:(NSCoder *)coder

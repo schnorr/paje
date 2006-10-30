@@ -29,7 +29,7 @@
     PajeFilter *component;
     Class entityClass;
     PajeEntityType *entityTypeToReduce;
-    NSMutableSet *filterNames;       // entity names that are counted
+    NSMutableSet *filterValues;       // entity values that are reduced
     BusyArray *array;
 }
 
@@ -55,10 +55,10 @@
 - (void)setEntityTypeToReduce:(PajeEntityType *)newEntityTypeToReduce;
 - (PajeEntityType *)entityTypeToReduce;
 
-- (void)addNameToFilter:(NSString *)n;
-- (void)addNamesToFilter:(NSArray *)n;
-- (void)removeNameFromFilter:(NSString *)n;
-- (NSSet *)filterNames;
+- (void)addValueToFilter:(id)value;
+- (void)addValuesToFilter:(NSArray *)values;
+- (void)removeValueFromFilter:(id)value;
+- (NSSet *)filterValues;
 
 - (NSEnumerator *)enumeratorOfEntitiesInContainer:(PajeContainer *)container
                                          fromTime:(NSDate *)start

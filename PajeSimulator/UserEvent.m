@@ -49,10 +49,8 @@
                      container:c];
 
     if (self != nil) {
-        Assign(event, e);
-        if (e != nil
-            && ![type isKnownEventType:[e objectForKey:@"PajeEventId"]]) {
-            [type addFieldNames:[self fieldNames]];
+        if (e != nil) {
+            [self setEvent:e];
         }
     }
 
@@ -61,46 +59,66 @@
 
 - (void)dealloc
 {
-    Assign(event, nil);
+    Assign(extraFields, nil);
+    Assign(time, nil);
 
     [super dealloc];
 }
 
 - (void)setEvent:(PajeEvent *)e
 {
-    Assign(event, e);
+    Assign(extraFields, [e extraFields]);
+    if (![entityType isKnownEventType:[e cStringForFieldId:PajeEventIdFieldId]]) {
+        [entityType addFieldNames:[e fieldNames]];
+    }
+    Assign(time, [e time]);
 }
 
 - (NSDate *)time
 {
-    return [event time];
+    return time;
 }
 
 - (NSArray *)fieldNames
 {
-    return [[super fieldNames] arrayByAddingObjectsFromArray: [event fieldNames]];
+    NSArray *fieldNames;
+    fieldNames = [super fieldNames];
+    fieldNames = [fieldNames arrayByAddingObject:@"Time"];
+    if (extraFields != nil) {
+        fieldNames = [fieldNames arrayByAddingObjectsFromArray:[extraFields allKeys]];
+    }
+    return fieldNames;
 }
 
 - (id)valueOfFieldNamed:(NSString *)fieldName
 {
-    id value;
-    value = [super valueOfFieldNamed:fieldName];
-    if (value != nil)
-        return value;
-    value = [event valueOfFieldNamed:fieldName];
+    id value = nil;
+
+    if ([fieldName isEqualToString:@"Time"]) {
+        value = time;
+    } else if (extraFields != nil) {
+        value = [extraFields objectForKey:fieldName];
+    }
+    
+    if (value == nil) {
+        value = [super valueOfFieldNamed:fieldName];
+    }
+
     return value;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];
-    [coder encodeObject:event];
+    [coder encodeObject:extraFields];
+    [coder encodeObject:time];
 }
 
 - (id)initWithCoder:(NSCoder *)coder
 {
     self = [super initWithCoder:coder];
-    Assign(event, [coder decodeObject]);
+    Assign(extraFields, [coder decodeObject]);
+    Assign(time, [coder decodeObject]);
     return self;
 }
 @end

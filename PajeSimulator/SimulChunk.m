@@ -21,6 +21,7 @@
 #include "SimulChunk.h"
 
 #include "../General/Macros.h"
+#include <math.h>
 
 @implementation SimulChunk
 + (SimulChunk *)chunkWithEntityType:(PajeEntityType *)type
@@ -147,21 +148,21 @@
 
 // for variables
 - (void)setVariableEvent:(PajeEvent *)event
-                   value:(id)value
+             doubleValue:(double)value
 {
     NSLog(@"Ignoring 'setVariable' event for non variable entity type."
            " Event: %@", event);
 }
 
 - (void)addVariableEvent:(PajeEvent *)event
-                   value:(id)value
+             doubleValue:(double)value
 {
     NSLog(@"Ignoring 'addVariable' event for non variable entity type."
            " Event: %@", event);
 }
 
 - (void)subVariableEvent:(PajeEvent *)event
-                   value:(id)value
+             doubleValue:(double)value
 {
     NSLog(@"Ignoring 'subVariable' event for non variable entity type."
            " Event: %@", event);
@@ -452,7 +453,6 @@
         [self addEntity:link];
         [pendingLinks removeObjectAtIndex:index];
     } else {
-        // TODO: search incompletes
         link = [UserLink linkOfType:entityType
                               value:value
                                 key:key
@@ -499,8 +499,6 @@
         [self addEntity:link];
         [pendingLinks removeObjectAtIndex:index];
     } else {
-        // search link in incomplete entities
-//        for (in
         link = [UserLink linkOfType:entityType
                               value:value
                                 key:key
@@ -542,69 +540,270 @@
 
 - (void)endOfChunkWithTime:(NSDate *)time
 {
-    [self setIncompleteEntities:pendingLinks];
+    // if incompleteEntities is already set, entities in pendingLinks can be ignored
+    // (it is a resimulation, and they should be equal to incompleteEntities)
+    if (incompleteEntities == nil) {
+        [self setIncompleteEntities:pendingLinks];
+    }
     Assign(pendingLinks, nil);;
     [super endOfChunkWithTime:time];
 }
 
 @end
 
+#include "../General/Association.h"
+
 @implementation VariableChunk
-// For the time being, variables are implemented as states.
-// FIXME: should be implemented as variables.
+
+- (id)initWithEntityType:(PajeEntityType *)type
+               container:(PajeContainer *)pc
+{
+    self = [super initWithEntityType:type
+                           container:pc];
+    if (self != nil) {
+        //[entities setSelector:@selector(objectValue)];
+        incompleteEntities = nil;
+        [entities setSelector:@selector(time)];
+        currentValue = HUGE_VAL;
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    Assign(incompleteEntities, nil);
+    [super dealloc];
+}
+
+- (void)activate
+{
+    [super activate];
+    //[entities setSelector:@selector(objectValue)];
+    [entities setSelector:@selector(time)];
+}
+
 - (id)topEntity
 {
-    return [simulationStack lastObject];
+    return [entities lastObject];
+}
+
+- (void)setPreviousChunkIncompleteEntities:(NSArray *)newIncompleteEntities
+{
+    NSAssert([entities count] == 0, @"Internal inconsistency");
+//    if (incompleteEntities != nil && [incompleteEntities count] != 0) {
+//        NSAssert([newIncompleteEntities count] == 1, @"Internal inconsistency");
+//NSLog(@"previnc count=%d", [newIncompleteEntities count]);
+if ([newIncompleteEntities count] == 1)
+        [self addEntity:[newIncompleteEntities lastObject]];
+//    }
+    currentValue = HUGE_VAL;
+}
+
+- (NSArray *)incompleteEntities
+{
+    return incompleteEntities;
+}
+
+- (void)setValue:(double)value
+            time:(NSDate *)time
+{
+    if (value != HUGE_VAL && currentValue == value) return;
+
+    if (currentValue != HUGE_VAL) {
+        sumValue += currentValue
+                  * [time timeIntervalSinceDate:currentTime];
+        [self addEntity:[UserValue valueWithType:entityType
+                                     doubleValue:currentValue
+                                       container:container
+                                       startTime:currentTime
+                                         endTime:time]];
+    } else {
+        UserValue *valueFromPreviousChunk;
+        valueFromPreviousChunk = [self topEntity];
+        if (valueFromPreviousChunk != nil) {
+            if ([valueFromPreviousChunk doubleValue] == value) return;
+            [valueFromPreviousChunk setEndTime:time];
+        }
+    }
+    currentValue = value;
+    currentTime = time;
+    if (value > maxValue) maxValue = value;
+    if (value < minValue) minValue = value;
 }
 
 - (void)setVariableEvent:(PajeEvent *)event
-                   value:(id)value
+             doubleValue:(double)value
 {
     [container _verifyMinMaxOfEntityType:entityType withValue:value];
-    [self setStateEvent:event
-                  value:[value stringValue]];
+    [self setValue:value time:[event time]];
 }
 
 - (void)addVariableEvent:(PajeEvent *)event
-                   value:(id)value
+             doubleValue:(double)value
 {
-    UserState *currentUserState;
-    id oldValue;
-    id newValue;
-
-    currentUserState = [self topEntity];
-    if (currentUserState != nil) {
-        oldValue = [currentUserState value];
-        newValue = [NSNumber numberWithDouble:
-            [oldValue doubleValue] + [value doubleValue]];
-    } else {
-        newValue = value;
-    }
-
-    [self setVariableEvent:event
-                     value:newValue];
+    [container _verifyMinMaxOfEntityType:entityType withValue:value];
+    [self setValue:currentValue + value time:[event time]];
 }
 
 - (void)subVariableEvent:(PajeEvent *)event
-                   value:(id)value
+             doubleValue:(double)value
 {
-    UserState *currentUserState;
-    id oldValue;
-    id newValue;
-
-    currentUserState = [self topEntity];
-    if (currentUserState != nil) {
-        oldValue = [currentUserState value];
-        newValue = [NSNumber numberWithDouble:
-            [oldValue doubleValue] - [value doubleValue]];
-    } else {
-        newValue = [NSNumber numberWithDouble:-[value doubleValue]];
-    }
-
-    [self setVariableEvent:event
-                     value:newValue];
+    [container _verifyMinMaxOfEntityType:entityType withValue:value];
+    [self setValue:currentValue - value time:[event time]];
 }
 
+- (void)stopWithEvent:(PajeEvent *)event
+{
+    [self setValue:HUGE_VAL time:[event time]];
+}
+
+- (void)endOfChunkWithTime:(NSDate *)time
+{
+    if (incompleteEntities == nil) {
+        UserValue *incomplete;
+        if (currentValue != HUGE_VAL) {
+            incomplete = [UserValue valueWithType:entityType
+                                      doubleValue:currentValue
+                                        container:container
+                                        startTime:currentTime
+                                          endTime:time];
+            Assign(incompleteEntities, [NSArray arrayWithObject:incomplete]);
+        } else if ([entities count] == 1) {
+            incomplete = [entities lastObject];
+            [incomplete setEndTime:time];
+            Assign(incompleteEntities, [NSArray arrayWithObject:incomplete]);
+            [entities removeLastObject];
+        }
+    }
+    [super endOfChunkWithTime:time];
+if ([[[self entityType] description] hasSuffix:@"active.buffer_head"]) NSLog(@"just finished:%@", self);
+}
+
+- (void)xsetEndTime:(NSDate *)time
+{
+    [self setValue:currentValue time:time];
+    [super setEndTime:time];
+}
+
+- (NSEnumerator *)enumeratorOfEntitiesFromTime:(NSDate *)sliceStartTime
+                                        toTime:(NSDate *)sliceEndTime
+{
+    NSEnumerator *incEnum = nil;
+    NSEnumerator *compEnum = nil;
+    NSEnumerator *en;
+    int firstIndex;
+    int lastIndex;
+    NSRange range;
+    int count;
+    BOOL mayHaveIncomplete = YES;
+    
+    [EntityChunk touch:self];
+    count = [entities count];
+    if (count > 0) {
+        firstIndex = [entities indexOfLastObjectBeforeValue:sliceStartTime];
+        if (firstIndex == count - 1) {
+            lastIndex = firstIndex;
+            if ([[[entities objectAtIndex:firstIndex] endTime]
+                                        isEarlierThanDate:sliceStartTime]) {
+                firstIndex++; // no complete entities!
+            }
+        } else {
+            lastIndex = [entities indexOfLastObjectBeforeValue:sliceEndTime];
+            if (lastIndex != count - 1) {
+                mayHaveIncomplete = NO;
+            }
+        }
+        int numEntities = lastIndex - firstIndex + 1;
+        if (numEntities > 0) {
+            range = NSMakeRange(firstIndex, numEntities);
+            compEnum = [entities reverseObjectEnumeratorWithRange:range];
+        }
+    }
+    if (mayHaveIncomplete) {
+        PajeEntity *incomplete;
+        incomplete = [incompleteEntities lastObject];
+        if (incomplete != nil) {
+            NSDate *incompleteStartTime;
+            incompleteStartTime = [incomplete startTime];
+            if ([incompleteStartTime isEarlierThanDate:sliceEndTime]) {
+                incEnum = [incompleteEntities objectEnumerator];
+            }
+        }
+    }
+
+    if (incEnum != nil && compEnum != nil) {
+        en = [MultiEnumerator enumeratorWithEnumeratorArray:
+                    [NSArray arrayWithObjects:incEnum, compEnum, nil]];
+    } else if (compEnum != nil) {
+        en = compEnum;
+    } else {
+        en = incEnum;
+    }
+if ([[[self entityType] description] hasSuffix:@"active.buffer_head"]) NSLog(@"enum %@-%@:%@+%d inc=%@", sliceStartTime, sliceEndTime, NSStringFromRange(range), incEnum!=nil, incompleteEntities);
+    return en;
+}
+
+- (NSEnumerator *)enumeratorOfEntitiesBeforeTime:(NSDate *)time
+{
+    NSEnumerator *incEnum = nil;
+    NSEnumerator *compEnum;
+    NSEnumerator *en;
+    int firstIndex;
+    int lastIndex;
+    NSRange range;
+    int count;
+    BOOL mayHaveIncomplete = YES;
+    
+    [EntityChunk touch:self];
+    count = [entities count];
+    if (count > 0) {
+        firstIndex = 0;
+        lastIndex = [entities indexOfLastObjectBeforeValue:time];
+        if (lastIndex != count - 1) {
+            mayHaveIncomplete = NO;
+        }
+        int numEntities = lastIndex - firstIndex + 1;
+        if (numEntities > 0) {
+            range = NSMakeRange(firstIndex, numEntities);
+            compEnum = [entities reverseObjectEnumeratorWithRange:range];
+        }
+    }
+    if (mayHaveIncomplete) {
+        PajeEntity *incomplete;
+        incomplete = [incompleteEntities lastObject];
+        if (incomplete != nil) {
+            NSDate *incompleteStartTime;
+            incompleteStartTime = [incomplete startTime];
+            if ([incompleteStartTime isEarlierThanDate:time]) {
+                incEnum = [incompleteEntities objectEnumerator];
+            }
+        }
+    }
+
+    if (incEnum != nil && compEnum != nil) {
+        en = [MultiEnumerator enumeratorWithEnumeratorArray:
+                    [NSArray arrayWithObjects:incEnum, compEnum, nil]];
+    } else if (compEnum != nil) {
+        en = compEnum;
+    } else {
+        en = incEnum;
+    }
+if ([[[self entityType] description] hasSuffix:@"active.buffer_head"]) NSLog(@"enum -%@:%@+%d inc=%@", time, NSStringFromRange(range), incEnum!=nil, incompleteEntities);
+    return en;
+}
+- (NSEnumerator *)xxenumeratorOfAllCompleteEntities
+{
+    NSEnumerator *compEnum;
+    NSRange range;
+
+    NSAssert([self canEnumerate], @"enumerating non-enumerable chunk");
+    [EntityChunk touch:self];
+    range = NSMakeRange(0, [entities count]/* - 1*/);
+if ([[[self entityType] description] hasSuffix:@"active.buffer_head"]) NSLog(@"enum []:%@", NSStringFromRange(range));
+    compEnum = [entities reverseObjectEnumeratorWithRange:range];
+    
+    return compEnum;
+}
 @end
 
 @implementation AggregateStateChunk
@@ -640,4 +839,26 @@
         [array removeObjectsInRange:NSMakeRange(newCount, n)];
     }
 }
+@end
+@implementation AggregateVariableChunk
+- (void)setIncompleteEntities:(NSArray *)array
+{
+    if (incompleteEntities != nil) {
+        [incompleteEntities release];
+        incompleteEntities = nil;
+    }
+    if (array != nil) {
+        NSEnumerator *en = [array objectEnumerator];
+        NSDate *d = [[self lastEntity] endTime];
+        PajeEntity *e;
+        while ((e = [en nextObject]) != nil) {
+            if (d == nil || [[e endTime] isLaterThanDate:d]) {
+                Assign(incompleteEntities, [NSArray arrayWithObject:e]);
+            }
+        }
+    }
+}
+
+@end
+@implementation AggregateLinkChunk
 @end

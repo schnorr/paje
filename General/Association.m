@@ -125,4 +125,25 @@
     }
     return self;
 }
+
+- (id)startTime
+{
+    return [(NSDate *)object addTimeInterval:-100.0];
+}
+- (id)name
+{
+    return object;
+}
+- (id)container
+{
+return nil;
+}
+- (id)valueOfFieldNamed:(id)x
+{
+return nil;
+}
+- (id)relatedEntities
+{
+return nil;
+}
 @end

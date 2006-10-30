@@ -40,13 +40,15 @@
 {
     SimulContainer *rootContainer;
 #ifdef MAP
-    NSMapTable *invocationTable;
+//OLDEVENT    NSMapTable *invocationTable;
+    IMP invocationTable[PajeEventIdCount];
 #else
     NSMutableDictionary *invocationTable;
 #endif
 
     /* PajeContainerType's and PajeEntityTypes's mapped by name and alias */
-    NSMutableDictionary *userTypes;
+//OLDEVENT    NSMutableDictionary *userTypes;
+    NSMapTable *userTypes;
 
     /* PajeContainers mapped by name and alias (used only when containerType is
        not known, like in old PajeDestroyContainer events */
@@ -82,10 +84,12 @@
 - (NSDate *)currentTime;
 
 - (PajeEntityType *)entityTypeWithName:(NSString *)name;
+- (id)typeForId:(const char *)typeId;
+- (void)setType:(id)type forId:(const char *)typeId;
 
 - (int)eventCount;
 
-- (void)endOfChunk;
+- (void)endOfChunkLast:(BOOL)last;
 - (void)outputChunk:(id)entity;
 
 - (id)chunkState;
@@ -93,6 +97,8 @@
 - (int)currentChunkNumber;
 
 - (void)getChunksUntilTime:(NSDate *)time;
+
+- (BOOL)isReplaying;
 @end
 
 @interface PajeSimul (UserEvents)

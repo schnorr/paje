@@ -110,44 +110,32 @@ ofContainersTyped:(PajeEntityType *)containerType
     return [entityType containerType];
 }
 
-- (NSNumber *)minValueForEntityType:(PajeEntityType *)entityType
+- (double)minValueForEntityType:(PajeEntityType *)entityType
 {
-    if ([entityType respondsToSelector:@selector(minValue)])
-        return [(PajeVariableType *)entityType minValue];
-    else
-        return [NSNumber numberWithInt:0];
+    return [entityType minValue];
 }
 
-- (NSNumber *)maxValueForEntityType:(PajeEntityType *)entityType
+- (double)maxValueForEntityType:(PajeEntityType *)entityType
 {
-    if ([entityType respondsToSelector:@selector(maxValue)])
-        return [(PajeVariableType *)entityType maxValue];
-    else
-        return [NSNumber numberWithInt:0];
+    return [entityType maxValue];
 }
 
-- (NSNumber *)minValueForEntityType:(PajeEntityType *)entityType
+- (double)minValueForEntityType:(PajeEntityType *)entityType
+                    inContainer:(PajeContainer *)container
+{
+    return [container minValueForEntityType:entityType];
+}
+
+- (double)maxValueForEntityType:(PajeEntityType *)entityType
                         inContainer:(PajeContainer *)container
 {
-    if ([container respondsToSelector:@selector(minValueForEntityType:)])
-        return [(id)container minValueForEntityType:entityType];
-    else
-        return [NSNumber numberWithInt:0];
-}
-
-- (NSNumber *)maxValueForEntityType:(PajeEntityType *)entityType
-                        inContainer:(PajeContainer *)container
-{
-    if ([container respondsToSelector:@selector(maxValueForEntityType:)])
-        return [(id)container maxValueForEntityType:entityType];
-    else
-        return [NSNumber numberWithInt:0];
+    return [container maxValueForEntityType:entityType];
 }
 
 
-- (NSArray *)allNamesForEntityType:(PajeEntityType *)entityType
+- (NSArray *)allValuesForEntityType:(PajeEntityType *)entityType
 {
-    return [entityType allNames];
+    return [entityType allValues];
 }
 
 - (NSString *)descriptionForEntityType:(PajeEntityType *)entityType
@@ -165,26 +153,24 @@ ofContainersTyped:(PajeEntityType *)containerType
     return [entityType drawingType];
 }
 
-- (NSColor *)colorForName:(NSString *)name
-             ofEntityType:(PajeEntityType *)entityType
+- (NSColor *)colorForValue:(id)value
+              ofEntityType:(PajeEntityType *)entityType
 {
-    return [entityType colorForName:name];
+    return [entityType colorForValue:value];
 }
 
 - (void)setColor:(NSColor *)color
-         forName:(NSString *)name
+        forValue:(id)value
     ofEntityType:(PajeEntityType *)entityType
 {
-    [entityType setColor:color forName:name];
+    [entityType setColor:color forValue:value];
     [self colorChangedForEntityType:entityType];
 }
 
 
 - (NSColor *)colorForEntityType:(PajeEntityType *)entityType
 {
-    if ([entityType respondsToSelector:@selector(color)])
-        return [entityType color];
-    return [NSColor blackColor];
+    return [entityType color];
 }
 
 - (NSArray *)fieldNamesForEntityType:(PajeEntityType *)entityType
@@ -203,12 +189,19 @@ ofContainersTyped:(PajeEntityType *)containerType
 
 // Queries for entities
 
-- (NSNumber *)valueForEntity:(PajeEntity *)entity
+- (double)doubleValueForEntity:(PajeEntity *)entity
 {
-    if ([entity respondsToSelector:@selector(value)])
-        return [(id)entity value];
-    else
-        return [NSNumber numberWithInt:0];
+    return [entity doubleValue];
+}
+
+- (double)minValueForEntity:(PajeEntity *)entity
+{
+    return [entity minValue];
+}
+
+- (double)maxValueForEntity:(PajeEntity *)entity
+{
+    return [entity maxValue];
 }
 
 - (PajeContainer *)containerForEntity:(id<PajeEntity>)entity;
@@ -261,9 +254,9 @@ ofContainersTyped:(PajeEntityType *)containerType
     return [entity drawingType];
 }
 
-- (NSString *)nameForEntity:(id<PajeEntity>)entity
+- (id)valueForEntity:(id<PajeEntity>)entity
 {
-    return [entity name];
+    return [entity value];
 }
 
 - (int)imbricationLevelForEntity:(id<PajeEntity>)entity
@@ -281,22 +274,26 @@ ofContainersTyped:(PajeEntityType *)containerType
     return [entity subCount];
 }
 
-- (NSColor *)subColorAtIndex:(unsigned)index forEntity:(id<PajeEntity>)entity
+- (NSColor *)subColorAtIndex:(unsigned)index
+                   forEntity:(id<PajeEntity>)entity
 {
     return [entity subColorAtIndex:index];
 }
 
-- (NSString *)subNameAtIndex:(unsigned)index forEntity:(id<PajeEntity>)entity
+- (id)subValueAtIndex:(unsigned)index
+            forEntity:(id<PajeEntity>)entity
 {
-    return [entity subNameAtIndex:index];
+    return [entity subValueAtIndex:index];
 }
 
-- (double)subDurationAtIndex:(unsigned)index forEntity:(id<PajeEntity>)entity
+- (double)subDurationAtIndex:(unsigned)index
+                   forEntity:(id<PajeEntity>)entity
 {
     return [entity subDurationAtIndex:index];
 }
 
-- (unsigned)subCountAtIndex:(unsigned)index forEntity:(id<PajeEntity>)entity
+- (unsigned)subCountAtIndex:(unsigned)index
+                  forEntity:(id<PajeEntity>)entity
 {
     return [entity subCountAtIndex:index];
 }
@@ -304,9 +301,7 @@ ofContainersTyped:(PajeEntityType *)containerType
 
 - (NSString *)descriptionForEntity:(id<PajeEntity>)entity
 {
-    return [NSString stringWithFormat:@"%@ [%@ in %@ %@]",
-        [entity name], [entity entityType],
-        [[entity container] entityType], [entity container]];
+    return [entity description];
 }
 
 - (BOOL)canHighlightEntity:(id<PajeEntity>)entity
@@ -332,7 +327,8 @@ ofContainersTyped:(PajeEntityType *)containerType
 }
 
 
-- (void)setColor:(NSColor *)color forEntity:(id<PajeEntity>)entity
+- (void)setColor:(NSColor *)color
+       forEntity:(id<PajeEntity>)entity
 {
     [entity setColor:color];
     [self colorChangedForEntityType:[self entityTypeForEntity:entity]];

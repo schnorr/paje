@@ -43,34 +43,37 @@
                      container:c
                          event:e];
     if (self != nil) {
-        endEvent = nil;
+//        endEvent = nil;
+        endTime = nil;
         imbricationLevel = 0;
         innerStates = nil;
         innerDuration = 0;
     }
+//NSLog(@"init %@ e=%@", self, e);
     return self;
 }
 - (void)dealloc
 {
-    Assign(endEvent, nil);
+//    Assign(endEvent, nil);
+    Assign(endTime, nil);
     Assign(innerStates, nil);
     [super dealloc];
 }
 
-- (id)value
-{
-    return [super name];
-}
-
 - (void)setEndEvent:(PajeEvent *)e
 {
-    Assign(endEvent, e);
+//    Assign(endEvent, e);
+    Assign(endTime, [e time]);
+//NSLog(@"setend %@ e=%@", self, e);
 }
 
 - (NSDate *)endTime
 {
-    if (endEvent != nil) {
-        return [endEvent time];
+//    if (endEvent != nil) {
+//        return [endEvent time];
+//    }
+    if (endTime != nil) {
+        return endTime;
     }
     return [container endTime];
 }
@@ -107,8 +110,8 @@
         innerStates = [[CondensedEntitiesArray alloc] init];
     }
     [innerStates addArray:[innerState condensedEntities]];
-    [innerStates addName:[innerState name]
-                duration:[innerState exclusiveDuration]];
+    [innerStates addValue:[innerState value]
+                 duration:[innerState exclusiveDuration]];
     condensedEntitiesCount += [innerState condensedEntitiesCount] + 1;
 }
 
@@ -122,14 +125,14 @@
     return [innerStates count];
 }
 
-- (NSString *)subNameAtIndex:(unsigned)i
+- (id)subValueAtIndex:(unsigned)i
 {
-    return [innerStates nameAtIndex:i];
+    return [innerStates valueAtIndex:i];
 }
 
 - (NSColor *)subColorAtIndex:(unsigned)i
 {
-    return [entityType colorForName:[innerStates nameAtIndex:i]];
+    return [entityType colorForValue:[innerStates valueAtIndex:i]];
 }
 
 - (double)subDurationAtIndex:(unsigned)i
@@ -145,9 +148,9 @@
                         @"Imbrication Level",
                         @"Exclusive Duration",
                         nil];
-    if (endEvent != nil) {
-        [localFields addObjectsFromArray:[endEvent fieldNames]];
-    }
+//    if (endEvent != nil) {
+//        [localFields addObjectsFromArray:[endEvent fieldNames]];
+//    }
     [localFields addObjectsFromArray:[super fieldNames]];
     return localFields;
 }
@@ -163,7 +166,7 @@
     value = [super valueOfFieldNamed:fieldName];
     if (value != nil)
         return value;
-    value = [endEvent valueOfFieldNamed:fieldName];
+//    value = [endEvent valueOfFieldNamed:fieldName];
     return value;
 }
 
@@ -172,7 +175,8 @@
 {
     [super encodeWithCoder:coder];
     [coder encodeValuesOfObjCTypes:"@id@i",
-            &endEvent, &imbricationLevel, &innerDuration,
+//            &endEvent, &imbricationLevel, &innerDuration,
+            &endTime, &imbricationLevel, &innerDuration,
             &innerStates, &condensedEntitiesCount];
 }
 
@@ -180,7 +184,8 @@
 {
     self = [super initWithCoder:coder];
     [coder decodeValuesOfObjCTypes:"@id@i",
-            &endEvent, &imbricationLevel, &innerDuration,
+//            &endEvent, &imbricationLevel, &innerDuration,
+            &endTime, &imbricationLevel, &innerDuration,
             &innerStates, &condensedEntitiesCount];
     return self;
 }

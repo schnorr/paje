@@ -230,15 +230,16 @@
 
     cell = [containerTypesBrowser selectedCellInColumn:column];
     containerType = [cell representedObject];
-    if (containerType == nil)
+    if (containerType == nil) {
         return;
+    }
     isContainer = ![cell isLeaf];
 
     if (isContainer || containersOnly) {
         containerEnum = [filter enumeratorOfContainersTyped:containerType
                                                 inContainer:upperContainer];
     } else {
-        containerEnum = [[filter allNamesForEntityType:containerType] objectEnumerator];
+        containerEnum = [[filter allValuesForEntityType:containerType] objectEnumerator];
     }
     for (row = 0; (container = [containerEnum nextObject]) != nil; row++) {
         NSBrowserCell *cell;

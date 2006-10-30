@@ -28,6 +28,7 @@
 #include "Macros.h"
 #include "NSUserDefaults+Additions.h"
 #include "PajeContainer.h"
+#include "../General/CStringCallBacks.h"
 
 @implementation PajeEntityType
 
@@ -49,18 +50,19 @@
         Assign(name, n);
         containerType = type;
 	[containerType addContainedType:self];
-        Assign(event, e);
+        //NEWEVENT Assign(event, e);
         c = [[NSUserDefaults standardUserDefaults]
                          colorForKey:[name stringByAppendingString:@" Color"]];
         if (c == nil) {
-            c = [event valueOfFieldNamed:@"Color"];
+            //NEWEVENT c = [event valueOfFieldNamed:@"Color"];
+            c = [e colorForFieldId:PajeColorFieldId];
         }
         if (c == nil) {
             c = [NSColor whiteColor];
         }
         Assign(color, c);
         fieldNames = [[NSMutableSet alloc] init];
-        knownEventTypes = [[NSMutableSet alloc] init];
+        knownEventTypes = NSCreateHashTable(CStringHashCallBacks, 50);
     }
     return self;
 }
@@ -70,9 +72,9 @@
     Assign(name, nil);
     containerType = nil;
     Assign(color, nil);
-    Assign(event, nil);
+    //NEWEVENT Assign(event, nil);
     Assign(fieldNames, nil);
-    Assign(knownEventTypes, nil);
+    NSFreeHashTable(knownEventTypes);
     [super dealloc];
 }
 
@@ -81,7 +83,7 @@
     return NO;
 }
 
-- (NSArray *)allNames
+- (NSArray *)allValues
 {
     return [NSArray array];
 }
@@ -114,11 +116,12 @@
     return [name description];
 }
 
-- (NSColor *)colorForName:(id)n
+- (NSColor *)colorForValue:(id)value
 {
     return [self color];
 }
-- (void)setColor:(NSColor*)c forName:(id)n
+- (void)setColor:(NSColor*)c
+        forValue:(id)value
 {
     [self setColor:c];
 }
@@ -137,7 +140,8 @@
 
 - (id)valueOfFieldNamed:(NSString *)n
 {
-    return [event valueOfFieldNamed:n];
+    //NEWEVENT FIXME return [event valueOfFieldNamed:n];
+    return nil;
 }
 
 
@@ -151,12 +155,23 @@
     return [fieldNames allObjects];
 }
 
-- (BOOL)isKnownEventType:(id)type
+- (double)minValue
 {
-    if ([knownEventTypes containsObject:type]) {
+    return 0.0;
+}
+
+- (double)maxValue
+{
+    return 0.0;
+}
+
+
+- (BOOL)isKnownEventType:(const char *)type
+{
+    if (NSHashGet(knownEventTypes, type) != NULL) {
         return YES;
     }
-    [knownEventTypes addObject:type];
+    NSHashInsert(knownEventTypes, strdup(type));
     return NO;
 }
 
@@ -184,19 +199,21 @@
 {
     [coder encodeObject:name];
     [coder encodeObject:containerType];
-    [coder encodeObject:event];
+    //NEWEVENT [coder encodeObject:event];
     [coder encodeObject:fieldNames];
 }
 
 - (id)initWithCoder:(NSCoder *)coder
 {
-    id o1, o2, o3;
+    id o1;
+    id o2;
+    //NEWEVENT id o3;
     o1 = [coder decodeObject];
     o2 = [coder decodeObject];
-    o3 = [coder decodeObject];
+    //NEWEVENT o3 = [coder decodeObject];
     self = [self initWithName:o1
                 containerType:o2
-                        event:o3];
+                        event:nil/*NEWEVENT o3*/];
     Assign(fieldNames, [coder decodeObject]);
     return self;
 }
@@ -220,7 +237,8 @@
     self = [super initWithName:n containerType:type event:e];
     if (self != nil) {
         allInstances = [[NSMutableArray alloc] init];
-        idToInstance = [[NSMutableDictionary alloc] init];
+        idToInstance = NSCreateMapTable(CStringMapKeyCallBacks,
+                                        NSObjectMapValueCallBacks, 50);
         containedTypes = [[NSMutableArray alloc] init];
     }
     return self;
@@ -229,7 +247,7 @@
 - (void)dealloc
 {
     Assign(allInstances, nil);
-    Assign(idToInstance, nil);
+    NSFreeMapTable(idToInstance);
     Assign(containedTypes, nil);
     [super dealloc];
 }
@@ -245,25 +263,22 @@
 }
 
 - (void)addInstance:(PajeContainer *)container
+                id1:(const char *)id1
+                id2:(const char *)id2
 {
-    NSString *containerName;
-    NSString *containerAlias;
-    
     [allInstances addObject:container];
-    containerName = [container name];
-    if (containerName != nil) {
-        [idToInstance setObject:container forKey:containerName];
+    if (id1 != NULL) {
+        NSMapInsert(idToInstance, strdup(id1), container);
     }
-    containerAlias = [container alias];
-    if (containerAlias != nil && ![containerAlias isEqual:containerName]) {
-        [idToInstance setObject:container forKey:containerAlias];
+    if (id2 != NULL && strcmp(id1, id2) != 0) {
+        NSMapInsert(idToInstance, strdup(id2), container);
     }
 }
 
-- (PajeContainer *)instanceWithId:(NSString *)containerId
+- (PajeContainer *)instanceWithId:(const char *)containerId
 {
-    if (containerId != nil) {
-        return [idToInstance objectForKey:containerId];
+    if (containerId != NULL) {
+        return NSMapGet(idToInstance, containerId);
     }
     return nil;
 }
@@ -288,7 +303,8 @@
 {
     [super encodeWithCoder:coder];
     [coder encodeObject:allInstances];
-    [coder encodeObject:idToInstance];
+//FIXME -- how to encode this?
+//    [coder encodeObject:idToInstance];
     [coder encodeObject:containedTypes];
 }
 
@@ -296,7 +312,8 @@
 {
     self = [super initWithCoder:coder];
     Assign(allInstances, [coder decodeObject]);
-    Assign(idToInstance, [coder decodeObject]);
+//FIXME
+//    Assign(idToInstance, [coder decodeObject]);
     Assign(containedTypes, [coder decodeObject]);
     return self;
 }
@@ -313,8 +330,8 @@
 {
     self = [super initWithName:n containerType:type event:e];
     if (self != nil) {
-        Assign(aliases, [NSMutableDictionary dictionary]);
-        allValues = [[NSMutableSet alloc] init];
+        aliasToValue = NSCreateMapTable(CStringMapKeyCallBacks,
+                                        NSObjectMapValueCallBacks, 50);
         [self readDefaultColors];
     }
     return self;
@@ -322,65 +339,61 @@
 
 - (void)dealloc
 {
-    Assign(aliases, nil);
-    Assign(allValues, nil);
-    Assign(nameToColor, nil);
+    NSFreeMapTable(aliasToValue);
+    Assign(valueToColor, nil);
     [super dealloc];
 }
 
 - (void)setValue:(id)value
-           alias:(id)alias
+           alias:(const char *)alias
 {
-    if (alias != nil) {
-        [aliases setObject:value forKey:alias];
+    if (alias != NULL) {
+        NSMapInsert(aliasToValue, strdup(alias), value);
     }
-    [allValues addObject:value];
 }
 
 - (void)setValue:(id)value
-           alias:(id)alias
+           alias:(const char *)alias
            color:(id)c
 {
-    if (alias != nil) {
-        [aliases setObject:value forKey:alias];
+    if (alias != NULL) {
+        NSMapInsert(aliasToValue, strdup(alias), value);
     }
-    [allValues addObject:value];
-    [self setColor:c forName:value];
+    [self setColor:c forValue:value];
 }
 
-- (id)unaliasedValue:(id)v
+- (id)valueForAlias:(const char *)alias
 {
     id value;
-    value = [aliases objectForKey:v];
-    if (value != nil) {
-        return value;
+    value = NSMapGet(aliasToValue, alias);
+    if (value == nil) {
+        value = [NSString stringWithCString:alias];
+        NSMapInsert(aliasToValue, strdup(alias), value);
     }
-    // TODO should see if v is in allValues
-    // return [allValues member];
-    return v;
+    return value;
 }
 
-//FIXME should be allValues
-- (NSArray *)allNames
+- (NSArray *)allValues
 {
-    return [allValues allObjects];
+    return NSAllMapTableValues(aliasToValue);
 }
 
-- (NSColor *)colorForName:(id)n
+- (NSColor *)colorForValue:(id)value
 {
-    NSColor *c;
-    c = [nameToColor objectForKey:n];
-    if (c == nil) {
-        c = [NSColor whiteColor];
+    NSColor *colorForValue;
+    colorForValue = [valueToColor objectForKey:value];
+    if (colorForValue == nil) {
+        colorForValue = [NSColor whiteColor];
     }
-    return c;
+    return colorForValue;
 }
 
-- (void)setColor:(NSColor*)c forName:(id)n
+- (void)setColor:(NSColor*)colorForValue
+        forValue:(id)value
 {
-    [nameToColor setObject:c forKey:n];
+    [valueToColor setObject:colorForValue forKey:value];
     [[NSUserDefaults standardUserDefaults]
-        setColorDictionary:nameToColor
+        setColorDictionary:valueToColor
                     forKey:[name stringByAppendingString:@" Colors"]];
 }
 
@@ -391,7 +404,7 @@
         colorDictionaryForKey:[name stringByAppendingString:@" Colors"]] mutableCopy] autorelease];
     if (!dict)
         dict = [NSMutableDictionary dictionary];
-    Assign(nameToColor, dict);
+    Assign(valueToColor, dict);
 }
 
 
@@ -399,15 +412,13 @@
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];
-    [coder encodeObject:aliases];
-    [coder encodeObject:allValues];
+    //FIXME [coder encodeObject:aliasToValue];
 }
 
 - (id)initWithCoder:(NSCoder *)coder
 {
     self = [super initWithCoder:coder];
-    Assign(aliases, [coder decodeObject]);
-    Assign(allValues, [coder decodeObject]);
+    //FIXME Assign(aliasToValue, [coder decodeObject]);
     [self readDefaultColors];
     return self;
 }
@@ -430,17 +441,30 @@
 }
 @end
 
+#include <math.h>
 
 @implementation PajeVariableType
-+ (NSArray *)allNames
+- (id)initWithName:(NSString *)n
+     containerType:(PajeContainerType *)type
+             event:(PajeEvent *)e
+{
+    self = [super initWithName:n
+                 containerType:type
+                         event:e];
+    if (self != nil) {
+        minValue = HUGE_VAL;
+        maxValue = -HUGE_VAL;
+    }
+    return self;
+}
+
++ (NSArray *)allValues
 {
     return [NSArray array];
 }
 
 - (void)dealloc
 {
-    Assign(minValue, nil);
-    Assign(maxValue, nil);
     [super dealloc];
 }
 
@@ -449,27 +473,27 @@
     return PajeVariableDrawingType;
 }
 
-- (void)possibleNewMinValue:(NSNumber *)value
+- (void)possibleNewMinValue:(double)value
 {
-    if ((minValue == nil) || ([minValue compare:value] == NSOrderedDescending)) {
-        Assign(minValue, value);
+    if (value < minValue) {
+        minValue = value;
     }
 }
 
-- (void)possibleNewMaxValue:(NSNumber *)value
+- (void)possibleNewMaxValue:(double)value
 {
 
-    if ((maxValue == nil) || ([maxValue compare:value] == NSOrderedAscending)) {
-        Assign(maxValue, value);
+    if (value > maxValue) {
+        maxValue = value;
     }
 }
 
-- (NSNumber *)minValue
+- (double)minValue
 {
     return minValue;
 }
 
-- (NSNumber *)maxValue
+- (double)maxValue
 {
     return maxValue;
 }
@@ -479,15 +503,15 @@
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];
-    [coder encodeObject:minValue];
-    [coder encodeObject:maxValue];
+    [coder encodeObject:[NSNumber numberWithDouble:minValue]];
+    [coder encodeObject:[NSNumber numberWithDouble:maxValue]];
 }
 
 - (id)initWithCoder:(NSCoder *)coder
 {
     self = [super initWithCoder:coder];
-    Assign(minValue, [coder decodeObject]);
-    Assign(maxValue, [coder decodeObject]);
+    minValue = [[coder decodeObject] doubleValue];
+    maxValue = [[coder decodeObject] doubleValue];
     return self;
 }
 @end

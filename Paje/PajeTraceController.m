@@ -161,6 +161,7 @@
                    PajeEventDecoder, \
                    PajeSimulator, \
                    StorageController, \
+                   AggregatingFilter, \
                    ReductionFilter, \
                    FieldFilter, \
                    ContainerFilter, \
@@ -254,8 +255,8 @@
             NSDebugMLLog(@"tim", @"will read chunk starting at %@",
                                     [simulator currentTime]);
             [reader readNextChunk];
-            [self endOfChunk];
         }
+        [self endOfChunkLast:![reader hasMoreData]];
 
     NS_HANDLER
         if (NSRunAlertPanel([localException name], @"%@\n%@",
@@ -288,9 +289,9 @@
     }
 }
 
-- (void)endOfChunk
+- (void)endOfChunkLast:(BOOL)last
 {
-    [reader endOfChunk];
+    [reader endOfChunkLast:last];
 }
 
 - (void)chunkFault:(NSNotification *)notification

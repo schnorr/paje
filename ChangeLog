@@ -1,4 +1,14 @@
 2006-10-29  Benhur Stein <benhur@inf.ufsm.br>
+	* */*: rewrote file reading and simulation for better speed.
+          (events are kept pointing into original string from file;
+          events cannot be retained anymore;
+          fields are made into objects only when needed, by the simulator).
+          new AggregatingFilter, with some code from StorageController;
+          completed missing entity types (values); still needing some
+          refactoring.
+          made distinction between -value and -doubleValue for all entity types.
+
+2006-10-29  Benhur Stein <benhur@inf.ufsm.br>
 	* SpaceTimeDiagram/*: major overhaul in drawing code, mainly to
 	  substitute PS functions by NSBezierPath.
 	  variables now have a vertical scale; all variables use the same

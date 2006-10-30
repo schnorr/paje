@@ -43,6 +43,7 @@
     NSMutableDictionary *minValues; // key = entityType
     NSMutableDictionary *maxValues; // key = entityType
     int logicalTime;
+    BOOL isActive;
 }
 
 + (SimulContainer *)containerWithType:(PajeEntityType *)type
@@ -66,6 +67,7 @@
 - (void)stopWithEvent:(PajeEvent*)event;
 
 - (BOOL)isStopped;
+- (BOOL)isActive;
 
 - (void)setLastTime:(NSDate *)time;
 
@@ -85,13 +87,13 @@
                  withEvent:(PajeEvent *)event;
 
 - (void)setUserVariableOfType:(PajeVariableType *)entityType
-                      toValue:(id)entityName
+                toDoubleValue:(double)value
                     withEvent:(PajeEvent *)event;
 - (void)addUserVariableOfType:(PajeVariableType *)entityType
-                        value:(id)entityName
+                  doubleValue:(double)value
                     withEvent:(PajeEvent *)event;
 - (void)subUserVariableOfType:(PajeVariableType *)entityType
-                        value:(id)entityName
+                  doubleValue:(double)value
                     withEvent:(PajeEvent *)event;
 
 - (void)startUserLinkOfType:(PajeEntityType *)entityType
@@ -112,7 +114,7 @@
 - (void)setLogicalTime:(int)lt;
 
 - (void)startChunk;
-- (void)endOfChunk;
+- (void)endOfChunkLast:(BOOL)last;
 
 - (void)emptyChunk:(int)chunkNumber;
 

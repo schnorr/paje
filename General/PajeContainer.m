@@ -122,4 +122,14 @@
     Assign(subContainers, [coder decodeObject]);
     return self;
 }
+
+- (double)minValueForEntityType:(PajeEntityType *)type
+{
+    return 0.0;
+}
+
+- (double)maxValueForEntityType:(PajeEntityType *)type
+{
+    return 0.0;
+}
 @end

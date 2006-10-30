@@ -105,7 +105,7 @@
     return 0;
 }
 
-- (NSString *)subNameAtIndex:(unsigned)index
+- (id)subValueAtIndex:(unsigned)index
 {
     [self subclassResponsibility:_cmd];
     return nil;
@@ -117,7 +117,7 @@
     return nil;
 }
 
-- (double)subValueAtIndex:(unsigned)index
+- (double)subDoubleValueAtIndex:(unsigned)index
 {
     [self subclassResponsibility:_cmd];
     return 0;
@@ -185,8 +185,8 @@
         
         while (top >= 0 && [entityEnd isEarlierThanDate:start[top]]) {
             if (incomplete[top] && duration[top] > 0) {
-                [condensedArray addName:names[top]
-                               duration:duration[top]];
+                [condensedArray addValue:names[top]
+                                duration:duration[top]];
             }
             top--;
         }
@@ -205,8 +205,8 @@
         }
         
         if (!entityIsAggregate) {
-            NSString *entityName;
-            entityName = [filter nameForEntity:entity];
+            id entityValue;
+            entityValue = [filter valueForEntity:entity];
 
             if (top >= 0 && incomplete[top]) {
                 duration[top] -= entityDurationInSelection;
@@ -215,14 +215,14 @@
             incomplete[top] = entityIsIncomplete;
             start[top] = entityStart;
             if (entityIsIncomplete) {
-                names[top] = entityName;
+                names[top] = entityValue;
                 duration[top] = entityDurationInSelection;
             } else {
                 double entityExclusiveDuration;
                 //entityExclusiveDuration = [filter exclusiveDurationForEntity:entity];
                 entityExclusiveDuration = [entity exclusiveDuration];
-                [condensedArray addName:entityName
-                               duration:entityExclusiveDuration];
+                [condensedArray addValue:entityValue
+                                duration:entityExclusiveDuration];
             }
             //condensedEntitiesCount ++;
         } else {
@@ -250,8 +250,8 @@
     while (top >= 0) {
         if (incomplete[top]
             && duration[top]/[endTime timeIntervalSinceDate:startTime] > 1e-5) {
-            [condensedArray addName:names[top]
-                           duration:duration[top]];
+            [condensedArray addValue:names[top]
+                            duration:duration[top]];
         }
         top--;
     }
@@ -265,12 +265,12 @@
 
 - (double)maxValue
 {
-    return [self subValueAtIndex:0];
+    return [self subDoubleValueAtIndex:0];
 }
 
 - (double)minValue
 {
-    return [self subValueAtIndex:[self subCount] - 1];
+    return [self subDoubleValueAtIndex:[self subCount] - 1];
 }
 
 
@@ -279,18 +279,18 @@
     return [condensedArray count];
 }
 
-- (NSString *)subNameAtIndex:(unsigned)i
+- (id)subValueAtIndex:(unsigned)i
 {
-    return [condensedArray nameAtIndex:i];
+    return [condensedArray valueAtIndex:i];
 }
 
 - (NSColor *)subColorAtIndex:(unsigned)i
 {
-    return [filter colorForName:[condensedArray nameAtIndex:i]
-                   ofEntityType:entityType];
+    return [filter colorForValue:[condensedArray valueAtIndex:i]
+                    ofEntityType:entityType];
 }
 
-- (double)subValueAtIndex:(unsigned)i
+- (double)subDoubleValueAtIndex:(unsigned)i
 {
     return [condensedArray durationAtIndex:i];
 }

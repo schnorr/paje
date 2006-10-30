@@ -44,7 +44,7 @@
 - (BOOL)hasMoreData;
 
 - (void)startChunk:(int)chunkNumber;
-- (void)endOfChunk;
+- (void)endOfChunkLast:(BOOL)last;
 
 - (void)raise:(NSString *)reason;
 

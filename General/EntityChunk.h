@@ -46,10 +46,13 @@
     
     enum { active, frozen, empty } chunkState2;
 
+    // for LRU list of chunks
     EntityChunk *prev;
     EntityChunk *next;
 }
 
+// chunk has been touched -- move it to head of list
++ (void)touch:(EntityChunk *)chunk;
 + (void)emptyLeastRecentlyUsedChunks;
 
 - (id)initWithEntityType:(PajeEntityType *)type

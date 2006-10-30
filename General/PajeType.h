@@ -37,9 +37,8 @@
     NSString *name;
     PajeContainerType *containerType;
     NSColor *color;
-    PajeEvent *event;
     NSMutableSet *fieldNames;
-    NSMutableSet *knownEventTypes;
+    NSHashTable *knownEventTypes;
 }
 
 + (PajeEntityType *)typeWithName:(NSString *)n
@@ -56,15 +55,18 @@
 
 - (PajeDrawingType)drawingType;
 
-- (NSColor *)colorForName:(id)n;
-- (void)setColor:(NSColor*)color forName:(id)n;
+- (NSColor *)colorForValue:(id)value;
+- (void)setColor:(NSColor*)color forValue:(id)value;
 - (NSColor *)color;
 - (void)setColor:(NSColor*)color;
-- (NSArray *)allNames;
+- (NSArray *)allValues;
+
+- (double)minValue;
+- (double)maxValue;
 
 - (id)valueOfFieldNamed:(NSString *)n;
 
-- (BOOL)isKnownEventType:(id)type;
+- (BOOL)isKnownEventType:(const char *)type;
 - (void)addFieldNames:(NSArray *)names;
 - (NSArray *)fieldNames;
 
@@ -75,7 +77,7 @@
 @interface PajeContainerType : PajeEntityType
 {
     NSMutableArray *allInstances;
-    NSMutableDictionary *idToInstance;
+    NSMapTable *idToInstance;
     NSMutableArray *containedTypes;
 }
 
@@ -83,8 +85,10 @@
                       containerType:(PajeContainerType *)type
                               event:(PajeEvent *)e;
 
-- (void)addInstance:(PajeContainer *)instance;
-- (PajeContainer *)instanceWithId:(NSString *)containerId;
+- (void)addInstance:(PajeContainer *)container
+                id1:(const char *)id1
+                id2:(const char *)id2;
+- (PajeContainer *)instanceWithId:(const char *)containerId;
 - (NSArray *)allInstances;
 - (void)addContainedType:(PajeEntityType *)type;
 - (NSArray *)containedTypes;
@@ -93,21 +97,20 @@
 
 @interface PajeCategorizedEntityType : PajeEntityType
 {
-    NSMutableDictionary *aliases;
-    NSMutableSet *allValues;
-    NSMutableDictionary *nameToColor;
+    NSMapTable *aliasToValue;
+    NSMutableDictionary *valueToColor;
 }
 
-- (void)setValue:(id)n
-           alias:(id)v;
 - (void)setValue:(id)value
-           alias:(id)alias
+           alias:(const char *)alias;
+- (void)setValue:(id)value
+           alias:(const char *)alias
            color:(id)c;
-- (id)unaliasedValue:(id)v;
-- (NSArray *)allNames;
+- (id)valueForAlias:(const char *)alias;
+- (NSArray *)allValues;
 
-- (NSColor *)colorForName:(id)n;
-- (void)setColor:(NSColor*)color forName:(id)n;
+- (NSColor *)colorForValue:(id)value;
+- (void)setColor:(NSColor*)color forValue:(id)value;
 - (void)readDefaultColors;
 @end
 
@@ -125,14 +128,14 @@
 
 @interface PajeVariableType : PajeEntityType
 {
-    NSNumber *minValue;
-    NSNumber *maxValue;
+    double minValue;
+    double maxValue;
 }
 - (PajeDrawingType)drawingType;
-- (void)possibleNewMinValue:(NSNumber *)value;
-- (void)possibleNewMaxValue:(NSNumber *)value;
-- (NSNumber *)minValue;
-- (NSNumber *)maxValue;
+- (void)possibleNewMinValue:(double)value;
+- (void)possibleNewMaxValue:(double)value;
+- (double)minValue;
+- (double)maxValue;
 @end
 
 

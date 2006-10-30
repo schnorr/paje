@@ -33,6 +33,7 @@
 
 + (PSortedArray *)sortedArrayWithSelector:(SEL)sel;
 - (id)initWithSelector:(SEL)sel;
+- (void)setSelector:(SEL)sel;
 
 - (unsigned)count;
 - (id)objectAtIndex:(unsigned)index;
@@ -45,6 +46,7 @@
 - (void)removeObjectIdenticalTo:(id)obj;
 - (void)removeObjectsBeforeValue:(id<Comparing>)value;
 - (void)removeAllObjects;
+- (void)removeLastObject;
 
 - (void)verifyPositionOfObjectIdenticalTo:(id)obj;
 
@@ -59,6 +61,8 @@
 - (unsigned)indexOfLastObjectBeforeValue:(id<Comparing>)value;
 - (unsigned)indexOfObjectWithValue:(id<Comparing>)value;
 - (unsigned)indexOfObject:(id)obj;
+
+- (NSEnumerator *)reverseObjectEnumeratorWithRange:(NSRange)range;
 
 // NSCoding Protocol
 - (void)encodeWithCoder:(NSCoder *)coder;

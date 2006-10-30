@@ -21,7 +21,8 @@ SUBPROJECTS = \
 	ReductionFilter \
 	ImbricationFilter \
 	SpaceTimeViewer \
-	StatViewer
+	StatViewer \
+	AggregatingFilter
 
 OTHERSRCS = Makefile.preamble Makefile Makefile.postamble
 

@@ -52,7 +52,7 @@
 - (NSString *)entityType;
 - (PajeDrawingType)drawingType;
 
-- (NSArray *)allNames;
+- (NSArray *)allValues;
 @end
 
 #endif

@@ -58,7 +58,7 @@
     NSMutableString *s = [NSMutableString stringWithFormat:@"time = %@; objects = (", [time description]];
     for (i=0; i<[objects count]; i++) {
         id <PajeEntity> o = [objects objectAtIndex:i];
-        [s appendFormat:@"%@ %@-%@, ", [o name], [[o startTime] description], [[o endTime] description]];
+        [s appendFormat:@"%@ %@-%@, ", [o value], [[o startTime] description], [[o endTime] description]];
     }
     [s appendString:@")\n"];
     return s;

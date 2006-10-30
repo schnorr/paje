@@ -4,16 +4,29 @@
 #include "../General/Macros.h"
 
 @implementation EntityAggregator
-+ (EntityAggregator *)aggregatorWithAggregationDuration:(double)duration
++ (EntityAggregator *)aggregatorForEntityType:(PajeEntityType *)entityType
+                          aggregationDuration:(double)duration;
 {
-    return [[[self alloc] initWithAggregationDuration:duration] autorelease];
-}
+    Class subclass;
+    switch ([entityType drawingType]) {
+    case PajeEventDrawingType:
+        subclass = [EventAggregator class];
+        break;
+    case PajeStateDrawingType:
+        subclass = [StateAggregator class];
+        break;
+    case PajeVariableDrawingType:
+        subclass = [ValueAggregator class];
+        break;
+    case PajeLinkDrawingType:
+        subclass = [LinkAggregator class];
+        break;
+    default:
+        NSWarnMLog(@"No support for creating aggregator of type %@", type);
+        class = Nil;
+    }
 
-+ (EntityAggregator *)aggregatorWithEntities:(NSArray *)array
-                         aggregationDuration:(double)duration
-{
-    return [[[self alloc] initWithEntities:array
-                       aggregationDuration:duration] autorelease];
+    return [[[subclass alloc] initWithAggregationDuration:duration] autorelease];
 }
 
 - (id)initWithAggregationDuration:(double)duration
@@ -22,21 +35,16 @@
     if (self != nil) {
         entities = [[NSMutableArray alloc] init];
         aggregationDuration = duration;
+        aggregatedEntityClass = [[self class] aggregatedEntityClass];
     }
     return self;
 
 }
 
-- (id)initWithEntities:(NSArray *)array
-   aggregationDuration:(double)duration
++ (Class)aggregatedEntityClass
 {
-    self = [super init];
-    if (self != nil) {
-        entities = [array mutableCopy];
-        aggregationDuration = duration;
-    }
-    return self;
-
+    [self _subclassResponsibility:_cmd];
+    return Nil;
 }
 
 - (double)aggregationDuration
@@ -52,23 +60,61 @@
 
 - (BOOL)addEntity:(PajeEntity *)entity
 {
-    [self subclassResponsibility:_cmd];
-    return NO;
+    double newDuration;
+
+    // cannot aggregate a too wide entity
+    if ([entity duration] > aggregationDuration) {
+        return NO;
+    }
+
+    // if there are no other entities, just add the new one
+    if (earliestStartTime == nil) {
+        earliestStartTime = [entity startTime];
+        [entities addObject:entity];
+        return YES;
+    }
+
+    // if adding the new entity would make this too wide, it cannot yet be
+    // added -> must aggregate some and try again 
+    newDuration = [[entity endTime] timeIntervalSinceDate:earliestStartTime];
+    if (newDuration > aggregationDuration) {
+        return NO;
+    }
+
+    [entities addObject:entity];
+    return YES;
 }
+
 
 - (PajeEntity *)aggregate
 {
-    [self subclassResponsibility:_cmd];
-    return nil;
+    PajeEntity *entity;
+    unsigned count;
+    
+    if (earliestStartTime == nil) {
+        return nil;
+    }
+
+    count = [entities count];
+    NSAssert(count != 0, NSInternalInconsistencyException);
+    if (count > 1) {
+        entity = [aggregatedEntityClass entityWithEntities:entities];
+    } else {
+        // FIXME: is this garanteed to be retained elsewhere?
+        entity = [entities objectAtIndex:0];
+    }
+    [entities removeAllObjects];
+    earliestStartTime = nil;
+    return entity;
 }
 
 
 - (PajeEntity *)aggregateBefore:(NSDate *)limit
 {
-    if (startTime == nil) {
+    if (earliestStartTime == nil) {
         return nil;
     }
-    if ([limit timeIntervalSinceDate:startTime] < aggregationDuration) {
+    if ([limit timeIntervalSinceDate:earliestStartTime] < aggregationDuration) {
         return nil;
     }
 
@@ -90,7 +136,7 @@
     EntityAggregator *new;
     new = [[[self class] allocWithZone:z] init];
     new->entities = [entities mutableCopyWithZone:z];
-    new->startTime = startTime;
+    new->earliestStartTime = earliestStartTime;
     new->aggregationDuration = aggregationDuration;
     return new;
 }
@@ -98,50 +144,93 @@
 @end
 
 
+#include "AggregateEvent.h"
 
 @implementation EventAggregator
++ (Class)aggregatedEntityClass
+{
+    return [AggregateEvent class];
+}
+@end
+
+#include "AggregateValue.h"
+
+@implementation VariableAggregator
++ (Class)aggregatedEntityClass
+{
+    return [AggregateValue class];
+}
+@end
+
+#include <math.h>
+#include "AggregateLink.h"
+
+@implementation LinkAggregator
+
++ (Class)aggregatedEntityClass
+{
+    return [AggregateLink class];
+}
 
 - (BOOL)addEntity:(PajeEntity *)entity
 {
     double newDuration;
+    NSDate *entityStartTime;
+    NSDate *entityEndTime;
 
-    if ([entity duration] > aggregationDuration) {
-        return NO;
-    }
+    entityStartTime = [entity startTime];
+    entityEndTime = [entity endTime];
 
-    if ([entities count] == 0) {
-        startTime = [entity startTime];
+    // if there are no other entities, just add the new one
+    if (earliestStartTime == nil) {
+        latestStartTime = earliestStartTime = entityStartTime;
+        earliestEndTime = entityEndTime;
         [entities addObject:entity];
         return YES;
     }
 
-    newDuration = [[entity endTime] timeIntervalSinceDate:startTime];
-    if (newDuration <= aggregationDuration) {
-        [entities addObject:entity];
-        return YES;
-    } else {
+    // cannot aggregate if endTimes would span more than aggregationDuration
+    newDuration = [entityEndTime timeIntervalSinceDate:earliestEndTime];
+    if (newDuration > aggregationDuration) {
         return NO;
     }
+    // cannot aggregate if startTimes would span more than aggregationDuration
+    // entities are ordered by endTime, so startTime can come in any order
+    newDuration = [entityStartTime timeIntervalSinceDate:earliestStartTime];
+    if (fabs(newDuration) > aggregationDuration) {
+        return NO;
+    }
+    newDuration = [entityStartTime timeIntervalSinceDate:latestStartTime];
+    if (fabs(newDuration) > aggregationDuration) {
+        return NO;
+    }
+    
+    earliestStartTime = [earliestStartTime earlierDate:entityStartTime];
+    latestStartTime = [latestStartTime laterDate:entityStartTime];
+
+    [entities addObject:entity];
+    return YES;
 }
 
-- (PajeEntity *)aggregate
+
+- (PajeEntity *)aggregateBefore:(NSDate *)limit
 {
-    PajeEntity *event;
-    unsigned count;
-    
-    if (startTime == nil) {
+    if (earliestStartTime == nil) {
+        return nil;
+    }
+    if ([limit timeIntervalSinceDate:earliestEndTime] < aggregationDuration) {
         return nil;
     }
 
-    count = [entities count];
-    NSAssert(count != 0, NSInternalInconsistencyException);
-    if (count > 1) {
-        event = [AggregateEvent eventWithEvents:entities];
-    } else {
-        event = [entities objectAtIndex:0];
-    }
-    [entities removeAllObjects];
-    startTime = nil;
-    return event;
+    return [self aggregate];
+}
+
+- (id)copyWithZone:(NSZone *)z
+{
+    LinkAggregator *new;
+    new = [self copyWithZone:z];
+    new->latestStartTime = latestStartTime;
+    new->earliestEndTime = earliestEndTime;
+    return new;
 }
 @end

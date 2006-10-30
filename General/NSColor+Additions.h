@@ -22,11 +22,12 @@
 
 #include <AppKit/AppKit.h>
 
-@interface NSColor (Additions)
+@interface NSColor (Additions1)
+- (NSColor *)contrastingWhiteOrBlackColor;
+@end
+@interface NSColor (Additions2)
 // GNUstep implements this but does not declares publically
 + (NSColor *)colorFromString:(NSString *)value;
-
-- (NSColor *)contrastingWhiteOrBlackColor;
 @end
 
 #endif

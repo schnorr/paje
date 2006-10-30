@@ -30,7 +30,8 @@
 
 @interface UserState : UserEvent
 {
-    PajeEvent *endEvent;
+//    PajeEvent *endEvent;
+    NSDate *endTime;
     int imbricationLevel;
     double innerDuration;
     CondensedEntitiesArray *innerStates;
@@ -49,8 +50,6 @@
 
 - (void)setEndEvent:(PajeEvent *)event;
 
-- (id)value;
-
 - (NSDate *)endTime;
 
 - (void)setImbricationLevel:(int)level;
@@ -63,7 +62,7 @@
 - (CondensedEntitiesArray *)condensedEntities;
 - (unsigned)condensedEntitiesCount;
 - (unsigned)subCount;
-- (NSString *)subNameAtIndex:(unsigned)i;
+- (id)subValueAtIndex:(unsigned)i;
 - (double)subDurationAtIndex:(unsigned)i;
 - (NSColor *)subColorAtIndex:(unsigned)i;
 @end

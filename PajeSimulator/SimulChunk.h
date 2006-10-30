@@ -24,6 +24,7 @@
 #include "../General/MultiEnumerator.h"
 #include "UserState.h"
 #include "UserLink.h"
+#include "UserValue.h"
 
 @interface SimulChunk : EntityChunk
 {
@@ -73,11 +74,11 @@
 
 // for variables
 - (void)setVariableEvent:(PajeEvent *)event
-                   value:(id)value;
+             doubleValue:(double)value;
 - (void)addVariableEvent:(PajeEvent *)event
-                   value:(id)value;
+             doubleValue:(double)value;
 - (void)subVariableEvent:(PajeEvent *)event
-                   value:(id)value;
+             doubleValue:(double)value;
 
 
 // true if chunk is last of container
@@ -109,10 +110,23 @@
     NSMutableArray *pendingLinks;
 }
 @end
-@interface VariableChunk : StateChunk
+
+@interface VariableChunk : EventChunk
+{
+    NSArray *incompleteEntities;
+    NSDate *currentTime;
+    double currentValue;
+    double maxValue;
+    double minValue;
+    double sumValue;
+}
 @end
 
 @interface AggregateStateChunk : StateChunk
 - (PajeEntity *)firstIncomplete;
+@end
+@interface AggregateVariableChunk : AggregateStateChunk
+@end
+@interface AggregateLinkChunk : AggregateStateChunk
 @end
 #endif

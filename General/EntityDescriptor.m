@@ -57,7 +57,7 @@
 - (NSString *)entityType { return entityType; }
 - (PajeDrawingType)drawingType { return drawingType; }
 
-- (NSArray *)allNames
+- (NSArray *)allValues
 {
     return nil;
 }

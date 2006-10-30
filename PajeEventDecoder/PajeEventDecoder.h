@@ -26,6 +26,35 @@
 #include "../General/DataScanner.h"
 #include "../General/PajeFilter.h"
 
+#ifndef OLDEVENT
+
+@interface PajeEventDecoder: PajeComponent
+{
+    enum { OUT_DEF, IN_DEF, EVENTS } status;
+    
+    PajeEventDefinition *eventBeingDefined;
+    NSMutableArray *valArray; /* used only while reading an event */
+    
+    int eventCount;
+    int lineCount;
+
+    NSMapTable *eventDefinitions;
+
+    NSMutableArray *chunkInfo;
+    unsigned currentChunk;
+}
+
+- (id)initWithController:(PajeTraceController *)c;
+- (void)scanDefinitionLine:(line *)line;
+- (PajeEvent *)scanEventLine:(line *)line;
+- (void)raise:(NSString *)reason, ...;
+
+- (int)eventCount;
+@end
+
+
+#else
+
 @interface PajeEventDecoder: PajeComponent
 {
     enum { OUT_DEF, IN_DEF, EVENTS } status;
@@ -62,8 +91,6 @@
 - (void)raise:(NSString *)reason;
 
 - (int)eventCount;
-
-- (void)encodeCheckPointWithCoder:(NSCoder *)coder;
-- (void)decodeCheckPointWithCoder:(NSCoder *)coder;
 @end
+#endif
 #endif

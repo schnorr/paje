@@ -3,7 +3,7 @@
 
 #include "EventAggregator.h"
 
-@interface StateAggregator : EntityAggregator
+@interface StateAggregator : EntityAggregator <NSCopying>
 {
     int imbricationLevel;
 }

@@ -29,6 +29,7 @@
 - (unsigned)lineNumberAtIndex:(unsigned)index;
 - (NSRange)rangeValue;
 + (NSString *)stringWithRange:(NSRange)range;
+- (NSString *)stringValue;
 @end
 
 

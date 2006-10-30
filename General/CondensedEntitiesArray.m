@@ -56,7 +56,7 @@
     sorted = YES;
 }
 
-- (NSString *)nameAtIndex:(unsigned)index
+- (id)valueAtIndex:(unsigned)index
 {
     if (!sorted) {
         [self sort];
@@ -64,8 +64,8 @@
     return [(Association *)[array objectAtIndex:index] objectValue];
 }
 
-- (Association *)associationWithName:(NSString *)name
-                             inRange:(NSRange)range
+- (Association *)associationWithValue:(id)value
+                              inRange:(NSRange)range
 {
     unsigned index;
     unsigned last;
@@ -73,7 +73,7 @@
     for (index = range.location; index < last; index++) {
         Association *association;
         association = [array objectAtIndex:index];
-        if ([[association objectValue] isEqual:name]) {
+        if ([[association objectValue] isEqual:value]) {
             return association;
         }
     }
@@ -81,7 +81,8 @@
 }
 
 // for states
-- (void)addName:(NSString *)name duration:(double)duration
+- (void)addValue:(id)value
+        duration:(double)duration
 {
     Association *association;
     NSRange range;
@@ -92,11 +93,12 @@
 
     range = NSMakeRange(0, [array count]);
 
-    association = [self associationWithName:name inRange:range];
+    association = [self associationWithValue:value inRange:range];
     if (association != nil) {
         [association addDouble:duration];
     } else {
-        association = [Association associationWithObject:name double:duration];
+        association = [Association associationWithObject:value
+                                                  double:duration];
         [array addObject:association];
     }
     totalDuration += duration;
@@ -114,9 +116,10 @@
 
 
 // for events
-- (void)addName:(NSString *)name count:(unsigned)count
+- (void)addValue:(id)value
+           count:(unsigned)count
 {
-    [self addName:name duration:count];
+    [self addValue:value duration:count];
 }
 
 - (unsigned)countAtIndex:(unsigned)index
@@ -138,17 +141,17 @@
 
     count = [other count];
     for (i = 0; i < count; i++) {
-        NSString *name;
+        id value;
         double duration;
         Association *association;
 
-        name = [other nameAtIndex:i];
+        value = [other valueAtIndex:i];
         duration = [other durationAtIndex:i];
-        association = [self associationWithName:name inRange:range];
+        association = [self associationWithValue:value inRange:range];
         if (association != nil) {
             [association addDouble:duration];
         } else {
-            association = [Association associationWithObject:name
+            association = [Association associationWithObject:value
                                                       double:duration];
             [array addObject:association];
         }

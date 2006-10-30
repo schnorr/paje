@@ -30,36 +30,44 @@
 // User defined entities
 //
 
-- (id)containerOfNumber:(NSString *)containerNumber
-                   type:(id)containerType
-                inEvent:(PajeEvent *)event
+- (id)containerForId:(const char *)containerId
+                type:(PajeContainerType *)containerType
 {
     if (containerType == nil) {
-        // GAMBIARRA, deveria procurar em todos os tipos
-        // precisa disso por causa de PajeDestroyContainer, que antes
-        // nao tinha o tipo do container a destruir
-        return [userNumberToContainer objectForKey:containerNumber];
-    }
-
-    if (![containerType isKindOfClass:[PajeContainerType class]]) {
+        // Unknown type, search in all types.
+        NSEnumerator *types;
+        types = [NSAllMapTableValues(userTypes) objectEnumerator];
+        while ((containerType = [types nextObject]) != nil) {
+            if (![containerType isKindOfClass:[PajeContainerType class]]) {
+                continue;
+            }
+            id container = [containerType instanceWithId:containerId];
+            if (container != nil) {
+                return container;
+            }
+        }
         return nil;
     }
 
-    return [containerType instanceWithId:containerNumber];
+    //if (![containerType isKindOfClass:[PajeContainerType class]]) {
+    //    return nil;
+    //}
+
+    return [containerType instanceWithId:containerId];
 }
 
 
 - (void)pajeStartTrace:(PajeEvent *)event
 {
-    Assign(startTime, [event objectForKey:@"StartTime"]);
-    Assign(endTime, [event objectForKey:@"EndTime"]);
+//OLDEVENT    Assign(startTime, [event objectForKey:@"StartTime"]);
+//OLDEVENT    Assign(endTime, [event objectForKey:@"EndTime"]);
 }
 
 - (void)pajeDefineContainerType:(PajeEvent *)event
 {
-    NSString *newContainerTypeAlias;
-    NSString *containerTypeId;
-    NSString *newContainerTypeName;
+    const char *newContainerTypeAlias;
+    const char *containerTypeId;
+    const char *newContainerTypeName;
 
     PajeContainerType *containerType;
     PajeContainerType *newContainerType;
@@ -67,61 +75,55 @@
     if (replaying) return;
 
     // get fields from event
-    newContainerTypeName   = [event objectForKey:@"Name"];
-    newContainerTypeAlias  = [event objectForKey:@"Alias"];
-    containerTypeId        = [event objectForKey:@"ContainerType"];
-
-    // get fields with old names
-    if (newContainerTypeName == nil) {
-        newContainerTypeName   = [event objectForKey:@"NewName"];
-    }
-    if (newContainerTypeAlias == nil) {
-        newContainerTypeAlias  = [event objectForKey:@"NewType"];
-    }
+    newContainerTypeName  = [event cStringForFieldId:PajeNameFieldId];
+    newContainerTypeAlias = [event cStringForFieldId:PajeAliasFieldId];
+    containerTypeId       = [event cStringForFieldId:PajeTypeFieldId];
 
     // verify presence of obligatory fields
-    if (newContainerTypeName == nil) {
+    if (newContainerTypeName == NULL) {
         [self error:@"Missing \"Name\" field" inEvent:event];
     }
-    if (containerTypeId == nil) {
+    if (containerTypeId == NULL) {
         [self error:@"Missing \"ContainerType\" field" inEvent:event];
     }
 
-    containerType = [userTypes objectForKey:containerTypeId];
-    if (!containerType) {
+    containerType = [self typeForId:containerTypeId];
+    if (containerType == nil) {
         [self error:@"Unknown container type" inEvent:event];
     }
 
     // new type should not exist (but may, if replaying)
-    if ([userTypes objectForKey:newContainerTypeName] != nil) {
-        //NSWarnLog(@"Redefining container type %@ with event %@",
-        //          newContainerTypeName, event);
+    if ([self typeForId:newContainerTypeName] != nil) {
+        NSWarnLog(@"Redefining container type %s with event %@",
+                  newContainerTypeName, event);
         return;
     }
-    if (newContainerTypeAlias != nil 
-        && [userTypes objectForKey:newContainerTypeAlias] != nil) {
-        //NSWarnLog(@"Redefining container type alias %@ with event %@",
-        //          newContainerTypeAlias, event);
+    if (newContainerTypeAlias != NULL 
+        && [self typeForId:newContainerTypeAlias] != nil) {
+        NSWarnLog(@"Redefining container type alias %s with event %@",
+                  newContainerTypeAlias, event);
         return;
     }
 
     // create the new container type
-    newContainerType = [PajeContainerType typeWithName:newContainerTypeName
+    NSString *newContainerTypeNameO;
+    newContainerTypeNameO = [NSString stringWithCString:newContainerTypeName];
+    newContainerType = [PajeContainerType typeWithName:newContainerTypeNameO
                                          containerType:containerType
                                                  event:event];
-    [userTypes setObject:newContainerType forKey:newContainerTypeName];
-    if (newContainerTypeAlias != nil) {
-        [userTypes setObject:newContainerType forKey:newContainerTypeAlias];
+    [self setType:newContainerType forId:newContainerTypeName];
+    if (newContainerTypeAlias != NULL) {
+        [self setType:newContainerType forId:newContainerTypeAlias];
     }
 }
 
 - (void)pajeDefineLinkType:(PajeEvent *)event
 {
-    NSNumber *newEntityTypeAlias;
-    NSNumber *containerTypeId;
-    NSNumber *sourceContainerTypeId;
-    NSNumber *destContainerTypeId;
-    NSString *newEntityTypeName;
+    const char *newEntityTypeAlias;
+    const char  *containerTypeId;
+    const char *sourceContainerTypeId;
+    const char *destContainerTypeId;
+    const char *newEntityTypeName;
 
     PajeContainerType *containerType;
     PajeContainerType *sourceContainerType;
@@ -131,68 +133,59 @@
     if (replaying) return;
 
     // get fields from event
-    newEntityTypeName         = [event objectForKey:@"Name"];
-    newEntityTypeAlias        = [event objectForKey:@"Alias"];
-    containerTypeId           = [event objectForKey:@"ContainerType"];
-    sourceContainerTypeId     = [event objectForKey:@"SourceContainerType"];
-    destContainerTypeId       = [event objectForKey:@"DestContainerType"];
+    newEntityTypeName     = [event cStringForFieldId:PajeNameFieldId];
+    newEntityTypeAlias    = [event cStringForFieldId:PajeAliasFieldId];
+    containerTypeId       = [event cStringForFieldId:PajeTypeFieldId];
+    sourceContainerTypeId = [event cStringForFieldId:PajeStartContainerTypeFieldId];
+    destContainerTypeId   = [event cStringForFieldId:PajeEndContainerTypeFieldId];
 
-    // old field names
-    if (newEntityTypeName == nil) {
-        newEntityTypeName         = [event objectForKey:@"NewName"];
-    }
-    if (newEntityTypeAlias == nil) {
-        newEntityTypeAlias        = [event objectForKey:@"NewType"];
-    }
-
-    containerType = [userTypes objectForKey:containerTypeId];
+    containerType = [self typeForId:containerTypeId];
     if (containerType == nil) {
         [self error:@"Unknown container type" inEvent:event];
     }
 
-    sourceContainerType = [userTypes objectForKey:sourceContainerTypeId];
+    sourceContainerType = [self typeForId:sourceContainerTypeId];
     if (sourceContainerType == nil) {
         [self error:@"Unknown source container type" inEvent:event];
     }
 
-    if (destContainerTypeId == nil) {
-        destContainerTypeId       = [event objectForKey:@"DestinContainerType"];
-    }
-    destContainerType = [userTypes objectForKey:destContainerTypeId];
+    destContainerType = [self typeForId:destContainerTypeId];
     if (destContainerType == nil) {
         [self error:@"Unknown dest container type" inEvent:event];
     }
 
     // new type should not exist
-    if ([userTypes objectForKey:newEntityTypeName] != nil) {
+    if ([self typeForId:newEntityTypeName] != nil) {
         //NSWarnLog(@"Redefining entity type %@ with event %@",
         //          newEntityTypeName, event);
         return;
     }
-    if (newEntityTypeAlias != nil 
-        && [userTypes objectForKey:newEntityTypeAlias] != nil) {
+    if (newEntityTypeAlias != NULL 
+        && [self typeForId:newEntityTypeAlias] != nil) {
         //NSWarnLog(@"Redefining entity type alias %@ with event %@",
         //          newEntityTypeAlias, event);
         return;
     }
 
-    newEntityType = [PajeLinkType typeWithName:newEntityTypeName
+    NSString *newEntityTypeNameO;
+    newEntityTypeNameO = [NSString stringWithCString:newEntityTypeName];
+    newEntityType = [PajeLinkType typeWithName:newEntityTypeNameO
                                  containerType:containerType
                            sourceContainerType:sourceContainerType
                              destContainerType:destContainerType
                                          event:event];
-    [userTypes setObject:newEntityType forKey:newEntityTypeName];
-    if (newEntityTypeAlias != nil) {
-        [userTypes setObject:newEntityType forKey:newEntityTypeAlias];
+    [self setType:newEntityType forId:newEntityTypeName];
+    if (newEntityTypeAlias != NULL) {
+        [self setType:newEntityType forId:newEntityTypeAlias];
     }
 }
 
 - (void)_defineUserEntityType:(PajeEvent *)event
                   drawingType:(PajeDrawingType)drawingType
 {
-    NSNumber *newEntityTypeAlias;
-    NSNumber *containerTypeId;
-    NSString *newEntityTypeName;
+    const char *newEntityTypeAlias;
+    const char *containerTypeId;
+    const char *newEntityTypeName;
 
     PajeContainerType *containerType;
     PajeEntityType *newEntityType;
@@ -200,49 +193,43 @@
     if (replaying) return;
 
     // get fields from event
-    newEntityTypeName   = [event objectForKey:@"Name"];
-    newEntityTypeAlias  = [event objectForKey:@"Alias"];
-    containerTypeId     = [event objectForKey:@"ContainerType"];
-
-    // old field names
-    if (newEntityTypeName == nil) {
-        newEntityTypeName   = [event objectForKey:@"NewName"];
-    }
-    if (newEntityTypeAlias == nil) {
-        newEntityTypeAlias  = [event objectForKey:@"NewType"];
-    }
+    newEntityTypeName  = [event cStringForFieldId:PajeNameFieldId];
+    newEntityTypeAlias = [event cStringForFieldId:PajeAliasFieldId];
+    containerTypeId    = [event cStringForFieldId:PajeTypeFieldId];
 
     // new type should not exist
-    if ([userTypes objectForKey:newEntityTypeName] != nil) {
-        //NSWarnLog(@"Redefining entity type %@ with event %@",
-        //          newEntityTypeName, event);
+    if ([self typeForId:newEntityTypeName] != nil) {
+        NSWarnLog(@"Redefining entity type %s with event %@",
+                  newEntityTypeName, event);
         return;
     }
-    if (newEntityTypeAlias != nil 
-        && [userTypes objectForKey:newEntityTypeAlias] != nil) {
-        //NSWarnLog(@"Redefining entity type alias %@ with event %@",
-        //          newEntityTypeAlias, event);
+    if (newEntityTypeAlias != NULL
+        && [self typeForId:newEntityTypeAlias] != nil) {
+        NSWarnLog(@"Redefining entity type alias %s with event %@",
+                  newEntityTypeAlias, event);
         return;
     }
 
-    containerType = [userTypes objectForKey:containerTypeId];
-    if (!containerType) {
+    containerType = [self typeForId:containerTypeId];
+    if (containerType == nil) {
         [self error:@"Unknown container type" inEvent:event];
     }
 
+    NSString *newEntityTypeNameO;
+    newEntityTypeNameO = [NSString stringWithCString:newEntityTypeName];
     switch (drawingType) {
     case PajeEventDrawingType:
-        newEntityType = [PajeEventType typeWithName:newEntityTypeName
+        newEntityType = [PajeEventType typeWithName:newEntityTypeNameO
                                       containerType:containerType
                                               event:event];
         break;
     case PajeStateDrawingType:
-        newEntityType = [PajeStateType typeWithName:newEntityTypeName
+        newEntityType = [PajeStateType typeWithName:newEntityTypeNameO
                                       containerType:containerType
                                               event:event];
         break;
     case PajeVariableDrawingType:
-        newEntityType = [PajeVariableType typeWithName:newEntityTypeName
+        newEntityType = [PajeVariableType typeWithName:newEntityTypeNameO
                                          containerType:containerType
                                                  event:event];
         break;
@@ -251,9 +238,9 @@
             inEvent:event];
     }
 
-    [userTypes setObject:newEntityType forKey:newEntityTypeName];
-    if (newEntityTypeAlias != nil) {
-        [userTypes setObject:newEntityType forKey:newEntityTypeAlias];
+    [self setType:newEntityType forId:newEntityTypeName];
+    if (newEntityTypeAlias != NULL) {
+        [self setType:newEntityType forId:newEntityTypeAlias];
     }
 }
 
@@ -275,9 +262,9 @@
 
 - (void)pajeDefineEntityValue:(PajeEvent *)event
 {
-    NSString *newEntityValueAlias;
-    NSString *entityTypeId;
+    const char *newEntityValueAlias;
     NSString *newEntityValueName;
+    const char *entityTypeId;
     NSColor *color;
 
     PajeEntityType *entityType;
@@ -285,24 +272,13 @@
     if (replaying) return;
 
     // get fields from event
-    newEntityValueName   = [event objectForKey:@"Name"];
-    newEntityValueAlias  = [event objectForKey:@"Alias"];
-    entityTypeId         = [event objectForKey:@"EntityType"];
-    color                = [event objectForKey:@"Color"];
-    if (entityTypeId == nil) {
-        entityTypeId  = [event objectForKey:@"Type"];
-    }
+    newEntityValueName  = [event stringForFieldId:PajeNameFieldId];
+    newEntityValueAlias = [event cStringForFieldId:PajeAliasFieldId];
+    entityTypeId        = [event cStringForFieldId:PajeTypeFieldId];
+    color               = [event colorForFieldId:PajeColorFieldId];
 
-    // old field names
-    if (newEntityValueName == nil) {
-        newEntityValueName   = [event objectForKey:@"NewName"];
-    }
-    if (newEntityValueAlias == nil) {
-        newEntityValueAlias  = [event objectForKey:@"NewValue"];
-    }
-
-    entityType = [userTypes objectForKey:entityTypeId];
-    if (!entityType) {
+    entityType = [self typeForId:entityTypeId];
+    if (entityType == nil) {
         [self error:@"Unknown entity type" inEvent:event];
     }
 
@@ -325,10 +301,10 @@
 
 - (void)pajeCreateContainer:(PajeEvent *)event
 {
-    NSString *newContainerAlias;
-    NSString *newContainerTypeId;
-    NSString *containerId;
-    NSString *newContainerName;
+    const char *newContainerAlias;
+    const char *newContainerTypeId;
+    const char *containerId;
+    const char *newContainerName;
 
     PajeContainerType *typeOfNewContainer;
     PajeContainer *container;
@@ -337,83 +313,70 @@
     if (replaying) return;
 
     // get fields from event
-    newContainerName       = [event objectForKey:@"Name"];
-    newContainerAlias      = [event objectForKey:@"Alias"]; // optional
-    newContainerTypeId     = [event objectForKey:@"Type"];
-    containerId            = [event objectForKey:@"Container"];
-    
-    // get fields with old names
-    if (newContainerName == nil) {
-        newContainerName       = [event objectForKey:@"NewName"];
-    }
-    if (newContainerAlias == nil) {
-        newContainerAlias      = [event objectForKey:@"NewContainer"];
-    }
-    if (newContainerTypeId == nil) {
-        newContainerTypeId     = [event objectForKey:@"NewContainerType"];
-    }
+    newContainerName   = [event cStringForFieldId:PajeNameFieldId];
+    newContainerAlias  = [event cStringForFieldId:PajeAliasFieldId];
+    newContainerTypeId = [event cStringForFieldId:PajeTypeFieldId];
+    containerId        = [event cStringForFieldId:PajeContainerFieldId];
 
-    if (newContainerName == nil) {
+    if (newContainerName == NULL) {
         [self error:@"Missing \"Name\" field" inEvent:event];
     }
-    if (newContainerTypeId == nil) {
+    if (newContainerTypeId == NULL) {
         [self error:@"Missing \"Type\" field" inEvent:event];
     }
-    if (containerId == nil) {
+    if (containerId == NULL) {
         [self error:@"Missing \"Container\" field" inEvent:event];
     }
 
-    typeOfNewContainer = [userTypes objectForKey:newContainerTypeId];
+    typeOfNewContainer = [self typeForId:newContainerTypeId];
     if (!typeOfNewContainer) {
         [self error:@"Unknown container type" inEvent:event];
     }
     
-    if ([self containerOfNumber:newContainerName 
-                           type:typeOfNewContainer
-                        inEvent:event] != nil) {
-        //NSWarnLog(@"Redefining container %@ in event %@",
-        //          newContainerName, event);
+    if ([self containerForId:newContainerName 
+                        type:typeOfNewContainer] != nil) {
+        NSWarnLog(@"Redefining container %s in event %@",
+                  newContainerName, event);
         return;
     }
 
-    if (newContainerAlias == nil) {
+    if (newContainerAlias == NULL) {
         newContainerAlias      = newContainerName;
     }
-    if (newContainerAlias != nil 
-        && [self containerOfNumber:newContainerAlias 
-                              type:typeOfNewContainer
-                           inEvent:event] != nil) {
-        //NSWarnLog(@"Redefining container alias %@ in event %@",
-        //          newContainerAlias, event);
+    if (newContainerAlias != NULL 
+        && [self containerForId:newContainerAlias 
+                           type:typeOfNewContainer] != nil) {
+        NSWarnLog(@"Redefining container alias %s in event %@",
+                  newContainerAlias, event);
         return;
     }
 
-    container = [self containerOfNumber:containerId
-                                   type:[typeOfNewContainer containerType]
-                                inEvent:event];
+    container = [self containerForId:containerId
+                                type:[typeOfNewContainer containerType]];
     if (container == nil) {
         [self error:@"Unknown container" inEvent:event];
     }
     
     newContainer = [SimulContainer containerWithType:typeOfNewContainer
-                                                name:newContainerName
-                                               alias:newContainerAlias
+                                                name:[NSString stringWithCString:newContainerName]
+                                               alias:[NSString stringWithCString:newContainerAlias]
                                            container:container
                                         creationTime:[event time]
                                            simulator:self];
     [container addSubContainer:newContainer];
-    [typeOfNewContainer addInstance:newContainer];
+    [typeOfNewContainer addInstance:newContainer
+                                id1:newContainerName id2:newContainerAlias];
 
 //    [userNumberToContainer setObject:newContainer forKey:newContainerName];
 //    if (newContainerAlias != nil) {
-        [userNumberToContainer setObject:newContainer forKey:newContainerAlias];
+        [userNumberToContainer setObject:newContainer forKey:[NSString stringWithCString:newContainerAlias]];
 //    }
 }
 
 - (void)pajeDestroyContainer:(PajeEvent *)event
 {
-    NSString *containerId;
-    NSString *containerTypeId;
+    const char *containerId;
+    const char *containerTypeId;
     PajeContainerType *containerType;
 
     SimulContainer *container;
@@ -421,22 +384,20 @@
 //    if (replaying) return;
 
     // get fields from event
-    containerId         = [event objectForKey:@"Name"];
-    containerTypeId     = [event objectForKey:@"Type"];
-    
-    if (containerId == nil) {
-        containerId     = [event objectForKey:@"Container"];
+    containerId     = [event cStringForFieldId:PajeNameFieldId];
+    if (containerId == NULL) {
+        containerId = [event cStringForFieldId:PajeContainerFieldId];
     }
+    containerTypeId = [event cStringForFieldId:PajeTypeFieldId];
 
-    containerType = [userTypes objectForKey:containerTypeId];
+    containerType = [self typeForId:containerTypeId];
     if (containerType == nil) {
         NSWarnLog(@"Unknown container type in event %@", event);
         //[self error:@"Unknown container type" inEvent:event];
     }
  
-    container = [self containerOfNumber:containerId
-                                   type:containerType
-                                inEvent:event];
+    container = [self containerForId:containerId
+                                type:containerType];
     if (container == nil) {
         [self error:@"Unknown container" inEvent:event];
         return;
@@ -452,37 +413,36 @@
              container:(PajeContainer **)container
              fromEvent:(PajeEvent *)event
 {
-    NSString *entityTypeId;
-    NSString *containerId;
+    const char *entityTypeId;
+    const char *containerId;
 
     if (entityType != NULL) {
-        entityTypeId  = [event objectForKey:@"EntityType"];
-	if (entityTypeId == nil) {
-            entityTypeId  = [event objectForKey:@"Type"];
-	}
-        *entityType = [userTypes objectForKey:entityTypeId];
-        if (!*entityType) {
+        entityTypeId = [event cStringForFieldId:PajeTypeFieldId];
+        *entityType = [self typeForId:entityTypeId];
+        if (*entityType == nil) {
             [self error:@"Unknown entity type" inEvent:event];
         }
     }
 
     if (entityType != NULL && container != NULL) {
-        containerId   = [event objectForKey:@"Container"];
-        *container = [self containerOfNumber:containerId
-                                        type:[*entityType containerType]
-                                     inEvent:event];
+        containerId = [event cStringForFieldId:PajeContainerFieldId];
+        *container = [self containerForId:containerId
+                                     type:[*entityType containerType]];
         if (*container == nil) {
             [self error:@"Unknown container" inEvent:event];
         }
     }
 
-    if (entityValue) {
+    if (entityValue != NULL) {
+        const char *csvalue;
         id value;
-        value = [event objectForKey:@"Value"];
+        csvalue = [event cStringForFieldId:PajeValueFieldId];
         if (entityType != NULL 
             && [*entityType isKindOfClass:[PajeCategorizedEntityType class]]) {
-            PajeCategorizedEntityType *type = *entityType;
-            value = [type unaliasedValue:value];
+            PajeCategorizedEntityType *type = (id)*entityType;
+            value = [type valueForAlias:csvalue];
+        } else {
+            value = [NSString stringWithCString:csvalue];
         }
         *entityValue = value;
     }
@@ -554,66 +514,70 @@
 {
     PajeVariableType *entityType;
     SimulContainer *container;
-    id entityValue;
+    double entityValue;
 
     [self _getEntityType:&entityType
-                   value:&entityValue
+                   value:NULL
                container:&container
                fromEvent:event];
+    entityValue = [event doubleForFieldId:PajeValueFieldId];
 
     [container setUserVariableOfType:entityType
-                             toValue:entityValue
+                       toDoubleValue:entityValue
                            withEvent:event];
 }
 - (void)pajeAddVariable:(PajeEvent *)event
 {
     PajeVariableType *entityType;
     SimulContainer *container;
-    id entityValue;
+    double entityValue;
 
     [self _getEntityType:&entityType
-                   value:&entityValue
+                   value:NULL
                container:&container
                fromEvent:event];
+    entityValue = [event doubleForFieldId:PajeValueFieldId];
 
     [container addUserVariableOfType:entityType
-                               value:entityValue
+                         doubleValue:entityValue
                            withEvent:event];
 }
 - (void)pajeSubVariable:(PajeEvent *)event
 {
     PajeVariableType *entityType;
     SimulContainer *container;
-    id entityValue;
+    double entityValue;
 
     [self _getEntityType:&entityType
-                   value:&entityValue
+                   value:NULL
                container:&container
                fromEvent:event];
+    entityValue = [event doubleForFieldId:PajeValueFieldId];
 
     [container subUserVariableOfType:entityType
-                               value:entityValue
+                         doubleValue:entityValue
                            withEvent:event];
 }
 
 
 - (void)pajeStartLink:(PajeEvent *)event
 {
-    NSString *sourceContainerNumber;
+    const char *sourceContainerId;
     PajeLinkType *entityType;
     SimulContainer *container;
     PajeContainer *sourceContainer;
     id entityValue;
+    id key;
 
     [self _getEntityType:&entityType
                    value:&entityValue
                container:&container
                fromEvent:event];
 
-    sourceContainerNumber = [event objectForKey:@"SourceContainer"];
-    sourceContainer = [self containerOfNumber:sourceContainerNumber
-                                         type:[entityType sourceContainerType]
-                                      inEvent:event];
+    sourceContainerId = [event cStringForFieldId:PajeStartContainerFieldId];
+    key               = [event stringForFieldId:PajeKeyFieldId];
+    sourceContainer   = [self containerForId:sourceContainerId
+                                        type:[entityType sourceContainerType]];
     if (sourceContainer == nil) {
         [self error:@"Unknown source container" inEvent:event];
         return;
@@ -622,27 +586,28 @@
     [container startUserLinkOfType:entityType
                              value:entityValue
                    sourceContainer:sourceContainer
-                               key:[event objectForKey:@"Key"]
+                               key:key
                          withEvent:event];
 }
 
 - (void)pajeEndLink:(PajeEvent *)event
 {
-    NSString *destContainerNumber;
+    const char *destContainerNumber;
     PajeLinkType *entityType;
     SimulContainer *container;
     PajeContainer *destContainer;
     id entityValue;
+    id key;
 
     [self _getEntityType:&entityType
                    value:&entityValue
                container:&container
                fromEvent:event];
 
-    destContainerNumber = [event objectForKey:@"DestContainer"];
-    destContainer = [self containerOfNumber:destContainerNumber
-                                       type:[entityType destContainerType]
-                                    inEvent:event];
+    destContainerNumber = [event cStringForFieldId:PajeEndContainerFieldId];
+    key                 = [event stringForFieldId:PajeKeyFieldId];
+    destContainer = [self containerForId:destContainerNumber
+                                    type:[entityType destContainerType]];
     if (destContainer == nil) {
         [self error:@"Unknown destination container" inEvent:event];
         return;
@@ -651,7 +616,7 @@
     [container endUserLinkOfType:entityType
                            value:entityValue
                    destContainer:destContainer
-                             key:[event objectForKey:@"Key"]
+                             key:key
                        withEvent:event];
 }
 

@@ -88,8 +88,12 @@
 
         unsigned long long position;
         position = [[chunkInfo objectAtIndex:chunkNumber] longLongValue];
-        [inputFile seekToFileOffset:position];
-        hasMoreData = YES;
+        if ([inputFile seekToEndOfFile] > position) {
+            [inputFile seekToFileOffset:position];
+            hasMoreData = YES;
+        } else {
+            hasMoreData = NO;
+        }
 
         currentChunk = chunkNumber;
     } else {
@@ -108,17 +112,20 @@
 }
 
 // The current chunk has ended.
-- (void)endOfChunk
+- (void)endOfChunkLast:(BOOL)last
 {
-    currentChunk++;
-    // if we're at the end of the known world, let's register its position
-    if (currentChunk == [chunkInfo count]) {
-        unsigned long long position;
-        position = [inputFile offsetInFile];
-        [chunkInfo addObject:[NSNumber numberWithLongLong:position]];
+    if (!last) {
+        currentChunk++;
+        // if we're at the end of the known world, let's register its position
+        if (currentChunk == [chunkInfo count]) {
 
+            unsigned long long position;
+            position = [inputFile offsetInFile];
+            [chunkInfo addObject:[NSNumber numberWithLongLong:position]];
+
+        }
     }
-    [super endOfChunk];
+    [super endOfChunkLast:last];
 }
 
 - (void)raise:(NSString *)reason

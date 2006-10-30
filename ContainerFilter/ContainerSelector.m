@@ -247,7 +247,7 @@
     containerEnum = [super enumeratorOfContainersTyped:entityType
                                            inContainer:[self rootInstance]];
     while ((container = [containerEnum nextObject]) != nil) {
-        [allDescriptions addObject:[self nameForEntity:container]];
+        [allDescriptions addObject:[self nameForContainer:container]];
     }
     return allDescriptions;
 }
@@ -459,7 +459,7 @@
     containerEnum = [[self selectedContainers] objectEnumerator];
     while ((container = [containerEnum nextObject]) != nil) {
         [[self filterForEntityType:[self entityTypeForEntity:container]]
-            addObject:[self nameForEntity:container]];
+            addObject:[self nameForContainer:container]];
     }
     [self synchronizeMatrix];
     [super dataChangedForEntityType:nil];
@@ -486,7 +486,7 @@
 - (id)filterHiddenContainer:(PajeContainer *)container
                      filter:(NSSet *)filter
 {
-    if ([filter containsObject:[self nameForEntity:container]]) {
+    if ([filter containsObject:[self nameForContainer:container]]) {
         return nil;
     } else {
         return container;
@@ -594,7 +594,7 @@ NSDebugMLog(@"");
         id entityType = [self selectedEntityType];
 NSDebugMLog(@"entityType:%@ color:%@", entityType, [NSColor colorFromPasteboard:[sender draggingPasteboard]]);
         [inputComponent setColor:[NSColor colorFromPasteboard:[sender draggingPasteboard]]
-                         forName:[cell representedObject]
+                        forValue:[cell representedObject]
                     ofEntityType:entityType];
         if ([cell state] == 1) {
             [super colorChangedForEntityType:entityType];

@@ -1,0 +1,44 @@
+{
+    "## Comment" = "Do NOT change this file, Gorm maintains it";
+    BusyNode = {
+	Actions = (
+	    "createEntityType:",
+	    "deleteEntityType:",
+	    "renameEntityType:",
+	    "entityNamePopUpChanged:",
+	    "entityTypePopUpChanged:",
+	    "groupByPopUpChanged:",
+	    "reduceModePopUpChanged:",
+	    "matrixChanged:"
+	);
+	Outlets = (
+	    view,
+	    entityTypePopUp,
+	    groupByPopUp,
+	    nameMatrix,
+	    entityNamePopUp,
+	    entityNameField,
+	    createEntityButton,
+	    deleteEntityButton,
+	    renameEntityButton,
+	    reduceModePopUp
+	);
+	Super = PajeFilter;
+    };
+    PajeComponent = {
+	Actions = (
+	    "inputEntity:",
+	    "outputEntity:"
+	);
+	Outlets = (
+	);
+	Super = NSObject;
+    };
+    PajeFilter = {
+	Actions = (
+	);
+	Outlets = (
+	);
+	Super = PajeComponent;
+    };
+}

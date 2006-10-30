@@ -23,7 +23,7 @@
 #include "MultiEnumerator.h"
 #include "FilteredEnumerator.h"
 
-#define CHUNKS_TO_KEEP 1000
+#define CHUNKS_TO_KEEP 100000
 
 @implementation EntityChunk
 
@@ -93,6 +93,11 @@ static int count;
     [super dealloc];
 }
 
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"chunk of %@ in %@ from %@ to %@ complete:%@ incomplete:%@",
+        entityType, container, startTime, endTime, [self completeEntities], [self incompleteEntities]];
+}
 
 - (PajeContainer *)container
 {
@@ -314,6 +319,7 @@ static int count;
         en = incEnum;
     }
 
+if ([[[self entityType] description] hasSuffix:@"active.buffer_head"]) NSLog(@"ec %@ enum %@-%@", [self class], sliceStartTime, sliceEndTime);
     return [FilteredEnumerator enumeratorWithEnumerator:en
                                                  filter:self
                                                selector:filterSelector

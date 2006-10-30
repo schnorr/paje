@@ -268,7 +268,11 @@ withFilterDescriptor:(FieldFilterDescriptor *)fdesc
         result = [entityValue floatValue] < [filterValue floatValue];
         break;
     }
-    return result ? nil : entity;
+    if (result) {
+        return nil;
+    } else {
+        return entity;
+    }
 }
 
 

@@ -141,7 +141,7 @@
                startTime:(NSDate *)startTime
                  endTime:(NSDate *)endTime
               enumerator:(NSEnumerator *)enumerator
-              nameFilter:(NSSet *)filter
+             valueFilter:(NSSet *)filter
 {
     self = [self initWithEntityType:et
                           container:cont
@@ -150,7 +150,7 @@
     if (self) {
         PajeEntity *entity;
         while ((entity = [enumerator nextObject]) != nil) {
-            if (![filter containsObject:[entity name]]) {
+            if (![filter containsObject:[entity value]]) {
                 [self addEntity:entity];
             }
         }

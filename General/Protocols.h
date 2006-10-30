@@ -56,7 +56,8 @@ typedef enum {
 @end
 
 @protocol PajeEntity <PajeTiming, NSCoding>
-- (NSString *)name;
+//- (NSString *)name;
+- (id)value;
 - (PajeEntityType *)entityType;
 - (NSArray *)relatedEntities;
 - (NSColor *)color;
@@ -75,15 +76,16 @@ typedef enum {
 - (BOOL)isAggregate;
 - (unsigned)subCount;
 - (NSColor *)subColorAtIndex:(unsigned)index;
-- (NSString *)subNameAtIndex:(unsigned)index;
+- (id)subValueAtIndex:(unsigned)index;
 - (double)subDurationAtIndex:(unsigned)index;
 - (unsigned)subCountAtIndex:(unsigned)index;
 @end
 
 @protocol PajeEntityType
-- (NSArray *)allNames;
-- (NSColor *)colorForName:(NSString *)name;
-- (void)setColor:(NSColor*)c forName:(NSString *)name;
+- (NSArray *)allValues;
+- (NSColor *)colorForValue:(id)value;
+- (void)setColor:(NSColor*)color
+        forValue:(id)value;
 @end
 
 @protocol PajeEvent <PajeEntity>
@@ -101,7 +103,7 @@ typedef enum {
 @end
 
 @protocol PajeVariable <PajeEntity>
-- (id)value;
+- (double)doubleValue;
 @end
 
 @protocol PajeLink <PajeComm>
@@ -150,14 +152,14 @@ typedef enum {
 - (NSString *)inputFilename;
 - (void)startChunk:(int)chunkNumber;
 - (void)readNextChunk;
-- (void)endOfChunk;
+- (void)endOfChunkLast:(BOOL)last;
 - (BOOL)hasMoreData;
 @end
 
 @protocol PajeSimulator
 - (int)eventCount;
 - (NSDate *)currentTime;
-- (void)endOfChunk;
+- (void)endOfChunkLast:(BOOL)last;
 @end
 
 

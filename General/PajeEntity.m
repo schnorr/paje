@@ -65,6 +65,11 @@
     return name;
 }
 
+- (id)value
+{
+    return name;
+}
+
 - (PajeEntityType *)entityType
 {
     return entityType;
@@ -73,6 +78,16 @@
 - (PajeContainer *)container
 {
     return container;
+}
+
+- (PajeContainer *)sourceContainer
+{
+    return [self container];
+}
+
+- (PajeContainer *)destContainer
+{
+    return [self container];
 }
 
 - (void)setContainer:(PajeContainer *)c
@@ -104,6 +119,12 @@
 
 - (NSString *)description
 {
+    return [NSString stringWithFormat:@"%@ [%@ in %@-%@]",
+        [self valueOfFieldNamed:@"Value"], [self entityType], [self startTime],
+        [self endTime]];
+    return [NSString stringWithFormat:@"%@ [%@ in %@ %@]",
+        [self name], [self entityType],
+        [[self container] entityType], [self container]];
     return [name description];
 //    return [[NSDictionary dictionaryWithObjectsAndKeys:entityType, @"Type",
 //    name, @"Name", container, @"Container", nil] description];
@@ -151,9 +172,9 @@
     return 0;
 }
 
-- (NSString *)subNameAtIndex:(unsigned)index
+- (id)subValueAtIndex:(unsigned)index
 {
-    return [self name];
+    return [self value];
 }
 
 - (NSColor *)subColorAtIndex:(unsigned)index
@@ -183,18 +204,18 @@
 
 - (NSColor *)color
 {
-    NSString *n = [self name];
-    NSColor *c = [entityType colorForName:n];
+    id value = [self value];
+    NSColor *c = [entityType colorForValue:value];
     if (!c) {
         c = [NSColor yellowColor];
-        [entityType setColor:c forName:n];
+        [entityType setColor:c forValue:value];
     }
     return c;
 }
 
 - (void)setColor:(NSColor *)c
 {
-    [entityType setColor:c forName:[self name]];
+    [entityType setColor:c forValue:[self value]];
 }
 
 - (void)takeColorFrom:(id)sender
@@ -212,11 +233,25 @@
     return 0;
 }
 
+- (double)doubleValue
+{
+    return 0.0;
+}
+
+- (double)minValue
+{
+    return 0.0;
+}
+
+- (double)maxValue
+{
+    return 0.0;
+}
 
 - (NSArray *)fieldNames
 {
     return [NSMutableArray arrayWithObjects:
-        @"EntityType", @"Name", @"Container",
+        @"EntityType", @"Name", @"Value", @"Container",
         @"StartTime", @"EndTime", @"Duration",
         nil];
 }
@@ -227,6 +262,8 @@
         return [self entityType];
     } else if ([fieldName isEqualToString:@"Name"]) {
         return [self name];
+    } else if ([fieldName isEqualToString:@"Value"]) {
+        return [self value];
     } else if ([fieldName isEqualToString:@"Container"]) {
         return [self container];
     } else if ([fieldName isEqualToString:@"StartTime"]) {
@@ -256,7 +293,9 @@
     if (![other isKindOfClass:[PajeEntity class]]) return NO;
     return [entityType isEqual:[(PajeEntity *)other entityType]]
         && [name isEqual:[(PajeEntity *)other name]]
-        && [container isEqual:[(PajeEntity *)other container]];
+        && [container isEqual:[(PajeEntity *)other container]]
+        && [[self startTime] isEqual:[(PajeEntity *)other startTime]]
+        && [[self endTime] isEqual:[(PajeEntity *)other endTime]];
 }
 
 // NSCoding protocol

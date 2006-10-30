@@ -67,7 +67,7 @@
 - (id)filterDelegate;
 
 - (void)startChunk:(int)chunkNumber;
-- (void)endOfChunk;
+- (void)endOfChunkLast:(BOOL)last;
 @end
 
 @interface PajeFilter : PajeComponent
@@ -141,7 +141,7 @@ ofContainersTyped:(PajeEntityType *)containerType
        
 // Command a filter to change the color of a given value of an entity type.
 - (void)setColor:(NSColor *)color
-         forName:(NSString *)name
+        forValue:(id)value
     ofEntityType:(PajeEntityType *)entityType;
 
 // Command a filter to change the color for all entities of a given type
@@ -216,19 +216,19 @@ ofContainersTyped:(PajeEntityType *)containerType
                                   inContainer:(PajeContainer *)container;
 
 // All values an entity of given type can have.
-- (NSArray *)allNamesForEntityType:(PajeEntityType *)entityType;
+- (NSArray *)allValuesForEntityType:(PajeEntityType *)entityType;
 
 // Textual description of an entity type.
 - (NSString *)descriptionForEntityType:(PajeEntityType *)entityType;
 
 // Minimum and maximum value of a "variable" entity type, globally or inside
 // a container.
-- (NSNumber *)minValueForEntityType:(PajeEntityType *)entityType;
-- (NSNumber *)maxValueForEntityType:(PajeEntityType *)entityType;
-- (NSNumber *)minValueForEntityType:(PajeEntityType *)entityType
-                        inContainer:(PajeContainer *)container;
-- (NSNumber *)maxValueForEntityType:(PajeEntityType *)entityType
-                        inContainer:(PajeContainer *)container;
+- (double)minValueForEntityType:(PajeEntityType *)entityType;
+- (double)maxValueForEntityType:(PajeEntityType *)entityType;
+- (double)minValueForEntityType:(PajeEntityType *)entityType
+                    inContainer:(PajeContainer *)container;
+- (double)maxValueForEntityType:(PajeEntityType *)entityType
+                    inContainer:(PajeContainer *)container;
 
 //- (BOOL)isHiddenEntityType:(PajeEntityType *)entityType;
 
@@ -247,8 +247,8 @@ ofContainersTyped:(PajeEntityType *)containerType
           forEntityType:(PajeEntityType *)entityType;
 
 // Color of given value of entity type
-- (NSColor *)colorForName:(NSString *)name
-             ofEntityType:(PajeEntityType *)entityType;
+- (NSColor *)colorForValue:(id)value
+              ofEntityType:(PajeEntityType *)entityType;
              
 // Color for all entities of given type (used for "variable" entity type).
 - (NSColor *)colorForEntityType:(PajeEntityType *)entityType;
@@ -257,7 +257,8 @@ ofContainersTyped:(PajeEntityType *)containerType
 // Getting info from entity
 //
 - (NSArray *)fieldNamesForEntity:(id<PajeEntity>)entity;
-- (id)valueOfFieldNamed:(NSString *)fieldName forEntity:(id<PajeEntity>)entity;
+- (id)valueOfFieldNamed:(NSString *)fieldName
+              forEntity:(id<PajeEntity>)entity;
 
 - (PajeContainer *)containerForEntity:(id<PajeEntity>)entity;
 - (PajeEntityType *)entityTypeForEntity:(id<PajeEntity>)entity;
@@ -272,15 +273,17 @@ ofContainersTyped:(PajeEntityType *)containerType
 - (NSDate *)timeForEntity:(id<PajeEntity>)entity;
 - (double)durationForEntity:(id<PajeEntity>)entity;
 - (PajeDrawingType)drawingTypeForEntity:(id<PajeEntity>)entity;
-- (NSString *)nameForEntity:(id<PajeEntity>)entity;
-- (NSNumber *)valueForEntity:(id<PajeEntity>)entity; // for variables
+- (id)valueForEntity:(id<PajeEntity>)entity;
+- (double)doubleValueForEntity:(id<PajeEntity>)entity; // for variables
+- (double)minValueForEntity:(id<PajeEntity>)entity; // for variables
+- (double)maxValueForEntity:(id<PajeEntity>)entity; // for variables
 - (NSString *)descriptionForEntity:(id<PajeEntity>)entity;
 - (int)imbricationLevelForEntity:(id<PajeEntity>)entity;
 
 - (BOOL)isAggregateEntity:(id<PajeEntity>)entity;
 - (unsigned)subCountForEntity:(id<PajeEntity>)entity;
 - (NSColor *)subColorAtIndex:(unsigned)index forEntity:(id<PajeEntity>)entity;
-- (NSString *)subNameAtIndex:(unsigned)index forEntity:(id<PajeEntity>)entity;
+- (id)subValueAtIndex:(unsigned)index forEntity:(id<PajeEntity>)entity;
 - (double)subDurationAtIndex:(unsigned)index forEntity:(id<PajeEntity>)entity;
 - (unsigned)subCountAtIndex:(unsigned)index forEntity:(id<PajeEntity>)entity;
 
@@ -301,6 +304,7 @@ ofContainersTyped:(PajeEntityType *)containerType
 - (PajeEntityType *)entityTypeWithName:(NSString *)n;
 - (PajeContainer *)containerWithName:(NSString *)n
                                 type:(PajeEntityType *)t;
+- (NSString *)nameForContainer:(PajeContainer *)container;
 @end
 
 #endif

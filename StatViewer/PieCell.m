@@ -325,6 +325,8 @@
     Assign(labelLinesPath, nil);
     Assign(labelAttributes, nil);
     Assign(complementAttributes, nil);
+
+    [super dealloc];
 }
 
 // The data provider retains the cells, so they cannot retain it.
@@ -481,7 +483,7 @@
     unsigned index;
     unsigned count = [data subCount];
     for (index = 0; index < count && index < 10; index++) {
-        val = [data subValueAtIndex:index];
+        val = [data subDoubleValueAtIndex:index];
 
         // draw bar
         [[data subColorAtIndex:index] set];
@@ -730,7 +732,7 @@
     angle = angle0;
     count = [data subCount];
     for (index = 0; index < count; index++) {
-        val = [data subValueAtIndex:index];
+        val = [data subDoubleValueAtIndex:index];
         if ((val/total) < .05 && (nothers > 0 || index < (count-1))) {
             others += val;
             nothers++;

@@ -5,6 +5,11 @@
 
 @implementation StateAggregator
 
++ (Class)aggregatedEntityClass
+{
+    return [AggregateState class];
+}
+
 /* Try to aggregate one more state.
    Returns YES if state can be aggregated, NO if it cannot.
    States must be entered in endTime order.
@@ -20,8 +25,8 @@
     }
 
     // if there are no other entities, just add the new one
-    if (startTime == nil) {
-        startTime = [entity startTime];
+    if (earliestStartTime == nil) {
+        earliestStartTime = [entity startTime];
         imbricationLevel = [entity imbricationLevel];
         [entities addObject:entity];
         return YES;
@@ -29,7 +34,7 @@
 
     // if adding the new entity would make this too wide, it cannot yet be
     // added -> must aggregate some and try again 
-    newDuration = [[entity endTime] timeIntervalSinceDate:startTime];
+    newDuration = [[entity endTime] timeIntervalSinceDate:earliestStartTime];
     if (newDuration > aggregationDuration) {
         return NO;
     }
@@ -53,7 +58,7 @@
         }
         if ([entities count] == 0) {
             // new state will be first
-            startTime = entityStartTime;
+            earliestStartTime = entityStartTime;
         }
         imbricationLevel = entityImbricationLevel;
         [entities addObject:entity];
@@ -78,7 +83,7 @@
         }
         if ([entities count] == 0) {
             // new state will be first
-            startTime = entityStartTime;
+            earliestStartTime = entityStartTime;
         }
     }
     [entities addObject:entity];
@@ -88,21 +93,21 @@
 
 - (PajeEntity *)aggregate
 {
-    PajeEntity *state;
+    PajeEntity *entity;
     unsigned count;
     
-    if (startTime == nil) {
+    if (earliestStartTime == nil) {
         return nil;
     }
     count = [entities count];
     if (count == 1) {
-        state = [entities objectAtIndex:0];
-        if ([state subCount] > 0) {
-            state = [AggregateState stateWithStates:entities];
+        entity = [entities objectAtIndex:0];
+        if ([entity subCount] > 0) {
+            entity = [AggregateState entityWithEntities:entities];
         }
         [entities removeAllObjects];
-        startTime = nil;
-        return state;
+        earliestStartTime = nil;
+        return entity;
     }
 
     int firstImbricationLevel;
@@ -114,24 +119,24 @@
     } else {
         lastIndex = 0;
         while (lastIndex < count - 1) {
-            state = [entities objectAtIndex:lastIndex + 1];
-            if ([state imbricationLevel] != firstImbricationLevel) {
+            entity = [entities objectAtIndex:lastIndex + 1];
+            if ([entity imbricationLevel] != firstImbricationLevel) {
                 break;
             }
             lastIndex++;
         }
     }
     if (lastIndex == count - 1) {
-        state = [AggregateState stateWithStates:entities];
+        entity = [AggregateState entityWithEntities:entities];
         [entities removeAllObjects];
-        startTime = nil;
+        earliestStartTime = nil;
     } else {
         NSRange r = NSMakeRange(0, lastIndex + 1);
-        startTime = [state startTime];
-        state = [AggregateState stateWithStates:[entities subarrayWithRange:r]];
+        earliestStartTime = [entity startTime];
+        entity = [AggregateState entityWithEntities:[entities subarrayWithRange:r]];
         [entities removeObjectsInRange:r];
     }
-    return state;
+    return entity;
 }
 
 - (id)copyWithZone:(NSZone *)z

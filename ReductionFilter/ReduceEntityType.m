@@ -22,6 +22,8 @@
 #include "../General/Macros.h"
 #include "../General/NSUserDefaults+Additions.h"
 
+#include <math.h>
+
 @implementation ReduceEntityType
 
 + (ReduceEntityType *)typeFromDictionary:(NSDictionary *)dict
@@ -56,13 +58,14 @@
     [newType setEntityTypeToReduce:red];
 
     reductionClass = NSClassFromString([dict objectForKey:@"ReductionClass"]);
-    if (reductionClass == Nil)
+    if (reductionClass == Nil) {
         reductionClass = [CountReduceEntity class];
+    }
     [newType setEntityClass:reductionClass];
 
-    en = [[dict objectForKey:@"NamesToFilter"] objectEnumerator];
+    en = [[dict objectForKey:@"ValuesToFilter"] objectEnumerator];
     while ((nameToFilter = [en nextObject]) != nil) {
-        [newType addNameToFilter:nameToFilter];
+        [newType addValueToFilter:nameToFilter];
     }
     return newType;
 }
@@ -95,20 +98,20 @@
         fieldNames = [[NSMutableSet alloc] init];
 
         component = comp;
-        filterNames = [[NSMutableSet alloc] init];
+        filterValues = [[NSMutableSet alloc] init];
     }
     return self;
     self = [super initWithName:n containerType:type event:nil];
     if (self != nil) {
         component = comp;
-        filterNames = [[NSMutableSet alloc] init];
+        filterValues = [[NSMutableSet alloc] init];
     }
     return self;
 }
 
 - (void)dealloc
 {
-    Assign(filterNames, nil);
+    Assign(filterValues, nil);
     Assign(entityTypeToReduce, nil);
     Assign(array, nil);
     [super dealloc];
@@ -125,7 +128,7 @@
         [self name], @"EntityName",
         [[self containerType] name], @"ContainerType",
         [[self entityTypeToReduce] name], @"EntityTypeToReduce",
-        [filterNames allObjects], @"NamesToFilter",
+        [filterValues allObjects], @"ValuesToFilter",
         NSStringFromClass(entityClass), @"ReductionClass",
         nil];
 }
@@ -145,23 +148,21 @@
     [[NSUserDefaults standardUserDefaults] setObject:[containerType name]
                                               forKey:defaultName];
 
-    Assign(minValue, nil);
-    Assign(maxValue, nil);
+    minValue = HUGE_VAL;
+    maxValue = -HUGE_VAL;
     Assign(array, nil);
 }
 
 - (void)setEntityClass:(Class)c
 {
     entityClass = c;
-    Assign(minValue, nil);
-    Assign(maxValue, nil);
+    minValue = HUGE_VAL;
+    maxValue = -HUGE_VAL;
     if (array != nil) {
         [entityClass getMinValue:&minValue
                         maxValue:&maxValue
                         forArray:array
                    pajeComponent:component];
-        [minValue retain];
-        [maxValue retain];
     }
 }
 
@@ -179,10 +180,10 @@
 {
     Assign(entityTypeToReduce, newEntityTypeToReduce);
 
-    [filterNames removeAllObjects];
+    [filterValues removeAllObjects];
     Assign(array, nil);
-    Assign(minValue, nil);
-    Assign(maxValue, nil);
+    minValue = HUGE_VAL;
+    maxValue = -HUGE_VAL;
 }
 
 - (PajeEntityType *)entityTypeToReduce
@@ -190,32 +191,33 @@
     return entityTypeToReduce;
 }
 
-- (void)addNameToFilter:(NSString *)n
+- (void)addValueToFilter:(id)value
 {
-    [filterNames addObject:n];
+    [filterValues addObject:value];
     Assign(array, nil);
-    Assign(minValue, nil);
-    Assign(maxValue, nil);
+    minValue = HUGE_VAL;
+    maxValue = -HUGE_VAL;
 }
 
-- (void)addNamesToFilter:(NSArray *)names
+- (void)addValuesToFilter:(NSArray *)values
 {
-    [filterNames addObjectsFromArray:names];
+    [filterValues addObjectsFromArray:values];
     Assign(array, nil);
-    Assign(minValue, nil);
-    Assign(maxValue, nil);
+    minValue = HUGE_VAL;
+    maxValue = -HUGE_VAL;
 }
 
-- (void)removeNameFromFilter:(NSString *)n
+- (void)removeValueFromFilter:(id)value
 {
-    [filterNames removeObject:n];
+    [filterValues removeObject:value];
     Assign(array, nil);
-    Assign(minValue, nil);
-    Assign(maxValue, nil);
+    minValue = HUGE_VAL;
+    maxValue = -HUGE_VAL;
 }
-- (NSSet *)filterNames
+
+- (NSSet *)filterValues
 {
-    return filterNames;
+    return filterValues;
 }
 
 
@@ -225,8 +227,8 @@
                                       minDuration:(double)minDuration
 {
     NSEnumerator *origEnum;
-    NSNumber *min;
-    NSNumber *max;
+    double min;
+    double max;
     BOOL limitsChanged = NO;
 
     if (array != nil
@@ -249,22 +251,23 @@
                                         startTime:start
                                           endTime:end
                                        enumerator:origEnum
-                                       nameFilter:filterNames];
+                                      valueFilter:filterValues];
 
     [entityClass getMinValue:&min
                     maxValue:&max
                     forArray:array
                pajeComponent:component];
-    if ((minValue == nil) || ([minValue compare:min] == NSOrderedDescending)) {
-        Assign(minValue, min);
+    if (min < minValue) {
+        minValue = min;
         limitsChanged = YES;
     }
-    if ((maxValue == nil) || ([maxValue compare:max] == NSOrderedAscending)) {
-        Assign(maxValue, max);
+    if (max > maxValue) {
+        maxValue = max;
         limitsChanged = YES;
     }
-    if (limitsChanged)
+    if (limitsChanged) {
         [component dataChangedForEntityType:self];
+    }
 
     return [array reverseObjectEnumeratorOfClass:entityClass];
 }

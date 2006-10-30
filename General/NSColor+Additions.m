@@ -19,8 +19,28 @@
 */
 #include "NSColor+Additions.h"
 
-@implementation NSColor (Additions)
+@implementation NSColor (Additions1)
+- (NSColor *)contrastingWhiteOrBlackColor
+{
+    NSColor *bw;
+    float wc;
+    NSColor *ret;
+
+    bw = [self colorUsingColorSpaceName:NSCalibratedWhiteColorSpace];
+    wc = [bw whiteComponent];
+    if (wc > .5) {
+        //ret = [NSColor blackColor];
+        ret = [NSColor colorWithCalibratedWhite:0.15 alpha:1.0];
+    } else {
+        //ret = [NSColor whiteColor];
+        ret = [NSColor colorWithCalibratedWhite:0.85 alpha:1.0];
+    }
+    return ret;
+}
+@end
+
 #ifndef GNUSTEP
+@implementation NSColor (Additions2)
 + (NSColor *)colorFromString:(NSString *)value
 {
     if ([value isKindOfClass:[NSString class]]) {
@@ -58,23 +78,5 @@
     }
     return nil;
 }
-#endif
-
-- (NSColor *)contrastingWhiteOrBlackColor
-{
-    NSColor *bw;
-    float wc;
-    NSColor *ret;
-
-    bw = [self colorUsingColorSpaceName:NSCalibratedWhiteColorSpace];
-    wc = [bw whiteComponent];
-    if (wc > .5) {
-        //ret = [NSColor blackColor];
-        ret = [NSColor colorWithCalibratedWhite:0.15 alpha:1.0];
-    } else {
-        //ret = [NSColor whiteColor];
-        ret = [NSColor colorWithCalibratedWhite:0.85 alpha:1.0];
-    }
-    return ret;
-}
 @end
+#endif

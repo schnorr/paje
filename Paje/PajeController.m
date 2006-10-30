@@ -56,6 +56,17 @@ static PajeController *uniqueController;
     return uniqueController;
 }
 
+- (void)awakeFromNib
+{
+    // Couldn't connect to menu in Gorm, only to menuitem...
+    if ([[filtersMenu class] isEqual:[NSMenuItem class]]) {
+        filtersMenu = [(NSMenuItem *)filtersMenu submenu];
+    }
+    if ([[toolsMenu class] isEqual:[NSMenuItem class]]) {
+        toolsMenu = [(NSMenuItem *)toolsMenu submenu];
+    }
+}
+
 - (id)init
 {
     if (uniqueController != nil) {
@@ -93,7 +104,9 @@ static PajeController *uniqueController;
     bundlePaths = [[NSUserDefaults standardUserDefaults]
                                        arrayForKey:@"BundlePaths"];
     if (!bundlePaths) {
-        bundlePaths = NSStandardLibraryPaths();
+        bundlePaths = NSSearchPathForDirectoriesInDomains(
+                                            NSAllLibrariesDirectory,
+                                            NSAllDomainsMask, YES);
     }
 
     // insert application path (eases development)

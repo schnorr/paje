@@ -34,7 +34,8 @@
 
 @interface UserEvent : PajeEntity
 {
-    PajeEvent *event;
+    NSDictionary *extraFields;
+    NSDate *time;
 }
 
 + (UserEvent *)eventWithType:(PajeEntityType *)type

@@ -50,47 +50,47 @@
 - (NSDate *)endTime;
 - (PajeContainer *)container;
 - (NSString *)name;
+- (id)value;
+- (double)doubleValue;
 - (NSColor *)color;
 - (NSArray *)relatedEntities;
 
-+ (void)getMinValue:(NSNumber **)min
-           maxValue:(NSNumber **)max
++ (void)getMinValue:(double *)min
+           maxValue:(double *)max
            forArray:(BusyArray *)a
       pajeComponent:(PajeFilter *)filter;
 
-- (NSNumber *)value;
-
 // to be implemented by subclasses
 + (NSString *)titleForPopUp;
-+ (NSNumber *)valueForRelatedEntities:(NSArray *)entities
-                        pajeComponent:(PajeFilter *)filter;
++ (double)valueForRelatedEntities:(NSArray *)entities
+                    pajeComponent:(PajeFilter *)filter;
 @end
 
 @interface CountReduceEntity : ReduceEntity
 + (NSString *)titleForPopUp;
-+ (NSNumber *)valueForRelatedEntities:(NSArray *)entities
-                        pajeComponent:(PajeFilter *)filter;
++ (double)valueForRelatedEntities:(NSArray *)entities
+                    pajeComponent:(PajeFilter *)filter;
 @end
 @interface SumReduceEntity : ReduceEntity
 + (NSString *)titleForPopUp;
-+ (NSNumber *)valueForRelatedEntities:(NSArray *)entities
-                        pajeComponent:(PajeFilter *)filter;
++ (double)valueForRelatedEntities:(NSArray *)entities
+                    pajeComponent:(PajeFilter *)filter;
 @end
 @interface AverageReduceEntity : ReduceEntity
 + (NSString *)titleForPopUp;
-+ (NSNumber *)valueForRelatedEntities:(NSArray *)entities
-                        pajeComponent:(PajeFilter *)filter;
++ (double)valueForRelatedEntities:(NSArray *)entities
+                    pajeComponent:(PajeFilter *)filter;
 @end
 @interface MaxReduceEntity : ReduceEntity
 + (NSString *)titleForPopUp;
-+ (NSNumber *)valueForRelatedEntities:(NSArray *)entities
-                        pajeComponent:(PajeFilter *)filter;
++ (double)valueForRelatedEntities:(NSArray *)entities
+                    pajeComponent:(PajeFilter *)filter;
 @end
 @interface MinReduceEntity : ReduceEntity
-{NSNumber *xval;}
+{double xval;}
 + (NSString *)titleForPopUp;
-+ (NSNumber *)valueForRelatedEntities:(NSArray *)entities
-                        pajeComponent:(PajeFilter *)filter;
++ (double)valueForRelatedEntities:(NSArray *)entities
+                    pajeComponent:(PajeFilter *)filter;
 @end
 
 #endif

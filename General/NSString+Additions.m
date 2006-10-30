@@ -136,6 +136,11 @@
 {
     return NSStringFromRange(range);
 }
+
+- (NSString *)stringValue
+{
+    return self;
+}
 @end
 
 

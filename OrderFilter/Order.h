@@ -31,7 +31,7 @@
 @interface Order : PajeFilter
 {
     NSMutableDictionary *containers;
-    IBOutlet id view;
+    IBOutlet NSView *view;
     IBOutlet NSView *browserBox;
     HierarchyBrowser *hierarchyBrowser;
 }

@@ -58,8 +58,8 @@
 
     [[NSNotificationCenter defaultCenter]
         addObserver:self
-           selector:@selector(filterEntityNameNotification:)
-               name:@"PajeFilterEntityNameNotification"
+           selector:@selector(filterEntityValueNotification:)
+               name:@"PajeFilterEntityValueNotification"
              object:nil];
 
 #ifndef GNUSTEP
@@ -115,6 +115,7 @@
 {
     if (entityType == nil || [entityType isEqual:[self selectedEntityType]]) {
         [self synchronizeMatrix];
+        //[matrix setNeedsDisplay:YES];
     }
     [super colorChangedForEntityType:entityType];
 }
@@ -239,7 +240,7 @@
 
 - (NSArray *)unfilteredObjectsForEntityType:(PajeEntityType *)entityType
 {
-    return [super allNamesForEntityType:entityType];
+    return [super allValuesForEntityType:entityType];
 }
 
 - (void)unselectAll:(id)sender
@@ -266,9 +267,9 @@
     [super hierarchyChanged];
 }
 
-- (void)filterName:(NSString *)name
-      ofEntityType:(PajeEntityType *)entityType
-              show:(BOOL)flag
+- (void)filterValue:(id)value
+       ofEntityType:(PajeEntityType *)entityType
+               show:(BOOL)flag
 {
     NSMutableSet *filter;
 
@@ -276,18 +277,18 @@
 
     if (filter != nil) {
         if (flag) {
-            [filter removeObject:name];
+            [filter removeObject:value];
         } else {
-            [filter addObject:name];
+            [filter addObject:value];
         }
         [self registerDefaultFilter:filter forEntityType:entityType];
         [super dataChangedForEntityType:entityType];
     }
 }
 
-- (void)filterEntityNameNotification:(NSNotification *)notification
+- (void)filterEntityValueNotification:(NSNotification *)notification
 {
-    NSString *name;
+    id value;
     PajeEntityType *entityType;
     BOOL flag;
     NSDictionary *userInfo;
@@ -297,13 +298,14 @@
         return;
 
     entityType = [userInfo objectForKey:@"EntityType"];
-    name = [userInfo objectForKey:@"EntityName"];
+    value = [userInfo objectForKey:@"EntityValue"];
     flag = [[userInfo objectForKey:@"Show"] isEqualToString:@"YES"];
 
-    if (entityType != nil && name != nil)
-        [self filterName:name
-            ofEntityType:entityType
-                    show:flag];
+    if (entityType != nil && value != nil) {
+        [self filterValue:value
+             ofEntityType:entityType
+                     show:flag];
+    }
     [self synchronizeMatrix];        
 }
 
@@ -313,9 +315,9 @@
     PajeEntityType* entityType = [self selectedEntityType];
 
     if (cell != nil) {
-        [self filterName:[cell representedObject]
-            ofEntityType:entityType
-                    show:[cell state]];
+        [self filterValue:[cell representedObject]
+             ofEntityType:entityType
+                     show:[cell state]];
     }
 }
 
@@ -340,12 +342,13 @@
     filter = [filters objectForKey:entityType];
     names = [[self unfilteredObjectsForEntityType:entityType] objectEnumerator];
 
-    while ([matrix cellAtRow:0 column:0]) {
+    while ([matrix numberOfRows] > 0 && ![[matrix cellAtRow:0 column:0] isKindOfClass:[ColoredSwitchButtonCell class]]) {
         [matrix removeRow:0];
     }
+    [matrix renewRows:[[self unfilteredObjectsForEntityType:entityType] count] columns:1];
 
     while ((entityName = [names nextObject]) != nil) {
-        [matrix addRow];
+        //[matrix addRow];
         cell = [matrix cellAtRow:i column:0];
         [cell setState:!([filter containsObject:entityName])];
         [cell setRepresentedObject:entityName];
@@ -368,8 +371,8 @@
         [title replaceCharactersInRange:NSMakeRange(1,0) withString:@" "];
 #endif
         [title addAttribute:NSForegroundColorAttributeName
-                      value:[inputComponent colorForName:entityName
-                                            ofEntityType:entityType]
+                      value:[inputComponent colorForValue:entityName
+                                             ofEntityType:entityType]
                       range:NSMakeRange(0,1)];
         [title fixAttributesInRange:NSMakeRange(0, [title length])];
         [cell setAttributedTitle:title];
@@ -378,8 +381,8 @@
 #endif
 #else
         [cell setTitle:[entityName description]];
-        [cell setColor:[inputComponent colorForName:entityName
-                                            ofEntityType:entityType]];
+        [cell setColor:[inputComponent colorForValue:entityName
+                                        ofEntityType:entityType]];
 #endif
         [cell setHighlightsBy:NSChangeBackgroundCellMask];
         i++;
@@ -456,25 +459,24 @@
 - (id)filterHiddenEntity:(PajeEntity *)entity
                   filter:(NSSet *)filter
 {
-    if ([filter containsObject:[self nameForEntity:entity]]) {
+    if ([filter containsObject:[self valueForEntity:entity]]) {
         return nil;
     } else {
         return entity;
     }
 }
 
-- (NSArray *)allNamesForEntityType:(PajeEntityType *)entityType
+- (NSArray *)allValuesForEntityType:(PajeEntityType *)entityType
 {
-    NSArray *allNames = [inputComponent allNamesForEntityType:entityType];
+    NSArray *allValues = [inputComponent allValuesForEntityType:entityType];
     NSMutableSet *filter = [filters objectForKey:entityType];
 
-    if (filter) {
-        NSMutableSet *set = [NSMutableSet setWithArray:allNames];
+    if (filter != nil) {
+        NSMutableSet *set = [NSMutableSet setWithArray:allValues];
         [set minusSet:filter];
-        return [set allObjects];
-    } else {
-        return allNames;
+        allValues = [set allObjects];
     }
+    return allValues;
 }
 
 
@@ -544,7 +546,7 @@
         
         dragColor = [NSColor colorFromPasteboard:[sender draggingPasteboard]];
         [inputComponent setColor:dragColor
-                         forName:[cell representedObject]
+                        forValue:[cell representedObject]
                     ofEntityType:entityType];
         return YES;
     }

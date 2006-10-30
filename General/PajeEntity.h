@@ -47,10 +47,17 @@
 - (BOOL)isContainer;
 
 - (NSString *)name;
+- (id)value;
 - (PajeEntityType *)entityType;
 - (void)setContainer:(PajeContainer *)c;
 - (PajeContainer *)container;
+- (PajeContainer *)sourceContainer;
+- (PajeContainer *)destContainer;
 - (BOOL)isContainedBy:(PajeContainer *)cont;
+
+- (double)doubleValue;
+- (double)minValue;
+- (double)maxValue;
 
 - (NSString *)description;
 
@@ -73,7 +80,7 @@
 // When the entity has subentities
 - (BOOL)isAggregate;
 - (unsigned)subCount;
-- (NSString *)subNameAtIndex:(unsigned)index;
+- (id)subValueAtIndex:(unsigned)index;
 - (NSColor *)subColorAtIndex:(unsigned)index;
 - (double)subDurationAtIndex:(unsigned)index;
 - (unsigned)subCountAtIndex:(unsigned)index;

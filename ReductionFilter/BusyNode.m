@@ -33,7 +33,7 @@
     if (self) {
 
         // load the interface. it initializes view.
-        if (![NSBundle loadNibNamed:@"BusyNode" owner:self])
+        if (![NSBundle loadNibNamed:@"ReductionFilter" owner:self])
             NSRunAlertPanel(NSStringFromClass([self class]),
                             @"Couldn't load interface file",
                             nil, nil, nil);
@@ -182,8 +182,10 @@
     subenum = [[self allEntityTypes] objectEnumerator];
     while ((entityType = [subenum nextObject]) != nil) {
         if (![self isContainerEntityType:entityType]) {
-            [entityTypePopUp addItemWithTitle:[entityType name]];
-            [[entityTypePopUp itemWithTitle:[entityType name]]
+            NSString *title;
+            title = [self descriptionForEntityType:entityType];
+            [entityTypePopUp addItemWithTitle:title];
+            [[entityTypePopUp itemWithTitle:title]
                                        setRepresentedObject:entityType];
             ct++;
         }
@@ -194,7 +196,9 @@
     } else {
         [entityTypePopUp setEnabled:YES];
     }
-    [entityTypePopUp selectItemWithTitle:[[type entityTypeToReduce] name]];
+    NSString *selectedTitle;
+    selectedTitle = [self descriptionForEntityType:[type entityTypeToReduce]];
+    [entityTypePopUp selectItemWithTitle:selectedTitle];
 }
 
 - (void)calcGroupPopUp
@@ -210,7 +214,9 @@
     while ((parentEntityType = [self containerTypeForType:entityType]) != nil) {
         if (parentEntityType == entityType) break;
         entityType = parentEntityType;
-        [groupByPopUp insertItemWithTitle:[entityType name] atIndex:0];
+        NSString *title;
+        title = [self descriptionForEntityType:entityType];
+        [groupByPopUp insertItemWithTitle:title atIndex:0];
         [[groupByPopUp itemAtIndex:0] setRepresentedObject:entityType];
 	ct++;
     }
@@ -220,7 +226,10 @@
     } else {
         [groupByPopUp setEnabled:YES];
     }
-    [groupByPopUp selectItemWithTitle:[[self containerTypeForType:type] name]];
+    NSString *selectedTitle;
+    selectedTitle = [self descriptionForEntityType:
+                                              [self containerTypeForType:type]];
+    [groupByPopUp selectItemWithTitle:selectedTitle];
 }
 
 - (void)calcReduceModePopUp
@@ -321,7 +330,7 @@
                                              component:self];
         [newEntityType setEntityClass:[selectedEntityType entityClass]];
         [newEntityType setEntityTypeToReduce:[selectedEntityType entityTypeToReduce]];
-        [newEntityType addNamesToFilter:[[selectedEntityType filterNames] allObjects]];        
+        [newEntityType addValuesToFilter:[[selectedEntityType filterValues] allObjects]];        
     } else {
         newEntityType = [ReduceEntityType typeWithName:newEntityName
                                          containerType:(PajeContainerType *)[self rootEntityType]
@@ -467,10 +476,11 @@
         NSBeep();
         return;
     }
-    if ([cell state])
-        [type removeNameFromFilter:[cell representedObject]];
-    else
-        [type addNameToFilter:[cell representedObject]];
+    if ([cell state]) {
+        [type removeValueFromFilter:[cell representedObject]];
+    } else {
+        [type addValueToFilter:[cell representedObject]];
+    }
     [entityTypesDictionary setObject:[type dictionaryForDefaults]
                               forKey:[type name]];
     [self registerDefaults];
@@ -487,7 +497,7 @@
     ReduceEntityType *type;
 
     type = [[entityNamePopUp selectedItem] representedObject];
-    allArray = [inputComponent allNamesForEntityType:[type entityTypeToReduce]];
+    allArray = [inputComponent allValuesForEntityType:[type entityTypeToReduce]];
 
     n = [allArray count];
     [nameMatrix renewRows:n columns:1];
@@ -496,7 +506,7 @@
         cell = [nameMatrix cellAtRow:i column:0];
         [cell setTitle:name];
         [cell setRepresentedObject:name];
-        [cell setState:![[type filterNames] containsObject:name]];
+        [cell setState:![[type filterValues] containsObject:name]];
     }
     [nameMatrix sizeToFit];
     [nameMatrix setNeedsDisplay:YES];
@@ -549,21 +559,39 @@
 - (PajeDrawingType)drawingTypeForEntityType:(PajeEntityType *)entityType
 {
     if ([entityType isKindOfClass:[ReduceEntityType class]])
-        return [entityType drawingType];
+        return [(ReduceEntityType *)entityType drawingType];
     else
         return [super drawingTypeForEntityType:entityType];
 }
 
-- (NSNumber *)valueForEntity:(PajeEntity *)entity
+- (double)doubleValueForEntity:(PajeEntity *)entity
 {
     if ([entity isKindOfClass:[ReduceEntity class]]) {
-        return [(ReduceEntity *)entity value];
+        return [(ReduceEntity *)entity doubleValue];
     } else {
-        return [inputComponent valueForEntity:entity];
+        return [inputComponent doubleValueForEntity:entity];
     }
 }
 
-- (NSNumber *)minValueForEntityType:(PajeEntityType *)entityType
+- (double)minValueForEntity:(PajeEntity *)entity
+{
+    if ([entity isKindOfClass:[ReduceEntity class]]) {
+        return [(ReduceEntity *)entity minValue];
+    } else {
+        return [inputComponent minValueForEntity:entity];
+    }
+}
+
+- (double)maxValueForEntity:(PajeEntity *)entity
+{
+    if ([entity isKindOfClass:[ReduceEntity class]]) {
+        return [(ReduceEntity *)entity maxValue];
+    } else {
+        return [inputComponent maxValueForEntity:entity];
+    }
+}
+
+- (double)minValueForEntityType:(PajeEntityType *)entityType
 {
     if ([entityType isKindOfClass:[ReduceEntityType class]])
         return [(ReduceEntityType *)entityType minValue];
@@ -571,7 +599,7 @@
         return [super minValueForEntityType:entityType];
 }
 
-- (NSNumber *)maxValueForEntityType:(PajeEntityType *)entityType
+- (double)maxValueForEntityType:(PajeEntityType *)entityType
 {
     if ([entityType isKindOfClass:[ReduceEntityType class]])
         return [(ReduceEntityType *)entityType maxValue];
@@ -579,8 +607,8 @@
         return [super maxValueForEntityType:entityType];
 }
 
-- (NSNumber *)minValueForEntityType:(PajeEntityType *)entityType
-                        inContainer:(PajeContainer *)container
+- (double)minValueForEntityType:(PajeEntityType *)entityType
+                    inContainer:(PajeContainer *)container
 {
     if ([entityType isKindOfClass:[ReduceEntityType class]])
         return [(ReduceEntityType *)entityType minValue];
@@ -588,8 +616,8 @@
         return [super minValueForEntityType:entityType inContainer:container];
 }
 
-- (NSNumber *)maxValueForEntityType:(PajeEntityType *)entityType
-                        inContainer:(PajeContainer *)container
+- (double)maxValueForEntityType:(PajeEntityType *)entityType
+                    inContainer:(PajeContainer *)container
 {
     if ([entityType isKindOfClass:[ReduceEntityType class]])
         return [(ReduceEntityType *)entityType maxValue];

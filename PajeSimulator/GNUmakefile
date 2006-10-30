@@ -51,6 +51,7 @@ PajeSimulator_HEADERS= \
         UserEvent.h \
         UserLink.h \
         UserState.h \
+        UserValue.h \
 	SimulChunk.h
 
 #
@@ -64,6 +65,7 @@ PajeSimulator_OBJC_FILES= \
         UserEvent.m \
         UserLink.m \
         UserState.m \
+        UserValue.m \
 	SimulChunk.m
 
 #

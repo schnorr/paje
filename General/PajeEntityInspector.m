@@ -226,21 +226,21 @@ static NSMutableArray *allInstances;
 - (IBAction)filterEntityName:(id)sender
 {
     PajeEntityType *entityType;
-    id entityName;
+    id entityValue;
 
     entityType = [inspectedEntity entityType];
-    entityName = [inspectedEntity name];
-    if (entityType != nil && entityName != nil) {
+    entityValue = [inspectedEntity value];
+    if (entityType != nil && entityValue != nil) {
         NSString *filtering;
         NSDictionary *userInfo;
         filtering = [sender state] ? @"YES" : @"NO";
         userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
                                          entityType, @"EntityType",
-                                         entityName, @"EntityName",
+                                         entityValue, @"EntityValue",
                                          filtering, @"Show",
                                          nil];
         [[NSNotificationCenter defaultCenter]
-                postNotificationName:@"PajeFilterEntityNameNotification"
+                postNotificationName:@"PajeFilterEntityValueNotification"
                               object:self
                             userInfo:userInfo];
     }
@@ -516,7 +516,7 @@ static NSMutableArray *allInstances;
         if (subCount <= 5) count = subCount;
         else count = 4;
         for (i = 0; i < count; i++) {
-            [fieldTitles addObject:[inspectedEntity subNameAtIndex:i]];
+            [fieldTitles addObject:[inspectedEntity subValueAtIndex:i]];
             if ([inspectedEntity drawingType] == PajeStateDrawingType) {
                 value = [inspectedEntity subDurationAtIndex:i];
                 [fieldValues addObject:
@@ -559,7 +559,7 @@ static NSMutableArray *allInstances;
 - (void)addGlobalFields
 {
     // global fields
-    [nameField setStringValue:[filter nameForEntity:inspectedEntity]];
+    [nameField setStringValue:[[filter valueForEntity:inspectedEntity] stringValue]];
     [colorField setColor:[filter colorForEntity:inspectedEntity]];
     [colorField setAction:@selector(colorChanged:)];
     [colorField setTarget:self];
@@ -567,7 +567,7 @@ static NSMutableArray *allInstances;
                                  [filter entityTypeForEntity:inspectedEntity]]];
 
     [nonDisplayedFields removeObject:@"PajeEventName"];
-    [nonDisplayedFields removeObject:@"Name"];
+    //[nonDisplayedFields removeObject:@"Value"];
     [nonDisplayedFields removeObject:@"Color"];
 
     [nonDisplayedFields removeObject:@"EntityType"];
@@ -648,7 +648,7 @@ static NSMutableArray *allInstances;
         while ((related = [relatedEnum nextObject]) != nil) {
             NSButtonCell *cell;
             cell = [relatedEntitiesMatrix cellAtRow:row++ column:0];
-            [cell setTitle:[filter nameForEntity:related]];
+            [cell setTitle:[[filter valueForEntity:related] stringValue]];
             [cell setRepresentedObject:related];
             [cell setTarget:self];
             [cell setAction:@selector(entityClicked:)];

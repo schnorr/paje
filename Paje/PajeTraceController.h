@@ -53,7 +53,7 @@
 - (void)readNextChunk:(id)sender;
 - (void)readChunk:(int)chunkNumber;
 - (void)startChunk:(int)chunkNumber;
-- (void)endOfChunk;
+- (void)endOfChunkLast:(BOOL)last;
 
 - (BOOL)openFile:(NSString *)filename;
 

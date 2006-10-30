@@ -15,19 +15,21 @@ ADDITIONAL_INCLUDE_DIRS = -I../General
 StorageController_OBJC_FILES = \
         AnchorFilter.m \
         Encapsulate.m \
-        AggregateEvent.m \
-        AggregateState.m \
-        EventAggregator.m \
-        StateAggregator.m \
-	AggregatingChunkArray.m
+#        AggregateEvent.m \
+#        AggregateState.m \
+#        AggregateValue.m \
+#        AggregateLink.m \
+#        EntityAggregator.m \
+#	AggregatingChunkArray.m
 
 StorageController_HEADER_FILES = \
         AnchorFilter.h \
         Encapsulate.h \
         AggregateEvent.h \
         AggregateState.h \
-        EventAggregator.h \
-        StateAggregator.h \
+        AggregateValue.h \
+        AggregateLink.h \
+        EntityAggregator.h \
 	AggregatingChunkArray.h
 
 OTHERSRCS = Makefile.preamble Makefile Makefile.postamble m.template \

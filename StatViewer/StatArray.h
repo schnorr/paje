@@ -51,8 +51,8 @@
 - (double)minValue;
 
 - (unsigned)subCount;
-- (NSString *)subNameAtIndex:(unsigned)index;
+- (id)subValueAtIndex:(unsigned)index;
 - (NSColor *)subColorAtIndex:(unsigned)index;
-- (double)subValueAtIndex:(unsigned)index;
+- (double)subDoubleValueAtIndex:(unsigned)index;
 @end
 #endif

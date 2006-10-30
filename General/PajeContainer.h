@@ -51,6 +51,9 @@
 - (NSEnumerator *)enumeratorOfCompleteEntitiesTyped:(PajeEntityType *)type
                                            fromTime:(NSDate *)start
                                              toTime:(NSDate *)end;
+
+- (double)minValueForEntityType:(PajeEntityType *)type;
+- (double)maxValueForEntityType:(PajeEntityType *)type;
 @end
 
 #endif

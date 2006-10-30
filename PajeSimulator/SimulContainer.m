@@ -122,8 +122,15 @@
 
 - (void)stopWithEvent:(PajeEvent *)event
 {
+    NSDate *stopTime;
+    
+    if (event != nil) {
+        stopTime = [event time];
+    } else {
+        stopTime = [simulator currentTime];
+    }
     if (lastTime == nil) {
-        [self setLastTime:[event time]];
+        [self setLastTime:stopTime];
     }
 
     NSEnumerator *typeEnumerator;
@@ -135,8 +142,8 @@
         chunk = [self chunkOfType:type];
         if ([chunk isActive]) {
             [chunk stopWithEvent:event];
-            //[chunk setEndTime:[simulator currentTime]];
-            //[simulator outputChunk:chunk];
+            [chunk endOfChunkWithTime:stopTime];
+            [simulator outputChunk:chunk];
         }
     }
     //[userEntities removeAllObjects];
@@ -148,6 +155,7 @@
     while ((subContainer = [subEnum nextObject]) != nil) {
         [subContainer stopWithEvent:event];
     }
+    isActive = NO;
 }
 
 - (BOOL)isStopped
@@ -155,11 +163,17 @@
     return lastTime != nil;
 }
 
+- (BOOL)isActive
+{
+    return isActive;
+}
+
 - (void)startChunk
 {
     NSEnumerator *typeEnumerator;
     id type;
 
+    isActive = ![simulator isReplaying];
     typeEnumerator = [userEntities keyEnumerator];
     while ((type = [typeEnumerator nextObject]) != nil) {
         SimulChunk *chunk;
@@ -176,20 +190,32 @@
             [chunk activate];
             [chunk setPreviousChunkIncompleteEntities:stack];
         }
+        if ([chunk isActive]) {
+            isActive = YES;
+        }
     }
 }
 
-- (void)endOfChunk
+- (void)endOfChunkLast:(BOOL)last
 {
     NSEnumerator *typeEnumerator;
     id type;
 
+    if (![self isActive]) {
+        return;
+    }
+
+    if (last) {
+        [self stopWithEvent:nil];
+        return;
+    }
+    NSDate *chunkEndTime = [simulator currentTime];
     typeEnumerator = [userEntities keyEnumerator];
     while ((type = [typeEnumerator nextObject]) != nil) {
         SimulChunk *chunk;
         chunk = [self chunkOfType:type];
         if ([chunk isActive]) {
-            [chunk endOfChunkWithTime:[simulator currentTime]];
+            [chunk endOfChunkWithTime:chunkEndTime];
             [simulator outputChunk:chunk];
         }
     }
@@ -238,6 +264,7 @@
         [chunk setPreviousChunkIncompleteEntities:[NSArray array]];
         [chunkArray addChunk:chunk];
         [chunkArray release];
+        isActive = YES;
     } else {
         chunk = (SimulChunk *)[chunkArray chunkAtIndex:currentChunkNumber];
         if (chunk == nil) {
@@ -254,6 +281,7 @@
                                            [previousChunk incompleteEntities]];
 
             [chunkArray addChunk:chunk];
+            isActive = YES;
         }
     }
     
@@ -309,26 +337,26 @@
 }
 
 - (void)_verifyMinMaxOfEntityType:(PajeVariableType *)type
-                        withValue:(NSNumber *)value
+                        withValue:(double)value
 {
     NSNumber *oldMin;
     NSNumber *oldMax;
     oldMin = [minValues objectForKey:type];
     oldMax = [maxValues objectForKey:type];
 
-    if ((oldMin == nil) || ([oldMin compare:value] == NSOrderedDescending)) {
-        [minValues setObject:value forKey:type];
+    if ((oldMin == nil) || (value < [oldMin doubleValue])) {
+        [minValues setObject:[NSNumber numberWithDouble:value] forKey:type];
         [type possibleNewMinValue:value];
     }
 
-    if ((oldMax == nil) || ([oldMax compare:value] == NSOrderedAscending)) {
-        [maxValues setObject:value forKey:type];
+    if ((oldMax == nil) || (value > [oldMax doubleValue])) {
+        [maxValues setObject:[NSNumber numberWithDouble:value] forKey:type];
         [type possibleNewMaxValue:value];
     }
 }
 
 - (void)setUserVariableOfType:(PajeVariableType *)type
-                      toValue:(id)value
+                toDoubleValue:(double)value
                     withEvent:(PajeEvent *)event
 {
     SimulChunk *chunk;
@@ -337,11 +365,11 @@
     if (![chunk isActive]) return;
 
     [chunk setVariableEvent:event
-                      value:value];
+                doubleValue:value];
 }
 
 - (void)addUserVariableOfType:(PajeVariableType *)type
-                        value:(id)value
+                  doubleValue:(double)value
                     withEvent:(PajeEvent *)event
 {
     SimulChunk *chunk;
@@ -350,11 +378,11 @@
     if (![chunk isActive]) return;
 
     [chunk addVariableEvent:event
-                      value:value];
+                doubleValue:value];
 }
 
 - (void)subUserVariableOfType:(PajeVariableType *)type
-                        value:(id)value
+                  doubleValue:(double)value
                     withEvent:(PajeEvent *)event
 {
     SimulChunk *chunk;
@@ -363,7 +391,7 @@
     if (![chunk isActive]) return;
 
     [chunk subVariableEvent:event
-                      value:value];
+                doubleValue:value];
 }
 
 - (NSNumber *)minValueForEntityType:(PajeEntityType *)type

@@ -22,6 +22,8 @@
 #include "../General/Macros.h"
 #include "../General/NSObject+Additions.h"
 
+#include <math.h>
+
 @implementation ReduceEntity
 
 + (ReduceEntity *)entityWithArray:(BusyArray *)a index:(int)i
@@ -80,16 +82,22 @@
 
 - (NSString *)name
 {
-    return [[self value] stringValue];
+    return [NSString stringWithFormat:@"%f", [self doubleValue]];
+}
+
+- (id)value
+{
+    return [NSString stringWithFormat:@"%f", [self doubleValue]];
 }
 
 - (NSColor *)color
 {
     // FIXME: should color be calculated from value? If so, who keeps the color limits?
     float x;
-    x = ([[self value] floatValue] - [[(ReduceEntityType *)[self entityType] minValue] floatValue]);
-    x /= ([[(ReduceEntityType *)[self entityType] maxValue] floatValue] - [[(ReduceEntityType *)[self entityType] minValue] floatValue]);
-    return [[NSColor blueColor] blendedColorWithFraction:x ofColor:[NSColor redColor]];
+    x = ([self doubleValue] - [[self entityType] minValue]);
+    x /= ([[self entityType] maxValue] - [[self entityType] minValue]);
+    return [[NSColor blueColor] blendedColorWithFraction:x
+                                                 ofColor:[NSColor redColor]];
 }
 
 - (NSArray *)relatedEntities
@@ -97,14 +105,14 @@
     return [[array objectAtIndex:index] allObjects];
 }
 
-+ (void)getMinValue:(NSNumber **)min
-           maxValue:(NSNumber **)max
++ (void)getMinValue:(double *)min
+           maxValue:(double *)max
            forArray:(BusyArray *)a
       pajeComponent:(PajeFilter *)filter
 {
-    NSNumber *minValue = nil;
-    NSNumber *maxValue = nil;
-    NSNumber *v;
+    double minValue = HUGE_VAL;
+    double maxValue = -HUGE_VAL;
+    double v;
     int i;
     int c;
 
@@ -112,21 +120,22 @@
     for (i = 1; i < c; i++) {
         v = [self valueForRelatedEntities:[[a objectAtIndex:i] allObjects]
                             pajeComponent:filter];
-        if ((minValue == nil) || ([minValue compare:v] == NSOrderedDescending))
+        if (v < minValue) {
             minValue = v;
-        if ((maxValue == nil) || ([maxValue compare:v] == NSOrderedAscending))
+        }
+        if (v > maxValue) {
             maxValue = v;
+        }
     }
     *min = minValue;
     *max = maxValue;
 }
 
 // to be implemented by subclasses
-- (NSNumber *)value
+- (double)doubleValue
 {
     return [[self class] valueForRelatedEntities:[self relatedEntities]
                                    pajeComponent:[(ReduceEntityType *)[self entityType] component]];
-    return nil;
 }
 
 // to be implemented by subclasses
@@ -135,11 +144,11 @@
     [self subclassResponsibility:_cmd];
     return nil;
 }
-+ (NSNumber *)valueForRelatedEntities:(NSArray *)entities
-                        pajeComponent:(PajeFilter *)filter
++ (double)valueForRelatedEntities:(NSArray *)entities
+                    pajeComponent:(PajeFilter *)filter
 {
     [self subclassResponsibility:_cmd];
-    return nil;
+    return 0.0;
 }
 @end
 
@@ -148,10 +157,10 @@
 {
     return @"Count";
 }
-+ (NSNumber *)valueForRelatedEntities:(NSArray *)entities
-                        pajeComponent:(PajeFilter *)filter
++ (double)valueForRelatedEntities:(NSArray *)entities
+                    pajeComponent:(PajeFilter *)filter
 {
-    return [NSNumber numberWithInt:[entities count]];
+    return (double)[entities count];
 }
 @end
 
@@ -160,8 +169,8 @@
 {
     return @"Sum";
 }
-+ (NSNumber *)valueForRelatedEntities:(NSArray *)entities
-                        pajeComponent:(PajeFilter *)filter
++ (double)valueForRelatedEntities:(NSArray *)entities
+                    pajeComponent:(PajeFilter *)filter
 {
     double sum = 0.0;
     PajeEntity *entity;
@@ -169,9 +178,9 @@
 
     entityEnum = [entities objectEnumerator];
     while ((entity = [entityEnum nextObject]) != nil) {
-        sum += [[filter valueForEntity:entity] doubleValue];
+        sum += [filter doubleValueForEntity:entity];
     }
-    return [NSNumber numberWithDouble:sum];
+    return sum;
 }
 @end
 @implementation AverageReduceEntity
@@ -179,23 +188,24 @@
 {
     return @"Average";
 }
-+ (NSNumber *)valueForRelatedEntities:(NSArray *)entities
-                        pajeComponent:(PajeFilter *)filter
++ (double)valueForRelatedEntities:(NSArray *)entities
+                    pajeComponent:(PajeFilter *)filter
 {
     double sum = 0.0;
-    int n=0;
+    int n = 0;
     PajeEntity *entity;
     NSEnumerator *entityEnum;
 
     entityEnum = [entities objectEnumerator];
     while ((entity = [entityEnum nextObject]) != nil) {
-        sum += [[filter valueForEntity:entity] doubleValue];
+        sum += [filter doubleValueForEntity:entity];
         n++;
     }
-    if (n != 0)
-        return [NSNumber numberWithDouble:sum/n];
-    else
-        return [NSNumber numberWithDouble:sum];
+    if (n == 0) {
+        return 0.0;
+    } else {
+        return sum/n;
+    }
 }
 @end
 @implementation MinReduceEntity
@@ -203,50 +213,50 @@
 {
     return @"Min";
 }
-+ (NSNumber *)valueForRelatedEntities:(NSArray *)entities
-                        pajeComponent:(PajeFilter *)filter
++ (double)valueForRelatedEntities:(NSArray *)entities
+                    pajeComponent:(PajeFilter *)filter
 {
-    NSNumber *val = nil;
+    double val = HUGE_VAL;
     PajeEntity *entity;
     NSEnumerator *entityEnum;
 
     entityEnum = [entities objectEnumerator];
     while ((entity = [entityEnum nextObject]) != nil) {
-        NSNumber *newval;
-        newval = [filter valueForEntity:entity];
-        if (val == nil || [val compare:newval] == NSOrderedDescending) {
-            Assign(val, newval);
+        double newval;
+        newval = [filter doubleValueForEntity:entity];
+        if (newval < val) {
+            val = newval;
         }
     }
-    if (val != nil)
-        return [val autorelease];
-    else
-        return [NSNumber numberWithDouble:0];
+    return val;
 }
-- (NSNumber *)value
+- (double)doubleValue
 {
-    if (!xval) Assign(xval, [super value]);
+    if (xval == HUGE_VAL) {
+        xval = [super doubleValue];
+    }
     return xval;
 }
 - (NSArray *)relatedEntities
 {
-    NSNumber *val = nil;
-    PajeEntity *entity, *me=nil;
+    double val = HUGE_VAL;
+    PajeEntity *entity;
     NSEnumerator *entityEnum;
+    NSMutableArray *a = [NSMutableArray array];
 
     entityEnum = [[super relatedEntities] objectEnumerator];
     while ((entity = [entityEnum nextObject]) != nil) {
-        NSNumber *newval;
-        newval = [[(ReduceEntityType *)[self entityType] component] valueForEntity:entity];
-        if (val == nil || [val compare:newval] == NSOrderedDescending) {
+        double newval;
+        newval = [[(ReduceEntityType *)[self entityType] component] doubleValueForEntity:entity];
+        if (newval < val) {
             val = newval;
-            me = entity;
+            [a removeAllObjects];
+            [a addObject:entity];
+        } else if (newval == val) {
+            [a addObject:entity];
         }
     }
-    if (me != nil)
-        return [NSArray arrayWithObject:me];
-    else
-        return [NSArray array];
+    return a;
 }
 @end
 @implementation MaxReduceEntity
@@ -254,24 +264,21 @@
 {
     return @"Max";
 }
-+ (NSNumber *)valueForRelatedEntities:(NSArray *)entities
-                        pajeComponent:(PajeFilter *)filter
++ (double)valueForRelatedEntities:(NSArray *)entities
+                    pajeComponent:(PajeFilter *)filter
 {
-    NSNumber *val = nil;
+    double val = -HUGE_VAL;
     PajeEntity *entity;
     NSEnumerator *entityEnum;
 
     entityEnum = [entities objectEnumerator];
     while ((entity = [entityEnum nextObject]) != nil) {
-        NSNumber *newval;
-        newval = [filter valueForEntity:entity];
-        if (val == nil || [val compare:newval] == NSOrderedAscending) {
-            Assign(val, newval);
+        double newval;
+        newval = [filter doubleValueForEntity:entity];
+        if (newval > val) {
+            val = newval;
         }
     }
-    if (val != nil)
-        return [val autorelease];
-    else
-        return [NSNumber numberWithDouble:0];
+    return val;
 }
 @end

@@ -51,7 +51,7 @@
                startTime:(NSDate *)startTime
                  endTime:(NSDate *)endTime
               enumerator:(NSEnumerator *)enumerator
-              nameFilter:(NSSet *)filter;
+             valueFilter:(NSSet *)filter;
 
 - (void)dealloc;
 

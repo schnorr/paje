@@ -32,6 +32,7 @@
 #include "../General/SourceCodeReference.h"
 #include "../General/NSDictionary+Additions.h"
 #include "../General/Macros.h"
+#include "../General/CStringCallBacks.h"
 
 #define DEFINE_STRINGS
 #include "EventNames.h"
@@ -59,6 +60,7 @@
 
 - (void)error:(NSString *)str inEvent:(PajeEvent *)event
 {
+#ifdef OLDEVENT
     PajeEvent *eventCopy;
     NSDate *evTime;
     evTime = [event valueOfFieldNamed:@"Time"];
@@ -74,6 +76,9 @@
                 [eventCopy descriptionWithLocale:[NSDictionary dictionary]
                                           indent:0]];
     [eventCopy release];
+#else
+    [self error:@"%@ in event %@", str, event];
+#endif
 }
 
 - (PajeContainer *)rootInstance
@@ -101,12 +106,12 @@
                                                    container:nil
                                                 creationTime:[NSDate dateWithTimeIntervalSinceReferenceDate:0]
                                                    simulator:self];
-        [rootContainerType addInstance:rootContainer];
+        [rootContainerType addInstance:rootContainer id1:"0" id2:"/"];
 
-        [userTypes setObject:rootContainerType forKey:@"0"];
-        [userTypes setObject:rootContainerType forKey:@"/"];
-        [userTypes setObject:rootContainerType forKey:@"File"];
-                            
+        [self setType:rootContainerType forId:"0"];
+        [self setType:rootContainerType forId:"/"];
+        [self setType:rootContainerType forId:"File"];
+
         [userNumberToContainer setObject:rootContainer forKey:@"0"];
         [userNumberToContainer setObject:rootContainer forKey:@"/"];
         [userNumberToContainer setObject:rootContainer
@@ -149,16 +154,21 @@ NSInvocation *invocation;
                                        forKey:Paje##name##EventName]
 #endif                          // NS_MESSAGE
 #else /* MAP */
+#ifdef OLDEVENT
 #define ADD_INVOCATION(name) NSMapInsert(invocationTable, \
                                          Paje##name##EventName, \
                                          [self methodForSelector:@selector(paje##name:)])
+#else
+#define ADD_INVOCATION(name) invocationTable[Paje##name##EventId] = \
+                                         [self methodForSelector:@selector(paje##name:)]
+#endif
 #endif /* MAP */
 
 - (void)_initInvocationTable
 {
 #ifdef MAP
-    invocationTable = NSCreateMapTable(NSIntMapKeyCallBacks/*NSObjectMapKeyCallBacks*/,
-                                       NSIntMapValueCallBacks, 50);
+//OLDEVENT    invocationTable = NSCreateMapTable(NSIntMapKeyCallBacks/*NSObjectMapKeyCallBacks*/,
+//OLDEVENT                                       NSIntMapValueCallBacks, 50);
 #else
     Assign(invocationTable, [NSMutableDictionary dictionary]);
 #endif
@@ -187,8 +197,10 @@ NSInvocation *invocation;
     self = [super initWithController:c];
 
     if (self != nil) {
-        userTypes = [[NSMutableDictionary alloc] init];
-        userNumberToContainer = [[NSMutableDictionary alloc] init];
+//OLDEVENT        userTypes = [[NSMutableDictionary alloc] init];
+        userTypes = NSCreateMapTable(CStringMapKeyCallBacks,
+                                     NSObjectMapValueCallBacks, 50);
+//        userNumberToContainer = [[NSMutableDictionary alloc] init];
         relatedEntities = [[NSMutableDictionary alloc] init];
 
         [self _initInvocationTable];
@@ -205,12 +217,13 @@ NSInvocation *invocation;
 {
     [rootContainer release];
 #ifdef MAP
-    NSFreeMapTable(invocationTable);
+//OLDEVENT    NSFreeMapTable(invocationTable);
 #else
     [invocationTable release];
 #endif
-    [userTypes release];
-    [userNumberToContainer release];
+//OLDEVENT    [userTypes release];
+    NSFreeMapTable(userTypes);
+//    [userNumberToContainer release];
     [relatedEntities release];
     [startTime release];
     [endTime release];
@@ -249,7 +262,19 @@ NSInvocation *invocation;
 
 - (PajeEntityType *)entityTypeWithName:(NSString *)name
 {
-    return [userTypes objectForKey:name];
+//OLDEVENT    return [userTypes objectForKey:name];
+    return NSMapGet(userTypes, [name cString]);
+}
+
+- (id)typeForId:(const char *)typeId
+{
+    if (typeId == NULL) return nil;
+    return NSMapGet(userTypes, typeId);
+}
+
+- (void)setType:(id)type forId:(const char *)typeId
+{
+    NSMapInsert(userTypes, strdup(typeId), type);
 }
 
 - (void)inputEntity:(PajeEvent *)event
@@ -265,26 +290,29 @@ NSInvocation *invocation;
 //    if (file)
 //        filename = [fileToFilename objectForKey:file];
 //    else
-        filename = [event objectForKey:@"FileName"];
+//OLDEVENT        filename = [event objectForKey:@"FileName"];
+        filename = [event stringForFieldId:PajeFileFieldId];
     if (filename) {
-        id line;
+//OLDEVENT        id line;
         int lineNumber;
         SourceCodeReference *sourceRef;
 //        NSMutableDictionary *refToEvents;
 
-        line = [event objectForKey:@"Line"];
-        if (line == nil)
-            line = [event objectForKey:@"LineNumber"];
-        lineNumber = [line intValue];
+//OLDEVENT        line = [event objectForKey:@"Line"];
+//OLDEVENT        if (line == nil)
+//OLDEVENT            line = [event objectForKey:@"LineNumber"];
+//OLDEVENT            line = [event objectForKey:@"LineNumber"];
+//OLDEVENT        lineNumber = [line intValue];
+        lineNumber = [event intForFieldId:PajeLineFieldId];
         sourceRef = [SourceCodeReference referenceToFilename:filename
                                                   lineNumber:lineNumber];
 //        refToEvents = [filenameToReferences objectForKey:filename];
 //        [refToEvents addObject:event forKey:sourceRef];
-        [event removeObjectForKey:@"File"];
-        [event removeObjectForKey:@"FileName"];
-        [event removeObjectForKey:@"Line"];
-        [event removeObjectForKey:@"LineNumber"];
-        [event setObject:sourceRef forKey:@"FileReference"];
+//OLDEVENT        [event removeObjectForKey:@"File"];
+//OLDEVENT        [event removeObjectForKey:@"FileName"];
+//OLDEVENT        [event removeObjectForKey:@"Line"];
+//OLDEVENT        [event removeObjectForKey:@"LineNumber"];
+//OLDEVENT FIXME        [event setObject:sourceRef forKey:@"FileReference"];
     }
 
 }
@@ -303,12 +331,15 @@ NSInvocation *invocation;
         [invocation invoke];
     }
 #else
-    void (*f)(id, SEL, id);
-    f = NSMapGet(invocationTable, [event pajeEventName]);
+//OLDEVENT    void (*f)(id, SEL, id);
+    IMP f;
+//OLDEVENT    f = NSMapGet(invocationTable, [event pajeEventName]);
+    f = invocationTable[[event pajeEventId]];
     if (f != NULL) {
         f(self, 0, event);
     } else {
-        NSLog(@"Unknown event \"%@\"", [event pajeEventName]);
+//OLDEVENT        NSLog(@"Unknown event \"%@\"", [event pajeEventName]);
+        NSLog(@"Unknown event \"%@\"", event);
     }
 #endif
     
@@ -375,12 +406,12 @@ if (replaying) return;
     }
 }
 
-- (void)endOfChunkInContainer:(SimulContainer *)container
+- (void)endOfChunkInContainer:(SimulContainer *)container last:(BOOL)last
 {
     NSEnumerator *subContainerEnumerator;
     SimulContainer *subContainer;
 
-    [container endOfChunk];
+    [container endOfChunkLast:last];
     
     if (endTime == nil || [endTime isEarlierThanDate:currentTime]) {
         Assign(endTime, currentTime);
@@ -388,7 +419,7 @@ if (replaying) return;
 
     subContainerEnumerator = [[container subContainers] objectEnumerator];
     while ((subContainer = [subContainerEnumerator nextObject]) != nil) {
-        [self endOfChunkInContainer:subContainer];
+        [self endOfChunkInContainer:subContainer last:last];
     }
 }
 
@@ -491,19 +522,26 @@ if (replaying) return;
     [super startChunk:chunkNumber];
 }
 
-
-- (void)endOfChunk
+- (BOOL)isReplaying
 {
-    [self endOfChunkInContainer:rootContainer];
+    return replaying;
+}
 
-    currentChunkNumber++;
-    // if we're at the end of the known world, let's register its position
-    if (currentChunkNumber == [chunkInfo count]) {
 
-        [chunkInfo addObject:[self chunkState]];
+- (void)endOfChunkLast:(BOOL)last
+{
+    [self endOfChunkInContainer:rootContainer last:last];
 
+    if (!last) {
+        currentChunkNumber++;
+        // if we're at the end of the known world, let's register its position
+        if (currentChunkNumber == [chunkInfo count]) {
+
+            [chunkInfo addObject:[self chunkState]];
+
+        }
     }
-    [super endOfChunk];
+    [super endOfChunkLast:(BOOL)last];
 }
 
 - (void)emptyChunk:(int)chunkNumber
@@ -529,7 +567,7 @@ if (replaying) return;
         int chunkNumber = [chunkInfo count] - 1;
         [self notifyMissingChunk:chunkNumber];
         // if no chunk has been read, give up
-        if ([chunkInfo count] == chunkNumber) {
+        if ([chunkInfo count] - 1 == chunkNumber) {
             break;
         }
     }

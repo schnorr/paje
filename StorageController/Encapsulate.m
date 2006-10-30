@@ -32,14 +32,13 @@
 #include "../General/Macros.h"
 #include "../General/NSDate+Additions.h"
 
-#include "StateAggregator.h"
-#include "AggregatingChunkArray.h"
+//#include "AggregatingChunkArray.h"
 
-#include <math.h>
-double log2(double);
-double pow(double, double);
-#define DURtoSLOT(dur)  (log2(dur) + 15)
-#define SLOTtoDUR(slot) pow(2.0, (slot) - 15.0)
+//#include <math.h>
+//double log2(double);
+//double pow(double, double);
+//#define DURtoSLOT(dur)  (log2(dur) + 15)
+//#define SLOTtoDUR(slot) pow(2.0, (slot) - 15.0)
 
 @implementation Encapsulate
 
@@ -110,27 +109,8 @@ double pow(double, double);
         Assign(startTimeInMemory, time);
     }
     //ENDKLUDGE
-return;
-
-    NSMutableDictionary *dict = [entityLists objectForKey:entityType];
-    if (dict == nil) {
-        // unknown entity type -- create a new dict for it
-        dict = [[NSMutableDictionary alloc] init];
-        [entityLists setObject:dict forKey:entityType];
-        [dict release];
-    }
-
-    chunks = [dict objectForKey:container];
-
-    if (chunks == nil) {
-        // unknown container for this entity type -- create a new array for it
-        chunks = [[ChunkArray alloc] init];
-        [dict setObject:chunks forKey:container];
-        [chunks release]; // dict is retaining it
-    }
-
-    [chunks addChunk:chunk];
 }
+
 
 - (void)send
 /*"notifies that data has changed."*/
@@ -226,70 +206,13 @@ return;
 }
 
 
-- (ChunkArray *)chunkArrayForEntityType:(PajeEntityType *)entityType
-                              container:(PajeContainer *)container
-                            minDuration:(double)minDuration
-{
-    NSMutableDictionary *dict;
-    dict = [entityLists objectForKey:entityType];
-    if (dict == nil) {
-        dict = [NSMutableDictionary dictionary];
-        [entityLists setObject:dict forKey:entityType];
-    }
-    
-    NSMutableArray *array;
-    array = [dict objectForKey:container];
-    if (array == nil) {
-        array = [NSMutableArray array];
-        [dict setObject:array forKey:container];
-    }
-
-    ChunkArray *chunks;
-    int index = DURtoSLOT(minDuration);
-    while (index >= [array count]) {
-        chunks = [AggregatingChunkArray
-                       arrayWithEntityType:entityType
-                                 container:container
-                                dataSource:self
-                       aggregatingDuration:SLOTtoDUR([array count])];
-        [array addObject:chunks];
-    }
-    chunks = [array objectAtIndex:index];
-    return chunks;
-}
-
 - (NSEnumerator *)enumeratorOfEntitiesTyped:(PajeEntityType *)entityType
                                 inContainer:(PajeContainer *)container
                                    fromTime:(NSDate *)start
                                      toTime:(NSDate *)end
                                 minDuration:(double)minDuration
 {
-    if (([entityType drawingType] != PajeStateDrawingType
-         && [entityType drawingType] != PajeEventDrawingType)
-        || DURtoSLOT(minDuration) < 0) {
-        return [self enumeratorOfEntitiesTyped:entityType
-                                   inContainer:container
-                                      fromTime:start
-                                        toTime:end];
-    }
-
-    ChunkArray *chunks;
-
-    // if container directly contains entityType's
-    chunks = [self chunkArrayForEntityType:entityType
-                                 container:container
-                               minDuration:minDuration];
-    if (chunks != nil) {
-        return [chunks enumeratorOfEntitiesFromTime:start toTime:end];
-    }
-
-    // if container should contain entityType directly, we have no entities!
-    if ([[entityType containerType] isEqual:[container entityType]]) {
-        return nil;
-    }
-    
-    // container does not contain entityType's directly.
-    // Try containers in-between.
+    if (![[entityType containerType] isEqual:[container entityType]]) {
     NSEnumerator *subcontainerEnum;
     id subcontainer;
     MultiEnumerator *multiEnum;
@@ -300,16 +223,23 @@ return;
                                              inContainer:container];
     multiEnum = [MultiEnumerator enumerator];
     while ((subcontainer = [subcontainerEnum nextObject]) != nil) {
-        //chunks = [dict objectForKey:subcontainer];
-        chunks = [self chunkArrayForEntityType:entityType
-                                     container:subcontainer
-                                   minDuration:minDuration];
-        if (chunks != nil) {
-            [multiEnum addEnumerator:[chunks enumeratorOfEntitiesFromTime:start
-                                                                   toTime:end]];
+        NSEnumerator *en;
+        en = [self enumeratorOfEntitiesTyped:entityType
+                                inContainer:subcontainer
+                                   fromTime:start
+                                     toTime:end
+                                minDuration:minDuration];
+        if (en != nil) {
+            [multiEnum addEnumerator:en];
         }
     }
     return multiEnum;
+    }
+
+        return [self enumeratorOfEntitiesTyped:entityType
+                                   inContainer:container
+                                      fromTime:start
+                                        toTime:end];
 }
 
 
@@ -319,53 +249,38 @@ return;
                                              toTime:(NSDate *)end
                                         minDuration:(double)minDuration
 {
-    if (([entityType drawingType] != PajeStateDrawingType
-         && [entityType drawingType] != PajeEventDrawingType)
-        || DURtoSLOT(minDuration) < 0) {
+    // if container should contain entityType directly, we have no entities!
+    if (![[entityType containerType] isEqual:[container entityType]]) {
+    // container does not contain entityType's directly.
+    // Try containers in-between.
+        NSEnumerator *subcontainerEnum;
+        id subcontainer;
+        MultiEnumerator *multiEnum;
+        PajeEntityType *parentType;
+
+        parentType = [entityType containerType];
+        subcontainerEnum = [self enumeratorOfContainersTyped:parentType
+                                                 inContainer:container];
+        multiEnum = [MultiEnumerator enumerator];
+        while ((subcontainer = [subcontainerEnum nextObject]) != nil) {
+            NSEnumerator *en;
+            en = [self enumeratorOfCompleteEntitiesTyped:entityType
+                                             inContainer:subcontainer
+                                                fromTime:start
+                                                  toTime:end
+                                             minDuration:minDuration];
+            if (en != nil) {
+                [multiEnum addEnumerator:en];
+            }
+        }
+        return multiEnum;
+    }
+
         return [self enumeratorOfCompleteEntitiesTyped:entityType
                                            inContainer:container
                                               fromTime:start
                                                 toTime:end];
-    }
 
-    ChunkArray *chunks;
-
-    // if container directly contains entityType's
-    chunks = [self chunkArrayForEntityType:entityType
-                                 container:container
-                               minDuration:minDuration];
-    if (chunks != nil) {
-        return [chunks enumeratorOfCompleteEntitiesFromTime:start toTime:end];
-    }
-
-    // if container should contain entityType directly, we have no entities!
-    if ([[entityType containerType] isEqual:[container entityType]]) {
-        return nil;
-    }
-    
-    // container does not contain entityType's directly.
-    // Try containers in-between.
-    NSEnumerator *subcontainerEnum;
-    id subcontainer;
-    MultiEnumerator *multiEnum;
-    PajeEntityType *parentType;
-
-    parentType = [entityType containerType];
-    subcontainerEnum = [self enumeratorOfContainersTyped:parentType
-                                             inContainer:container];
-    multiEnum = [MultiEnumerator enumerator];
-    while ((subcontainer = [subcontainerEnum nextObject]) != nil) {
-        //chunks = [dict objectForKey:subcontainer];
-        chunks = [self chunkArrayForEntityType:entityType
-                                     container:subcontainer
-                                   minDuration:minDuration];
-        if (chunks != nil) {
-            [multiEnum addEnumerator:
-                    [chunks enumeratorOfCompleteEntitiesFromTime:start
-                                                          toTime:end]];
-        }
-    }
-    return multiEnum;
 }
 
 
@@ -395,7 +310,7 @@ return;
     // the components following this should not be interested in this method
 }
 
-- (void)endOfChunk
+- (void)endOfChunkLast:(BOOL)last
 {
     // the components following this should not be interested in this method
 }

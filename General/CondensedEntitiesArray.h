@@ -39,14 +39,16 @@
 - (void)dealloc;
 
 - (unsigned)count;
-- (NSString *)nameAtIndex:(unsigned)index;
+- (id)valueAtIndex:(unsigned)index;
 
 // for states
-- (void)addName:(NSString *)name duration:(double)duration;
+- (void)addValue:(id)value
+        duration:(double)duration;
 - (double)durationAtIndex:(unsigned)index;
 
 // for events
-- (void)addName:(NSString *)name count:(unsigned)count;
+- (void)addValue:(id)value
+           count:(unsigned)count;
 - (unsigned)countAtIndex:(unsigned)index;
 
 - (double)totalDuration;
