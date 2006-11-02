@@ -1,3 +1,7 @@
+2006-11-02  Benhur Stein <benhur@inf.ufsm.br>
+        * SpaceTimeViewer/DrawView.m: corrected trackingRect handling
+        * SpaceTimeViewer/SpaceTime.gorm: corrected autosizing
+
 2006-10-30  Benhur Stein <benhur@inf.ufsm.br>
         * EntityTypeFilter/EntityTypeSelector.m: indentation;
           removed unused code

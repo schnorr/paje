@@ -284,6 +284,19 @@
     [super removeFromSuperview];
 }
 
+// set tracking rect to visible rectangle of view. should be called any time
+// the view frame is changed
+- (void)resetTrackingRect
+{
+    if (trackingRectTag != 0) {
+        [self removeTrackingRect:trackingRectTag];
+    }
+    trackingRectTag = [self addTrackingRect:[self visibleRect]
+                                      owner:self
+                                   userData:NULL
+                               assumeInside:NO];
+}
+
 - (void)adjustSize
 {
     NSRect newBounds;
@@ -310,12 +323,7 @@
                     TIMEtoX([NSDate dateWithTimeIntervalSinceReferenceDate:0])];
         [scrollView tile];
         
-        // change mouse tracking rect
-        if (trackingRectTag != 0) {
-            [self removeTrackingRect:trackingRectTag];
-        }
-        trackingRectTag = [self addTrackingRect:[self visibleRect] owner:self
-                                       userData:NULL assumeInside:NO];
+        [self resetTrackingRect];
     }
 }
 
@@ -328,6 +336,28 @@
                     endTime:XtoTIME(NSMaxX([self convertRect:[scrollView frame]
                                                     fromView:scrollView]))];
 }
+
+- (void)setFrame:(NSRect)frame
+{
+    [super setFrame:frame];
+
+    [self resetTrackingRect];
+}
+
+- (void)setBounds:(NSRect)bounds
+{
+    [super setBounds:bounds];
+
+    [self resetTrackingRect];
+}
+
+- (void)viewWillMoveToWindow:(NSWindow *)newWindow
+{
+    if ([self window] != nil && trackingRectTag != 0) {
+        [self removeTrackingRect:trackingRectTag];
+    }
+}
+
 
 /*
  * Changing scales
