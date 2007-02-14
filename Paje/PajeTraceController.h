@@ -55,6 +55,8 @@
 - (void)startChunk:(int)chunkNumber;
 - (void)endOfChunkLast:(BOOL)last;
 
+- (void)missingChunk:(int)chunkNumber;
+
 - (BOOL)openFile:(NSString *)filename;
 
 - (void)setConfigurationName:(NSString *)name;

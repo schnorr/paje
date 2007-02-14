@@ -313,6 +313,11 @@
     [reader endOfChunkLast:last];
 }
 
+- (void)missingChunk:(int)chunkNumber
+{
+    [self readChunk:chunkNumber];
+}
+
 - (void)chunkFault:(NSNotification *)notification
 {
     int chunkNumber;

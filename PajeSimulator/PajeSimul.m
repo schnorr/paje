@@ -34,6 +34,8 @@
 #include "../General/Macros.h"
 #include "../General/CStringCallBacks.h"
 
+#include "../Paje/PajeTraceController.h"
+
 #define DEFINE_STRINGS
 #include "EventNames.h"
 #undef DEFINE_STRINGS
@@ -496,14 +498,7 @@ if (replaying) return;
 
 - (void)notifyMissingChunk:(int)chunkNumber
 {
-    NSDictionary *userInfo;
-    userInfo = [NSDictionary dictionaryWithObject:
-                                 [NSNumber numberWithInt:chunkNumber]
-                                           forKey:@"ChunkNumber"];
-    [[NSNotificationCenter defaultCenter]
-                  postNotificationName:@"PajeChunkNotInMemoryNotification"
-                                object:self
-                              userInfo:userInfo];
+    [controller missingChunk:chunkNumber];
 }
 
 - (void)getChunksUntilTime:(NSDate *)time

@@ -1,3 +1,13 @@
+2007-02-14  Benhur Stein <benhur@inf.ufsm.br>
+	* Paje/PajeTraceController.m; PajeSimulator/PajeSimul.m:
+	  call missingChunk directly instead of thru a notification
+
+2007-02-14  Benhur Stein <benhur@inf.ufsm.br>
+	* Paje/Paje*Controller.[hm]: cleaned finalisation code
+
+2007-02-14  Benhur Stein <benhur@inf.ufsm.br>
+	* Paje/Paje.gorm: small changes in interface file
+
 2006-11-02  Benhur Stein <benhur@inf.ufsm.br>
         * SpaceTimeViewer/DrawView.m: corrected trackingRect handling
         * SpaceTimeViewer/SpaceTime.gorm: corrected autosizing
