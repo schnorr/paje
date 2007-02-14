@@ -1,4 +1,10 @@
 2007-02-14  Benhur Stein <benhur@inf.ufsm.br>
+        * FileReader: add support for reading gzipped files
+          add control of when a chunk can end
+        * PajeEventDecoder: ditto
+        * PajeSimulator: ditto
+
+2007-02-14  Benhur Stein <benhur@inf.ufsm.br>
 	* add timeLimitsChanged notification for better control of when to
 	  recalculate layouts
 

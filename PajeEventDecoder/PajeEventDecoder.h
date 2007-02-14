@@ -40,6 +40,7 @@
 
     NSMutableArray *chunkInfo;
     unsigned currentChunk;
+    BOOL ignoringChunk;
 }
 
 - (id)initWithController:(PajeTraceController *)c;

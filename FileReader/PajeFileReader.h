@@ -47,8 +47,5 @@
 - (void)endOfChunkLast:(BOOL)last;
 
 - (void)raise:(NSString *)reason;
-
-- (void)encodeCheckPointWithCoder:(NSCoder *)coder;
-- (void)decodeCheckPointWithCoder:(NSCoder *)coder;
 @end
 #endif

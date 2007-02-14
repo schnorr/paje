@@ -293,6 +293,21 @@
     eventCount++;
 }
 
+
+- (BOOL)canEndChunkBefore:(PajeEvent *)event
+{
+    id time;
+
+    time = [event time];
+    if (time != nil && [currentTime isLaterThanDate:[NSDate distantPast]] && [currentTime isLaterThanDate:[NSDate dateWithTimeIntervalSinceReferenceDate:0]] && [time isLaterThanDate:currentTime]) {
+        return YES;
+    }
+
+    [self inputEntity:event];
+    return NO;
+}
+
+
 - (void)_resetContainers
 {
     [[userNumberToContainer allValues]
@@ -457,7 +472,7 @@ if (replaying) return;
         }
     }
 
-    if (currentChunkNumber == [chunkInfo count] - 1) {
+    if (!lastChunkSeen && currentChunkNumber == [chunkInfo count] - 1) {
         replaying = NO;
     } else {
         replaying = YES;
@@ -487,6 +502,8 @@ if (replaying) return;
             [chunkInfo addObject:[self chunkState]];
 
         }
+    } else {
+        lastChunkSeen = YES;
     }
     [super endOfChunkLast:(BOOL)last];
 }

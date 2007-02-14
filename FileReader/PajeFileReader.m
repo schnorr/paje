@@ -22,6 +22,8 @@
 #include "../General/UniqueString.h"
 #include "../General/Macros.h"
 
+#define LINE_SIZE 512
+
 @implementation FileReader
 
 - (id)initWithController:(PajeTraceController *)c
@@ -35,31 +37,6 @@
     }
 
     return self;
-}
-
-- (void)encodeCheckPointWithCoder:(NSCoder *)coder
-{
-    unsigned long long position = [inputFile offsetInFile];
-    [coder encodeValuesOfObjCTypes:"@Q", &inputFilename, &position];
-    NSDebugMLLog(@"tim", @"encoded %@ %lld", inputFilename, position);
-}
-
-- (void)decodeCheckPointWithCoder:(NSCoder *)coder
-{
-    id filename;
-    unsigned long long position;
-    
-    [coder decodeValuesOfObjCTypes:"@Q", &filename, &position];
-    NSDebugMLLog(@"tim", @"decoded %@ %lld", filename, position);
-    if (inputFilename) {
-        if (![filename isEqual:inputFilename]) {
-            [self raise:@"trying to read check point file of a different trace file"];
-        }
-    }
-
-    [filename release];
-    [inputFile seekToFileOffset:position];
-    hasMoreData = YES;
 }
 
 - (void)dealloc
@@ -86,9 +63,9 @@
             [self raise:@"Cannot start unknown chunk"];
         }
 
-        unsigned long long position;
+        unsigned long /*long*/ position;
         position = [[chunkInfo objectAtIndex:chunkNumber] longLongValue];
-        if ([inputFile seekToEndOfFile] > position) {
+        if (1||[inputFile seekToEndOfFile] > position) {
             [inputFile seekToFileOffset:position];
             hasMoreData = YES;
         } else {
@@ -100,7 +77,7 @@
         // let's register the first chunk position
         if ([chunkInfo count] == 0) {
 
-            unsigned long long position;
+            unsigned long /*long*/ position;
             position = [inputFile offsetInFile];
             [chunkInfo addObject:[NSNumber numberWithLongLong:position]];
 
@@ -114,12 +91,12 @@
 // The current chunk has ended.
 - (void)endOfChunkLast:(BOOL)last
 {
+    currentChunk++;
     if (!last) {
-        currentChunk++;
         // if we're at the end of the known world, let's register its position
         if (currentChunk == [chunkInfo count]) {
 
-            unsigned long long position;
+            unsigned long /*long*/ position;
             position = [inputFile offsetInFile];
             [chunkInfo addObject:[NSNumber numberWithLongLong:position]];
 
@@ -160,12 +137,57 @@
     if (inputFile == nil) {
         [self raise:@"Couldn't open file"];
     }
+    NSLog(@"usecomp:%d\n\n", [inputFile useCompression]);
     hasMoreData = YES;
 }
 
 - (void)inputEntity:(id)entity
 {    
     [self raise:@"Configuration error:" " PajeFileReader should be first component"];
+}
+
+- (BOOL)canEndChunk
+{
+    NSMutableData *data;
+    unsigned int length;
+    unsigned long /*long*/ offsetInFile;
+
+    if (![self hasMoreData]) {
+        return YES;
+    }
+    offsetInFile = [inputFile offsetInFile];
+    data = (NSMutableData *)[inputFile readDataOfLength:LINE_SIZE];
+    length = [data length];
+    if (length < LINE_SIZE) {
+        hasMoreData = NO;
+    }
+    const char *bytes;
+    char *eol;
+    bytes = [data bytes];
+    eol = memchr(bytes, '\n', length);
+    if (eol != NULL) {
+        unsigned int newlength;
+        newlength = eol - bytes + 1;
+        if (newlength != length) {
+            length = newlength;
+            hasMoreData = YES;
+            [inputFile seekToFileOffset:offsetInFile + length];
+            [data setLength:length];
+        }
+    }
+    NSDebugMLLog(@"tim", @"data: %@\nchunk length: %u has more:%d",
+                 [data class], [data length], hasMoreData);
+    if (length > 0) {
+        if ([super canEndChunkBefore:data]) {
+            [inputFile seekToFileOffset:offsetInFile];
+            return YES;
+        } else {
+            [inputFile seekToFileOffset:offsetInFile + length];
+            return NO;
+        }
+    } else {
+        return YES;
+    }
 }
 
 - (void)readNextChunk
@@ -176,29 +198,50 @@
     if (![self hasMoreData]) {
         return;
     }
-    data = (NSMutableData *)[inputFile readDataOfLength:CHUNK_SIZE];
-    length = [data length];
-    if (length < CHUNK_SIZE) {
-        hasMoreData = NO;
-    } else {
-        char *bytes;
-        int i;
-        int offset = 0;
-        bytes = (char *)[data bytes];
-        for (i = length-1; i >= 0 && bytes[i] != '\n'; i--) {
-            offset++;
+    int nextChunk = currentChunk +1;
+    if (nextChunk < [chunkInfo count]) {
+        // this chunk has already been read, we should know its size
+        unsigned long /*long*/ nextChunkPosition;
+        nextChunkPosition = [[chunkInfo objectAtIndex:nextChunk] longLongValue];
+        unsigned long /*long*/ chunkSize;
+        chunkSize = nextChunkPosition - [inputFile offsetInFile];
+        data = (NSMutableData *)[inputFile readDataOfLength:chunkSize];
+        length = [data length];
+        if (length != chunkSize) {
+            [self raise:@"Cannot reread chunk! Has file been altered?"];
         }
-    
-        if (i >= 0) {
-            [inputFile seekToFileOffset:[inputFile offsetInFile] - offset];
-            length -= offset;
-            [data setLength:length];
-        }
-    }
-    NSDebugMLLog(@"tim", @"data: %@\nchunk length: %u has more:%d",
-                 [data class], [data length], hasMoreData);
-    if (length > 0) {
         [self outputEntity:data];
+    } else {
+        // first time reading this chunk.
+        // must determine its correct size (must end in a line boundary
+        // and in a date-changing event).
+        data = (NSMutableData *)[inputFile readDataOfLength:80/*CHUNK_SIZE*/];
+        length = [data length];
+        if (length < 80/*CHUNK_SIZE*/) {
+            hasMoreData = NO;
+        } else {
+            char *bytes;
+            int i;
+            int offset = 0;
+            bytes = (char *)[data bytes];
+            for (i = length-1; i >= 0 && bytes[i] != '\n'; i--) {
+                offset++;
+            }
+
+            if ((i >= 0) && (offset > 0)) {
+                [inputFile seekToFileOffset:[inputFile offsetInFile] - offset];
+                length -= offset;
+                [data setLength:length];
+            }
+        }
+        NSDebugMLLog(@"tim", @"data: %@\nchunk length: %u has more:%d",
+                     [data class], [data length], hasMoreData);
+        if (length > 0) {
+            [self outputEntity:data];
+            while (![self canEndChunk]) {
+                ;
+            }
+        }
     }
 }
 

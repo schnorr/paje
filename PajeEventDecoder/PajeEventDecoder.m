@@ -131,6 +131,12 @@ char *break_line(char *s, line *line)
 
         }
     }
+    if (status != EVENTS && chunkNumber+1 < [chunkInfo count]) {
+        // attempt to reread a chunk with only definitions
+        ignoringChunk = YES;
+    } else {
+        ignoringChunk = NO;
+    }
 
     // keep the ball rolling (tell other components)
     [super startChunk:chunkNumber];
@@ -174,7 +180,10 @@ char *break_line(char *s, line *line)
 }
 
 - (void)inputEntity:(id)data
-{    
+{
+    if (ignoringChunk) {
+        return;
+    }
     if (![data isKindOfClass:[NSData class]]) {
         [self raise:@"Internal error: incorrect data type"];
     }
@@ -205,6 +214,46 @@ char *break_line(char *s, line *line)
             }
         }
     }
+}
+
+- (BOOL)canEndChunkBefore:(id)data
+{
+    if (ignoringChunk) {
+        [self raise:@"SHOULD NOT BE IGNORING WHEN THIS METHOD IS CALLED!!!"];
+        return YES;
+    }
+    if (![data isKindOfClass:[NSData class]]) {
+        [self raise:@"Internal error: incorrect data type"];
+    }
+
+    char *dataPointer;
+    char *initDataPointer;
+    int length;
+
+    length = [data length];
+    dataPointer = (char *)[data bytes];
+    initDataPointer = dataPointer;
+
+    line line;
+    BOOL result = NO;
+    
+    while ((dataPointer - initDataPointer) < length) {
+        dataPointer = break_line(dataPointer, &line);
+        if (line.word_count == 0) {
+            continue;
+        }
+        if (status != EVENTS) {
+            [self scanDefinitionLine:&line];
+        }
+	if (status == EVENTS) {
+            PajeEvent *event;
+            event = [self scanEventLine:&line];
+            if (event != nil) {
+                result = [super canEndChunkBefore:event];
+            }
+        }
+    }
+    return result;
 }
 
 - (void)scanDefinitionLine:(line *)line
@@ -296,6 +345,9 @@ char *break_line(char *s, line *line)
     PajeEventDefinition *eventDefinition;
 
     eventId = line->word[0];
+    if (*eventId == '%') {
+        return nil;
+    }
     eventDefinition = NSMapGet(eventDefinitions, eventId);
     if (eventDefinition == nil) {
         [self raise:@"Event with id '%s' has not been defined", eventId];

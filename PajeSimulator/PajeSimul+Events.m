@@ -115,6 +115,7 @@
     if (newContainerTypeAlias != NULL) {
         [self setType:newContainerType forId:newContainerTypeAlias];
     }
+    [(PajeFilter *)outputComponent hierarchyChanged];
 }
 
 - (void)pajeDefineLinkType:(PajeEvent *)event
@@ -178,6 +179,7 @@
     if (newEntityTypeAlias != NULL) {
         [self setType:newEntityType forId:newEntityTypeAlias];
     }
+    [(PajeFilter *)outputComponent hierarchyChanged];
 }
 
 - (void)_defineUserEntityType:(PajeEvent *)event
@@ -242,6 +244,7 @@
     if (newEntityTypeAlias != NULL) {
         [self setType:newEntityType forId:newEntityTypeAlias];
     }
+    [(PajeFilter *)outputComponent hierarchyChanged];
 }
 
 - (void)pajeDefineEventType:(PajeEvent *)event
@@ -371,6 +374,7 @@
 //    if (newContainerAlias != nil) {
         [userNumberToContainer setObject:newContainer forKey:[NSString stringWithCString:newContainerAlias]];
 //    }
+    [(PajeFilter *)outputComponent hierarchyChanged];
 }
 
 - (void)pajeDestroyContainer:(PajeEvent *)event

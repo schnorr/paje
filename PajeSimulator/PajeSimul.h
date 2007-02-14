@@ -60,6 +60,7 @@
     unsigned currentChunkNumber;
 
     BOOL replaying;
+    BOOL lastChunkSeen;
 }
 
 - (id)initWithController:(PajeTraceController *)c;
