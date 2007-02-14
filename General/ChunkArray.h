@@ -47,7 +47,7 @@
 - (NSEnumerator *)enumeratorOfEntitiesFromTime:(NSDate *)startTime
                                         toTime:(NSDate *)endTime;
 - (NSEnumerator *)enumeratorOfCompleteEntitiesFromTime:(NSDate *)startTime
-                                                toTime:(NSDate *)endTime;
+                                             untilTime:(NSDate *)endTime;
 
 - (void)addChunk:(EntityChunk *)chunk;
 

@@ -241,7 +241,7 @@ NSDate *delta_d_t0;
     while (index < [array count]) {
         id arrValue;
         arrValue = [[array objectAtIndex:index] performSelector:valueSelector];
-        if ([value compare:arrValue] == NSOrderedAscending) {
+        if ([value compare:arrValue] == NSOrderedAscending) { // v<a[i]
             break;
         }
         index++;
@@ -254,13 +254,16 @@ NSDate *delta_d_t0;
     if (value == nil) {
         return 0;
     }
-    unsigned index = [self indexOfFirstObjectNotBeforeValue:value];
+    int index = [self indexOfFirstObjectNotBeforeValue:value];
 
-    while (index > 0) {
+    while (index >= 0) {
         id arrValue;
+        if (index == 0) {
+            return NSNotFound;
+        }
         index --;
         arrValue = [[array objectAtIndex:index] performSelector:valueSelector];
-        if ([value compare:arrValue] == NSOrderedDescending) {
+        if ([value compare:arrValue] == NSOrderedDescending) { // v>a[i]
             break;
         }
     }
@@ -269,12 +272,12 @@ NSDate *delta_d_t0;
 
 - (unsigned)indexOfLastObjectNotAfterValue:(id<Comparing>)value
 {
-    unsigned index = [self indexOfFirstObjectAfterValue:value];
+    int index = [self indexOfFirstObjectAfterValue:value];
 
-    if (index > 0) {
-        return index - 1;
+    if (index == 0) {
+        return NSNotFound;
     }
-    return index;
+    return index - 1;
 }
 
 - (unsigned)indexOfObjectWithValue:(id<Comparing>)value
@@ -313,7 +316,7 @@ NSDate *delta_d_t0;
 
 - (NSEnumerator *)objectEnumeratorAfterValue:(id<Comparing>)value
 {
-    int firstIndex;
+    unsigned firstIndex;
     NSRange range;
 
     firstIndex = [self indexOfFirstObjectAfterValue:value];
@@ -321,12 +324,74 @@ NSDate *delta_d_t0;
     return [array objectEnumeratorWithRange:range];
 }
 
+- (NSEnumerator *)objectEnumeratorNotAfterValue:(id<Comparing>)value
+{
+    unsigned lastIndex;
+    NSRange range;
+
+    lastIndex = [self indexOfFirstObjectAfterValue:value];
+    range = NSMakeRange(0, lastIndex);
+    return [array objectEnumeratorWithRange:range];
+}
+
+- (NSEnumerator *)objectEnumeratorNotBeforeValue:(id<Comparing>)value
+{
+    unsigned firstIndex;
+    NSRange range;
+
+    firstIndex = [self indexOfFirstObjectNotBeforeValue:value];
+    range = NSMakeRange(firstIndex, [array count] - firstIndex);
+    return [array objectEnumeratorWithRange:range];
+}
+
+- (NSEnumerator *)objectEnumeratorNotBeforeValue:(id<Comparing>)value1
+                                   notAfterValue:(id<Comparing>)value2
+{
+    unsigned firstIndex;
+    unsigned lastIndex;
+    NSRange range;
+
+    lastIndex = [self indexOfLastObjectNotAfterValue:value2];
+    if (lastIndex == NSNotFound) {
+        return nil;
+    }
+    firstIndex = [self indexOfFirstObjectNotBeforeValue:value1];
+    range = NSMakeRange(firstIndex, lastIndex - firstIndex + 1);
+    return [array objectEnumeratorWithRange:range];
+}
+
+- (NSEnumerator *)objectEnumeratorAfterValue:(id<Comparing>)value1
+                               notAfterValue:(id<Comparing>)value2
+{
+    unsigned firstIndex;
+    unsigned lastIndex;
+    NSRange range;
+
+    lastIndex = [self indexOfLastObjectNotAfterValue:value2];
+    if (lastIndex == NSNotFound) {
+        return nil;
+    }
+    firstIndex = [self indexOfFirstObjectAfterValue:value1];
+    range = NSMakeRange(firstIndex, lastIndex - firstIndex + 1);
+    return [array objectEnumeratorWithRange:range];
+}
+
 - (NSEnumerator *)reverseObjectEnumeratorAfterValue:(id<Comparing>)value
 {
-    int firstIndex;
+    unsigned firstIndex;
     NSRange range;
 
     firstIndex = [self indexOfFirstObjectAfterValue:value];
+    range = NSMakeRange(firstIndex, [array count] - firstIndex);
+    return [array reverseObjectEnumeratorWithRange:range];
+}
+
+- (NSEnumerator *)reverseObjectEnumeratorNotBeforeValue:(id<Comparing>)value
+{
+    unsigned firstIndex;
+    NSRange range;
+
+    firstIndex = [self indexOfFirstObjectNotBeforeValue:value];
     range = NSMakeRange(firstIndex, [array count] - firstIndex);
     return [array reverseObjectEnumeratorWithRange:range];
 }

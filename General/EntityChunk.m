@@ -23,7 +23,7 @@
 #include "MultiEnumerator.h"
 #include "FilteredEnumerator.h"
 
-#define CHUNKS_TO_KEEP 10000
+#define CHUNKS_TO_KEEP 5000
 
 @implementation EntityChunk
 
@@ -76,6 +76,7 @@ static int count;
     if (self != nil) {
         entityType = type;    // not retained
         container = pc;       // not retained
+        entities = [[PSortedArray alloc] initWithSelector:@selector(endTime)];
         count++;
         [EntityChunk touch:self];
     }
@@ -88,6 +89,8 @@ static int count;
     entityType = nil;
     Assign(startTime, nil);
     Assign(endTime, nil);
+    Assign(entities, nil);
+    Assign(incompleteEntities, nil);
     [EntityChunk remove:self];
     count--;
     [super dealloc];
@@ -133,52 +136,79 @@ static int count;
 
 - (BOOL)isActive
 {
-    return chunkState2 == active;
+    return chunkState == active;
 }
 
 - (BOOL)isFull
 {
-    return chunkState2 == frozen;
+    return chunkState == frozen;
 }
 
 - (BOOL)isZombie
 {
-    return chunkState2 == empty;
+    return chunkState == empty;
 }
 
 - (BOOL)canEnumerate
 {
-    return chunkState2 == frozen;
+    return chunkState == frozen;
 }
 
 - (BOOL)canInsert
 {
-    return chunkState2 == active;
+    return chunkState == active;
 }
 
 // sent to a zombie to refill it
 - (void)activate
 {
-//    NSAssert(chunkState2 == empty, @"trying to activate a non-zombie chunk");
-    chunkState2 = active;
+//    NSAssert(chunkState == empty, @"trying to activate a non-zombie chunk");
+    chunkState = active;
+    entities = [[PSortedArray alloc] initWithSelector:@selector(endTime)];
 }
 
 // sent to an active chunk to make it full
 - (void)freeze
 {
-//    NSAssert(chunkState2 == active, @"trying to freeze a non-active chunk");
-    chunkState2 = frozen;
+//    NSAssert(chunkState == active, @"trying to freeze a non-active chunk");
+    chunkState = frozen;
 }
 
 // sent to a full chunk to empty it (make a zombie)
 - (void)empty
 {
-//    NSAssert(chunkState2 == frozen, @"trying to activate a non-zombie chunk");
-    chunkState2 = empty;
+//    NSAssert(chunkState == frozen, @"trying to activate a non-zombie chunk");
+    if ([self isZombie]) {
+        return;
+    }
+    // do not empty it nothing would be released
+    if ([entities count] == 0) {
+        return;
+    }
+    chunkState = empty;
+    Assign(entities, nil);
 }
 
 
 
+
+- (id)filterEntity:(PajeEntity *)entity notStartingBefore:(NSDate *)time
+{
+    if ([[entity startTime] isEarlierThanDate:time]) {
+        return entity;
+    } else {
+        return nil;
+    }
+}
+
+- (id)filterEntity:(PajeEntity *)entity startingBefore:(NSDate *)time
+{
+    if ([[entity startTime] isEarlierThanDate:time]) {
+        return nil;
+    } else {
+        return entity;
+    }
+}
 
 - (id)filterEntity:(PajeEntity *)entity startingLaterThan:(NSDate *)time
 {
@@ -198,16 +228,37 @@ static int count;
     }
 }
 
+- (id)filterEntity:(PajeEntity *)entity notEndingBefore:(NSDate *)time
+{
+    if ([[entity endTime] isEarlierThanDate:time]) {
+        return entity;
+    } else {
+        return nil;
+    }
+}
+
 - (PSortedArray *)completeEntities
 {
-    [self subclassResponsibility:_cmd];
-    return nil;
+    return entities;
+}
+
+- (void)setIncompleteEntities:(NSArray *)array
+{
+    if (incompleteEntities != nil) {
+        [incompleteEntities release];
+        incompleteEntities = nil;
+    }
+    if (array != nil) {
+        incompleteEntities = [array copy];
+    }
 }
 
 - (NSArray *)incompleteEntities
 {
-    [self subclassResponsibility:_cmd];
-    return nil;
+    if (incompleteEntities == nil) {
+        return [NSArray array];
+    }
+    return incompleteEntities;
 }
 
 
@@ -222,17 +273,6 @@ static int count;
     return compEnum;
 }
 
-- (NSEnumerator *)fwEnumeratorOfAllCompleteEntities
-{
-    NSEnumerator *compEnum;
-
-    NSAssert([self canEnumerate], @"enumerating non-enumerable chunk");
-    [EntityChunk touch:self];
-    compEnum = [[self completeEntities] objectEnumerator];
-    
-    return compEnum;
-}
-
 - (NSEnumerator *)enumeratorOfCompleteEntitiesAfterTime:(NSDate *)time
 {
     NSAssert([self canEnumerate], @"enumerating non-enumerable chunk");
@@ -241,12 +281,63 @@ static int count;
                 reverseObjectEnumeratorAfterValue:(id<Comparing>)time];
 }
 
-- (NSEnumerator *)fwEnumeratorOfCompleteEntitiesAfterTime:(NSDate *)time
+- (NSEnumerator *)enumeratorOfCompleteEntitiesFromTime:(NSDate *)time
 {
     NSAssert([self canEnumerate], @"enumerating non-enumerable chunk");
     [isa touch:self];
     return [[self completeEntities]
+//                reverseObjectEnumeratorNotBeforeValue:(id<Comparing>)time];
+                reverseObjectEnumeratorAfterValue:(id<Comparing>)time];
+}
+
+- (NSEnumerator *)fwEnumeratorOfAllCompleteEntities
+{
+    NSEnumerator *compEnum;
+
+    NSAssert([self canEnumerate], @"enumerating non-enumerable chunk");
+//    [EntityChunk touch:self];
+    compEnum = [[self completeEntities] objectEnumerator];
+    
+    return compEnum;
+}
+
+- (NSEnumerator *)fwEnumeratorOfCompleteEntitiesFromTime:(NSDate *)time
+{
+    NSAssert([self canEnumerate], @"enumerating non-enumerable chunk");
+//    [isa touch:self];
+    return [[self completeEntities]
                 objectEnumeratorAfterValue:(id<Comparing>)time];
+}
+
+- (NSEnumerator *)fwEnumeratorOfCompleteEntitiesUntilTime:(NSDate *)time
+{
+    NSAssert([self canEnumerate], @"enumerating non-enumerable chunk");
+//    [isa touch:self];
+    return [[self completeEntities]
+                objectEnumeratorNotAfterValue:(id<Comparing>)time];
+}
+
+- (NSEnumerator *)fwEnumeratorOfCompleteEntitiesFromTime:(NSDate *)start
+                                               untilTime:(NSDate *)end
+{
+    NSAssert([self canEnumerate], @"enumerating non-enumerable chunk");
+//    [isa touch:self];
+    return [[self completeEntities]
+                objectEnumeratorAfterValue:(id<Comparing>)start
+                             notAfterValue:(id<Comparing>)end];
+
+    NSEnumerator *compEnum;
+    SEL filterSelector = @selector(filterEntity:startingBefore:);
+
+    NSAssert([self canEnumerate], @"enumerating non-enumerable chunk");
+//    [EntityChunk touch:self];
+
+    compEnum = [self fwEnumeratorOfCompleteEntitiesUntilTime:end];
+
+    return [FilteredEnumerator enumeratorWithEnumerator:compEnum
+                                                 filter:self
+                                               selector:filterSelector
+                                                context:start];
 }
 
 - (NSEnumerator *)enumeratorOfAllEntities
@@ -274,7 +365,7 @@ static int count;
 - (NSEnumerator *)enumeratorOfEntitiesBeforeTime:(NSDate *)time
 {
     NSEnumerator *enAll;
-    SEL filterSelector = @selector(filterEntity:startingLaterThan:);
+    SEL filterSelector = @selector(filterEntity:notStartingBefore:);
     
     enAll = [self enumeratorOfAllEntities];
 
@@ -284,10 +375,10 @@ static int count;
                                                 context:time];
 }
 
-- (NSEnumerator *)fwEnumeratorOfCompleteEntitiesUntilTime:(NSDate *)time
+- (NSEnumerator *)xxfwEnumeratorOfCompleteEntitiesUntilTime:(NSDate *)time
 {
     NSEnumerator *enAll;
-    SEL filterSelector = @selector(filterEntity:endingLaterThan:);
+    SEL filterSelector = @selector(filterEntity:endingAfterTime:);
     
     enAll = [self fwEnumeratorOfAllCompleteEntities];
 
@@ -303,13 +394,13 @@ static int count;
     NSEnumerator *incEnum;
     NSEnumerator *compEnum;
     NSEnumerator *en;
-    SEL filterSelector = @selector(filterEntity:startingLaterThan:);
+    SEL filterSelector = @selector(filterEntity:notStartingBefore:);
 
     NSAssert([self canEnumerate], @"enumerating non-enumerable chunk");
     [EntityChunk touch:self];
 
     incEnum = [[self incompleteEntities] objectEnumerator];
-    compEnum = [self enumeratorOfCompleteEntitiesAfterTime:sliceStartTime];
+    compEnum = [self enumeratorOfCompleteEntitiesFromTime:sliceStartTime];
     if (incEnum != nil && compEnum != nil) {
         en = [MultiEnumerator enumeratorWithEnumeratorArray:
                     [NSArray arrayWithObjects:incEnum, compEnum, nil]];
@@ -323,23 +414,6 @@ static int count;
                                                  filter:self
                                                selector:filterSelector
                                                 context:sliceEndTime];
-}
-
-- (NSEnumerator *)fwEnumeratorOfCompleteEntitiesAfterTime:(NSDate *)start
-                                                untilTime:(NSDate *)end
-{
-    NSEnumerator *compEnum;
-    SEL filterSelector = @selector(filterEntity:endingLaterThan:);
-
-    NSAssert([self canEnumerate], @"enumerating non-enumerable chunk");
-    [EntityChunk touch:self];
-
-    compEnum = [self fwEnumeratorOfCompleteEntitiesAfterTime:start];
-
-    return [FilteredEnumerator enumeratorWithEnumerator:compEnum
-                                                 filter:self
-                                               selector:filterSelector
-                                                context:end];
 }
 
 
@@ -363,8 +437,11 @@ static int count;
     return [[self completeEntities] lastObject];
 }
 
+
 - (void)addEntity:(PajeEntity *)entity
 {
-    [self subclassResponsibility:_cmd];
+    NSAssert([self canInsert], @"adding entities to inactive chunk");
+    [entities addObject:entity];
 }
+
 @end

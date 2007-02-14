@@ -44,7 +44,10 @@
     NSDate *startTime;
     NSDate *endTime;
     
-    enum { active, frozen, empty } chunkState2;
+    enum { active, frozen, empty } chunkState;
+
+    PSortedArray *entities;
+    NSArray *incompleteEntities;
 
     // for LRU list of chunks
     EntityChunk *prev;
@@ -111,10 +114,12 @@
 // auxiliary methods used when creating enumerators
 - (PSortedArray *)completeEntities;
 - (NSArray *)incompleteEntities;
+- (void)setIncompleteEntities:(NSArray *)array;
 
 // only entities that finish inside the chunk's time boundaries
-- (NSEnumerator *)enumeratorOfAllCompleteEntities;
-- (NSEnumerator *)enumeratorOfCompleteEntitiesAfterTime:(NSDate *)time;
+//- (NSEnumerator *)enumeratorOfAllCompleteEntities;
+//- (NSEnumerator *)enumeratorOfCompleteEntitiesAfterTime:(NSDate *)time;
+//- (NSEnumerator *)enumeratorOfCompleteEntitiesFromTime:(NSDate *)time;
 
 // all entities, including those that finish after the chunk's endTime
 - (NSEnumerator *)enumeratorOfAllEntities;
@@ -123,11 +128,12 @@
                                         toTime:(NSDate *)sliceEndTime;
 
 // only completed entities, in non-reverse order
+// include entities that end on those times.
 - (NSEnumerator *)fwEnumeratorOfAllCompleteEntities;
-- (NSEnumerator *)fwEnumeratorOfCompleteEntitiesAfterTime:(NSDate *)time;
+- (NSEnumerator *)fwEnumeratorOfCompleteEntitiesFromTime:(NSDate *)time;
 - (NSEnumerator *)fwEnumeratorOfCompleteEntitiesUntilTime:(NSDate *)time;
-- (NSEnumerator *)fwEnumeratorOfCompleteEntitiesAfterTime:(NSDate *)start
-                                                untilTime:(NSDate *)end;
+- (NSEnumerator *)fwEnumeratorOfCompleteEntitiesFromTime:(NSDate *)start
+                                               untilTime:(NSDate *)end;
 
 - (int)entityCount;
 - (id)lastEntity;

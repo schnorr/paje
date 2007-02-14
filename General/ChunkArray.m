@@ -47,12 +47,18 @@
     userInfo = [NSDictionary dictionaryWithObject:
                                  [NSNumber numberWithInt:chunkNumber+firstIndex]
                                            forKey:@"ChunkNumber"];
+    [[NSException exceptionWithName:@"PajeMissingChunkException"
+                             reason:nil
+                           userInfo:userInfo] raise];
+//
     [[NSNotificationCenter defaultCenter]
                   postNotificationName:@"PajeChunkNotInMemoryNotification"
                                 object:self
                               userInfo:userInfo];
 }
 
+// enumerate all entities that end after startTime and start before endTime,
+// in reverse endTime order.
 - (NSEnumerator *)enumeratorOfEntitiesFromTime:(NSDate *)startTime
                                         toTime:(NSDate *)endTime
 {
@@ -68,11 +74,20 @@
         return nil;
     }
 
-    startIndex = [chunks indexOfLastObjectNotAfterValue:startTime];
+    // chunks are ordered by startTime, and each contains all entities that
+    // end inside its time boundaries (after its startTime and not after
+    // its endTime (plus incomplete entities, that cross its endTime border)).
+    // startIndex and endIndex are the indexes of the first and last chunks
+    // that may contain the entities we are interested in.
     endIndex = [chunks indexOfLastObjectBeforeValue:endTime];
-    
-    if (endIndex >= chunkCount) {
-        endIndex = chunkCount - 1;
+    if (endIndex == NSNotFound) {
+        // no chunk starts before endTime
+        return nil;
+    }
+    startIndex = [chunks indexOfLastObjectNotAfterValue:startTime];
+    if (startIndex == NSNotFound) {
+        // all chunks start after startTime
+        startIndex = 0;
     }
     if (startIndex > endIndex) {
         startIndex = endIndex;
@@ -84,12 +99,15 @@
     }
 
     if (startIndex == endIndex) {
+        // all entities are in one chunk.
         return [chunk enumeratorOfEntitiesFromTime:startTime toTime:endTime];
     }
 
-    // there are multiple chunks involved -- get complete and incomplete
-    //  entities from last chunk, all complete from intermediary chunks and some
-    // complete entities from first chunk.
+    // there are multiple chunks involved --
+    //  get complete and incomplete entities from last chunk,
+    //  all complete entities from intermediary chunks
+    //  and some (those that end after startTime) complete entities
+    //  from first chunk.
     multiEnum = [MultiEnumerator enumerator];
 
     [multiEnum addEnumerator:[chunk enumeratorOfEntitiesBeforeTime:endTime]];
@@ -104,16 +122,18 @@
 
     chunk = [chunks objectAtIndex:startIndex];
     if (![chunk isFull]) {
-            [self raiseMissingChunk:startIndex];
+        [self raiseMissingChunk:startIndex];
     }
     [multiEnum addEnumerator:
-                    [chunk enumeratorOfCompleteEntitiesAfterTime:startTime]];
+                    [chunk enumeratorOfCompleteEntitiesFromTime:startTime]];
 
     return multiEnum;
 }
 
+// enumerate all entities that end after startTime and not after endTime,
+// in increasing endTime order.
 - (NSEnumerator *)enumeratorOfCompleteEntitiesFromTime:(NSDate *)startTime
-                                                toTime:(NSDate *)endTime
+                                             untilTime:(NSDate *)endTime
 {
     unsigned startIndex;
     unsigned endIndex;
@@ -127,11 +147,16 @@
         return nil;
     }
 
-    startIndex = [chunks indexOfLastObjectNotAfterValue:startTime];
+    // chunks are in startTime order
     endIndex = [chunks indexOfLastObjectBeforeValue:endTime];
-
-    while (endIndex >= chunkCount) {
-        endIndex = chunkCount - 1;
+    if (endIndex == NSNotFound) {
+        // no chunk starts before endTime
+        return nil;
+    }
+    startIndex = [chunks indexOfLastObjectNotAfterValue:startTime];
+    if (startIndex == NSNotFound) {
+        // all chunks start after startTime
+        startIndex = 0;
     }
     if (startIndex > endIndex) {
         startIndex = endIndex;
@@ -143,17 +168,23 @@
     }
 
     if (startIndex == endIndex) {
-        return [chunk fwEnumeratorOfCompleteEntitiesAfterTime:startTime
-                                                    untilTime:endTime];
+        // all entities are in one chunk.
+        return [chunk fwEnumeratorOfCompleteEntitiesFromTime:startTime
+                                                   untilTime:endTime];
     }
 
     // there are multiple chunks involved -- get complete and incomplete
     //  entities from last chunk, all complete from intermediary chunks and some
     // complete entities from first chunk.
+    // there are multiple chunks involved --
+    //  get some (those that end after startTime) complete entities
+    //  from first chunk,
+    //  all complete entities from intermediary chunks
+    //  and entities that end up to endTime from last chunk.
     multiEnum = [MultiEnumerator enumerator];
 
     [multiEnum addEnumerator:
-                [chunk fwEnumeratorOfCompleteEntitiesAfterTime:startTime]];
+                [chunk fwEnumeratorOfCompleteEntitiesFromTime:startTime]];
 
     for (index = startIndex + 1; index < endIndex; index++) {
         chunk = [chunks objectAtIndex:index];

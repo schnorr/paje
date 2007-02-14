@@ -52,15 +52,22 @@
 
 - (NSEnumerator *)objectEnumerator;
 - (NSEnumerator *)objectEnumeratorAfterValue:(id<Comparing>)value;
+- (NSEnumerator *)objectEnumeratorNotAfterValue:(id<Comparing>)value;
+- (NSEnumerator *)objectEnumeratorNotBeforeValue:(id<Comparing>)value;
+- (NSEnumerator *)objectEnumeratorNotBeforeValue:(id<Comparing>)value1
+                                   notAfterValue:(id<Comparing>)value2;
+- (NSEnumerator *)objectEnumeratorAfterValue:(id<Comparing>)value1
+                               notAfterValue:(id<Comparing>)value2;
 - (NSEnumerator *)reverseObjectEnumerator;
 - (NSEnumerator *)reverseObjectEnumeratorAfterValue:(id<Comparing>)value;
+- (NSEnumerator *)reverseObjectEnumeratorNotBeforeValue:(id<Comparing>)value;
 
-- (unsigned)indexOfFirstObjectNotBeforeValue:(id<Comparing>)value;
-- (unsigned)indexOfFirstObjectAfterValue:(id<Comparing>)value;
-- (unsigned)indexOfLastObjectNotAfterValue:(id<Comparing>)value;
-- (unsigned)indexOfLastObjectBeforeValue:(id<Comparing>)value;
-- (unsigned)indexOfObjectWithValue:(id<Comparing>)value;
-- (unsigned)indexOfObject:(id)obj;
+- (unsigned)indexOfFirstObjectNotBeforeValue:(id<Comparing>)value; // 0--count
+- (unsigned)indexOfFirstObjectAfterValue:(id<Comparing>)value; // 0--count
+- (unsigned)indexOfLastObjectNotAfterValue:(id<Comparing>)value; // 0--count-1  may return NSNotFound
+- (unsigned)indexOfLastObjectBeforeValue:(id<Comparing>)value; // 0--count-1  may return NSNotFound
+- (unsigned)indexOfObjectWithValue:(id<Comparing>)value; // 0--count-1  may return NSNotFound
+- (unsigned)indexOfObject:(id)obj; // 0--count-1  may return NSNotFound
 
 - (NSEnumerator *)reverseObjectEnumeratorWithRange:(NSRange)range;
 

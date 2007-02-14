@@ -38,6 +38,13 @@
         Assign(array, anArray);
         range = aRange;
         nextIndex = range.location;
+        if (nextIndex < 0) {
+            nextIndex = 0;
+        }
+        int count = [array count];
+        if (NSMaxRange(range) >= count) {
+            range.length = count - range.location;
+        }
     }
     return self;
 }

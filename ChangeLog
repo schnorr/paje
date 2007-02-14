@@ -1,4 +1,12 @@
 2007-02-14  Benhur Stein <benhur@inf.ufsm.br>
+        * General/ChunkArray: use exception instead of notif for missing chk;
+          add new enumerators
+        * General/EntityChunk.[hm]: use new enumerators; store entities here,
+          not in subclasses.
+        * General/PSortedArray: new enumerators
+        * General/NSArray+Additions.m: allow range out of array
+
+2007-02-14  Benhur Stein <benhur@inf.ufsm.br>
         * FileReader: add support for reading gzipped files
           add control of when a chunk can end
         * PajeEventDecoder: ditto
