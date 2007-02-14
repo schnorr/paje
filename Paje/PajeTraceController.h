@@ -66,6 +66,9 @@
 
 // Remove a component from the chain.
 - (void)removeComponent:component;
+
+// Close the controller (remove all components)
+- (void)close;
 @end
 
 #endif

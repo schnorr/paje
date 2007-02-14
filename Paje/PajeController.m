@@ -230,6 +230,7 @@ return;
     if (traceController == currentTraceController) {
         [self setCurrentTraceController:nil];
     }
+    [traceController close];
     [traceControllers removeObjectIdenticalTo:traceController];
 }
 

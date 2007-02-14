@@ -53,12 +53,31 @@
 
 - (void)dealloc
 {
+    if (components != nil) {
+        [self close];
+    }
+    [super dealloc];
+}
+
+- (void)disconnectComponents
+{
+    NSEnumerator *componentEnumerator;
+    PajeComponent *component;
+
+    componentEnumerator = [components objectEnumerator];
+    while ((component = [componentEnumerator nextObject]) != nil) {
+        [component disconnectComponent];
+    }
+}
+
+- (void)close
+{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     Assign(filters, nil);
     Assign(tools, nil);
+    [self disconnectComponents];
     Assign(components, nil);
     Assign(chunkDates, nil);
-    [super dealloc];
 }
 
 - (NSDictionary *)filters
@@ -82,7 +101,7 @@
         NSBundle *bundle;
         bundle = [[PajeController controller] bundleWithName:className];
         componentClass = [bundle principalClass];
-        NSLog(@"bundle %@: %@ class:%@", className, bundle, componentClass);
+        //NSLog(@"bundle %@: %@ class:%@", className, bundle, componentClass);
     } 
     component = [componentClass componentWithController:self];
     if (component != nil) {
