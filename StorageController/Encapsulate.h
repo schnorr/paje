@@ -29,6 +29,8 @@
 @interface Encapsulate : AnchorFilter
 {
     BOOL                 traceChanged;
+    BOOL                 timeLimitsChanged;
+    BOOL                 hierarchyChanged;
     BOOL                 timerActive;
 
     NSDate              *startTimeInMemory;
