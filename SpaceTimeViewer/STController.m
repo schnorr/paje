@@ -193,6 +193,10 @@
 }
 
 
+- (void)timeLimitsChanged
+{
+    [self hierarchyChanged];
+}
 
 - (void)hierarchyChanged
 {
@@ -225,6 +229,21 @@
     [drawView adjustSize];
     [hierarchyRuler refreshSizes];
 //[scrollView setNeedsDisplay:YES];
+}
+
+- (void)limitsChangedForEntityType:(PajeEntityType *)entityType
+{
+    STEntityTypeLayout *layoutDescriptor;
+    layoutDescriptor = [layoutDescriptors objectForKey:entityType];
+    if (layoutDescriptor != nil
+        && [layoutDescriptor drawingType] == PajeVariableDrawingType) {
+        [(STVariableTypeLayout*)layoutDescriptor
+                        setMinValue:[self minValueForEntityType:entityType]];
+        [(STVariableTypeLayout*)layoutDescriptor
+                        setMaxValue:[self maxValueForEntityType:entityType]];
+    }
+    // FIXME: redrawing could be limeted to rects of this entityType.
+    [drawView setNeedsDisplay:YES];
 }
 
 - (void)changedTimeScale

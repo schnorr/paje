@@ -1,4 +1,8 @@
 2007-02-14  Benhur Stein <benhur@inf.ufsm.br>
+	* add timeLimitsChanged notification for better control of when to
+	  recalculate layouts
+
+2007-02-14  Benhur Stein <benhur@inf.ufsm.br>
 	* Paje/PajeTraceController.m; PajeSimulator/PajeSimul.m:
 	  call missingChunk directly instead of thru a notification
 

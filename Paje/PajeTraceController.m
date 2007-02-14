@@ -305,12 +305,17 @@
     [reader startChunk:chunkNumber];
     if ([reader hasMoreData] && chunkNumber >= [chunkDates count]) {
         [chunkDates addObject:[simulator currentTime]];
+        timeLimitsChanged = YES;
     }
 }
 
 - (void)endOfChunkLast:(BOOL)last
 {
     [reader endOfChunkLast:last];
+    if (timeLimitsChanged) {
+        [encapsulator timeLimitsChanged];
+        timeLimitsChanged = NO;
+    }
 }
 
 - (void)missingChunk:(int)chunkNumber

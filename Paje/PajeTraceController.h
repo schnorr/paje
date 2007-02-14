@@ -42,6 +42,7 @@
     NSString *configurationName;
 
     PSortedArray *chunkDates;
+    BOOL timeLimitsChanged;
 }
 
 - (void)registerFilter:(PajeFilter *)filter;

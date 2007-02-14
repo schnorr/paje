@@ -52,8 +52,11 @@
 - (void)setInputComponent:(PajeComponent *)component;
 - (void)setOutputComponent:(PajeComponent *)component;
 
+- (void)disconnectComponent;
+
 - (void)inputEntity:(id)entity;
 - (void)outputEntity:(id)entity;
+- (BOOL)canEndChunkBefore:(id)entity;
 
 - (NSString *)traceDescription; /* only for use by simulator */
 
@@ -85,9 +88,15 @@
 // redrawing.
 //
 
+// Message sent when startTime or endTime of the whole visible trace changed
+- (void)timeLimitsChanged;
+
 // Generic message. Used when something not specified in the other messages
 // has changed. entityType can be nil if not only one entityType is affected.
 - (void)dataChangedForEntityType:(PajeEntityType *)entityType;
+
+// Message sent when the numeric limits of some variable entity type changed.
+- (void)limitsChangedForEntityType:(PajeEntityType *)entityType;
 
 // Message sent when the color of something of entityType has changed.
 - (void)colorChangedForEntityType:(PajeEntityType *)entityType;

@@ -67,6 +67,28 @@
     }
 }
 
+- (void)activateTimer
+{
+    if (!timerActive) {
+        [self performSelector:@selector(timeElapsed:)
+                   withObject:self
+                   afterDelay:0.0];
+        timerActive = YES;
+    }
+}
+
+- (void)hierarchyChanged
+{
+    hierarchyChanged = YES;
+    [self activateTimer];
+}
+
+- (void)timeLimitsChanged
+{
+    timeLimitsChanged = YES;
+    [self activateTimer];
+}
+
 - (void)inputEntity:(id)entity
 /*"There's new data in the input port. Encapsulate it."*/
 {
@@ -74,12 +96,7 @@
     [self addChunk:entity];
     traceChanged = YES;
 
-    if (!timerActive) {
-        [self performSelector:@selector(timeElapsed:)
-                   withObject:self
-                   afterDelay:0.0];
-        timerActive = YES;
-    }
+    [self activateTimer];
 }
 
 - (void)addChunk:(EntityChunk *)chunk
@@ -111,8 +128,14 @@
     // (or else space time diagram will think trace has no data, and the
     // lazy reading will not work well)
     // FIXME should send more specific notification
-    [self hierarchyChanged];
-    traceChanged = NO;
+    if (hierarchyChanged) {
+        [super hierarchyChanged];
+        hierarchyChanged = NO;
+    }
+    if (timeLimitsChanged) {
+        [super timeLimitsChanged];
+        timeLimitsChanged = NO;
+    }
     [self performSelector:@selector(timeElapsed:)
                withObject:self
                afterDelay:0.005];

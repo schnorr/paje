@@ -19,6 +19,7 @@
 */
 //#define COMPATIBILITY
 #include "PajeFilter.h"
+#include "Macros.h"
 #include "../Paje/PajeTraceController.h"
 
 
@@ -49,8 +50,14 @@
 
 - (void)dealloc
 {
-    [outputComponent release]; // HACK (see setOutputComponent:)
+    [self disconnectComponent];
     [super dealloc];
+}
+
+- (void)disconnectComponent
+{
+    [self setInputComponent:nil];
+    [self setOutputComponent:nil];
 }
 
 - (void)setInputComponent:(PajeComponent *)component
@@ -60,6 +67,10 @@
 
 - (void)setOutputComponent:(PajeComponent *)component
 {
+    if (component == nil) {
+        Assign(outputComponent, component);
+        return;
+    }
     if (outputComponent != nil) { // HACK
         if ([outputComponent isKindOfClass: [NSMutableArray class]]) {
             [(NSMutableArray *)outputComponent addObject:component];
@@ -83,6 +94,11 @@
         [(NSArray*)outputComponent makeObjectsPerformSelector:outputSelector withObject:entity];
     else
         [outputComponent performSelector:outputSelector withObject:entity];
+}
+
+- (BOOL)canEndChunkBefore:(id)entity
+{
+    return [outputComponent canEndChunkBefore:entity];
 }
 
 /* only for use by simulator */
@@ -159,6 +175,15 @@
 //
 // Deal with notifications
 //
+- (void)timeLimitsChanged
+{
+    if ([outputComponent isKindOfClass:[NSArray class]]) {
+        [(NSArray*)outputComponent makeObjectsPerformSelector:_cmd];
+    } else {
+        [outputComponent timeLimitsChanged];
+    }
+}
+
 - (void)dataChangedForEntityType:(PajeEntityType *)entityType
 {
     if ([outputComponent isKindOfClass:[NSArray class]]) {
@@ -166,6 +191,16 @@
                                                     withObject:entityType];
     } else {
         [outputComponent dataChangedForEntityType:entityType];
+    }
+}
+
+- (void)limitsChangedForEntityType:(PajeEntityType *)entityType
+{
+    if ([outputComponent isKindOfClass:[NSArray class]]) {
+	[(NSArray *)outputComponent makeObjectsPerformSelector:_cmd 
+                                                    withObject:entityType];
+    } else {
+        [outputComponent limitsChangedForEntityType:entityType];
     }
 }
 
