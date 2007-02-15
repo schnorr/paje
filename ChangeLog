@@ -1,3 +1,8 @@
+2007-02-15  Benhur Stein <benhur@inf.ufsm.br>
+        * PajeSimulator/SimulChunk: cope with changes in EntityChunk;
+          remove aggregation subclasses;
+          test for indexOfLastObject... returning NSNotFound
+
 2007-02-14  Benhur Stein <benhur@inf.ufsm.br>
         * General/ChunkArray: use exception instead of notif for missing chk;
           add new enumerators

@@ -34,15 +34,8 @@
 + (SimulChunk *)chunkWithEntityType:(PajeEntityType *)type
                           container:(PajeContainer *)pc;
 
-
 - (id)initWithEntityType:(PajeEntityType *)type
                container:(PajeContainer *)pc;
-
-
-- (void)removeAllCompletedEntities;
-
-- (void)setIncompleteEntities:(NSArray *)array;
-- (NSArray *)incompleteEntities;
 
 // Simulation
 - (void)addEntity:(PajeEntity *)entity;
@@ -89,15 +82,10 @@
 @end
 
 @interface EventChunk : SimulChunk
-{
-    PSortedArray *entities;
-}
 @end
-
 
 @interface StateChunk : EventChunk
 {
-    NSArray *incompleteEntities;
     NSMutableArray *simulationStack;
     int resimulationStackLevel;
 }
@@ -107,26 +95,18 @@
 
 @interface LinkChunk : StateChunk
 {
-    NSMutableArray *pendingLinks;
+//    NSMutableArray *pendingLinks;
+#define pendingLinks simulationStack
 }
 @end
 
 @interface VariableChunk : EventChunk
 {
-    NSArray *incompleteEntities;
     NSDate *currentTime;
     double currentValue;
     double maxValue;
     double minValue;
     double sumValue;
 }
-@end
-
-@interface AggregateStateChunk : StateChunk
-- (PajeEntity *)firstIncomplete;
-@end
-@interface AggregateVariableChunk : AggregateStateChunk
-@end
-@interface AggregateLinkChunk : AggregateStateChunk
 @end
 #endif
