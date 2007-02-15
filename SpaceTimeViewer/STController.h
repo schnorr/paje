@@ -40,7 +40,7 @@
     
 }
 - (id)initWithController:(PajeTraceController *)c;
-- (void)awakeFromNib;
+- (void)adjustInterface;
 - (void)print:(id)sender;
 
 - (NSArray *)layoutDescriptors;

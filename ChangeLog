@@ -1,4 +1,8 @@
 2007-02-15  Benhur Stein <benhur@inf.ufsm.br>
+        * SpaceTimeViewer/STController: better initialisation code for when
+          more than one interface file is loaded
+
+2007-02-15  Benhur Stein <benhur@inf.ufsm.br>
         * ReductionFilter/BusyArray: add new enumerator
         * ReductionFilter/BusyNode: add new enumerator
         * ReductionFilter/ReduceEntity: add min/maxValue methods

@@ -35,9 +35,17 @@
         if (![NSBundle loadNibNamed:@"SpaceTime" owner:self]) {
             NSRunAlertPanel(@"SpaceTime", @"Couldn't load interface file",
                             nil, nil, nil);
+        } else {
+            [self adjustInterface];
         }
 
         layoutDescriptors = [[NSMutableDictionary alloc] init];
+        layoutController = [[STEntityTypeLayoutController alloc]
+                                            initWithDelegate:self];
+
+        // register the tools with the controller
+        [self registerTool:self];
+        [self registerTool:layoutController];
     }
 
     return self;
@@ -45,8 +53,7 @@
 
 - (void)dealloc
 {
-    [layoutDescriptors release];
-    [layoutController release];
+    // super's implementation will grant disconnection
 #ifdef GNUSTEP
     // workaround GNUstep bug #13382
     {
@@ -64,7 +71,15 @@
     [super dealloc];
 }
 
-- (void)awakeFromNib
+- (void)disconnectComponent
+{
+    Assign(layoutDescriptors, nil);
+    Assign(layoutController, nil);
+    [super disconnectComponent];
+}
+
+// set some things that weren't set when main nib file was loaded
+- (void)adjustInterface
 {
     // set rulers
     [scrollView setHasVerticalRuler:YES];
@@ -73,7 +88,7 @@
     [scrollView setVerticalRulerView:hierarchyRuler];
     [hierarchyRuler setClientView:drawView];
 
-    [scrollView setHasHorizontalRuler:/*NO];*/YES];
+    [scrollView setHasHorizontalRuler:YES];
     [[scrollView horizontalRulerView] setClientView:drawView];
     [[scrollView horizontalRulerView] setReservedThicknessForMarkers:0.0];
 
@@ -82,12 +97,6 @@
     [window setDelegate:self];
     [window setFrameAutosaveName:@"SpaceTime"];
     [window makeKeyAndOrderFront:self];
-
-    // register the tools with the controller
-    [self registerTool:self];
-    layoutController = [[STEntityTypeLayoutController alloc]
-                                          initWithDelegate:self];
-    [self registerTool:layoutController];
 }
 
 - (void)windowDidBecomeKey:(NSNotification *)notification
