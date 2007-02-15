@@ -461,29 +461,31 @@
     ChunkArray *chunkArray;
     NSEnumerator *enumerator;
     chunkArray = [userEntities objectForKey:type];
-    BOOL voltou;
+    BOOL foundAllData;
 
-    voltou = NO;
-    while (!voltou) {
+    foundAllData = NO;
+    while (!foundAllData) {
 NS_DURING
         if (![self isStopped] && [end isLaterThanDate:[self endTime]]) {
             [simulator getChunksUntilTime:end];
         }
         enumerator = [chunkArray enumeratorOfEntitiesFromTime:start
                                                        toTime:end];
-        voltou = YES;
+        foundAllData = YES;
 NS_HANDLER
         NSString *exceptionName;
         exceptionName = [localException name];
-        if (![exceptionName isEqual:@"PajeMissingChunkException"]) 
+        if ([exceptionName isEqual:@"PajeMissingChunkException"]) {
+            int chunkNo;
+            chunkNo = [[[localException userInfo]
+                                objectForKey:@"ChunkNumber"] intValue];
+            [simulator notifyMissingChunk:chunkNo];
+        } else {
             [localException raise];
-        [[NSNotificationCenter defaultCenter]
-                      postNotificationName:@"PajeChunkNotInMemoryNotification"
-                                    object:self
-                                  userInfo:[localException userInfo]];
+	}
 NS_ENDHANDLER
     }
-    [SimulChunk emptyLeastRecentlyUsedChunks];
+    //[SimulChunk emptyLeastRecentlyUsedChunks];
     return enumerator;
 }
 
@@ -494,29 +496,31 @@ NS_ENDHANDLER
     ChunkArray *chunkArray;
     NSEnumerator *enumerator;
     chunkArray = [userEntities objectForKey:type];
-    BOOL voltou;
+    BOOL foundAllData;
 
-    voltou = NO;
-    while (!voltou) {
+    foundAllData = NO;
+    while (!foundAllData) {
 NS_DURING
         if (![self isStopped] && [end isLaterThanDate:[self endTime]]) {
             [simulator getChunksUntilTime:end];
         }
         enumerator = [chunkArray enumeratorOfCompleteEntitiesFromTime:start
-                                                               toTime:end];
-        voltou = YES;
+                                                            untilTime:end];
+        foundAllData = YES;
 NS_HANDLER
         NSString *exceptionName;
         exceptionName = [localException name];
-        if (![exceptionName isEqual:@"PajeMissingChunkException"]) 
+        if ([exceptionName isEqual:@"PajeMissingChunkException"]) {
+            int chunkNo;
+            chunkNo = [[[localException userInfo]
+                                objectForKey:@"ChunkNumber"] intValue];
+            [simulator notifyMissingChunk:chunkNo];
+        } else {
             [localException raise];
-        [[NSNotificationCenter defaultCenter]
-                      postNotificationName:@"PajeChunkNotInMemoryNotification"
-                                    object:self
-                                  userInfo:[localException userInfo]];
+	}
 NS_ENDHANDLER
     }
-    [SimulChunk emptyLeastRecentlyUsedChunks];
+    //[SimulChunk emptyLeastRecentlyUsedChunks];
     return enumerator;
 }
 

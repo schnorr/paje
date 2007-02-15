@@ -120,15 +120,15 @@
 
 - (BOOL)canBeEndedWithValue:(id)v key:(id)k
 {
-    return ((destContainer == nil)
-            && [[self value] isEqual:v]
+    return (/*(destContainer == nil)
+            && */[[self value] isEqual:v]
             && [key isEqual:k]);
 }
 
 - (BOOL)canBeStartedWithValue:(id)v key:(id)k
 {
-    return ((sourceContainer == nil)
-            && [[self value] isEqual:v]
+    return (/*(sourceContainer == nil)
+            && */[[self value] isEqual:v]
             && [key isEqual:k]);
 }
 
