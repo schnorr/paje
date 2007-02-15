@@ -231,12 +231,34 @@
     BusyArrayEnumerator *enumerator;
     unsigned i1, i2;
     i1 = [self indexOfLastObjectNotAfterValue:t1];
+    if (i1 == NSNotFound) {
+        i1 = 0;
+    }
     i2 = [self indexOfFirstObjectNotBeforeValue:t2];
     enumerator = [[BusyArrayEnumerator alloc] initWithArray:self
                                                 entityClass:c
                                                  firstIndex:i1
                                                   lastIndex:i2];
     return [enumerator autorelease];
+}
+
+- (NSEnumerator *)completeObjectEnumeratorOfClass:(Class)c
+                                         fromTime:(NSDate *)t1
+                                           toTime:(NSDate *)t2
+{
+    BusyArrayEnumerator *enumerator;
+    unsigned i1, i2;
+    i1 = [self indexOfFirstObjectNotBeforeValue:t1];
+    i2 = [self indexOfLastObjectNotAfterValue:t2];
+    if (i2 != NSNotFound && i2 != 0) {
+        enumerator = [[BusyArrayEnumerator alloc] initWithArray:self
+                                                    entityClass:c
+                                                     firstIndex:i1
+                                                      lastIndex:i2 - 1];
+        return [enumerator autorelease];
+    } else {
+        return nil;
+    }
 }
 
 
@@ -253,6 +275,9 @@
     BusyArrayEnumerator *enumerator;
     unsigned i1, i2;
     i1 = [self indexOfLastObjectNotAfterValue:t1];
+    if (i1 == NSNotFound) {
+        i1 = 0;
+    }
     i2 = [self indexOfFirstObjectNotBeforeValue:t2];
     enumerator = [[BusyArrayReverseEnumerator alloc] initWithArray:self
                                                        entityClass:c

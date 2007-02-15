@@ -64,6 +64,10 @@
                                          fromTime:(NSDate *)start
                                            toTime:(NSDate *)end
                                       minDuration:(double)minDuration;
+- (NSEnumerator *)enumeratorOfCompleteEntitiesInContainer:(PajeContainer *)container
+                                                 fromTime:(NSDate *)start
+                                                   toTime:(NSDate *)end
+                                              minDuration:(double)minDuration;
 @end
 
 #endif

@@ -84,25 +84,11 @@
          component:(PajeFilter *)comp
 {
     // super adds self as a subtype of containertype.
-    // init has been copied from super so as to not do that
-    if (self == [super init]) {
-        NSColor *c;
-        Assign(name, n);
-        containerType = type;
-//	[containerType addContainedType:self];
-        c = [[NSUserDefaults standardUserDefaults] colorForKey:[name stringByAppendingString:@" Color"]];
-        if (c == nil) {
-            c = [NSColor blackColor];
-        }
-        Assign(color, c);
-        fieldNames = [[NSMutableSet alloc] init];
-
-        component = comp;
-        filterValues = [[NSMutableSet alloc] init];
-    }
-    return self;
-    self = [super initWithName:n containerType:type event:nil];
+    // call init with nil as containerType so as to not do that;
+    // initialize containerType after it.
+    self = [super initWithName:n containerType:nil event:nil];
     if (self != nil) {
+        containerType = type;
         component = comp;
         filterValues = [[NSMutableSet alloc] init];
     }
@@ -266,9 +252,62 @@
         limitsChanged = YES;
     }
     if (limitsChanged) {
-        [component dataChangedForEntityType:self];
+        [component limitsChangedForEntityType:self];
     }
 
     return [array reverseObjectEnumeratorOfClass:entityClass];
+}
+
+- (NSEnumerator *)enumeratorOfCompleteEntitiesInContainer:(PajeContainer *)container
+                                                 fromTime:(NSDate *)start
+                                                   toTime:(NSDate *)end
+                                              minDuration:(double)minDuration
+{
+    NSEnumerator *origEnum;
+    double min;
+    double max;
+    BOOL limitsChanged = NO;
+
+    if (array != nil
+        && [container isEqual:[array container]]
+        && ![start isEarlierThanDate:[array startTime]]
+        && ![end isLaterThanDate:[array endTime]]) {
+        return [array completeObjectEnumeratorOfClass:entityClass
+                                             fromTime:start
+                                               toTime:end];
+    }
+
+    if (array != nil) [array release];
+    origEnum = [component enumeratorOfEntitiesTyped:entityTypeToReduce
+                                        inContainer:container
+                                           fromTime:start
+                                             toTime:end
+                                        minDuration:0];
+    array = [[BusyArray alloc] initWithEntityType:self
+                                        container:container
+                                        startTime:start
+                                          endTime:end
+                                       enumerator:origEnum
+                                      valueFilter:filterValues];
+
+    [entityClass getMinValue:&min
+                    maxValue:&max
+                    forArray:array
+               pajeComponent:component];
+    if (min < minValue) {
+        minValue = min;
+        limitsChanged = YES;
+    }
+    if (max > maxValue) {
+        maxValue = max;
+        limitsChanged = YES;
+    }
+    if (limitsChanged) {
+        [component limitsChangedForEntityType:self];
+    }
+
+    return [array completeObjectEnumeratorOfClass:entityClass
+                                         fromTime:start
+                                           toTime:end];
 }
 @end

@@ -138,6 +138,16 @@
                                    pajeComponent:[(ReduceEntityType *)[self entityType] component]];
 }
 
+- (double)minValue
+{
+    return [self doubleValue];
+}
+
+- (double)maxValue
+{
+    return [self doubleValue];
+}
+
 // to be implemented by subclasses
 + (NSString *)titleForPopUp
 {

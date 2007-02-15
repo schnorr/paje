@@ -1,4 +1,11 @@
 2007-02-15  Benhur Stein <benhur@inf.ufsm.br>
+        * ReductionFilter/BusyArray: add new enumerator
+        * ReductionFilter/BusyNode: add new enumerator
+        * ReductionFilter/ReduceEntity: add min/maxValue methods
+        * ReductionFilter/ReduceEntityType: call new notification limitsChanged
+          instead of dataChanged
+
+2007-02-15  Benhur Stein <benhur@inf.ufsm.br>
         * AggregatingFilter/AggregatingChunk: new class
         * AggregatingFilter/AggregatingChunkArray: move aggregator to 
           AggregatingChunk class; major refactoring, removing most subclasses

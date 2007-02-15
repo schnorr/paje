@@ -359,6 +359,8 @@
         return;
     }
     [entityTypesDictionary removeObjectForKey:[entityType name]];
+    [reduceEntityTypes removeObject:entityType];
+    [self calcHierarchy];
     [self registerDefaults];
     [self hierarchyChanged];
 }
@@ -375,14 +377,17 @@
         NSBeep();
         return;
     }
+    [reduceEntityTypes removeObject:entityType];
     [entityType setName:newName];
+    [reduceEntityTypes addObject:entityType];
     [entityTypesDictionary removeObjectForKey:oldName];
     [entityTypesDictionary setObject:[entityType dictionaryForDefaults]
                               forKey:newName];
+    [self calcHierarchy];
     [self registerDefaults];
     [[entityNamePopUp selectedItem] setTitle:newName];
     [entityNamePopUp synchronizeTitleAndSelectedItem];
-    [super hierarchyChanged];
+//    [super hierarchyChanged];
 }
 
 - (IBAction)entityNamePopUpChanged:(id)sender
@@ -532,12 +537,13 @@
                                      toTime:(NSDate *)end
                                 minDuration:(double)minDuration
 {
-    if (![entityType isKindOfClass:[ReduceEntityType class]])
-        return [inputComponent enumeratorOfEntitiesTyped:entityType
-                                             inContainer:container
-                                                fromTime:start
-                                                  toTime:end
-                                             minDuration:minDuration];
+    if (![entityType isKindOfClass:[ReduceEntityType class]]) {
+        return [super enumeratorOfEntitiesTyped:entityType
+                                    inContainer:container
+                                       fromTime:start
+                                         toTime:end
+                                    minDuration:minDuration];
+    }
 
     return [(ReduceEntityType *)entityType
                         enumeratorOfEntitiesInContainer:container
@@ -546,6 +552,26 @@
                                             minDuration:minDuration];
 }
 
+- (NSEnumerator *)enumeratorOfCompleteEntitiesTyped:(PajeEntityType *)entityType
+                                        inContainer:(PajeContainer *)container
+                                           fromTime:(NSDate *)start
+                                             toTime:(NSDate *)end
+                                        minDuration:(double)minDuration
+{
+    if (![entityType isKindOfClass:[ReduceEntityType class]]) {
+        return [super enumeratorOfCompleteEntitiesTyped:entityType
+                                            inContainer:container
+                                               fromTime:start
+                                                 toTime:end
+                                            minDuration:minDuration];
+    }
+
+    return [(ReduceEntityType *)entityType
+                        enumeratorOfCompleteEntitiesInContainer:container
+                                                       fromTime:start
+                                                         toTime:end
+                                                    minDuration:minDuration];
+}
 
 - (BOOL)canHighlightEntity:(PajeEntity *)entity
 {
@@ -593,36 +619,40 @@
 
 - (double)minValueForEntityType:(PajeEntityType *)entityType
 {
-    if ([entityType isKindOfClass:[ReduceEntityType class]])
+    if ([entityType isKindOfClass:[ReduceEntityType class]]) {
         return [(ReduceEntityType *)entityType minValue];
-    else
+    } else {
         return [super minValueForEntityType:entityType];
+    }
 }
 
 - (double)maxValueForEntityType:(PajeEntityType *)entityType
 {
-    if ([entityType isKindOfClass:[ReduceEntityType class]])
+    if ([entityType isKindOfClass:[ReduceEntityType class]]) {
         return [(ReduceEntityType *)entityType maxValue];
-    else
+    } else {
         return [super maxValueForEntityType:entityType];
+    }
 }
 
 - (double)minValueForEntityType:(PajeEntityType *)entityType
                     inContainer:(PajeContainer *)container
 {
-    if ([entityType isKindOfClass:[ReduceEntityType class]])
+    if ([entityType isKindOfClass:[ReduceEntityType class]]) {
         return [(ReduceEntityType *)entityType minValue];
-    else
+    } else {
         return [super minValueForEntityType:entityType inContainer:container];
+    }
 }
 
 - (double)maxValueForEntityType:(PajeEntityType *)entityType
                     inContainer:(PajeContainer *)container
 {
-    if ([entityType isKindOfClass:[ReduceEntityType class]])
+    if ([entityType isKindOfClass:[ReduceEntityType class]]) {
         return [(ReduceEntityType *)entityType maxValue];
-    else
+    } else {
         return [super maxValueForEntityType:entityType inContainer:container];
+    }
 }
 
 - (id)configuration

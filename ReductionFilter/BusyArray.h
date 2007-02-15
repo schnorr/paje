@@ -61,6 +61,9 @@
 - (NSEnumerator *)objectEnumeratorOfClass:(Class)c
                                  fromTime:(NSDate *)t1
                                    toTime:(NSDate *)t2;
+- (NSEnumerator *)completeObjectEnumeratorOfClass:(Class)c
+                                         fromTime:(NSDate *)t1
+                                           toTime:(NSDate *)t2;
 - (NSEnumerator *)reverseObjectEnumeratorOfClass:(Class)c;
 - (NSEnumerator *)reverseObjectEnumeratorOfClass:(Class)c
                                         fromTime:(NSDate *)t1
