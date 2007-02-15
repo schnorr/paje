@@ -16,15 +16,13 @@
                           aggregationDuration:(double)duration;
 - (id)initWithAggregationDuration:(double)duration;
 
-+ (Class)aggregatedEntityClass;
-
-- (double)aggregationDuration;
-
 - (BOOL)addEntity:(PajeEntity *)entity;
+- (PajeEntity *)aggregateEntity:(PajeEntity *)entity;
 - (PajeEntity *)aggregate;
 - (PajeEntity *)aggregateBefore:(NSDate *)limit;
 
-- (NSArray *)entities;
 - (int)entityCount;
+
+- (double)aggregationDuration;
 @end
 #endif

@@ -19,6 +19,7 @@ AggregatingFilter_OBJC_FILES = \
         AggregateValue.m \
         AggregateLink.m \
         EntityAggregator.m \
+	AggregatingChunk.m \
 	AggregatingChunkArray.m
 
 AggregatingFilter_HEADER_FILES = \
@@ -28,6 +29,7 @@ AggregatingFilter_HEADER_FILES = \
         AggregateValue.h \
         AggregateLink.h \
         EntityAggregator.h \
+	AggregatingChunk.h \
 	AggregatingChunkArray.h
 
 OTHERSRCS = Makefile.preamble Makefile Makefile.postamble m.template \

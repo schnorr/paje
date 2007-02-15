@@ -20,1089 +20,26 @@
 
 
 #include "AggregatingChunkArray.h"
+#include "AggregatingChunk.h"
 
 #include "../General/Macros.h"
-#include "../PajeSimulator/SimulChunk.h"
 #include "../PajeSimulator/SimulContainer.h"
 
-@interface AggregatingEventChunkArray : AggregatingChunkArray
-@end
-@implementation AggregatingEventChunkArray
 
-- (id)initWithEntityType:(PajeEntityType *)eType
-               container:(PajeContainer *)c
-              dataSource:(PajeFilter *)source
-     aggregatingDuration:(double)duration
-{
-    self = [super initWithEntityType:eType
-                           container:c
-                          dataSource:source
-                 aggregatingDuration:duration];
-    if (self != nil) {
-        Assign(aggregator, 
-               [EntityAggregator aggregatorForEntityType:eType
-                                     aggregationDuration:duration]);
-    }
-    return self;
-}
-
-- (void)createChunk
-{
-    AggregateStateChunk *chunk;
-
-    chunk = [[AggregateStateChunk alloc] initWithEntityType:entityType
-               container:container];
-    if ([chunks count] > 0) {
-        [chunk setStartTime:[[chunks lastObject] endTime]];
-    } else {
-        [chunk setStartTime:[container startTime]];
-    }
-    // set an endTime, will be better set when chunk is finished
-    [chunk setEndTime:[container endTime]];
-    [chunks addObject:chunk];
-    [chunk release];
-}
-
-- (EntityChunk *)lastChunk
-{
-    if ([chunks count] == 0) {
-        [self createChunk];
-    }
-    return [chunks lastObject];
-}
-
-- (void)finishChunk
-{
-    AggregateStateChunk *chunk;
-    NSDate *chunkEndTime;
-
-    // set end time to that of last entity    
-    chunk = (AggregateStateChunk *)[self lastChunk];
-    chunkEndTime = [[chunk lastEntity] endTime];
-    [chunk setEndTime:chunkEndTime];
-
-    // set incomplete entities as those that cross endtime in lower
-    // aggregation level.
-    // REVER: tá correto isto? se sim, comentar melhor.
-    NSEnumerator *en;
-    NSArray *incomplete;
-    en = [self originalEnumeratorFromTime:chunkEndTime
-                                   toTime:chunkEndTime
-                              minDuration:[aggregator aggregationDuration]/2];
-    incomplete = [en allObjects];
-    [chunk setIncompleteEntities:incomplete];
-    [chunk freeze];
-}
-
-// reached end of last chunk in this entityType/container
-- (void)finishAggregation
-{
-    AggregateStateChunk *chunk;
-    PajeEntity *state;
-
-    if ([self aggregationFinished]) {
-        return;
-    }
-
-    chunk = (AggregateStateChunk *)[self lastChunk];
-    while ((state = [aggregator aggregate]) != nil) {
-        [chunk addEntity:state];
-    }
-
-    [chunk setEndTime:[[chunk lastEntity] endTime]];
-    [chunk setIncompleteEntities:nil];
-    [chunk freeze];
-    
-    Assign(lastEntity, nil);
-    //Assign(aggregator, nil);
-    finished = YES;
-}
-
-- (void)aggregateEntitiesUntilTime:(NSDate *)time
-{
-    PajeEntity *state;
-    PajeEntity *aggregate;
-    PajeEntity *newLastEntity = lastEntity;
-    NSEnumerator *en;
-    AggregateStateChunk *chunk;
-
-    if ([self aggregationFinished]) {
-        return;
-    }
-    
-    if (lastTime != nil && [time isEarlierThanDate:lastTime]) {
-        return;
-    }
-    
-    if ([(SimulContainer *)container isStopped]
-        && [time isLaterThanDate:[container endTime]]) {
-        time = [container endTime];
-    }
-    en = [self originalCompleteEnumeratorFromTime:[[lastEntity endTime] addTimeInterval:-.000001]
-                                           toTime:time
-                                      minDuration:[aggregator aggregationDuration]/2];
-
-    state = [en nextObject];
-
-    // ignore states that have already been aggregated
-    if (lastEntity != nil) {
-        while (state != nil) {
-            if ([[state endTime] isLaterThanDate:[lastEntity endTime]]) {
-                break;
-            }
-            if (![[state endTime] isEarlierThanDate:[lastEntity endTime]])
-            if ([[state startTime] isEarlierThanDate:[lastEntity startTime]]) {
-                break;
-            }
-            state = [en nextObject];
-        }
-    }
-
-    chunk = (AggregateStateChunk *)[self lastChunk];
-    int entityCount = [chunk entityCount];
-    while (state != nil) {
-        if (entityCount >= 1000 
-            && [aggregator entityCount] == 0
-            && [[state endTime] isLaterThanDate:[newLastEntity endTime]]) {
-            [self finishChunk];
-            [self createChunk];
-            chunk = (AggregateStateChunk *)[self lastChunk];
-            entityCount = [chunk entityCount];
-        }
-
-        newLastEntity = state;
-
-        while (![aggregator addEntity:state]) {
-            entityCount++;
-            aggregate = [aggregator aggregate];
-            if (aggregate != nil) {
-                [chunk addEntity:aggregate];
-            } else {
-                [chunk addEntity:state];
-                break;
-            }
-        }
-
-        state = [en nextObject];
-    }
-    Assign(lastTime, time);
-    if ([(SimulContainer *)container isStopped] 
-        && ![time isEarlierThanDate:[container endTime]]) {
-        [self finishAggregation];
-    } else {
-        Assign(lastEntity, newLastEntity);
-
-        while ((state = [aggregator aggregateBefore:time]) != nil) {
-            [chunk addEntity:state];
-        }
-        [chunk setEndTime:time];
-
-        NSMutableArray *incomplete = [NSMutableArray array];
-
-        if ([aggregator entityCount] > 0) {
-            EntityAggregator *newAggregator;
-            newAggregator = [aggregator copy];
-            while ((aggregate = [newAggregator aggregate]) != nil) {
-                [incomplete addObject:aggregate];
-            }
-            [newAggregator release];
-        }
-
-        en = [self originalEnumeratorFromTime:time
-                                       toTime:time
-                                  minDuration:[aggregator aggregationDuration]/2];
-        en = [[en allObjects] reverseObjectEnumerator];
-
-        while ((state = [en nextObject]) != nil) {
-            [incomplete addObject:state];
-        }
-        incomplete = [[incomplete reverseObjectEnumerator] allObjects];
-        [chunk setIncompleteEntities:incomplete];
-    }
-}
-
-- (void)refillChunkAtIndex:(int)chunkIndex
-{
-    AggregateStateChunk *chunk;
-
-    chunk = (AggregateStateChunk *)[self chunkAtIndex:chunkIndex];
-    NSAssert([chunk isZombie], @"refilling a non-empty chunk");
-
-    [chunk activate];
-
-    PajeEntity *entity;
-    PajeEntity *aggregate;
-    NSEnumerator *en;
-
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
-
-    EntityAggregator *refillAggregator;
-
-//startTime deste é igual ao endTime do anterior. definir a quem pertence quem
-//termina/comeca numa data certa
-    en = [self originalCompleteEnumeratorFromTime:[chunk startTime]
-                                           toTime:[chunk endTime]
-                                      minDuration:[aggregator aggregationDuration]/2];
-
-    entity = [en nextObject];
-    if (entity != nil) {
-        refillAggregator = [EntityAggregator 
-                     aggregatorForEntityType:[entity entityType]
-                         aggregationDuration:[aggregator aggregationDuration]];
-    }
-    while (entity != nil) {
-        while (![refillAggregator addEntity:entity]) {
-            aggregate = [refillAggregator aggregate];
-            if (aggregate != nil) {
-                [chunk addEntity:aggregate];
-            } else {
-                [chunk addEntity:entity];
-                break;
-            }
-        }
-        entity = [en nextObject];
-    }
-
-    NSDate *incompleteStartTime = [[chunk firstIncomplete] startTime];
-    while ((aggregate = [refillAggregator aggregate]) != nil) {
-        if (incompleteStartTime == nil
-            || ![[aggregate endTime] isEarlierThanDate:incompleteStartTime]) {
-            [chunk addEntity:aggregate];
-        }
-    }
-    [chunk freeze];
-
-    [pool release];
-}
-@end
-
-@interface AggregatingStateChunkArray : AggregatingChunkArray
-/*
-- (void)finishChunk;
-- (void)createChunk;
-- (EntityChunk *)lastChunk;
-*/
-@end
-@implementation AggregatingStateChunkArray
-
-- (id)initWithEntityType:(PajeEntityType *)eType
-               container:(PajeContainer *)c
-              dataSource:(PajeFilter *)source
-     aggregatingDuration:(double)duration
-{
-    self = [super initWithEntityType:eType
-                           container:c
-                          dataSource:source
-                 aggregatingDuration:duration];
-    if (self != nil) {
-        Assign(aggregator, 
-               [EntityAggregator aggregatorForEntityType:eType
-                                     aggregationDuration:duration]);
-    }
-    return self;
-}
-
-- (void)createChunk
-{
-    AggregateStateChunk *chunk;
-
-    chunk = [[AggregateStateChunk alloc] initWithEntityType:entityType
-               container:container];
-    if ([chunks count] > 0) {
-        [chunk setStartTime:[[chunks lastObject] endTime]];
-    } else {
-        [chunk setStartTime:[container startTime]];
-    }
-    // set an endTime, will be better set when chunk is finished
-    [chunk setEndTime:[container endTime]];
-    [chunks addObject:chunk];
-    [chunk release];
-}
-
-- (EntityChunk *)lastChunk
-{
-    if ([chunks count] == 0) {
-        [self createChunk];
-    }
-    return [chunks lastObject];
-}
-
-- (void)finishChunk
-{
-    AggregateStateChunk *chunk;
-    NSDate *chunkEndTime;
-
-    // set end time to that of last entity    
-    chunk = (AggregateStateChunk *)[self lastChunk];
-    chunkEndTime = [[chunk lastEntity] endTime];
-    [chunk setEndTime:chunkEndTime];
-
-    // set incomplete entities as those that cross endtime in lower
-    // aggregation level.
-    // REVER: tá correto isto? se sim, comentar melhor.
-    NSEnumerator *en;
-    NSArray *incomplete;
-    en = [self originalEnumeratorFromTime:chunkEndTime
-                                   toTime:chunkEndTime
-                              minDuration:[aggregator aggregationDuration]/2];
-    incomplete = [en allObjects];
-    [chunk setIncompleteEntities:incomplete];
-    [chunk freeze];
-}
-
-// reached end of last chunk in this entityType/container
-- (void)finishAggregation
-{
-    AggregateStateChunk *chunk;
-    PajeEntity *state;
-
-    if ([self aggregationFinished]) {
-        return;
-    }
-
-    chunk = (AggregateStateChunk *)[self lastChunk];
-    while ((state = [aggregator aggregate]) != nil) {
-        [chunk addEntity:state];
-    }
-
-    [chunk setEndTime:[[chunk lastEntity] endTime]];
-    [chunk setIncompleteEntities:nil];
-    [chunk freeze];
-    
-    Assign(lastEntity, nil);
-    //Assign(aggregator, nil);
-    finished = YES;
-}
-
-- (void)aggregateEntitiesUntilTime:(NSDate *)time
-{
-    PajeEntity *entity;
-    PajeEntity *aggregate;
-    PajeEntity *newLastEntity = lastEntity;
-    NSEnumerator *en;
-    AggregateStateChunk *chunk;
-
-    if ([self aggregationFinished]) {
-        return;
-    }
-    
-    if (lastTime != nil && [time isEarlierThanDate:lastTime]) {
-        return;
-    }
-    
-    if ([(SimulContainer *)container isStopped]
-        && [time isLaterThanDate:[container endTime]]) {
-        time = [container endTime];
-    }
-    en = [self originalCompleteEnumeratorFromTime:[[lastEntity endTime] addTimeInterval:-.000001]
-                                           toTime:time
-                                      minDuration:[aggregator aggregationDuration]/2];
-
-    entity = [en nextObject];
-
-    // ignore states that have already been aggregated
-    if (lastEntity != nil) {
-        while (entity != nil) {
-            if ([[entity endTime] isLaterThanDate:[lastEntity endTime]]) {
-                break;
-            }
-            if (![[entity endTime] isEarlierThanDate:[lastEntity endTime]])
-            if ([[entity startTime] isEarlierThanDate:[lastEntity startTime]]) {
-                break;
-            }
-            entity = [en nextObject];
-        }
-    }
-
-    chunk = (AggregateStateChunk *)[self lastChunk];
-    int entityCount = [chunk entityCount];
-    while (entity != nil) {
-        if (entityCount >= 1000 
-            && [aggregator entityCount] == 0
-            && [[entity endTime] isLaterThanDate:[newLastEntity endTime]]) {
-            [self finishChunk];
-            [self createChunk];
-            chunk = (AggregateStateChunk *)[self lastChunk];
-            entityCount = [chunk entityCount];
-        }
-
-        newLastEntity = entity;
-
-        while (![aggregator addEntity:entity]) {
-            entityCount++;
-            aggregate = [aggregator aggregate];
-            if (aggregate != nil) {
-                [chunk addEntity:aggregate];
-            } else {
-                [chunk addEntity:entity];
-                break;
-            }
-        }
-
-        entity = [en nextObject];
-    }
-    Assign(lastTime, time);
-    if ([(SimulContainer *)container isStopped] 
-        && ![time isEarlierThanDate:[container endTime]]) {
-        [self finishAggregation];
-    } else {
-        Assign(lastEntity, newLastEntity);
-
-        while ((entity = [aggregator aggregateBefore:time]) != nil) {
-            [chunk addEntity:entity];
-        }
-        [chunk setEndTime:time];
-
-        NSMutableArray *incomplete = [NSMutableArray array];
-
-        if ([aggregator entityCount] > 0) {
-            EntityAggregator *newAggregator;
-            newAggregator = [aggregator copy];
-            while ((aggregate = [newAggregator aggregate]) != nil) {
-                [incomplete addObject:aggregate];
-            }
-            [newAggregator release];
-        }
-
-        en = [self originalEnumeratorFromTime:time
-                                       toTime:time
-                                  minDuration:[aggregator aggregationDuration]/2];
-        en = [[en allObjects] reverseObjectEnumerator];
-
-        while ((entity = [en nextObject]) != nil) {
-            [incomplete addObject:entity];
-        }
-        incomplete = [[incomplete reverseObjectEnumerator] allObjects];
-        [chunk setIncompleteEntities:incomplete];
-    }
-}
-
-- (void)refillChunkAtIndex:(int)chunkIndex
-{
-    AggregateStateChunk *chunk;
-
-    chunk = (AggregateStateChunk *)[self chunkAtIndex:chunkIndex];
-    NSAssert([chunk isZombie], @"refilling a non-empty chunk");
-
-    [chunk activate];
-
-    PajeEntity *entity;
-    PajeEntity *aggregate;
-    NSEnumerator *en;
-
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
-
-    EntityAggregator *refillAggregator;
-
-//startTime deste é igual ao endTime do anterior. definir a quem pertence quem
-//termina/comeca numa data certa
-    en = [self originalCompleteEnumeratorFromTime:[chunk startTime]
-                                           toTime:[chunk endTime]
-                                      minDuration:[aggregator aggregationDuration]/2];
-    entity = [en nextObject];
-    if (entity != nil) {
-        refillAggregator = [EntityAggregator
-                    aggregatorForEntityType:[entity entityType]
-                        aggregationDuration:[aggregator aggregationDuration]];
-    }
-
-    while (entity != nil) {
-        while (![refillAggregator addEntity:entity]) {
-            aggregate = [refillAggregator aggregate];
-            if (aggregate != nil) {
-                [chunk addEntity:aggregate];
-            } else {
-                [chunk addEntity:entity];
-                break;
-            }
-        }
-        entity = [en nextObject];
-    }
-
-    NSDate *incompleteStartTime = [[chunk firstIncomplete] startTime];
-    while ((aggregate = [refillAggregator aggregate]) != nil) {
-        if (incompleteStartTime == nil
-            || ![[aggregate endTime] isEarlierThanDate:incompleteStartTime]) {
-            [chunk addEntity:aggregate];
-        }
-    }
-    [chunk freeze];
-
-    [pool release];
-}
-@end
-
-
+#define ENTITIES_IN_AGGREGATED_CHUNK 1
 
 @interface AggregatingVariableChunkArray : AggregatingChunkArray
-/*
-- (void)finishChunk;
-- (void)createChunk;
-- (EntityChunk *)lastChunk;
-*/
 @end
 @implementation AggregatingVariableChunkArray
 
-- (id)initWithEntityType:(PajeEntityType *)eType
-               container:(PajeContainer *)c
-              dataSource:(PajeFilter *)source
-     aggregatingDuration:(double)duration
-{
-    self = [super initWithEntityType:eType
-                           container:c
-                          dataSource:source
-                 aggregatingDuration:duration];
-    if (self != nil) {
-        Assign(aggregator, [EntityAggregator aggregatorForEntityType:eType
-                                                 aggregationDuration:duration]);
-    }
-    return self;
-}
-
-- (void)createChunk
-{
-    AggregateVariableChunk *chunk;
-
-    chunk = [[AggregateVariableChunk alloc] initWithEntityType:entityType
-               container:container];
-    if ([chunks count] > 0) {
-        [chunk setStartTime:[[chunks lastObject] endTime]];
-    } else {
-        [chunk setStartTime:[container startTime]];
-    }
-    // set an endTime, will be better set when chunk is finished
-    [chunk setEndTime:[container endTime]];
-    [chunks addObject:chunk];
-    [chunk release];
-}
-
-- (EntityChunk *)lastChunk
-{
-    if ([chunks count] == 0) {
-        [self createChunk];
-    }
-    return [chunks lastObject];
-}
-
 - (void)finishChunk
 {
-    AggregateVariableChunk *chunk;
-    NSDate *chunkEndTime;
+    EntityChunk *chunk;
 
-    // set end time to that of last entity    
-    chunk = (AggregateVariableChunk *)[self lastChunk];
-    chunkEndTime = [[chunk lastEntity] endTime];
-    [chunk setEndTime:chunkEndTime];
+    chunk = [self lastChunk];
     [chunk freeze];
-}
-
-// reached end of last chunk in this entityType/container
-- (void)finishAggregation
-{
-    AggregateVariableChunk *chunk;
-    PajeEntity *entity;
-
-    if ([self aggregationFinished]) {
-        return;
-    }
-
-    chunk = (AggregateVariableChunk *)[self lastChunk];
-    while ((entity = [aggregator aggregate]) != nil) {
-        [chunk addEntity:entity];
-    }
-
-    [chunk setEndTime:[[chunk lastEntity] endTime]];
-    [chunk setIncompleteEntities:nil];
-    [chunk freeze];
-    
-    Assign(lastEntity, nil);
-    //Assign(aggregator, nil);
-    finished = YES;
-}
-
-- (void)aggregateEntitiesUntilTime:(NSDate *)time
-{
-    PajeEntity *entity;
-    PajeEntity *aggregate;
-    PajeEntity *newLastEntity = lastEntity;
-    NSEnumerator *en;
-    AggregateVariableChunk *chunk;
-
-    if ([self aggregationFinished]) {
-        return;
-    }
-    
-    if (lastTime != nil && [time isEarlierThanDate:lastTime]) {
-        return;
-    }
-    
-    if ([(SimulContainer *)container isStopped]
-        && [time isLaterThanDate:[container endTime]]) {
-        time = [container endTime];
-    }
-    en = [self originalCompleteEnumeratorFromTime:[[lastEntity endTime] addTimeInterval:-.000001]
-                                           toTime:time
-                                      minDuration:[aggregator aggregationDuration]/2];
-
-    entity = [en nextObject];
-
-    // ignore states that have already been aggregated
-    if (lastEntity != nil) {
-        while (entity != nil) {
-            if ([[entity endTime] isLaterThanDate:[lastEntity endTime]]) {
-                break;
-            }
-            if (![[entity endTime] isEarlierThanDate:[lastEntity endTime]])
-            if ([[entity startTime] isEarlierThanDate:[lastEntity startTime]]) {
-                break;
-            }
-            entity = [en nextObject];
-        }
-    }
-
-    chunk = (AggregateVariableChunk *)[self lastChunk];
-    int entityCount = [chunk entityCount];
-    while (entity != nil) {
-        if (entityCount >= 1000 
-            && [aggregator entityCount] == 0
-            && [[entity endTime] isLaterThanDate:[newLastEntity endTime]]) {
-            [self finishChunk];
-            [self createChunk];
-            chunk = (AggregateVariableChunk *)[self lastChunk];
-            entityCount = [chunk entityCount];
-        }
-
-        newLastEntity = entity;
-
-        while (![aggregator addEntity:entity]) {
-            entityCount++;
-            aggregate = [aggregator aggregate];
-            if (aggregate != nil) {
-                [chunk addEntity:aggregate];
-            } else {
-                [chunk addEntity:entity];
-                break;
-            }
-        }
-
-        entity = [en nextObject];
-    }
-    Assign(lastTime, time);
-    if ([(SimulContainer *)container isStopped] 
-        && ![time isEarlierThanDate:[container endTime]]) {
-        [self finishAggregation];
-    } else {
-        Assign(lastEntity, newLastEntity);
-
-        while ((entity = [aggregator aggregateBefore:time]) != nil) {
-            [chunk addEntity:entity];
-        }
-        [chunk setEndTime:time];
-
-        NSMutableArray *incomplete = [NSMutableArray array];
-
-        if ([aggregator entityCount] > 0) {
-            EntityAggregator *newAggregator;
-            newAggregator = [aggregator copy];
-            while ((aggregate = [newAggregator aggregate]) != nil) {
-                [incomplete addObject:aggregate];
-            }
-            [newAggregator release];
-        }
-
-        en = [self originalEnumeratorFromTime:time
-                                       toTime:time
-                                  minDuration:[aggregator aggregationDuration]/2];
-        en = [[en allObjects] reverseObjectEnumerator];
-
-        while ((entity = [en nextObject]) != nil) {
-            [incomplete addObject:entity];
-        }
-        incomplete = [[incomplete reverseObjectEnumerator] allObjects];
-        [chunk setIncompleteEntities:incomplete];
-    }
-}
-
-- (void)refillChunkAtIndex:(int)chunkIndex
-{
-    AggregateVariableChunk *chunk;
-
-    chunk = (AggregateVariableChunk *)[self chunkAtIndex:chunkIndex];
-    NSAssert([chunk isZombie], @"refilling a non-empty chunk");
-
-    [chunk activate];
-
-    PajeEntity *entity;
-    PajeEntity *aggregate;
-    NSEnumerator *en;
-
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
-
-    EntityAggregator *refillAggregator;
-
-//startTime deste é igual ao endTime do anterior. definir a quem pertence quem
-//termina/comeca numa data certa
-    en = [self originalCompleteEnumeratorFromTime:[chunk startTime]
-                                           toTime:[chunk endTime]
-                                      minDuration:[aggregator aggregationDuration]/2];
-    entity = [en nextObject];
-    if (entity != nil) {
-        refillAggregator = [EntityAggregator
-                    aggregatorForEntityType:[entity entityType]
-                        aggregationDuration:[aggregator aggregationDuration]];
-    }
-
-    while (entity != nil) {
-        while (![refillAggregator addEntity:entity]) {
-            aggregate = [refillAggregator aggregate];
-            if (aggregate != nil) {
-                [chunk addEntity:aggregate];
-            } else {
-                [chunk addEntity:entity];
-                break;
-            }
-        }
-        entity = [en nextObject];
-    }
-
-    NSDate *incompleteStartTime = [[chunk firstIncomplete] startTime];
-    while ((aggregate = [refillAggregator aggregate]) != nil) {
-        if (incompleteStartTime == nil
-        // acho que nao tem esse "!"
-            || ![[aggregate endTime] isEarlierThanDate:incompleteStartTime]) {
-            [chunk addEntity:aggregate];
-        }
-    }
-    [chunk freeze];
-
-    [pool release];
 }
 @end
-@interface AggregatingLinkChunkArray : AggregatingChunkArray
-{
-    // need one aggregator for each souce/dest container pair
-    NSMutableDictionary *aggregators;
-    double aggregationDuration;
-}
-@end
-@implementation AggregatingLinkChunkArray
-
-- (id)initWithEntityType:(PajeEntityType *)eType
-               container:(PajeContainer *)c
-              dataSource:(PajeFilter *)source
-     aggregatingDuration:(double)duration
-{
-    self = [super initWithEntityType:eType
-                           container:c
-                          dataSource:source
-                 aggregatingDuration:duration];
-    if (self != nil) {
-        aggregators = [[NSMutableDictionary alloc] init];
-        aggregationDuration = duration;
-    }
-    return self;
-}
-
-- (void)dealloc
-{
-    Assign(aggregators, nil);
-    [super dealloc];
-}
-
-- (void)createChunk
-{
-    AggregateLinkChunk *chunk;
-
-    chunk = [[AggregateLinkChunk alloc] initWithEntityType:entityType
-               container:container];
-    if ([chunks count] > 0) {
-        [chunk setStartTime:[[chunks lastObject] endTime]];
-    } else {
-        [chunk setStartTime:[container startTime]];
-    }
-    // set an endTime, will be better set when chunk is finished
-    [chunk setEndTime:[container endTime]];
-    [chunks addObject:chunk];
-    [chunk release];
-}
-
-- (EntityChunk *)lastChunk
-{
-    if ([chunks count] == 0) {
-        [self createChunk];
-    }
-    return [chunks lastObject];
-}
-
-- (void)finishChunk
-{
-    AggregateLinkChunk *chunk;
-    NSDate *chunkEndTime;
-
-    // set end time to that of last entity    
-    chunk = (AggregateLinkChunk *)[self lastChunk];
-    chunkEndTime = [[chunk lastEntity] endTime];
-    [chunk setEndTime:chunkEndTime];
-
-    // set incomplete entities as those that cross endtime in lower
-    // aggregation level.
-    // REVER: tá correto isto? se sim, comentar melhor.
-    NSEnumerator *en;
-    NSArray *incomplete;
-    en = [self originalEnumeratorFromTime:chunkEndTime
-                                   toTime:chunkEndTime
-                              minDuration:aggregationDuration/2];
-    incomplete = [en allObjects];
-    [chunk setIncompleteEntities:incomplete];
-    [chunk freeze];
-}
-
-- (NSArray *)allAggregators
-{
-    NSMutableArray *array;
-
-    array = [NSMutableArray array];
-
-    NSEnumerator *dictEnum;
-    NSDictionary *dict;
-    dictEnum = [aggregators objectEnumerator];
-    while ((dict = [dictEnum nextObject]) != nil) {
-        [array addObjectsFromArray:[dict allValues]];
-    }
-    return array;
-}
-
-- (EntityAggregator *)aggregatorForEntity:(PajeEntity *)entity
-                             inDictionary:(NSMutableDictionary *)aggDict
-{
-    PajeContainer *sourceContainer;
-    PajeContainer *destContainer;
-    EntityAggregator *agg;
-    NSMutableDictionary *dict;
-    
-
-    sourceContainer = [entity sourceContainer];
-    destContainer = [entity destContainer];
-
-    dict = [aggDict objectForKey:sourceContainer];
-    if (dict == nil) {
-        dict = [NSMutableDictionary dictionary];
-        [aggDict setObject:dict forKey:sourceContainer];
-    }
-    
-    agg = [dict objectForKey:destContainer];
-    if (agg == nil) {
-        agg = [EntityAggregator aggregatorForEntityType:[entity entityType]
-                                    aggregationDuration:aggregationDuration];
-        [dict setObject:agg forKey:destContainer];
-    }
-
-    return agg;
-}
-
-- (EntityAggregator *)aggregatorForEntity:(PajeEntity *)entity
-{
-    return [self aggregatorForEntity:entity inDictionary:aggregators];
-}
-
-// reached end of last chunk in this entityType/container
-- (void)finishAggregation
-{
-    AggregateLinkChunk *chunk;
-    PajeEntity *entity;
-
-    if ([self aggregationFinished]) {
-        return;
-    }
-
-    chunk = (AggregateLinkChunk *)[self lastChunk];
-
-    NSEnumerator *aggEnum;
-    EntityAggregator *agg;
-    aggEnum = [[self allAggregators] objectEnumerator];
-    while ((agg = [aggEnum nextObject]) != nil) {
-        while ((entity = [agg aggregate]) != nil) {
-            [chunk addEntity:entity];
-        }
-    }
-
-    [chunk setEndTime:[[chunk lastEntity] endTime]];
-    [chunk setIncompleteEntities:nil];
-    [chunk freeze];
-    
-    Assign(lastEntity, nil);
-    //Assign(aggregator, nil);
-    finished = YES;
-}
-
-- (void)aggregateEntitiesUntilTime:(NSDate *)time
-{
-    PajeEntity *entity;
-    PajeEntity *aggregate;
-    PajeEntity *newLastEntity = lastEntity;
-    NSEnumerator *en;
-    AggregateLinkChunk *chunk;
-
-    if ([self aggregationFinished]) {
-        return;
-    }
-    
-    if (lastTime != nil && [time isEarlierThanDate:lastTime]) {
-        return;
-    }
-    
-    if ([(SimulContainer *)container isStopped]
-        && [time isLaterThanDate:[container endTime]]) {
-        time = [container endTime];
-    }
-    en = [self originalCompleteEnumeratorFromTime:[[lastEntity endTime] addTimeInterval:-.000001]
-                                           toTime:time
-                                      minDuration:aggregationDuration/2];
-
-    entity = [en nextObject];
-
-    // ignore states that have already been aggregated
-    if (lastEntity != nil) {
-        while (entity != nil) {
-            if ([[entity endTime] isLaterThanDate:[lastEntity endTime]]) {
-                break;
-            }
-            /* FIXME: what if lastEntity has the same endTime as next?
-            if (![[entity endTime] isEarlierThanDate:[lastEntity endTime]])
-            if ([[entity startTime] isEarlierThanDate:[lastEntity startTime]]) {
-                break;
-            }
-            */
-            entity = [en nextObject];
-        }
-    }
-
-    chunk = (AggregateLinkChunk *)[self lastChunk];
-    int entityCount = [chunk entityCount];
-    while (entity != nil) {
-        if (entityCount >= 1000 
-            //&& [aggregator entityCount] == 0 //FIXME: there can be lots of aggregators, possibly never all empty.
-            && [[entity endTime] isLaterThanDate:[newLastEntity endTime]]) {
-            [self finishChunk];
-            [self createChunk];
-            chunk = (AggregateLinkChunk *)[self lastChunk];
-            entityCount = [chunk entityCount];
-        }
-
-        newLastEntity = entity;
-
-        EntityAggregator *aggregator;
-        aggregator = [self aggregatorForEntity:entity];
-        while (![aggregator addEntity:entity]) {
-            entityCount++;
-            aggregate = [aggregator aggregate];
-            if (aggregate != nil) {
-                [chunk addEntity:aggregate];
-            } else {
-                [chunk addEntity:entity];
-                break;
-            }
-        }
-
-        entity = [en nextObject];
-    }
-    Assign(lastTime, time);
-    if ([(SimulContainer *)container isStopped] 
-        && ![time isEarlierThanDate:[container endTime]]) {
-        [self finishAggregation];
-    } else {
-        Assign(lastEntity, newLastEntity);
-
-        NSMutableArray *incomplete = [NSMutableArray array];
-
-        NSEnumerator *aggEnum;
-        EntityAggregator *aggregator;
-        aggEnum = [[self allAggregators] objectEnumerator];
-        while ((aggregator = [aggEnum nextObject]) != nil) {
-            while ((entity = [aggregator aggregateBefore:time]) != nil) {
-                [chunk addEntity:entity];
-            }
-
-            if ([aggregator entityCount] > 0) {
-                EntityAggregator *newAggregator;
-                newAggregator = [aggregator copy];
-                while ((aggregate = [newAggregator aggregate]) != nil) {
-                    [incomplete addObject:aggregate];
-                }
-                [newAggregator release];
-            }
-        }
-
-        [chunk setEndTime:time];
-
-        en = [self originalEnumeratorFromTime:time
-                                       toTime:time
-                                  minDuration:aggregationDuration/2];
-        en = [[en allObjects] reverseObjectEnumerator];
-
-        while ((entity = [en nextObject]) != nil) {
-            [incomplete addObject:entity];
-        }
-        incomplete = [[incomplete reverseObjectEnumerator] allObjects];
-        [chunk setIncompleteEntities:incomplete];
-    }
-}
-
-- (void)refillChunkAtIndex:(int)chunkIndex
-{
-    AggregateLinkChunk *chunk;
-
-    chunk = (AggregateLinkChunk *)[self chunkAtIndex:chunkIndex];
-    NSAssert([chunk isZombie], @"refilling a non-empty chunk");
-
-    [chunk activate];
-
-    PajeEntity *entity;
-    PajeEntity *aggregate;
-    NSEnumerator *en;
-
-    NSAutoreleasePool *pool = [NSAutoreleasePool new];
-
-    NSMutableDictionary *refillAggregators;
-    refillAggregators = [NSMutableDictionary dictionary];
-    EntityAggregator *refillAggregator;
-
-//startTime deste é igual ao endTime do anterior. definir a quem pertence quem
-//termina/comeca numa data certa
-    en = [self originalCompleteEnumeratorFromTime:[chunk startTime]
-                                           toTime:[chunk endTime]
-                                      minDuration:aggregationDuration/2];
-
-    while ((entity = [en nextObject]) != nil) {
-        while (![refillAggregator addEntity:entity]) {
-            refillAggregator = [self aggregatorForEntity:entity
-                                            inDictionary:refillAggregators];
-            aggregate = [refillAggregator aggregate];
-            if (aggregate != nil) {
-                [chunk addEntity:aggregate];
-            } else {
-                [chunk addEntity:entity];
-                break;
-            }
-        }
-    }
-
-/*
-//FIXME: find a way to know if a (possibly partial) aggregate in in incompletes or not
-    NSDate *chunkEndTime = [chunk endTime];
-    while ((aggregate = [refillAggregator aggregate]) != nil) {
-        if (incompleteStartTime == nil
-            || ![[aggregate endTime] isEarlierThanDate:incompleteStartTime]) {
-            [chunk addEntity:aggregate];
-        }
-    }
-*/
-    [chunk freeze];
-
-    [pool release];
-}
-@end
-
 
 @implementation AggregatingChunkArray
 
@@ -1114,16 +51,16 @@
     Class arrayClass;
     switch ([eType drawingType]) {
     case PajeEventDrawingType:
-        arrayClass = [AggregatingEventChunkArray class];
+        arrayClass = self;
         break;
     case PajeStateDrawingType:
-        arrayClass = [AggregatingStateChunkArray class];
+        arrayClass = self;
         break;
     case PajeVariableDrawingType:
         arrayClass = [AggregatingVariableChunkArray class];
         break;
     case PajeLinkDrawingType:
-        arrayClass = [AggregatingLinkChunkArray class];
+        arrayClass = self;
         break;
     default:
         NSLog(@"Don't know how to aggregate %@", eType);
@@ -1145,9 +82,7 @@
         dataSource = source; // not retained
         entityType = [eType retain];
         container = [c retain];
-        //Assign(aggregator, 
-        //       [StateAggregator aggregatorWithAggregationDuration:duration]);
-        lastEntity = nil;
+        aggregationDuration = duration;
     }
     return self;
 }
@@ -1156,9 +91,6 @@
 {
     Assign(entityType, nil);
     Assign(container, nil);
-    Assign(aggregator, nil);
-    Assign(lastEntity, nil);
-    Assign(lastTime, nil);
     dataSource = nil;
     [super dealloc];
 }
@@ -1187,7 +119,6 @@
 
 - (BOOL)aggregationFinished
 {
-    //return aggregator == nil;
     return finished;
 }
 
@@ -1196,16 +127,19 @@
 {
     unsigned startIndex;
     unsigned endIndex;
-    int index;
+    unsigned index;
     MultiEnumerator *multiEnum;
     EntityChunk *chunk;
     int chunkCount;
+    NSDate *lastTime;
+    
+    lastTime = [[self lastChunk] latestTime];
 
     // if not yet aggregated until endTime, continue aggregation
     if (![self aggregationFinished]
         && (lastTime == nil || [endTime isLaterThanDate:lastTime])) {
         [self aggregateEntitiesUntilTime:
-                [endTime addTimeInterval:2*[aggregator aggregationDuration]]];
+                [endTime addTimeInterval:2*aggregationDuration]];
     }
 
     chunkCount = [chunks count];
@@ -1214,15 +148,18 @@
     }
 
     // chunks are indexed by startTime
-    startIndex = [chunks indexOfLastObjectNotAfterValue:startTime];
     endIndex = [chunks indexOfLastObjectBeforeValue:endTime];
-
-    if (endIndex >= chunkCount) {
-        endIndex = chunkCount - 1;
-        chunk = [chunks objectAtIndex:endIndex];
+    if (endIndex == NSNotFound) {
+        // no chunk starts before endTime
+        return nil;
+    }
+    startIndex = [chunks indexOfLastObjectNotAfterValue:startTime];
+    if (startIndex == NSNotFound) {
+        // all chunks start after startTime
+        startIndex = 0;
     }
     if (startIndex > endIndex) {
-        return nil;
+        startIndex = endIndex;
     }
 
     chunk = [chunks objectAtIndex:endIndex];
@@ -1255,7 +192,7 @@
         [self refillChunkAtIndex:startIndex];
     }
     [multiEnum addEnumerator:
-                    [chunk enumeratorOfCompleteEntitiesAfterTime:startTime]];
+                    [chunk enumeratorOfCompleteEntitiesFromTime:startTime]];
 
     return multiEnum;
 }
@@ -1265,15 +202,12 @@
 {
     unsigned startIndex;
     unsigned endIndex;
-    int index;
+    unsigned index;
     MultiEnumerator *multiEnum;
     EntityChunk *chunk;
     int chunkCount;
 
-    // if not yet aggregated until endTime, continue aggregation
-    if (lastEntity == nil || [endTime isLaterThanDate:lastTime]) {
-        [self aggregateEntitiesUntilTime:endTime];
-    }
+    [self aggregateEntitiesUntilTime:endTime];
 
     chunkCount = [chunks count];
     if (chunkCount == 0) {
@@ -1281,11 +215,15 @@
     }
 
     // chunks are indexed by startTime
-    startIndex = [chunks indexOfLastObjectNotAfterValue:startTime];
     endIndex = [chunks indexOfLastObjectBeforeValue:endTime];
-
-    if (endIndex >= chunkCount) {
-        endIndex = chunkCount - 1;
+    if (endIndex == NSNotFound) {
+        // no chunk starts before endTime
+        return nil;
+    }
+    startIndex = [chunks indexOfLastObjectNotAfterValue:startTime];
+    if (startIndex == NSNotFound) {
+        // all chunks start after startTime
+        startIndex = 0;
     }
     if (startIndex > endIndex) {
         startIndex = endIndex;
@@ -1298,8 +236,8 @@
 
     // one chunk: it can enumerate
     if (startIndex == endIndex) {
-        return [chunk fwEnumeratorOfCompleteEntitiesAfterTime:startTime
-                                                    untilTime:endTime];
+        return [chunk fwEnumeratorOfCompleteEntitiesFromTime:startTime
+                                                   untilTime:endTime];
     }
 
     // multiple chunks: get some entities from first chunk,
@@ -1307,7 +245,7 @@
     multiEnum = [MultiEnumerator enumerator];
 
     [multiEnum addEnumerator:
-                    [chunk fwEnumeratorOfCompleteEntitiesAfterTime:startTime]];
+                    [chunk fwEnumeratorOfCompleteEntitiesFromTime:startTime]];
 
     for (index = startIndex + 1; index < endIndex; index++) {
         chunk = [chunks objectAtIndex:index];
@@ -1327,13 +265,152 @@
     return multiEnum;
 }
 
+- (void)createChunk
+{
+    EntityChunk *chunk;
+
+    chunk = [AggregatingChunk chunkWithEntityType:entityType
+                                        container:container
+                              aggregationDuration:aggregationDuration];
+    if ([chunks count] > 0) {
+        EntityChunk *previousChunk;
+        previousChunk = [chunks lastObject];
+        [chunk setStartTime:[previousChunk endTime]];
+    } else {
+        [chunk setStartTime:[container startTime]];
+    }
+    [chunks addObject:chunk];
+}
+
+
+- (EntityChunk *)lastChunk
+{
+    if ([chunks count] == 0) {
+        [self createChunk];
+    }
+    return [chunks lastObject];
+}
+
+
+// reached end of last chunk in this entityType/container
+- (void)finishAggregation
+{
+    EntityChunk *chunk;
+
+    if ([self aggregationFinished]) {
+        return;
+    }
+
+    chunk = [self lastChunk];
+
+    [chunk setIncompleteEntities:nil];
+    [chunk setEndTime:[container endTime]];
+    [chunk freeze];
+    
+    finished = YES;
+}
+
+
+- (void)finishChunk
+{
+    EntityChunk *chunk;
+    NSDate *chunkEndTime;
+
+    // set end time to that of last entity    
+    chunk = [self lastChunk];
+    chunkEndTime = [chunk continuationTime];
+
+    // set incomplete entities as those that cross endtime in lower
+    // aggregation level.
+    NSEnumerator *en;
+    NSArray *incomplete;
+    [chunkEndTime retain]; // sometimes there is a "missing chunk" exception below
+    en = [self originalEnumeratorFromTime:chunkEndTime
+                                   toTime:chunkEndTime
+                              minDuration:aggregationDuration/2];
+    [chunkEndTime release];
+    incomplete = [en allObjects];
+    [chunk setIncompleteEntities:incomplete];
+
+    // chunk aggregator should be empty for this to work
+    [chunk freeze];
+}
+
+
 - (void)aggregateEntitiesUntilTime:(NSDate *)time
 {
-    [self subclassResponsibility:_cmd];
+    PajeEntity *entity;
+    NSEnumerator *en;
+    AggregatingChunk *chunk;
+
+    if ([self aggregationFinished]) {
+        return;
+    }
+    
+    chunk = [self lastChunk];
+
+    if ([time isEarlierThanDate:[chunk latestTime]]) {
+        return;
+    }
+    
+    if ([(SimulContainer *)container isStopped]
+        && [time isLaterThanDate:[container endTime]]) {
+        time = [container endTime];
+    }
+
+    NSDate *ct = [chunk continuationTime];
+    [ct retain]; // sometimes the method below releases ct (missing chunk except)
+    en = [self originalCompleteEnumeratorFromTime:ct//[chunk continuationTime]
+                                           toTime:time
+                                      minDuration:aggregationDuration/2];
+    [ct release];
+
+    while ((entity = [en nextObject]) != nil) {
+        if ([chunk canFinishBeforeEntity:entity]) {
+            [self finishChunk];
+            [self createChunk];
+            chunk = [self lastChunk];
+        }
+
+        [chunk addEntity:entity];
+    }
+
+    if ([(SimulContainer *)container isStopped] 
+        && ![time isEarlierThanDate:[container endTime]]) {
+        [self finishAggregation];
+    } else {
+        [chunk setLatestTime:time];
+        en = [self originalEnumeratorFromTime:time
+                                       toTime:time
+                                  minDuration:aggregationDuration/2];
+        [chunk setIncompleteEntities:[en allObjects]];
+    }
 }
 
 - (void)refillChunkAtIndex:(int)chunkIndex
 {
-    [self subclassResponsibility:_cmd];
+    EntityChunk *chunk;
+
+    chunk = [self chunkAtIndex:chunkIndex];
+    NSAssert([chunk isZombie], @"refilling a non-empty chunk");
+
+    [chunk activate];
+
+    PajeEntity *entity;
+    NSEnumerator *en;
+
+    NSAutoreleasePool *pool = [NSAutoreleasePool new];
+
+    en = [self originalCompleteEnumeratorFromTime:[chunk startTime]
+                                           toTime:[chunk endTime]
+                                      minDuration:aggregationDuration/2];
+
+    while ((entity = [en nextObject]) != nil) {
+        [chunk addEntity:entity];
+    }
+
+    [chunk freeze];
+
+    [pool release];
 }
 @end

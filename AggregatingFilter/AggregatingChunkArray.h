@@ -40,9 +40,7 @@
     PajeEntityType *entityType;
     PajeContainer *container;
     PajeFilter *dataSource;
-    EntityAggregator *aggregator;
-    PajeEntity *lastEntity;
-    NSDate *lastTime;
+    double aggregationDuration;
     BOOL finished;
 }
 
@@ -65,6 +63,8 @@
 - (NSEnumerator *)originalCompleteEnumeratorFromTime:(NSDate *)t1
                                               toTime:(NSDate *)t2
                                          minDuration:(double)duration;
+
+- (EntityChunk *)lastChunk;
 
 // to be implemented by subclasses
 - (void)aggregateEntitiesUntilTime:(NSDate *)time;

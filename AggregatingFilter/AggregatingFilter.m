@@ -81,6 +81,12 @@ double pow(double, double);
     [super dataChangedForEntityType:entityType];
 }
 
+- (void)hierarchyChanged
+{
+    [entityLists removeAllObjects];
+    [super hierarchyChanged];
+}
+
 - (ChunkArray *)chunkArrayForEntityType:(PajeEntityType *)entityType
                               container:(PajeContainer *)container
                             minDuration:(double)minDuration
@@ -222,7 +228,6 @@ double pow(double, double);
     }
 
     ChunkArray *chunks;
-
     chunks = [self chunkArrayForEntityType:entityType
                                  container:container
                                minDuration:minDuration];
@@ -231,27 +236,6 @@ double pow(double, double);
     }
 
     return nil;
-}
-
-
-- (NSEnumerator *)enumeratorOfContainersTyped:(PajeEntityType *)entityType
-                                  inContainer:(PajeContainer *)container
-{
-    NSEnumerator *ienum;
-    PajeContainer *instance;
-    NSMutableArray *instancesInContainer = [NSMutableArray array];
-
-    if ([entityType isContainer]) {
-        PajeContainerType *containerType = (PajeContainerType *)entityType;
-        ienum = [[containerType allInstances] objectEnumerator];
-        while ((instance = [ienum nextObject]) != nil) {
-            if ([instance isContainedBy:container]) {
-                [instancesInContainer addObject:instance];
-            }
-        }
-    }
-    //[instancesInContainer sortUsingSelector:@selector(compare:)];
-    return [instancesInContainer objectEnumerator];
 }
 
 @end

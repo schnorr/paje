@@ -18,13 +18,23 @@
 @interface VariableAggregator : EntityAggregator
 @end
 
-@interface LinkAggregator : EntityAggregator <NSCopying>
+@interface OneLinkAggregator : EntityAggregator <NSCopying>
 {
     NSDate *earliestEndTime;    // not retained
     NSDate *latestStartTime;    // not retained
 }
 
 - (BOOL)addEntity:(PajeEntity *)entity;
+- (PajeEntity *)aggregateBefore:(NSDate *)limit;
+@end
+@interface LinkAggregator : EntityAggregator <NSCopying>
+{
+    // need one aggregator for each souce/dest container pair
+    NSMutableDictionary *aggregators;
+}
+
+- (BOOL)addEntity:(PajeEntity *)entity;
+- (PajeEntity *)aggregate;
 - (PajeEntity *)aggregateBefore:(NSDate *)limit;
 @end
 
@@ -49,7 +59,8 @@
 
 /* Try to aggregate one more state.
    Returns YES if state can be aggregated, NO if it cannot.
-   States must be entered in endTime order.
+   States must be entered in endTime order;
+   states with the same endTime must be entered in reverse imbricationLevel order.
 */
 - (BOOL)addEntity:(PajeEntity *)entity
 {
@@ -198,11 +209,18 @@
 #include <math.h>
 #include "AggregateLink.h"
 
-@implementation LinkAggregator
+@implementation OneLinkAggregator
 
 + (Class)aggregatedEntityClass
 {
     return [AggregateLink class];
+}
+
+- (void)dealloc
+{
+    Assign(latestStartTime, nil);
+    Assign(earliestEndTime, nil);
+    [super dealloc];
 }
 
 - (BOOL)addEntity:(PajeEntity *)entity
@@ -216,8 +234,9 @@
 
     // if there are no other entities, just add the new one
     if (earliestStartTime == nil) {
-        latestStartTime = earliestStartTime = entityStartTime;
-        earliestEndTime = entityEndTime;
+        earliestStartTime = entityStartTime;
+        Assign(latestStartTime, entityStartTime);
+        Assign(earliestEndTime, entityEndTime);
         [entities addObject:entity];
         return YES;
     }
@@ -239,7 +258,7 @@
     }
     
     earliestStartTime = [earliestStartTime earlierDate:entityStartTime];
-    latestStartTime = [latestStartTime laterDate:entityStartTime];
+    Assign(latestStartTime, [latestStartTime laterDate:entityStartTime]);
 
     [entities addObject:entity];
     return YES;
@@ -260,14 +279,180 @@
 
 - (id)copyWithZone:(NSZone *)z
 {
-    LinkAggregator *new;
-    new = [self copyWithZone:z];
-    new->latestStartTime = latestStartTime;
-    new->earliestEndTime = earliestEndTime;
+    OneLinkAggregator *new;
+    new = [super copyWithZone:z];
+    new->latestStartTime = [latestStartTime retain];
+    new->earliestEndTime = [earliestEndTime retain];
     return new;
 }
 @end
 
+@implementation LinkAggregator
+
++ (Class)aggregatedEntityClass
+{
+    return [AggregateLink class];
+}
+
+- (id)initWithAggregationDuration:(double)duration
+{
+    self = [super initWithAggregationDuration:duration];
+    if (self != nil) {
+        aggregators = [[NSMutableDictionary alloc] init];
+    }
+    return self;
+
+}
+
+- (NSArray *)allAggregators
+{
+    NSMutableArray *array;
+
+    array = [NSMutableArray array];
+
+    NSEnumerator *dictEnum;
+    NSDictionary *dict;
+    dictEnum = [aggregators objectEnumerator];
+    while ((dict = [dictEnum nextObject]) != nil) {
+        [array addObjectsFromArray:[dict allValues]];
+    }
+    return array;
+}
+
+- (EntityAggregator *)aggregatorForEntity:(PajeEntity *)entity
+                             inDictionary:(NSMutableDictionary *)aggDict
+{
+    PajeContainer *sourceContainer;
+    PajeContainer *destContainer;
+    EntityAggregator *agg;
+    NSMutableDictionary *dict;
+    
+
+    sourceContainer = [entity sourceContainer];
+    destContainer = [entity destContainer];
+
+    dict = [aggDict objectForKey:sourceContainer];
+    if (dict == nil) {
+        dict = [NSMutableDictionary dictionary];
+        [aggDict setObject:dict forKey:sourceContainer];
+    }
+    
+    agg = [dict objectForKey:destContainer];
+    if (agg == nil) {
+        agg = [[OneLinkAggregator alloc]
+                        initWithAggregationDuration:aggregationDuration];
+        [dict setObject:agg forKey:destContainer];
+        [agg release];
+    }
+
+    return agg;
+}
+
+- (EntityAggregator *)aggregatorForEntity:(PajeEntity *)entity
+{
+    return [self aggregatorForEntity:entity inDictionary:aggregators];
+}
+
+- (BOOL)addEntity:(PajeEntity *)entity
+{
+    EntityAggregator *aggregator;
+    aggregator = [self aggregatorForEntity:entity];
+    return [aggregator addEntity:entity];
+}
+
+- (PajeEntity *)aggregate
+{
+    NSEnumerator *aggEnum;
+    EntityAggregator *aggregator;
+    PajeEntity *entity = nil;
+
+    aggEnum = [[self allAggregators] objectEnumerator];
+    while ((aggregator = [aggEnum nextObject]) != nil) {
+        if ((entity = [aggregator aggregate]) != nil) {
+            break;
+        }
+    }
+    return entity;
+}
+
+- (PajeEntity *)aggregateEntity:(PajeEntity *)entity
+{
+    EntityAggregator *aggregator;
+    PajeEntity *aggregate;
+
+    aggregator = [self aggregatorForEntity:entity];
+    if (![aggregator addEntity:entity]) {
+        aggregate = [aggregator aggregate];
+        if (aggregate != nil) {
+            return aggregate;
+        } else {
+            return entity;
+        }
+    }
+    return nil;
+}
+
+- (PajeEntity *)aggregateBefore:(NSDate *)limit
+{
+    NSEnumerator *aggEnum;
+    EntityAggregator *aggregator;
+    PajeEntity *entity = nil;
+
+    aggEnum = [[self allAggregators] objectEnumerator];
+    while ((aggregator = [aggEnum nextObject]) != nil) {
+        if ((entity = [aggregator aggregateBefore:limit]) != nil) {
+            break;
+        }
+    }
+    return entity;
+}
+
+- (int)entityCount
+{
+    int entityCount;
+    NSEnumerator *aggEnum;
+    EntityAggregator *agg;
+
+    entityCount = 0;
+    aggEnum = [[self allAggregators] objectEnumerator];
+    while ((agg = [aggEnum nextObject]) != nil) {
+        entityCount += [agg entityCount];
+    }
+
+    return entityCount;
+}
+
+- (id)copyWithZone:(NSZone *)z
+{
+    LinkAggregator *new;
+    new = [super copyWithZone:z];
+
+    new->aggregators = [NSMutableDictionary dictionary];
+    id k1;
+    NSEnumerator *k1en;
+
+    k1en = [aggregators keyEnumerator];
+    while ((k1 = [k1en nextObject]) != nil) {
+        NSMutableDictionary *dict;
+        NSMutableDictionary *newdict;
+        dict = [aggregators objectForKey:k1];
+        newdict = [NSMutableDictionary dictionary];
+        [new->aggregators setObject:newdict forKey:k1];
+        NSEnumerator *k2en;
+        id k2;
+        k2en = [dict keyEnumerator];
+        while ((k2 = [k2en nextObject]) != nil) {
+            id newagg;
+            newagg = [[dict objectForKey:k2] copyWithZone:z];
+            [newdict setObject:newagg forKey:k2];
+            [newagg release];
+        }
+        
+    }
+
+    return new;
+}
+@end
 
 @implementation EntityAggregator
 + (EntityAggregator *)aggregatorForEntityType:(PajeEntityType *)entityType
@@ -368,10 +553,27 @@
     } else {
         // FIXME: is this garanteed to be retained elsewhere?
         entity = [entities objectAtIndex:0];
+        [[entity retain] autorelease];
     }
     [entities removeAllObjects];
     earliestStartTime = nil;
     return entity;
+}
+
+
+- (PajeEntity *)aggregateEntity:(PajeEntity *)entity
+{
+    PajeEntity *aggregate;
+
+    if (![self addEntity:entity]) {
+        aggregate = [self aggregate];
+        if (aggregate != nil) {
+            return aggregate;
+        } else {
+            return entity;
+        }
+    }
+    return nil;
 }
 
 
