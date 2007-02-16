@@ -1,7 +1,7 @@
 {
   ApplicationDescription = "A trace file viewer.";
   ApplicationName = "Paj\u00e9";
-  ApplicationRelease = "1.4";
+  ApplicationRelease = "1.97";
   ApplicationURL = "http://www.inf.ufsm.br/lsc/paje";
   Authors = ("Benhur Stein <benhur@inf.ufsm.br>",
              "Developed at Laboratoire ID, IMAG, France",
@@ -9,7 +9,7 @@
 	     "", "Sponsored by: CAPES/COFECUB and CNPq");
   Copyright = "Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005 Benhur Stein.";
   CopyrightDescription = "Released under the GNU Lesser General Public License 2.0";
-  FullVersionID = "1.4.0, Mar 2006";
+  FullVersionID = "1.97, (first pre2.0), Fev 2007";
   NOTE = "Automatically generated, do not edit!";
   NSExecutable = "Paje";
   NSMainNibFile = "Paje";
