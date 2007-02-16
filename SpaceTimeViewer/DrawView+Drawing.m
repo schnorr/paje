@@ -364,6 +364,8 @@ static void addToMinMaxPath(NSBezierPath *path,
     NSBezierPath *valuePath;
     NSBezierPath *selectedPath;
     NSBezierPath *minMaxPath;
+    NSBezierPath *minPath;
+    NSBezierPath *maxPath;
     BOOL showMinMax;
     NSColor *color;
     id <PajeState>entity;
@@ -405,6 +407,8 @@ static void addToMinMaxPath(NSBezierPath *path,
     showMinMax = [layout showMinMax];
     if (showMinMax) {
         minMaxPath = [[NSBezierPath alloc] init];
+        minPath = [[NSBezierPath alloc] init];
+        maxPath = [[NSBezierPath alloc] init];
     }
 
     while ((entity = [enumerator nextObject]) != nil) {
@@ -432,13 +436,21 @@ static void addToMinMaxPath(NSBezierPath *path,
         yOld = y;
         if (showMinMax) {
             addToMinMaxPath(minMaxPath, xStart, xEnd, y, yvMin, yvMax);
+            pathFunction(minPath, NSMakeRect(xStart, yvMin, xEnd-xStart, 0));
+            pathFunction(maxPath, NSMakeRect(xStart, yvMax, xEnd-xStart, 0));
         }
     }
 
     if (showMinMax) {
-        [[NSColor blackColor] set];
-        [minMaxPath stroke];
+        //[[NSColor blackColor] set];
+        //[minMaxPath stroke];
+        color = [filter colorForEntityType:entityType];
+        [color set];
         [minMaxPath release];
+        [minPath stroke];
+        [minPath release];
+        [maxPath stroke];
+        [maxPath release];
     }
 
     if (hasHighlight) {
@@ -458,6 +470,8 @@ static void addToMinMaxPath(NSBezierPath *path,
 {
     shapefunction *pathFunction;
     drawfunction *drawFunction;
+    shapefunction *sourcelessPathFunction;
+    shapefunction *destlessPathFunction;
     NSColor *color;
     id <PajeLink>entity;
     float x1, x2, y1, y2;
@@ -465,6 +479,8 @@ static void addToMinMaxPath(NSBezierPath *path,
 
     pathFunction = [[layout shapeFunction] function];
     drawFunction = [[layout drawFunction] function];
+    sourcelessPathFunction = [[ShapeFunction shapeFunctionWithName:@"PSIn"] function];
+    destlessPathFunction = [[ShapeFunction shapeFunctionWithName:@"PSOut"] function];
 
     path = [NSBezierPath bezierPath];
 
@@ -505,11 +521,9 @@ static void addToMinMaxPath(NSBezierPath *path,
 
         //if (sourceContainer && destContainer) {
         if (sourceContainer == nil) {
-            shapefunction PSIn;
-            PSIn(path, NSMakeRect(x2, y2, 8, 8));
+            sourcelessPathFunction(path, NSMakeRect(x2, y2, 8, 8));
         } else if (destContainer == nil) {
-            shapefunction PSOut;
-            PSOut(path, NSMakeRect(x1, y1, 8, 8));
+            destlessPathFunction(path, NSMakeRect(x1, y1, 8, 8));
         } else {
             pathFunction(path, NSMakeRect(x1, y1, x2-x1, y2-y1));
         }

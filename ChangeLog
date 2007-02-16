@@ -1,5 +1,10 @@
 2007-02-16  Benhur Stein <benhur@inf.ufsm.br>
+        * SpaceTime/DrawView+Drawing.m: better drawing of incomplete links
+          and min/max values
+
+2007-02-16  Benhur Stein <benhur@inf.ufsm.br>
 	* AggregatingFilter/AggregatingChunk.m: remove debug messages
+
 2007-02-16  Benhur Stein <benhur@inf.ufsm.br>
         * SpaceTime/DrawView.m: test for nil window when drawing;
           correct trackingRect setting.
