@@ -26,7 +26,7 @@
 #include "../PajeSimulator/SimulContainer.h"
 
 
-#define ENTITIES_IN_AGGREGATED_CHUNK 1
+#define ENTITIES_IN_AGGREGATED_CHUNK 1000
 
 @interface AggregatingVariableChunkArray : AggregatingChunkArray
 @end

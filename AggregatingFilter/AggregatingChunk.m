@@ -22,8 +22,8 @@
 
 #include "../General/Macros.h"
 
-#define ENTITIES_IN_AGGREGATED_CHUNK 1
-//#define ENTITIES_IN_AGGREGATED_CHUNK 5000
+//#define ENTITIES_IN_AGGREGATED_CHUNK 1
+#define ENTITIES_IN_AGGREGATED_CHUNK 1000
 
 
 @interface AggregateStateChunk : AggregatingChunk

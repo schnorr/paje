@@ -23,7 +23,7 @@
 #include "MultiEnumerator.h"
 #include "FilteredEnumerator.h"
 
-#define CHUNKS_TO_KEEP 5000
+#define CHUNKS_TO_KEEP 3000
 
 @implementation EntityChunk
 
