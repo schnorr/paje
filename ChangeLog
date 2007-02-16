@@ -1,3 +1,7 @@
+2007-02-16  Benhur Stein <benhur@inf.ufsm.br>
+        * SpaceTime/DrawView.m: test for nil window when drawing;
+          correct trackingRect setting.
+
 2007-02-15  Benhur Stein <benhur@inf.ufsm.br>
         * General/EntityChunk.h: added missing method declarations
         * PajeSimulator/PajeSimul.h: ditto

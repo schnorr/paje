@@ -31,6 +31,7 @@
 
 #include "../General/NSUserDefaults+Additions.h"
 #include "../General/Macros.h"
+#include "../General/EntityChunk.h"
 
 #include <math.h>
 
@@ -124,7 +125,7 @@
     NSCursor *cursor;
     NSImage *cursorImage;
     NSString *cursorPath;
-    
+
     // initialize instance variables
 
     pointsPerSecond = [[NSUserDefaults standardUserDefaults]
@@ -136,7 +137,7 @@
                               integerForKey:DefaultsKey(@"SmallEntityWidth")];
     hasZoomed = NO;
     filter = nil;
-    trackingRectTag = 0;
+    //trackingRectTag = 0;
     timeUnitDivisor = 1;
     Assign(cursorTimeFormat, @"%.6f s");
 
@@ -280,6 +281,7 @@
 {
     if (trackingRectTag != 0) {
         [self removeTrackingRect:trackingRectTag];
+        trackingRectTag = 0;
     }
     [super removeFromSuperview];
 }
@@ -288,6 +290,9 @@
 // the view frame is changed
 - (void)resetTrackingRect
 {
+    if ([self window] == nil) {
+        return;
+    }
     if (trackingRectTag != 0) {
         [self removeTrackingRect:trackingRectTag];
     }
@@ -355,7 +360,10 @@
 {
     if ([self window] != nil && trackingRectTag != 0) {
         [self removeTrackingRect:trackingRectTag];
+        trackingRectTag = 0;
     }
+    [super viewWillMoveToWindow:newWindow];
+    [self resetTrackingRect];
 }
 
 
@@ -574,6 +582,7 @@
 
 - (void)drawRect:(NSRect)rect
 {
+    if ([self window] == nil) return;
     if (startTime == nil) return;
 
 [self verifyTimes:self];
@@ -595,6 +604,9 @@ rect = NSInsetRect(rect, -10, -10);
     NS_HANDLER
         NSLog(@"Ignoring exception caught inside drawRect: %@", localException);
     NS_ENDHANDLER
+
+    //FIXME: put this in controller
+    [EntityChunk emptyLeastRecentlyUsedChunks];
 }
 
 
