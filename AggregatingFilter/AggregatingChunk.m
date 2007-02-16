@@ -104,9 +104,7 @@
 - (void)addEntity:(PajeEntity *)entity
 {
     PajeEntity *aggregate;
-if ([[[self container]description] hasPrefix:@"T1"]&&aggregationDuration<1.00004) NSLog(@"add %@ %f %@-%@", [[self container]description], [aggregator aggregationDuration], [entity startTime], [entity endTime]);
     while ((aggregate = [aggregator aggregateEntity:entity]) != nil) {
-if ([[[self container]description] hasPrefix:@"T1"]&&aggregationDuration<1.00004) NSLog(@"radd %f %@-%@ [%d]", [aggregator aggregationDuration], [aggregate startTime], [aggregate endTime], [self entityCount]);
         [super addEntity:aggregate];
         if (aggregate == entity) {
             break;
@@ -121,14 +119,13 @@ if ([[[self container]description] hasPrefix:@"T1"]&&aggregationDuration<1.00004
 {
     PajeEntity *entity;
     while ((entity = [aggregator aggregateBefore:time]) != nil) {
-if ([[[self container]description] hasPrefix:@"T1"]&&aggregationDuration<1.00004) NSLog(@"fadd %f %@-%@ [%d]", [aggregator aggregationDuration], [entity startTime], [entity endTime], [self entityCount]);
         [super addEntity:entity];
     }
 }
 
 - (void)setEndTime:(NSDate *)time
 {
-NSLog(@"\n\n\nDONT CALL THIS (setEndTime)!!!\n\n\n");
+//NSLog(@"\n\n\nDONT CALL THIS (setEndTime)!!!\n\n\n");
 //    [self setLastTime:time];
     [super setEndTime:time];
 }
@@ -202,11 +199,8 @@ NSLog(@"\n\nSOMEONE IS CALLING lastEntity!!!\n\n");
         }
         [newAggregator release];
         array = [array arrayByAddingObjectsFromArray:
-                            [[notYetAggregated reverseObjectEnumerator] allObjects]];
+                      [[notYetAggregated reverseObjectEnumerator] allObjects]];
     }
-if ([[container description] hasPrefix:@"T1"]&&aggregationDuration<1.00004) {
-NSLog(@"%p:seti:%@\ncomp:%@", self, array, [self completeEntities]);
-}
     [super setIncompleteEntities:array];
 }
 
@@ -274,7 +268,6 @@ NSLog(@"%p:seti:%@\ncomp:%@", self, array, [self completeEntities]);
     if ([self entityCount] >= ENTITIES_IN_AGGREGATED_CHUNK
         && [[entity endTime] isLaterThanDate:[lastEntity endTime]] 
         && [aggregator entityCount] == 0) { //FIXME: there can be lots of aggregators, possibly never all empty.
-NSLog(@"%p can finish", self);
         return YES;
     }
     return NO;
