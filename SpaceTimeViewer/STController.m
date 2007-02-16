@@ -24,6 +24,7 @@
 #include "DrawView.h"
 #include "STEntityTypeLayoutController.h"
 #include "../Paje/PajeTraceController.h"
+#include "../General/Macros.h"
 
 @implementation STController
 
@@ -34,10 +35,12 @@
     if (self != nil) {
         if (![NSBundle loadNibNamed:@"SpaceTime" owner:self]) {
             NSRunAlertPanel(@"SpaceTime", @"Couldn't load interface file",
-                            nil, nil, nil);
-        } else {
-            [self adjustInterface];
-        }
+                            @"Abort", nil, nil);
+            //[self release];
+            //return nil;
+        //} else {
+    }    [self adjustInterface];
+        //}
 
         layoutDescriptors = [[NSMutableDictionary alloc] init];
         layoutController = [[STEntityTypeLayoutController alloc]

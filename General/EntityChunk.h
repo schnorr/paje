@@ -117,9 +117,9 @@
 - (void)setIncompleteEntities:(NSArray *)array;
 
 // only entities that finish inside the chunk's time boundaries
-//- (NSEnumerator *)enumeratorOfAllCompleteEntities;
+- (NSEnumerator *)enumeratorOfAllCompleteEntities;
 //- (NSEnumerator *)enumeratorOfCompleteEntitiesAfterTime:(NSDate *)time;
-//- (NSEnumerator *)enumeratorOfCompleteEntitiesFromTime:(NSDate *)time;
+- (NSEnumerator *)enumeratorOfCompleteEntitiesFromTime:(NSDate *)time;
 
 // all entities, including those that finish after the chunk's endTime
 - (NSEnumerator *)enumeratorOfAllEntities;

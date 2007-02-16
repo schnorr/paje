@@ -92,6 +92,8 @@
 
 - (void)getChunksUntilTime:(NSDate *)time;
 
+- (void)notifyMissingChunk:(int)chunkNumber;
+
 - (BOOL)isReplaying;
 @end
 

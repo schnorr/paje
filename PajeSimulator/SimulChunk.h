@@ -38,8 +38,6 @@
                container:(PajeContainer *)pc;
 
 // Simulation
-- (void)addEntity:(PajeEntity *)entity;
-
 - (void)stopWithEvent:(PajeEvent *)event;
 
 - (void)setPreviousChunkIncompleteEntities:(NSArray *)array;

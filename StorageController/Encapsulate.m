@@ -101,10 +101,6 @@
 
 - (void)addChunk:(EntityChunk *)chunk
 {
-    PajeEntityType *entityType = [chunk entityType];
-    PajeContainer *container = [chunk container];
-    ChunkArray *chunks;
-    
     //KLUDGE to identify last date in memory.
     // (doesn't work if events are not seen)
     // FIXME this should be calculated on demand

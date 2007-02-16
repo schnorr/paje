@@ -1,4 +1,11 @@
 2007-02-15  Benhur Stein <benhur@inf.ufsm.br>
+        * General/EntityChunk.h: added missing method declarations
+        * PajeSimulator/PajeSimul.h: ditto
+        * PajeSimulator/SimulChunk.h: ditto
+        * SpaceTimeViewer/STController: abort initialisation if interface
+          cannot be loaded
+
+2007-02-15  Benhur Stein <benhur@inf.ufsm.br>
         * SpaceTimeViewer/STController: better initialisation code for when
           more than one interface file is loaded
 
