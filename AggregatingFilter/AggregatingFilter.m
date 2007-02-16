@@ -232,7 +232,7 @@ double pow(double, double);
                                  container:container
                                minDuration:minDuration];
     if (chunks != nil) {
-        return [chunks enumeratorOfCompleteEntitiesFromTime:start untilTime:end];
+        return [chunks enumeratorOfCompleteEntitiesFromTime:start toTime:end];
     }
 
     return nil;

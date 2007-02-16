@@ -1,4 +1,7 @@
 2007-02-16  Benhur Stein <benhur@inf.ufsm.br>
+        * AggregatingFilter/AggregatingFilter.m: correct wrong enumerator use
+
+2007-02-16  Benhur Stein <benhur@inf.ufsm.br>
         * SpaceTime/DrawView+Drawing.m: better drawing of incomplete links
           and min/max values
 
