@@ -137,7 +137,9 @@
     if (inputFile == nil) {
         [self raise:@"Couldn't open file"];
     }
-    NSLog(@"usecomp:%d\n\n", [inputFile useCompression]);
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"UseCompression"]) {
+    	[inputFile useCompression];
+    }
     hasMoreData = YES;
 }
 
@@ -215,9 +217,9 @@
         // first time reading this chunk.
         // must determine its correct size (must end in a line boundary
         // and in a date-changing event).
-        data = (NSMutableData *)[inputFile readDataOfLength:80/*CHUNK_SIZE*/];
+        data = (NSMutableData *)[inputFile readDataOfLength:CHUNK_SIZE];
         length = [data length];
-        if (length < 80/*CHUNK_SIZE*/) {
+        if (length < CHUNK_SIZE) {
             hasMoreData = NO;
         } else {
             char *bytes;

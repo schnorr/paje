@@ -297,7 +297,7 @@
     e2 = [NSDate date];
     t2 = [e2 timeIntervalSinceDate:end];
     [end release];
-    NSLog(@"%@: %d events in %f seconds = %f e/s; rel=%f", [reader inputFilename], i, t, i/t, t2);
+    //NSLog(@"%@: %d events in %f seconds = %f e/s; rel=%f", [reader inputFilename], i, t, i/t, t2);
 }
 
 - (void)startChunk:(int)chunkNumber
