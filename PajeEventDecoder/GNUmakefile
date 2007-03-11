@@ -24,7 +24,7 @@ include $(GNUSTEP_MAKEFILES)/common.make
 PACKAGE_NAME=PajeEventDecoder
 BUNDLE_NAME=PajeEventDecoder
 BUNDLE_EXTENSION=.bundle
-BUNDLE_INSTALL_DIR=$(GNUSTEP_INSTALLATION_DIR)/Library/Bundles/Paje
+BUNDLE_INSTALL_DIR=$(GNUSTEP_BUNDLES)/Paje
 PajeEventDecoder_PRINCIPAL_CLASS=PajeEventDecoder
 
 

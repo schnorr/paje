@@ -1,3 +1,6 @@
+2007-03-11  Benhur Stein <benhur@inf.ufsm.br>
+	* Change makefiles to be compatible with gnustep-make v2
+
 2007-02-27  (1.97) Vincent Danjean <Vincent.Danjean@ens-lyon.org>
 	* New release. First RC before 2.0 ;-)
 

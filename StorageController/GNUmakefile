@@ -2,7 +2,7 @@ ifeq "$(GNUSTEP_SYSTEM_ROOT)" ""
   include Makefile
 else
 
-BUNDLE_INSTALL_DIR=$(GNUSTEP_INSTALLATION_DIR)/Library/Bundles/Paje
+BUNDLE_INSTALL_DIR=$(GNUSTEP_BUNDLES)/Paje
 
 include $(GNUSTEP_MAKEFILES)/common.make
 
