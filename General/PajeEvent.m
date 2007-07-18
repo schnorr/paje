@@ -325,7 +325,7 @@ PajeFieldType pajeFieldTypeFromName(const char *name)
     if ([self indexForFieldId:fieldId] != -1) {
         NSLog(@"Repeated field named '%@' in event definition %s.",
                 pajeFieldNameFromId(fieldId), eventId);
-    } else if (fieldId < PajeEventIdCount) {
+    } else if (fieldId < PajeFieldIdCount) {
         fieldIndexes[fieldId] = fieldCount;
     }
     if (![self isObligatoryOrOptionalFieldId:fieldId]) {
