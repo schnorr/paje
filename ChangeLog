@@ -1,4 +1,8 @@
 2007-07-18  Benhur Stein <benhur@inf.ufsm.br>
+	* AggregatingFilter/AggregateEvent.h, StatViewer/PieCell.m:
+	  correct method name (subValueAtIndex:)
+
+2007-07-18  Benhur Stein <benhur@inf.ufsm.br>
 	* General/PajeEvent.m: fix 'for' limit (bug report from Lucas Schnorr)
 
 2007-03-11  Benhur Stein <benhur@inf.ufsm.br>

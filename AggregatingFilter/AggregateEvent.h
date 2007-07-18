@@ -29,7 +29,7 @@
 - (unsigned)condensedEntitiesCount;
 
 - (unsigned)subCount;
-- (NSString *)subNameAtIndex:(unsigned)i;
+- (id)subValueAtIndex:(unsigned)i;
 - (NSColor *)subColorAtIndex:(unsigned)i;
 - (unsigned)subCountAtIndex:(unsigned)i;
 - (double)subDurationAtIndex:(unsigned)i;

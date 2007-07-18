@@ -405,6 +405,7 @@
 
 - (void)drawInteriorWithFrameVBar:(NSRect)cellFrame inView:(NSView *)controlView
 {
+#ifdef VBARSUPPORT
     float x, y, h, hmax, w, wmax;
     float val, total, max, min, cnt;
     float fontHeight = 0;
@@ -508,7 +509,7 @@
             }
             [attributes setObject:[NSColor blackColor]
                            forKey:NSForegroundColorAttributeName];
-            [[data subNameAtIndex:index] drawAtRTPoint:NSMakePoint(0, 0)
+            [[data subValueAtIndex:index] drawAtRTPoint:NSMakePoint(0, 0)
                          withAttributes:attributes];
             PSgrestore();
             
@@ -549,6 +550,7 @@
 
         x += w;
     }
+#endif
 }
 
 - (void)addPieSliceWithName:(NSString *)sliceName
@@ -739,7 +741,7 @@
             continue;
         }
 
-        [self addPieSliceWithName:[data subNameAtIndex:index]
+        [self addPieSliceWithName:[data subValueAtIndex:index]
                      initialAngle:angle
                             color:[data subColorAtIndex:index]
                             value:val
