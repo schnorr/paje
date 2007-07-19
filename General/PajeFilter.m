@@ -128,7 +128,7 @@
     return nil;
 }
 
-- (NSString *)filterKeyEquivalent;
+- (NSString *)filterKeyEquivalent
 {
     return @"";
 }

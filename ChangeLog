@@ -1,4 +1,12 @@
 2007-07-19  Benhur Stein <benhur@inf.ufsm.br>
+	* General/Association.m, General/CStringCallBacks.m,
+	  General/NSArray+Additions.m, General/NSDate+Additions.h, 
+	  General/PajeFilter.m, General/PajeType.m, General/Protocols.h,
+	  General/UniqueString.m, OrderFilter/Order.m, Paje/PajeController.m,
+	  SpaceTimeViewer/DrawView+Finding.m: change some small incompatibilities
+	  with MacOSX (include files, type declarations)
+
+2007-07-19  Benhur Stein <benhur@inf.ufsm.br>
 	* ReductionFilter/ReduceEntity.m, SpaceTimeViewer/STEntityTypeLayout.m,
 	  SpaceTimeViewer/STLayoutEditor.m, StatViewer/StatArray.m: rename
 	  subclassResponsibility to _subclassResponsibility (does not exist in Mac)

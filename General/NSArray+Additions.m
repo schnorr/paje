@@ -20,6 +20,7 @@
 
 #include "NSArray+Additions.h"
 #include "Macros.h"
+#include <Foundation/NSEnumerator.h>
 
 // Enumerator of objects in a range of indexes of an array
 @interface ArrayRangeEnumerator : NSEnumerator

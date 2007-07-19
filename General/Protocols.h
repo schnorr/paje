@@ -57,6 +57,7 @@ typedef enum {
 
 @protocol PajeEntity <PajeTiming, NSCoding>
 //- (NSString *)name;
+- (NSString *)description;
 - (id)value;
 - (PajeEntityType *)entityType;
 - (NSArray *)relatedEntities;

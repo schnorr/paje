@@ -24,7 +24,6 @@
 #include "DrawView.h"
 
 #include <math.h>
-#include <values.h>
 
 
 // returns a rectangle that is the same as rect but has positive height and width
@@ -85,8 +84,10 @@ BOOL line_hit(double px, double py,
     NSRect r;
     int hit;
 #ifndef GNUSTEP
+#ifndef __APPLE__
     shapefunction *path;
     STEntityTypeLayout *entityDescriptor;
+#endif
 #endif
 if (![entity isKindOfClass:[PajeEntity class]]) return YES;
     // couldn't make PSinfill work with an arrow...
@@ -103,7 +104,7 @@ if (![entity isKindOfClass:[PajeEntity class]]) return YES;
             break;
         default:
             r = [self rectForEntity:entity];
-#ifdef GNUSTEP
+#if defined(GNUSTEP) || defined(__APPLE__) // REVER ISSO
             hit = NSPointInRect(p, r);
 #else
             // test insideness with x=y=0, because PostScript has a problem with

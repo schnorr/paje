@@ -1,5 +1,7 @@
 #include "CStringCallBacks.h"
 #include <Foundation/NSString.h>
+#include <string.h> // for strcmp
+#include <stdlib.h> // for free
 
 static unsigned cstring_hash(NSMapTable *t, const void *p)
 {

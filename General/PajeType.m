@@ -189,7 +189,7 @@
     if ([other isKindOfClass:[PajeEntityType class]]) {
         return [name compare:[(PajeEntityType *)other name]];
     }
-    return [super compare:other];
+    return NSOrderedSame;
 }
 
 // NSCoding protocol

@@ -70,7 +70,7 @@
 
 - (NSComparisonResult)objectValueComparison:(Association *)other
 {
-    return [(NSObject *)object compare:[other objectValue]];
+    return [(NSNumber *)object compare:[other objectValue]];
 }
 
 - (unsigned int)hash

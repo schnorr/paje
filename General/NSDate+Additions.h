@@ -34,6 +34,6 @@
 
 @interface NSDate (AltDescription)
 - (NSString *)description;
-- (NSString *)descriptionWithLocale:(id)l;
+- (NSString *)descriptionWithLocale:(NSDictionary *)locale;
 @end
 #endif

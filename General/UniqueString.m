@@ -21,6 +21,7 @@
 #include <Foundation/NSSet.h>
 #include <Foundation/NSCoder.h>
 #include <Foundation/NSInvocation.h>
+#include <Foundation/NSEnumerator.h>
 
 @implementation UniqueString
 

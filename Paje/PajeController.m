@@ -334,10 +334,10 @@ return;
     
     [filtersMenu addItemWithTitle:@"Save Configuration"
                            action:@selector(saveFilterConfiguration:)
-                    keyEquivalent:nil];
+                    keyEquivalent:@""];
     [filtersMenu addItemWithTitle:@"Load Configuration"
                            action:@selector(loadFilterConfiguration:)
-                    keyEquivalent:nil];
+                    keyEquivalent:@""];
 
     [filtersMenu sizeToFit];
     [filtersPopUp selectItemWithTitle:previouslySelectedFilterName];

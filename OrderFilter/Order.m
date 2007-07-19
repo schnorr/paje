@@ -68,7 +68,9 @@
 {
     [containers release];
     [hierarchyBrowser release];
+#ifndef __APPLE__
     [view release];
+#endif
     [super dealloc];
 }
 
