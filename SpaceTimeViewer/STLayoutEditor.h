@@ -50,8 +50,11 @@
 {
     STContainerTypeLayout *layoutDescriptor;
     IBOutlet NSTextField *siblingSeparationField;
+    IBOutlet NSStepper *siblingSeparationStepper;
     IBOutlet NSTextField *subtypeSeparationField;
+    IBOutlet NSStepper *subtypeSeparationStepper;
     IBOutlet NSTextField *heightForVariablesField;
+    IBOutlet NSStepper *heightForVariablesStepper;
 }
 
 - (void)setLayoutDescriptor:(STEntityTypeLayout *)descriptor;
@@ -89,6 +92,7 @@
 {
     STLinkTypeLayout *layoutDescriptor;
     IBOutlet NSTextField *lineWidthField;
+    IBOutlet NSStepper *lineWidthStepper;
 }
 
 - (void)setLayoutDescriptor:(STEntityTypeLayout *)descriptor;
@@ -102,7 +106,9 @@
     STEventTypeLayout *layoutDescriptor;
     IBOutlet NSButton *displayValueSwitch;
     IBOutlet NSTextField *heightField;
+    IBOutlet NSStepper *heightStepper;
     IBOutlet NSTextField *widthField;
+    IBOutlet NSStepper *widthStepper;
 }
 
 - (void)setLayoutDescriptor:(STEntityTypeLayout *)descriptor;
@@ -118,7 +124,9 @@
     STStateTypeLayout *layoutDescriptor;
     IBOutlet NSButton *displayValueSwitch;
     IBOutlet NSTextField *heightField;
+    IBOutlet NSStepper *heightStepper;
     IBOutlet NSTextField *insetAmountField;
+    IBOutlet NSStepper *insetAmountStepper;
 }
 
 - (void)setLayoutDescriptor:(STEntityTypeLayout *)descriptor;
@@ -134,6 +142,7 @@
 {
     STVariableTypeLayout *layoutDescriptor;
     IBOutlet NSTextField *lineWidthField;
+    IBOutlet NSStepper *lineWidthStepper;
     IBOutlet NSButton *showMinMaxSwitch;
 }
 

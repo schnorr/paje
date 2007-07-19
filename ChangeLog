@@ -1,4 +1,18 @@
 2007-07-19  Benhur Stein <benhur@inf.ufsm.br>
+	* AggregatingFilter/AggregatingChunk.m: use -latestTime instead of
+      [lastEntity time]
+	* General/PajeEntityInspector.m: change box size calculations so that it
+      looks better on Mac
+    * Paje/PajeTraceController.m: change default order of filters
+    * SpaceTimeViewer/DrawView+Drawing.m: change way of highlighting entities
+    * SpaceTimeViewer/DrawView.h: add aux variables for new highlighting
+    * SpaceTimeViewer/DrawView.m: call new highlighting
+    * SpaceTimeViewer/HierarchyRuler.m: change drawing of ruler to a way
+      that is compatible with MacOSX
+    * SpaceTimeViewer/STLayoutEditor.[hm]: add steppers for editing numbers
+    * SpaceTimeViewer/Shape.m: correct some shapes
+
+2007-07-19  Benhur Stein <benhur@inf.ufsm.br>
 	* General/Association.m, General/CStringCallBacks.m,
 	  General/NSArray+Additions.m, General/NSDate+Additions.h, 
 	  General/PajeFilter.m, General/PajeType.m, General/Protocols.h,

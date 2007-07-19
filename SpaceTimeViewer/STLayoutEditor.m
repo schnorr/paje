@@ -22,7 +22,6 @@
 #include "STEntityTypeLayout.h"
 #include "DrawView.h"
 #include "../General/Macros.h"
-#include <AppKit/PSOperators.h>
 
 @interface ShapeImageRep : NSCustomImageRep
 {
@@ -94,25 +93,34 @@
     layoutDescriptor = (STContainerTypeLayout *)descriptor;
     
     [siblingSeparationField setFloatValue:[layoutDescriptor siblingSeparation]];
+    [siblingSeparationStepper setFloatValue:[layoutDescriptor siblingSeparation]];
     [subtypeSeparationField setFloatValue:[layoutDescriptor subtypeSeparation]];
+    [subtypeSeparationStepper setFloatValue:[layoutDescriptor subtypeSeparation]];
     [heightForVariablesField setFloatValue:[layoutDescriptor heightForVariables]];
+    [heightForVariablesStepper setFloatValue:[layoutDescriptor heightForVariables]];
 }
 
 - (IBAction)siblingSeparationChanged:(id)sender
 {
     [layoutDescriptor setSiblingSeparation:[sender floatValue]];
+    [siblingSeparationField setFloatValue:[layoutDescriptor siblingSeparation]];
+    [siblingSeparationStepper setFloatValue:[layoutDescriptor siblingSeparation]];
     [controller layoutEdited];
 }
 
 - (IBAction)subtypeSeparationChanged:(id)sender
 {
     [layoutDescriptor setSubtypeSeparation:[sender floatValue]];
+    [subtypeSeparationField setFloatValue:[layoutDescriptor subtypeSeparation]];
+    [subtypeSeparationStepper setFloatValue:[layoutDescriptor subtypeSeparation]];
     [controller layoutEdited];
 }
 
 - (IBAction)heightForVariablesChanged:(id)sender
 {
     [layoutDescriptor setHeightForVariables:[sender floatValue]];
+    [heightForVariablesField setFloatValue:[layoutDescriptor heightForVariables]];
+    [heightForVariablesStepper setFloatValue:[layoutDescriptor heightForVariables]];
     [controller layoutEdited];
 }
 @end
@@ -134,12 +142,15 @@
     [self setupShapeMatrix];
     [self setupDrawMatrices];
     [lineWidthField setFloatValue:[layoutDescriptor lineWidth]];
+    [lineWidthStepper setFloatValue:[layoutDescriptor lineWidth]];
     [showMinMaxSwitch  setState:[layoutDescriptor showMinMax]];
 }
 
 - (IBAction)lineWidthChanged:(id)sender
 {
     [layoutDescriptor setLineWidth:[sender floatValue]];
+    [lineWidthField setFloatValue:[layoutDescriptor lineWidth]];
+    [lineWidthStepper setFloatValue:[layoutDescriptor lineWidth]];
     [controller layoutEdited];
 }
 
@@ -453,11 +464,14 @@
     [self setupShapeMatrix];
     [self setupDrawMatrices];
     [lineWidthField setFloatValue:[layoutDescriptor lineWidth]];
+    [lineWidthStepper setFloatValue:[layoutDescriptor lineWidth]];
 }
 
 - (IBAction)lineWidthChanged:(id)sender
 {
     [layoutDescriptor setLineWidth:[sender floatValue]];
+    [lineWidthField setFloatValue:[layoutDescriptor lineWidth]];
+    [lineWidthStepper setFloatValue:[layoutDescriptor lineWidth]];
     [self recacheAll];
 }
 @end
@@ -492,19 +506,25 @@
     [self setupShapeMatrix];
     [self setupDrawMatrices];
     [heightField setFloatValue:[layoutDescriptor height]];
+    [heightStepper setFloatValue:[layoutDescriptor height]];
     [widthField setFloatValue:[layoutDescriptor width]];
+    [widthStepper setFloatValue:[layoutDescriptor width]];
     [displayValueSwitch setState:[layoutDescriptor drawsName]];
 }
 
 - (IBAction)heightChanged:(id)sender
 {
     [layoutDescriptor setHeight:[sender floatValue]];
+    [heightField setFloatValue:[layoutDescriptor height]];
+    [heightStepper setFloatValue:[layoutDescriptor height]];
     [self recacheAll];
 }
 
 - (IBAction)widthChanged:(id)sender
 {
     [layoutDescriptor setWidth:[sender floatValue]];
+    [widthField setFloatValue:[layoutDescriptor width]];
+    [widthStepper setFloatValue:[layoutDescriptor width]];
     [self recacheAll];
 }
 
@@ -547,19 +567,25 @@
     [self setupShapeMatrix];
     [self setupDrawMatrices];
     [heightField setFloatValue:[layoutDescriptor height]];
+    [heightStepper setFloatValue:[layoutDescriptor height]];
     [insetAmountField setFloatValue:[layoutDescriptor insetAmount]];
+    [insetAmountStepper setFloatValue:[layoutDescriptor insetAmount]];
     [displayValueSwitch setState:[layoutDescriptor drawsName]];
 }
 
 - (IBAction)heightChanged:(id)sender
 {
     [layoutDescriptor setHeight:[sender floatValue]];
+    [heightField setFloatValue:[layoutDescriptor height]];
+    [heightStepper setFloatValue:[layoutDescriptor height]];
     [self recacheAll];
 }
 
 - (IBAction)insetAmountChanged:(id)sender
 {
     [layoutDescriptor setInsetAmount:[sender floatValue]];
+    [insetAmountField setFloatValue:[layoutDescriptor insetAmount]];
+    [insetAmountStepper setFloatValue:[layoutDescriptor insetAmount]];
     [self recacheAll];
 }
 

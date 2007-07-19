@@ -180,16 +180,16 @@
                    PajeEventDecoder, \
                    PajeSimulator, \
                    StorageController, \
-                   AggregatingFilter, \
                    ReductionFilter, \
                    FieldFilter, \
                    ContainerFilter, \
                    OrderFilter, \
                    EntityTypeFilter, \
                    ImbricationFilter, \
+                   AggregatingFilter, \
                    SpaceTimeViewer \
                  ), \
-                 ( ImbricationFilter, \
+                 ( AggregatingFilter, \
                    StatViewer ) )" propertyList];
 
     /*

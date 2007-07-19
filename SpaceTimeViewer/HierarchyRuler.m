@@ -22,144 +22,84 @@
 
 #define SHOW_TYPES
 
+
+#define CEIL(f) (1000-((int)(1000-(f))))
+#define CEIL2(f) (1000-((int)(999.5-(f))))
+
 @interface VCell : NSCell
 @end
 @implementation VCell
 - (void) _drawAttributedText: (NSAttributedString*)aString 
 		     inFrame: (NSRect)aRect
 {
-  NSSize titleSize;
-  NSRect newRect;
+    NSSize titleSize;
+    NSRect newRect;
 
-  if (aString == nil)
-    return;
-
-/*
-[aString drawInRect:aRect];
-return;
-
-  if (NSWidth(aRect) > NSHeight(aRect)) {
-    [super _drawAttributedText: aString inFrame:aRect];
-    return;
-  }
-//*/
-
-  titleSize = [aString size];
-
-  /** Important: text should always be vertically centered without
-   * considering descender [as if descender did not exist].
-   * This is particularly important for single line texts.
-   * Please make sure the output remains always correct.
-   */
-//  aRect.origin.y = NSMidY (aRect) - titleSize.height/2; 
-//  aRect.size.height = titleSize.height;
-  if (NSWidth(aRect) > NSHeight(aRect)) {
-
-  if (titleSize.width < aRect.size.width) {
-    newRect.origin.x = NSMidX(aRect) - titleSize.width/2;
-    newRect.origin.y = NSMidY(aRect) - titleSize.height/2;
-    newRect.size = titleSize;
-    //newRect.size.width = aRect.size.height;
-  } else {
-    newRect.origin.x = NSMinX(aRect);
-    newRect.size.width = aRect.size.width + 1;
-    newRect.size.height = titleSize.height 
-                        * (1000-(int)(1000-(titleSize.width / newRect.size.width)));
-    if (newRect.size.height > aRect.size.height) {
-        newRect.size.height = aRect.size.height;
+    if (aString == nil || NSWidth(aRect) < 5 || NSHeight(aRect) < 5) {
+        return;
     }
-    newRect.origin.y = NSMidY(aRect) - newRect.size.height/2;
-  }
-  //PSgsave();
-  //PStranslate(newRect.origin.x, newRect.origin.y);
-  //newRect.origin = NSMakePoint(0, 0);
-  //PSrotate(-90);
-  [aString drawInRect: newRect];
-  //PSgrestore();
-  
-  } else {
-  
-  if (titleSize.width < aRect.size.height) {
-    newRect.origin.x = NSMidX(aRect) - titleSize.height/2;
-    newRect.origin.y = NSMidY(aRect) + titleSize.width/2;
-    newRect.size = titleSize;
-    newRect.size.width += 6;
-  } else {
-    newRect.origin.y = NSMaxY(aRect);
-    newRect.size.width = aRect.size.height + 1;
-    newRect.size.height = titleSize.height 
-                        * (1000-(int)(999.5-(titleSize.width / newRect.size.width)));
-    if (newRect.size.height > aRect.size.width) {
-        newRect.size.height = aRect.size.width;
-    }
-    newRect.origin.x = NSMidX(aRect) - newRect.size.height/2;
-  }
-  PSgsave();
-  PStranslate(newRect.origin.x, newRect.origin.y);
-  newRect.origin = NSMakePoint(0, 0);
-  PSrotate(-90);
-  [aString drawInRect: newRect];
-  PSgrestore();
 
-  }
+    titleSize = [aString size];
+
+    if (NSWidth(aRect) > NSHeight(aRect)) {
+
+        if (titleSize.width < aRect.size.width) {
+            newRect.origin.x = NSMidX(aRect) - titleSize.width/2;
+            newRect.origin.y = NSMidY(aRect) - titleSize.height/2;
+            newRect.size = titleSize;
+            //newRect.size.width = aRect.size.height;
+        } else {
+            newRect.origin.x = NSMinX(aRect);
+            newRect.size.width = aRect.size.width + 1;
+            newRect.size.height = titleSize.height 
+                                * CEIL(titleSize.width / newRect.size.width);
+            if (newRect.size.height > aRect.size.height) {
+                newRect.size.height = aRect.size.height;
+            }
+            newRect.origin.y = NSMidY(aRect) - newRect.size.height/2;
+        }
+        [aString drawInRect: newRect];
+  
+    } else {
+  
+        if (titleSize.width < aRect.size.height) {
+            newRect.origin.x = NSMidX(aRect) - titleSize.height/2;
+            newRect.origin.y = NSMidY(aRect) + titleSize.width/2;
+            newRect.size = titleSize;
+            newRect.size.width += 6;
+        } else {
+            newRect.origin.y = NSMaxY(aRect);
+            newRect.size.width = aRect.size.height + 1;
+            newRect.size.height = titleSize.height 
+                                * CEIL2(titleSize.width / newRect.size.width);
+            if (newRect.size.height > aRect.size.width) {
+                newRect.size.height = aRect.size.width;
+            }
+            newRect.origin.x = NSMidX(aRect) - newRect.size.height/2;
+        }
+        NSAffineTransform *transf;
+        transf = [NSAffineTransform transform];
+        [transf translateXBy: newRect.origin.x yBy: newRect.origin.y];
+        [transf rotateByDegrees:-90];
+        [transf concat];
+        newRect.origin = NSMakePoint(0, 0);
+        [aString drawInRect: newRect];
+        [transf invert];
+        [transf concat];
+
+    }
 }
 
 - (void) drawInteriorWithFrame: (NSRect)cellFrame inView: (NSView*)controlView
 {
-  if (![controlView window])
-    return;
-
-  cellFrame = [self drawingRectForBounds: cellFrame];
-
-  //FIXME: Check if this is also neccessary for images,
-  // Add spacing between border and inside 
-  if ([self isBordered] || [self isBezeled])
-    {
-      cellFrame.origin.x += 3;
-      cellFrame.size.width -= 6;
-      cellFrame.origin.y += 1;
-      cellFrame.size.height -= 2;
+    if ([controlView window] == nil) {
+        return;
     }
 
-  switch ([self type])
-    {
-      case NSTextCellType:
-        {
-	  [self _drawAttributedText: [self attributedStringValue]
-		inFrame: cellFrame];
-	}
-	break;
+    cellFrame = [self drawingRectForBounds: cellFrame];
 
-      case NSImageCellType:
-	if ([self image])
-	  {
-	    NSSize size;
-	    NSPoint position;
-
-	    size = [[self image] size];
-	    position.x = MAX(NSMidX(cellFrame) - (size.width/2.),0.);
-	    position.y = MAX(NSMidY(cellFrame) - (size.height/2.),0.);
-	    /*
-	     * Images are always drawn with their bottom-left corner
-	     * at the origin so we must adjust the position to take
-	     * account of a flipped view.
-	     */
-	    if ([controlView isFlipped])
-	      position.y += size.height;
-	    [[self image] compositeToPoint: position operation: NSCompositeSourceOver];
-	  }
-	 break;
-
-      case NSNullCellType:
-         break;
-    }
-
-  if ([self showsFirstResponder])
-    NSDottedFrameRect(cellFrame);
-
-  // NB: We don't do any highlighting to make it easier for subclasses
-  // to reuse this code while doing their own custom highlighting and
-  // prettyfying
+    [self _drawAttributedText: [self attributedStringValue]
+                      inFrame: cellFrame];
 }
 @end
 

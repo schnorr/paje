@@ -250,7 +250,7 @@ NSLog(@"\n\nSOMEONE IS CALLING lastEntity!!!\n\n");
     }
     if (array != nil) {
         NSEnumerator *en = [array objectEnumerator];
-        NSDate *d = [[self lastEntity] endTime];
+        NSDate *d = [self latestTime];
         PajeEntity *e;
         while ((e = [en nextObject]) != nil) {
             if (d == nil || [[e endTime] isLaterThanDate:d]) {

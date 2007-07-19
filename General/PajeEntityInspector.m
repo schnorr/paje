@@ -252,9 +252,12 @@ static NSMutableArray *allInstances;
 {
     NSBox *box;
     int index;
-    float curY = 0;
+    float curY;
     float titleWidth = 0;
+    float leftMargin;
+    float deltaHeight;
     NSTextField *field1;
+    NSRect boxFrame;
 
     NSAssert([titles count] == [values count],
              @"count of fields and values do not match");
@@ -262,6 +265,9 @@ static NSMutableArray *allInstances;
     // I don't know a better way of copying a box...
     box = [NSUnarchiver unarchiveObjectWithData:archivedBox];
     field1 = [NSUnarchiver unarchiveObjectWithData:archivedTitleField];
+    leftMargin = NSMinX([field1 frame]);
+    curY = NSMinY([field1 frame]) - 4;
+    deltaHeight = NSHeight([box frame]) - NSMaxY([field1 frame]);
 
     [box setTitle:boxTitle];
 
@@ -284,6 +290,9 @@ static NSMutableArray *allInstances;
         
         [tField setStringValue:title];
         [vField setStringValue:value];
+        height = MAX([[tField cell] cellSize].height,
+                     [[vField cell] cellSize].height);
+        
         if ([value isEqual:@"**AQUI**"]) {
             NSCell *cell = [[InnerStatesCell alloc] init];
             [cell setRepresentedObject:inspectedEntity];
@@ -291,17 +300,18 @@ static NSMutableArray *allInstances;
             [cell release];
         }
         
-        height = MAX([[tField cell] cellSize].height,
-                     [[vField cell] cellSize].height);
-        
-        [tField setFrame:NSMakeRect(0, curY, titleWidth, height)];
-        [vField setFrame:NSMakeRect(titleWidth + 2, curY, 10, height)];
+        [tField setFrame:NSMakeRect(leftMargin, curY, titleWidth, height)];
+        [vField setFrame:NSMakeRect(leftMargin + titleWidth + 2, curY, 10, height)];
         [box addSubview:tField];
         [box addSubview:vField];
         
         curY += height+2;
     }
-    [box sizeToFit];
+    boxFrame = [box frame];
+    boxFrame.size.height = curY - 2 + deltaHeight;
+    boxFrame.size.width = leftMargin + titleWidth + 2 + 10 + leftMargin;
+    [box setFrame:boxFrame];
+    //[box sizeToFit];
 
     return box;
 }
@@ -617,11 +627,15 @@ static NSMutableArray *allInstances;
 - (void)addScriptBox
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString *scriptPath;
+    NSString *scriptFieldName;
 
-    [scriptPathField setStringValue:
-            [defaults objectForKey:@"EntityInspectorScriptPath"]];
-    [scriptFieldNameField setStringValue:
-            [defaults objectForKey:@"EntityInspectorScriptFieldName"]];
+    scriptPath = [defaults objectForKey:@"EntityInspectorScriptPath"];
+    scriptFieldName = [defaults objectForKey:@"EntityInspectorScriptFieldName"];
+    if (scriptPath == nil) scriptPath = @"";
+    if (scriptFieldName == nil) scriptFieldName = @"";
+    [scriptPathField setStringValue:scriptPath];
+    [scriptFieldNameField setStringValue:scriptFieldName];
 
     if ([[filter relatedEntitiesForEntity:inspectedEntity] count] == 0) {
         [scriptFieldSourceMatrix selectCellWithTag:0];

@@ -46,6 +46,7 @@
     Assign(endTime, nil);
     Assign(backgroundColor, nil);
     Assign(selectedBackgroundColor, nil);
+    Assign(highlightColor, nil);
     Assign(entityNameAttributes, nil);
     Assign(cursorTimeFormat, nil);
     [super dealloc];
@@ -155,6 +156,12 @@
                          colorForKey:DefaultsKey(@"SelectedBackgroundColor")]);
     if (selectedBackgroundColor == nil) {
         Assign(selectedBackgroundColor, [NSColor controlLightHighlightColor]);
+    }
+    Assign(highlightColor, [[NSUserDefaults standardUserDefaults]
+                         colorForKey:DefaultsKey(@"HighlightColor")]);
+    if (highlightColor == nil) {
+        Assign(highlightColor, [NSColor colorWithCalibratedRed:1 green:0.4
+                                                          blue:0 alpha:0.4]);
     }
 
     // initialize the cursor
@@ -330,6 +337,9 @@
         
         [self resetTrackingRect];
     }
+#ifdef __APPLE__
+    [self setNeedsDisplay:YES];
+#endif
 }
 
 - (void)verifyTimes:sender
@@ -601,6 +611,7 @@ rect = NSInsetRect(rect, -10, -10);
         [self drawInstance:[controller rootInstance]
               ofDescriptor:[controller rootLayout]
                     inRect:rect];
+        [self drawHighlight];
     NS_HANDLER
         NSLog(@"Ignoring exception caught inside drawRect: %@", localException);
     NS_ENDHANDLER

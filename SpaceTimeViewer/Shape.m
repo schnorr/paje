@@ -223,7 +223,7 @@ static void PSOpenArrow(NSBezierPath *path, NSRect rect)
     if (len > 0) {
         NSBezierPath *arrow;
         arrow = [NSBezierPath bezierPath];
-        [arrow lineToPoint:NSMakePoint(-7, 3)];
+        [arrow moveToPoint:NSMakePoint(-7, 3)];
         [arrow lineToPoint:NSMakePoint(0, 0)];
         [arrow lineToPoint:NSMakePoint(-7, -3)];
         [arrow moveToPoint:NSMakePoint(0, 0)];
@@ -515,6 +515,9 @@ static void PS3DStroke(NSBezierPath *path, NSColor *color)
 {
     float lineWidth;
     lineWidth = [path lineWidth];
+	if (lineWidth < 2) {
+	    lineWidth = 2;
+	}
     if (color == nil) {
         color = [NSColor blackColor];
     }
@@ -553,6 +556,9 @@ static void PS3DFill(NSBezierPath *path, NSColor *color)
 {
     float lineWidth;
     lineWidth = [path lineWidth];
+	if (lineWidth < 2) {
+	    lineWidth = 2;
+	}
     if (color == nil) {
         color = [NSColor blackColor];
     }

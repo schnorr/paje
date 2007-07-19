@@ -81,6 +81,11 @@
 #endif
 
     NSDictionary *entityNameAttributes;
+	
+    NSImage *highlightImage;
+    NSImage *highlightMask;
+    NSAffineTransform *highlightTransform;
+    NSColor *highlightColor;
 }
 
 /* instance methods */
@@ -134,6 +139,9 @@
 @end
 
 @interface DrawView (Drawing)
+
+- (void)drawHighlight;
+
 - (void)drawInstance:(id)entity
         ofDescriptor:(STContainerTypeLayout *)layoutDescriptor
               inRect:(NSRect)drawRect;
