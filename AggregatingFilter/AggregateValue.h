@@ -7,8 +7,13 @@
 
 #include "../PajeSimulator/UserValue.h"
 
-@interface AggregateValue : UserValue
+@interface AggregateValue : PajeEntity
 {
+	// From UserValue
+    double value;
+    NSDate *startTime;
+    NSDate *endTime;
+
     double minValue;
     double maxValue;
     int condensedEntitiesCount;

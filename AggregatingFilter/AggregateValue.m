@@ -42,13 +42,14 @@
     } while ((entity = [entityEnum nextObject]) != nil);
     t2 = [lastEntity endTime];
     
-
     self = [super initWithType:[lastEntity entityType]
-                   doubleValue:sum / [t2 timeIntervalSinceDate:t1]
-                     container:[lastEntity container]
-                     startTime:t1
-                       endTime:t2];
+                          name:@""
+                     container:[lastEntity container]];
+
     if (self != nil) {
+        Assign(startTime, t1);
+        Assign(endTime, t2);
+        value = sum / [t2 timeIntervalSinceDate:t1];
         minValue = min;
         maxValue = max;
         condensedEntitiesCount = ct;
@@ -58,7 +59,58 @@
 
 - (void)dealloc
 {
+    Assign(startTime, nil);
+    Assign(endTime, nil);
     [super dealloc];
+}
+
+- (NSDate *)startTime
+{
+    return startTime;
+}
+
+- (NSDate *)endTime
+{
+    if (endTime != nil) {
+        return endTime;
+    }
+    return [container endTime];
+}
+
+- (NSDate *)time
+{
+    return startTime;
+}
+
+- (void)setEndTime:(NSDate *)time
+{
+    Assign(endTime, time);
+}
+
+- (double)doubleValue
+{
+    return value;
+}
+
+- (id)value
+{
+    return [NSNumber numberWithDouble:value];
+}
+
+- (NSArray *)fieldNames
+{
+    return [[super fieldNames] arrayByAddingObject: @"Value"];
+}
+
+- (id)valueOfFieldNamed:(NSString *)fieldName
+{
+    id val;
+    if ([fieldName isEqualToString:@"Value"]) {
+        val = [NSNumber numberWithDouble:value];
+    } else {
+        val = [super valueOfFieldNamed:fieldName];
+    }
+    return val;
 }
 
 - (double)maxValue
