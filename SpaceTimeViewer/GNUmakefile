@@ -7,6 +7,11 @@ BUNDLE_NAME = SpaceTimeViewer
 SpaceTimeViewer_PRINCIPAL_CLASS = STController
 
 ADDITIONAL_INCLUDE_DIRS = -I../General
+ifeq ($(FOUNDATION_LIB), apple)
+LDFLAGS += -framework General
+else
+LDFLAGS += -lGeneral
+endif
 
 SpaceTimeViewer_RESOURCE_FILES = \
         STEntityTypeLayout.gorm \

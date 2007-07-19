@@ -6,6 +6,11 @@ BUNDLE_NAME = EntityTypeFilter
 EntityTypeSelector_PRINCIPAL_CLASS = EntityTypeSelector
 
 ADDITIONAL_INCLUDE_DIRS = -I../General.bproj
+ifeq ($(FOUNDATION_LIB), apple)
+LDFLAGS += -framework General
+else
+LDFLAGS += -lGeneral
+endif
 
 EntityTypeFilter_RESOURCE_FILES = \
     EntityTypeSelector.gorm \

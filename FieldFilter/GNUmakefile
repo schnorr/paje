@@ -6,6 +6,11 @@ BUNDLE_NAME = FieldFilter
 FieldFilter_PRINCIPAL_CLASS = FieldFilter
 
 ADDITIONAL_INCLUDE_DIRS = -I../General.bproj
+ifeq ($(FOUNDATION_LIB), apple)
+LDFLAGS += -framework General
+else
+LDFLAGS += -lGeneral
+endif
 
 FieldFilter_RESOURCE_FILES = \
 	FieldFilter.gorm \

@@ -29,7 +29,10 @@
 	Outlets = (
 	    siblingSeparationField,
 	    subtypeSeparationField,
-	    heightForVariablesField
+	    heightForVariablesField,
+	    subtypeSeparationStepper,
+	    siblingSeparationStepper,
+	    heightForVariablesStepper
 	);
 	Super = STLayoutEditor;
     };
@@ -57,7 +60,9 @@
 	Outlets = (
 	    displayValueSwitch,
 	    heightField,
-	    widthField
+	    widthField,
+	    widthStepper,
+	    heightStepper
 	);
 	Super = STShapedLayoutEditor;
     };
@@ -75,7 +80,8 @@
 	    "lineWidthChanged:"
 	);
 	Outlets = (
-	    lineWidthField
+	    lineWidthField,
+	    lineWidthStepper
 	);
 	Super = STShapedLayoutEditor;
     };
@@ -99,7 +105,9 @@
 	Outlets = (
 	    displayValueSwitch,
 	    heightField,
-	    insetAmountField
+	    insetAmountField,
+	    heightStepper,
+	    insetAmountStepper
 	);
 	Super = STShapedLayoutEditor;
     };
@@ -110,7 +118,8 @@
 	);
 	Outlets = (
 	    lineWidthField,
-	    showMinMaxSwitch
+	    showMinMaxSwitch,
+	    lineWidthStepper
 	);
 	Super = STShapedLayoutEditor;
     };

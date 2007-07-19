@@ -1,8 +1,8 @@
-BUNDLE_INSTALL_DIR=$(GNUSTEP_BUNDLES)/Paje
+#BUNDLE_INSTALL_DIR=$(GNUSTEP_BUNDLES)/Paje
 
 include $(GNUSTEP_MAKEFILES)/common.make
 
-BUNDLE_NAME = General
+FRAMEWORK_NAME = General
 
 General_OBJC_FILES = \
 	Comparing.m \
@@ -106,5 +106,6 @@ PROJECT_HEADERS = \
 	CStringCallBacks.h
 
 -include GNUmakefile.preamble
-include $(GNUSTEP_MAKEFILES)/bundle.make
+#include $(GNUSTEP_MAKEFILES)/bundle.make
+include $(GNUSTEP_MAKEFILES)/framework.make
 -include GNUmakefile.postamble

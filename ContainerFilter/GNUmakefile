@@ -6,6 +6,11 @@ BUNDLE_NAME = ContainerFilter
 ContainerFilter_PRINCIPAL_CLASS = ContainerSelector
 
 ADDITIONAL_INCLUDE_DIRS = -I../General
+ifeq ($(FOUNDATION_LIB), apple)
+LDFLAGS += -framework General
+else
+LDFLAGS += -lGeneral
+endif
 
 ContainerFilter_RESOURCE_FILES = \
 	ContainerSelector.gorm \

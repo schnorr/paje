@@ -33,6 +33,11 @@ PajeSimulator_PRINCIPAL_CLASS=PajeSimul
 #
 
 PajeSimulator_LIBRARIES_DEPEND_UPON += 
+ifeq ($(FOUNDATION_LIB), apple)
+LDFLAGS += -framework General
+else
+LDFLAGS += -lGeneral
+endif
 
 #
 # Resource files

@@ -7,6 +7,11 @@ Paje_APPLICATION_ICON = Paje.tiff
 Paje_DOCICONS = traceFilePaje.tiff
 
 ADDITIONAL_INCLUDE_DIRS = -I../General
+ifeq ($(FOUNDATION_LIB), apple)
+LDFLAGS += -framework General
+else
+LDFLAGS += -lGeneral
+endif
 
 Paje_MAIN_MODEL_FILE = Paje.gorm
 

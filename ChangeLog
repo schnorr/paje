@@ -1,4 +1,7 @@
 2007-07-19  Benhur Stein <benhur@inf.ufsm.br>
+    * */GNUmakefile: make General into a framework
+
+2007-07-19  Benhur Stein <benhur@inf.ufsm.br>
 	* AggregatingFilter/AggregatingChunk.m: use -latestTime instead of
       [lastEntity time]
 	* General/PajeEntityInspector.m: change box size calculations so that it

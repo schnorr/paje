@@ -7,6 +7,11 @@ BUNDLE_NAME = ReductionFilter
 ReductionFilter_PRINCIPAL_CLASS = BusyNode
 
 ADDITIONAL_INCLUDE_DIRS = -I../General
+ifeq ($(FOUNDATION_LIB), apple)
+LDFLAGS += -framework General
+else
+LDFLAGS += -lGeneral
+endif
 
 ReductionFilter_RESOURCE_FILES = \
         ReductionFilter.gorm \

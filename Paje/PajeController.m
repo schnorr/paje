@@ -141,8 +141,8 @@ static PajeController *uniqueController;
 
 - (void)loadAllBundles
 {
-    [self loadBundleNamed:@"General"];
 return;
+    [self loadBundleNamed:@"General"];
     [self loadBundleNamed:@"FileReader"];
     [self loadBundleNamed:@"PajeEventDecoder"];
     [self loadBundleNamed:@"PajeSimulator"];
