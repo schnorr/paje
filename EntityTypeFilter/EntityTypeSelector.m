@@ -50,7 +50,14 @@
 
     [matrix registerForDraggedTypes:[NSArray arrayWithObject:NSColorPboardType]];
     [matrix setDelegate:self];
+#ifdef __APPLE__
+    ColoredSwitchButtonCell *protoCell;
+    protoCell = [[ColoredSwitchButtonCell alloc] init];
+    [matrix setPrototype:protoCell];
+    [protoCell release];
+#else
     [matrix setCellClass:[ColoredSwitchButtonCell class]];
+#endif
 
     [entityTypePopUp removeAllItems];
 
@@ -410,6 +417,38 @@
                                                 fromTime:start
                                                   toTime:end
                                              minDuration:minDuration];
+
+    filter = [filters objectForKey:entityType];
+    if (filter != nil) {
+        return [[[FilteredEnumerator alloc] 
+                        initWithEnumerator:origEnum
+                                    filter:self
+                                  selector:@selector(filterHiddenEntity:filter:)
+                                   context:filter] autorelease];
+    } else {
+        return origEnum;
+    }
+}
+
+- (NSEnumerator *)enumeratorOfCompleteEntitiesTyped:(PajeEntityType *)entityType
+                                        inContainer:(PajeContainer *)container
+                                           fromTime:(NSDate *)start
+                                             toTime:(NSDate *)end
+                                        minDuration:(double)minDuration
+{
+    NSEnumerator *origEnum;
+    NSMutableSet *filter;
+    
+    if ([self isHiddenEntityType:entityType]) {
+        NSWarnLog(@"enumerating hidden type %@", entityType);
+        return nil;
+    }
+
+    origEnum = [inputComponent enumeratorOfCompleteEntitiesTyped:entityType
+                                                     inContainer:container
+                                                        fromTime:start
+                                                          toTime:end
+                                                     minDuration:minDuration];
 
     filter = [filters objectForKey:entityType];
     if (filter != nil) {
