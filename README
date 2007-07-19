@@ -13,6 +13,9 @@ On Linux (and other platforms where GNUstep works):
   (source /path-to-gnustep/System/Library/Makefiles/GNUstep.[c]sh
 
 - Then cd to Paje's directory and type
+  cd General
+  make install
+  cd ..
   make
   make install
 

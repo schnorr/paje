@@ -1,4 +1,9 @@
 2007-07-19  Benhur Stein <benhur@inf.ufsm.br>
+    * General/GNUmakefile: define installation domain; General framework
+      needs to be installed separately, before compiling Paje
+    * README: change installation howto
+
+2007-07-19  Benhur Stein <benhur@inf.ufsm.br>
     * */GNUmakefile: make General into a framework
 
 2007-07-19  Benhur Stein <benhur@inf.ufsm.br>
