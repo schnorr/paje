@@ -515,9 +515,9 @@ static void PS3DStroke(NSBezierPath *path, NSColor *color)
 {
     float lineWidth;
     lineWidth = [path lineWidth];
-	if (lineWidth < 2) {
-	    lineWidth = 2;
-	}
+    if (lineWidth < 2) {
+        lineWidth = 2;
+    }
     if (color == nil) {
         color = [NSColor blackColor];
     }
@@ -556,9 +556,9 @@ static void PS3DFill(NSBezierPath *path, NSColor *color)
 {
     float lineWidth;
     lineWidth = [path lineWidth];
-	if (lineWidth < 2) {
-	    lineWidth = 2;
-	}
+    if (lineWidth < 2) {
+        lineWidth = 2;
+    }
     if (color == nil) {
         color = [NSColor blackColor];
     }
