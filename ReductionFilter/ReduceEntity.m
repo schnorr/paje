@@ -151,13 +151,13 @@
 // to be implemented by subclasses
 + (NSString *)titleForPopUp
 {
-    [self subclassResponsibility:_cmd];
+    [self _subclassResponsibility:_cmd];
     return nil;
 }
 + (double)valueForRelatedEntities:(NSArray *)entities
                     pajeComponent:(PajeFilter *)filter
 {
-    [self subclassResponsibility:_cmd];
+    [self _subclassResponsibility:_cmd];
     return 0.0;
 }
 @end

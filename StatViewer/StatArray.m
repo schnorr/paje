@@ -83,43 +83,43 @@
 
 - (double)totalValue
 {
-    [self subclassResponsibility:_cmd];
+    [self _subclassResponsibility:_cmd];
     return 0;
 }
 
 - (double)maxValue
 {
-    [self subclassResponsibility:_cmd];
+    [self _subclassResponsibility:_cmd];
     return 0;
 }
 
 - (double)minValue
 {
-    [self subclassResponsibility:_cmd];
+    [self _subclassResponsibility:_cmd];
     return 0;
 }
 
 - (unsigned)subCount
 {
-    [self subclassResponsibility:_cmd];
+    [self _subclassResponsibility:_cmd];
     return 0;
 }
 
 - (id)subValueAtIndex:(unsigned)index
 {
-    [self subclassResponsibility:_cmd];
+    [self _subclassResponsibility:_cmd];
     return nil;
 }
 
 - (NSColor *)subColorAtIndex:(unsigned)index
 {
-    [self subclassResponsibility:_cmd];
+    [self _subclassResponsibility:_cmd];
     return nil;
 }
 
 - (double)subDoubleValueAtIndex:(unsigned)index
 {
-    [self subclassResponsibility:_cmd];
+    [self _subclassResponsibility:_cmd];
     return 0;
 }
 

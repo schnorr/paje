@@ -271,7 +271,7 @@
 // methods to be implemented by subclasses
 - (PajeDrawingType)drawingType
 {
-    [self subclassResponsibility:_cmd];
+    [self _subclassResponsibility:_cmd];
     return PajeNonDrawingType;
 }
 

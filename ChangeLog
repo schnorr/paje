@@ -1,4 +1,9 @@
 2007-07-19  Benhur Stein <benhur@inf.ufsm.br>
+	* ReductionFilter/ReduceEntity.m, SpaceTimeViewer/STEntityTypeLayout.m,
+	  SpaceTimeViewer/STLayoutEditor.m, StatViewer/StatArray.m: rename
+	  subclassResponsibility to _subclassResponsibility (does not exist in Mac)
+
+2007-07-19  Benhur Stein <benhur@inf.ufsm.br>
 	* ContainerFilter/ContainerSelector.nib, OrderFilter/Order.nib,
 	  EntityTypeFilter/EntityTypeSelector.nib, Paje/Paje.nib,
 	  FieldFilter/FieldFilter.nib, ReductionFilter/ReductionFilter.nib,

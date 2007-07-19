@@ -75,12 +75,12 @@
 
 - (void)setLayoutDescriptor:(STEntityTypeLayout *)d
 {
-    [self subclassResponsibility:_cmd];
+    [self _subclassResponsibility:_cmd];
 }
 
 - (STEntityTypeLayout *)layoutDescriptor
 {
-    [self subclassResponsibility:_cmd];
+    [self _subclassResponsibility:_cmd];
     return nil;
 }
 @end
@@ -223,7 +223,7 @@
 
 - (NSRect)rectForImageOfSize:(NSSize)size
 {
-    [self subclassResponsibility:_cmd];
+    [self _subclassResponsibility:_cmd];
     return NSZeroRect;
 }
 
