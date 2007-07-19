@@ -138,7 +138,9 @@
         [self raise:@"Couldn't open file"];
     }
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"UseCompression"]) {
+#ifdef GNUSTEP
     	[inputFile useCompression];
+#endif
     }
     hasMoreData = YES;
 }
