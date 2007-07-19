@@ -1,4 +1,19 @@
 2007-07-19  Benhur Stein <benhur@inf.ufsm.br>
+	* ContainerFilter/ContainerSelector.nib, OrderFilter/Order.nib,
+	  EntityTypeFilter/EntityTypeSelector.nib, Paje/Paje.nib,
+	  FieldFilter/FieldFilter.nib, ReductionFilter/ReductionFilter.nib,
+	  General/HierarchyBrowser.nib, SpaceTimeViewer/STEntityTypeLayout.nib,
+	  General/PajeEntityInspector.nib, SpaceTimeViewer/SpaceTime.nib,
+	  General/SourceTextViewer.nib, StatViewer/StatViewer.nib,
+	  ImbricationFilter/InsetLimit.nib: new interface files for MacOSX
+	* ContainerFilter/GNUmakefile, EntityTypeFilter/GNUmakefile,
+	  FieldFilter/GNUmakefile, General/GNUmakefile,
+	  ImbricationFilter/GNUmakefile, OrderFilter/GNUmakefile,
+	  Paje/GNUmakefile, ReductionFilter/GNUmakefile,
+	  SpaceTimeViewer/GNUmakefile, StatViewer/GNUmakefile: declare nib files
+	  as resources
+
+2007-07-19  Benhur Stein <benhur@inf.ufsm.br>
 	* General/Macros.h: declare debug log macros missing in MacOSX
 
 2007-07-18  Benhur Stein <benhur@inf.ufsm.br>

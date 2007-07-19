@@ -10,7 +10,9 @@ ADDITIONAL_INCLUDE_DIRS = -I../General
 
 SpaceTimeViewer_RESOURCE_FILES = \
         STEntityTypeLayout.gorm \
+        STEntityTypeLayout.nib \
         SpaceTime.gorm \
+        SpaceTime.nib \
         crosscursor.tiff \
         distant.tiff \
         near.tiff \
@@ -25,8 +27,8 @@ SpaceTimeViewer_OBJC_FILES = \
         STController.m \
         HierarchyRuler.m \
         Shape.m \
-	STEntityTypeLayout.m \
-	STEntityTypeLayoutController.m \
+        STEntityTypeLayout.m \
+        STEntityTypeLayoutController.m \
         STLayoutEditor.m
 
 SpaceTimeViewer_HEADER_FILES = \
@@ -37,8 +39,6 @@ SpaceTimeViewer_HEADER_FILES = \
 	STEntityTypeLayout.h \
 	STEntityTypeLayoutController.h \
         STLayoutEditor.h
-
-SpaceTimeViewer_PSWFILES = drawline.psw
 
 -include GNUmakefile.preamble
 include $(GNUSTEP_MAKEFILES)/bundle.make

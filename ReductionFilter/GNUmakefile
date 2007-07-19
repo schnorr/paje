@@ -9,7 +9,8 @@ ReductionFilter_PRINCIPAL_CLASS = BusyNode
 ADDITIONAL_INCLUDE_DIRS = -I../General
 
 ReductionFilter_RESOURCE_FILES = \
-        ReductionFilter.gorm
+        ReductionFilter.gorm \
+        ReductionFilter.nib
 
 ReductionFilter_OBJC_FILES = \
         BusyNode.m \

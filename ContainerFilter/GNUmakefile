@@ -7,7 +7,9 @@ ContainerFilter_PRINCIPAL_CLASS = ContainerSelector
 
 ADDITIONAL_INCLUDE_DIRS = -I../General
 
-ContainerFilter_RESOURCE_FILES = ContainerSelector.gorm
+ContainerFilter_RESOURCE_FILES = \
+	ContainerSelector.gorm \
+	ContainerSelector.nib
 
 ContainerFilter_OBJC_FILES = ContainerSelector.m
 

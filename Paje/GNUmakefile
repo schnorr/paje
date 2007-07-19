@@ -10,14 +10,17 @@ ADDITIONAL_INCLUDE_DIRS = -I../General
 
 Paje_MAIN_MODEL_FILE = Paje.gorm
 
-Paje_RESOURCE_FILES = Paje.gorm \
+Paje_RESOURCE_FILES = \
+        Paje.gorm \
+        Paje.nib \
         Paje.tiff \
         traceFilePaje.tiff \
         PajeInfo.plist \
         ../SpaceTimeViewer/near.tiff \
         ../SpaceTimeViewer/distant.tiff \
         ../SpaceTimeViewer/toselection.tiff \
-        ../General/PajeEntityInspector.gorm
+        ../General/PajeEntityInspector.gorm \
+        ../General/PajeEntityInspector.nib
 
 Paje_OBJC_FILES = PajeController.m PajeTraceController.m PajeCheckPoint.m
 Paje_OBJC_FILES += Paje_main.m

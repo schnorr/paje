@@ -7,7 +7,9 @@ EntityTypeSelector_PRINCIPAL_CLASS = EntityTypeSelector
 
 ADDITIONAL_INCLUDE_DIRS = -I../General.bproj
 
-EntityTypeFilter_RESOURCE_FILES = EntityTypeSelector.gorm
+EntityTypeFilter_RESOURCE_FILES = \
+    EntityTypeSelector.gorm \
+    EntityTypeSelector.nib
 
 EntityTypeFilter_OBJC_FILES = EntityTypeSelector.m
 

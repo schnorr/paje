@@ -76,8 +76,11 @@ General_HEADER_FILES = \
 
 General_RESOURCE_FILES = \
 	HierarchyBrowser.gorm \
+	HierarchyBrowser.nib \
 	PajeEntityInspector.gorm \
-	SourceTextViewer.gorm
+	PajeEntityInspector.nib \
+	SourceTextViewer.gorm \
+	SourceTextViewer.nib
 
 PROJECT_HEADERS = \
 	Protocols.h \

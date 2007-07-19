@@ -8,7 +8,9 @@ BUNDLE_NAME = ImbricationFilter
 
 ADDITIONAL_INCLUDE_DIRS = -I../General.bproj
 
-ImbricationFilter_RESOURCE_FILES = InsetLimit.gorm
+ImbricationFilter_RESOURCE_FILES = \
+	InsetLimit.gorm \
+	InsetLimit.nib
 
 ImbricationFilter_OBJC_FILES = InsetLimit.m
 

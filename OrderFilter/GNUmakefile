@@ -8,7 +8,9 @@ BUNDLE_NAME = OrderFilter
 
 ADDITIONAL_INCLUDE_DIRS = -I../General.bproj
 
-OrderFilter_RESOURCE_FILES = Order.gorm
+OrderFilter_RESOURCE_FILES = \
+	Order.gorm \
+	Order.nib
 
 OrderFilter_OBJC_FILES = Order.m OrderKey.m
 

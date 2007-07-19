@@ -7,7 +7,9 @@ FieldFilter_PRINCIPAL_CLASS = FieldFilter
 
 ADDITIONAL_INCLUDE_DIRS = -I../General.bproj
 
-FieldFilter_RESOURCE_FILES = FieldFilter.gorm
+FieldFilter_RESOURCE_FILES = \
+	FieldFilter.gorm \
+	FieldFilter.nib
 
 FieldFilter_OBJC_FILES = \
         FieldFilter.m \

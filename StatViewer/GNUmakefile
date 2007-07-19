@@ -8,7 +8,9 @@ StatViewer_PRINCIPAL_CLASS = StatViewer
 
 ADDITIONAL_INCLUDE_DIRS = -I../General
 
-StatViewer_RESOURCE_FILES = StatViewer.gorm
+StatViewer_RESOURCE_FILES = \
+	StatViewer.gorm \
+	StatViewer.nib
 
 StatViewer_OBJC_FILES = \
         StatViewer.m \
