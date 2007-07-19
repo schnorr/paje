@@ -37,3 +37,11 @@
     } while (0)
 
 #endif
+
+#if defined(__APPLE__)
+#define NSWarnLog(...)
+#define NSWarnMLog(...)
+#define NSDebugLog(...)
+#define NSDebugMLog(...)
+#define NSDebugMLLog(...)
+#endif
