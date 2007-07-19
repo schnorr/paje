@@ -1,0 +1,35 @@
+{
+    IBClasses = (
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            ACTIONS = {
+                colorChanged = id; 
+                entityClicked = id; 
+                executeScript = id; 
+                filterEntityName = id; 
+                showSource = id; 
+            }; 
+            CLASS = PajeEntityInspector; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                colorField = NSColorWell; 
+                fieldBox = NSBox; 
+                filterButton = NSButton; 
+                inspectionWindow = NSWindow; 
+                nameField = NSTextField; 
+                relatedEntitiesBox = NSBox; 
+                relatedEntitiesMatrix = NSMatrix; 
+                reuseButton = NSButton; 
+                scriptBox = NSBox; 
+                scriptFieldNameField = NSTextField; 
+                scriptFieldSourceMatrix = NSMatrix; 
+                scriptPathField = NSTextField; 
+                showFileButton = NSButton; 
+                titleField = NSTextField; 
+                valueField = NSTextField; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }
+    ); 
+    IBVersion = 1; 
+}

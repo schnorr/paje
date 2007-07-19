@@ -1,0 +1,60 @@
+{
+    IBClasses = (
+        {
+            ACTIONS = {
+                doubleTimeScale = id; 
+                getSmallEntityWidthFrom = id; 
+                halveTimeScale = id; 
+                zoomToSelection = id; 
+            }; 
+            CLASS = DrawView; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                controller = id; 
+                cursorTimeField = id; 
+                doubleTimeScaleButton = id; 
+                entityNameField = id; 
+                oldMiddleTime = id; 
+                smallEntityWidth = id; 
+                timeUnitField = id; 
+                zoomButtonsMatrix = id; 
+                zoomToSelectionButton = id; 
+            }; 
+            SUPERCLASS = NSView; 
+        }, 
+        {
+            ACTIONS = {
+                doubleTimeScale = id; 
+                getSmallEntityWidthFrom = id; 
+                halveTimeScale = id; 
+                inputEntity = id; 
+                outputEntity = id; 
+                setConfiguration = id; 
+                zoomToSelection = id; 
+            }; 
+            CLASS = FirstResponder; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {
+            ACTIONS = {inputEntity = id; outputEntity = id; }; 
+            CLASS = PajeComponent; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {
+            ACTIONS = {setConfiguration = id; }; 
+            CLASS = PajeFilter; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = PajeComponent; 
+        }, 
+        {
+            ACTIONS = {print = id; }; 
+            CLASS = STController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {drawView = id; scrollView = id; window = id; }; 
+            SUPERCLASS = PajeFilter; 
+        }
+    ); 
+    IBVersion = 1; 
+}

@@ -1,0 +1,27 @@
+{
+    IBClasses = (
+        {
+            ACTIONS = {
+                comparisionPopUpChanged = id; 
+                entityTypePopUpChanged = id; 
+                fieldNamePopUpChanged = id; 
+                valueChanged = id; 
+            }; 
+            CLASS = FieldFilter; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                actionMatrix = NSMatrix; 
+                comparisionPopUp = NSPopUpButton; 
+                entityTypePopUp = NSPopUpButton; 
+                fieldNamePopUp = NSPopUpButton; 
+                valueField = NSTextField; 
+                view = NSView; 
+            }; 
+            SUPERCLASS = PajeFilter; 
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = PajeComponent; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = PajeFilter; LANGUAGE = ObjC; SUPERCLASS = PajeComponent; }
+    ); 
+    IBVersion = 1; 
+}

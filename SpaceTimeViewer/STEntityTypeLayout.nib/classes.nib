@@ -1,0 +1,96 @@
+{
+    IBClasses = (
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSDatePicker; LANGUAGE = ObjC; SUPERCLASS = NSControl; }, 
+        {
+            ACTIONS = {
+                heightForVariablesChanged = id; 
+                siblingSeparationChanged = id; 
+                subtypeSeparationChanged = id; 
+            }; 
+            CLASS = STContainerLayoutEditor; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                heightForVariablesField = NSTextField; 
+                heightForVariablesStepper = NSStepper; 
+                siblingSeparationField = NSTextField; 
+                siblingSeparationStepper = NSStepper; 
+                subtypeSeparationField = NSTextField; 
+                subtypeSeparationStepper = NSStepper; 
+            }; 
+            SUPERCLASS = STLayoutEditor; 
+        }, 
+        {
+            ACTIONS = {entityTypeSelected = id; }; 
+            CLASS = STEntityTypeLayoutController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                containerEditor = STContainerLayoutEditor; 
+                entityTypePopUp = NSPopUpButton; 
+                eventEditor = STEventLayoutEditor; 
+                linkEditor = STLinkLayoutEditor; 
+                stateEditor = STStateLayoutEditor; 
+                variableEditor = STVariableLayoutEditor; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {
+            ACTIONS = {displayValueChanged = id; heightChanged = id; widthChanged = id; }; 
+            CLASS = STEventLayoutEditor; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                displayValueSwitch = NSButton; 
+                heightField = NSTextField; 
+                heightStepper = NSStepper; 
+                widthField = NSTextField; 
+                widthStepper = NSStepper; 
+            }; 
+            SUPERCLASS = STShapedLayoutEditor; 
+        }, 
+        {
+            CLASS = STLayoutEditor; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {box = NSBox; controller = STEntityTypeLayoutController; }; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {
+            ACTIONS = {lineWidthChanged = id; }; 
+            CLASS = STLinkLayoutEditor; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {lineWidthField = NSTextField; lineWidthStepper = NSStepper; }; 
+            SUPERCLASS = STShapedLayoutEditor; 
+        }, 
+        {
+            ACTIONS = {drawFunctionSelected = id; shapeSelected = id; }; 
+            CLASS = STShapedLayoutEditor; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {drawMatrix = NSMatrix; shapeMatrix = NSMatrix; }; 
+            SUPERCLASS = STLayoutEditor; 
+        }, 
+        {
+            ACTIONS = {displayValueChanged = id; heightChanged = id; insetAmountChanged = id; }; 
+            CLASS = STStateLayoutEditor; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                displayValueSwitch = NSButton; 
+                heightField = NSTextField; 
+                heightStepper = NSStepper; 
+                insetAmountField = NSTextField; 
+                insetAmountStepper = NSStepper; 
+            }; 
+            SUPERCLASS = STShapedLayoutEditor; 
+        }, 
+        {
+            ACTIONS = {lineWidthChanged = id; showMinMaxChanged = id; }; 
+            CLASS = STVariableLayoutEditor; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                lineWidthField = NSTextField; 
+                lineWidthStepper = NSStepper; 
+                showMinMaxSwitch = NSButton; 
+            }; 
+            SUPERCLASS = STShapedLayoutEditor; 
+        }
+    ); 
+    IBVersion = 1; 
+}

@@ -1,0 +1,26 @@
+{
+    IBClasses = (
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = PajeComponent; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = PajeFilter; LANGUAGE = ObjC; SUPERCLASS = PajeComponent; }, 
+        {
+            ACTIONS = {
+                changeInitialAngle = id; 
+                entityTypeSelectorChanged = id; 
+                graphTypeSelectorChanged = id; 
+                print = id; 
+            }; 
+            CLASS = StatViewer; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                durationField = id; 
+                entityTypeSelector = NSPopUpButton; 
+                graphTypeSelector = NSPopUpButton; 
+                matrix = id; 
+                window = id; 
+            }; 
+            SUPERCLASS = PajeFilter; 
+        }
+    ); 
+    IBVersion = 1; 
+}

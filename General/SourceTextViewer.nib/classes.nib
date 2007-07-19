@@ -1,0 +1,13 @@
+{
+    IBClasses = (
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            ACTIONS = {lineNumberChanged = id; }; 
+            CLASS = SourceTextController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {lineNumberField = NSTextField; textView = NSTextView; }; 
+            SUPERCLASS = NSObject; 
+        }
+    ); 
+    IBVersion = 1; 
+}

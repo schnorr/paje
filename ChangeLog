@@ -1,4 +1,7 @@
 2007-07-19  Benhur Stein <benhur@inf.ufsm.br>
+    * */*.nib: add missing files
+
+2007-07-19  Benhur Stein <benhur@inf.ufsm.br>
     * General/GNUmakefile: define installation domain; General framework
       needs to be installed separately, before compiling Paje
     * README: change installation howto

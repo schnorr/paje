@@ -1,0 +1,20 @@
+{
+    IBClasses = (
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = NSObject; LANGUAGE = ObjC; }, 
+        {
+            ACTIONS = {filterChanged = id; filterMenuSelected = id; open = id; print = id; }; 
+            CLASS = PajeController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                filtersDummyView = NSBox; 
+                filtersMenu = NSMenu; 
+                filtersPopUp = NSPopUpButton; 
+                filtersWindow = NSWindow; 
+                toolsMenu = NSMenu; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }
+    ); 
+    IBVersion = 1; 
+}

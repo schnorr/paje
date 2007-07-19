@@ -1,0 +1,15 @@
+{
+    IBClasses = (
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            ACTIONS = {moveDown = id; moveUp = id; }; 
+            CLASS = Order; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {browserBox = NSView; view = NSView; }; 
+            SUPERCLASS = PajeFilter; 
+        }, 
+        {CLASS = PajeComponent; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = PajeFilter; LANGUAGE = ObjC; SUPERCLASS = PajeComponent; }
+    ); 
+    IBVersion = 1; 
+}

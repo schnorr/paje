@@ -1,0 +1,44 @@
+{
+    IBClasses = (
+        {
+            ACTIONS = {
+                entityPopUpChanged = id; 
+                hideButtonClicked = id; 
+                matrixChanged = id; 
+                selectAll = id; 
+                unselectAll = id; 
+            }; 
+            CLASS = ContainerSelector; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                entityTypePopUp = NSPopUpButton; 
+                hideButton = NSButton; 
+                matrix = NSMatrix; 
+                view = NSView; 
+            }; 
+            SUPERCLASS = PajeFilter; 
+        }, 
+        {
+            ACTIONS = {
+                entityPopUpChanged = id; 
+                hideButtonClicked = id; 
+                matrixChanged = id; 
+                selectAll = id; 
+                unselectAll = id; 
+            }; 
+            CLASS = EntityTypeSelector; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                entityTypePopUp = NSPopUpButton; 
+                hideButton = NSButton; 
+                matrix = NSMatrix; 
+                view = NSView; 
+            }; 
+            SUPERCLASS = PajeFilter; 
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = PajeComponent; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = PajeFilter; LANGUAGE = ObjC; SUPERCLASS = PajeComponent; }
+    ); 
+    IBVersion = 1; 
+}

@@ -1,0 +1,22 @@
+{
+    IBClasses = (
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            ACTIONS = {entityTypeSelected = id; maxValueChanged = id; minValueChanged = id; }; 
+            CLASS = InsetLimit; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                entityTypePopUp = NSPopUpButton; 
+                maxField = NSTextField; 
+                maxStepper = NSStepper; 
+                minField = NSTextField; 
+                minStepper = NSStepper; 
+                view = NSView; 
+            }; 
+            SUPERCLASS = PajeFilter; 
+        }, 
+        {CLASS = PajeComponent; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = PajeFilter; LANGUAGE = ObjC; SUPERCLASS = PajeComponent; }
+    ); 
+    IBVersion = 1; 
+}

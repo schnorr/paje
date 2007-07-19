@@ -1,0 +1,17 @@
+{
+    IBClasses = (
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            ACTIONS = {containerSelected = id; containerTypeSelected = id; }; 
+            CLASS = HierarchyBrowser; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                containerTypesBrowser = NSBrowser; 
+                containersBrowser = NSBrowser; 
+                splitView = NSSplitView; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }
+    ); 
+    IBVersion = 1; 
+}

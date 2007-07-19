@@ -1,0 +1,35 @@
+{
+    IBClasses = (
+        {
+            ACTIONS = {
+                createEntityType = id; 
+                deleteEntityType = id; 
+                entityNamePopUpChanged = id; 
+                entityTypePopUpChanged = id; 
+                groupByPopUpChanged = id; 
+                matrixChanged = id; 
+                reduceModePopUpChanged = id; 
+                renameEntityType = id; 
+            }; 
+            CLASS = BusyNode; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                createEntityButton = NSButton; 
+                deleteEntityButton = NSButton; 
+                entityNameField = NSTextField; 
+                entityNamePopUp = NSPopUpButton; 
+                entityTypePopUp = NSPopUpButton; 
+                groupByPopUp = NSPopUpButton; 
+                nameMatrix = NSMatrix; 
+                reduceModePopUp = NSPopUpButton; 
+                renameEntityButton = NSButton; 
+                view = NSBox; 
+            }; 
+            SUPERCLASS = PajeFilter; 
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = PajeComponent; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {CLASS = PajeFilter; LANGUAGE = ObjC; SUPERCLASS = PajeComponent; }
+    ); 
+    IBVersion = 1; 
+}
