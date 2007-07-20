@@ -30,11 +30,12 @@ On OPENSTEP (you must have developer installed):
 - click on run (the terminal)
 
 
-On MacOS-X (you mast have development tools installed)
+On MacOS-X (you must have development tools installed)
 
-- double click on PajeMerge3.pbproj
-- click on make
-- click on run
+- install the "make" package from GNUstep (www.gnustep.org)
+- source GNUstep.sh
+- cd to Paje's directory
+- do as on linux
 
 
 There are some example trace files in the Traces directory.
