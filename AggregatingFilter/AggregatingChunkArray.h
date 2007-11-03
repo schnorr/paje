@@ -34,6 +34,7 @@
 #include "ChunkArray.h"
 #include "PajeFilter.h"
 #include "EntityAggregator.h"
+#include "AggregatingChunk.h"
 
 @interface AggregatingChunkArray : ChunkArray
 {
@@ -64,7 +65,7 @@
                                               toTime:(NSDate *)t2
                                          minDuration:(double)duration;
 
-- (EntityChunk *)lastChunk;
+- (AggregatingChunk *)lastChunk;
 
 // to be implemented by subclasses
 - (void)aggregateEntitiesUntilTime:(NSDate *)time;

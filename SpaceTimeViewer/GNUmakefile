@@ -8,9 +8,9 @@ SpaceTimeViewer_PRINCIPAL_CLASS = STController
 
 ADDITIONAL_INCLUDE_DIRS = -I../General
 ifeq ($(FOUNDATION_LIB), apple)
-LDFLAGS += -framework General
+LDFLAGS += -F../General -framework General
 else
-LDFLAGS += -lGeneral
+#LDFLAGS += -lGeneral
 endif
 
 SpaceTimeViewer_RESOURCE_FILES = \

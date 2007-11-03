@@ -44,8 +44,12 @@
 
 - (void)dealloc;
 
+// enumerate all entities that end after startTime and start before endTime,
+// in reverse endTime order.
 - (NSEnumerator *)enumeratorOfEntitiesFromTime:(NSDate *)startTime
                                         toTime:(NSDate *)endTime;
+// enumerate all entities that end after startTime and not after endTime,
+// in increasing endTime order.
 - (NSEnumerator *)enumeratorOfCompleteEntitiesFromTime:(NSDate *)startTime
                                              untilTime:(NSDate *)endTime;
 

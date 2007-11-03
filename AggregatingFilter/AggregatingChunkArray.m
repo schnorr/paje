@@ -133,7 +133,7 @@
     int chunkCount;
     NSDate *lastTime;
     
-    lastTime = [[self lastChunk] latestTime];
+    lastTime = [(AggregatingChunk *)[self lastChunk] latestTime];
 
     // if not yet aggregated until endTime, continue aggregation
     if (![self aggregationFinished]
@@ -198,7 +198,7 @@
 }
 
 - (NSEnumerator *)enumeratorOfCompleteEntitiesFromTime:(NSDate *)startTime
-                                                toTime:(NSDate *)endTime
+                                             untilTime:(NSDate *)endTime
 {
     unsigned startIndex;
     unsigned endIndex;
@@ -283,7 +283,7 @@
 }
 
 
-- (EntityChunk *)lastChunk
+- (AggregatingChunk *)lastChunk
 {
     if ([chunks count] == 0) {
         [self createChunk];
@@ -313,7 +313,7 @@
 
 - (void)finishChunk
 {
-    EntityChunk *chunk;
+    AggregatingChunk *chunk;
     NSDate *chunkEndTime;
 
     // set end time to that of last entity    

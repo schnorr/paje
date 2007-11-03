@@ -1,3 +1,7 @@
+2007-11-03  Benhur Stein <benhur@inf.ufsm.br>
+    * Clean some compilation warnings; simplify compilation on MacOSX and
+      Linux; change installations instructions in README
+
 2007-07-19  Benhur Stein <benhur@inf.ufsm.br>
     * */*.nib: add missing files
 

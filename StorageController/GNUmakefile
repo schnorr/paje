@@ -12,9 +12,9 @@ BUNDLE_NAME = StorageController
 
 ADDITIONAL_INCLUDE_DIRS = -I../General
 ifeq ($(FOUNDATION_LIB), apple)
-LDFLAGS += -framework General
+LDFLAGS += -F../General -framework General
 else
-LDFLAGS += -lGeneral
+#LDFLAGS += -lGeneral
 endif
 
 StorageController_OBJC_FILES = \

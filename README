@@ -13,9 +13,6 @@ On Linux (and other platforms where GNUstep works):
   (source /path-to-gnustep/System/Library/Makefiles/GNUstep.[c]sh
 
 - Then cd to Paje's directory and type
-  cd General
-  make install
-  cd ..
   make
   make install
 
@@ -23,19 +20,10 @@ On Linux (and other platforms where GNUstep works):
   openapp Paje.app
 
 
-On OPENSTEP (you must have developer installed):
-
-- double-click on PB.project
-- click on make (the hammer)
-- click on run (the terminal)
-
-
 On MacOS-X (you must have development tools installed)
 
-- install the "make" package from GNUstep (www.gnustep.org)
-- source GNUstep.sh
-- cd to Paje's directory
-- do as on linux
+Like on Linux, except the first step, where instead of installing 
+the whole GNUstep package, only GNUstep's "make" package is needed.
 
 
 There are some example trace files in the Traces directory.

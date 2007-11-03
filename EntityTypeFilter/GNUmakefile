@@ -7,9 +7,9 @@ EntityTypeSelector_PRINCIPAL_CLASS = EntityTypeSelector
 
 ADDITIONAL_INCLUDE_DIRS = -I../General.bproj
 ifeq ($(FOUNDATION_LIB), apple)
-LDFLAGS += -framework General
+LDFLAGS += -F../General -framework General
 else
-LDFLAGS += -lGeneral
+#LDFLAGS += -lGeneral
 endif
 
 EntityTypeFilter_RESOURCE_FILES = \

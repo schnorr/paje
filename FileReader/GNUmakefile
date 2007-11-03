@@ -34,9 +34,9 @@ FileReader_PRINCIPAL_CLASS=PajeFileReader
 
 FileReader_LIBRARIES_DEPEND_UPON += 
 ifeq ($(FOUNDATION_LIB), apple)
-LDFLAGS += -framework General
+LDFLAGS += -F../General -framework General
 else
-LDFLAGS += -lGeneral
+#LDFLAGS += -lGeneral
 endif
 
 #

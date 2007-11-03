@@ -8,9 +8,9 @@ ReductionFilter_PRINCIPAL_CLASS = BusyNode
 
 ADDITIONAL_INCLUDE_DIRS = -I../General
 ifeq ($(FOUNDATION_LIB), apple)
-LDFLAGS += -framework General
+LDFLAGS += -F../General -framework General
 else
-LDFLAGS += -lGeneral
+#LDFLAGS += -lGeneral
 endif
 
 ReductionFilter_RESOURCE_FILES = \

@@ -41,7 +41,6 @@
 
 - (PajeEntity *)firstIncomplete;
 
-- (BOOL)hasBeenAggregated:(PajeEntity *)entity;
 - (BOOL)canFinishBeforeEntity:(PajeEntity *)entity;
         
 //- (NSDate *)lastTime;
