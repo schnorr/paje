@@ -67,18 +67,21 @@ typedef     void (drawfunction)(NSBezierPath *path, NSColor *color);
 {
     drawfunction *function;
     NSString *name;
+    BOOL fillsPath;
 } 
 
 + (DrawFunction *)drawFunctionWithName:(NSString *)name;
 + (NSArray *)drawFunctions;
 
 + (DrawFunction *)drawFunctionWithFunction:(drawfunction *)f
-                                      name:(NSString *)n;
+                                      name:(NSString *)n
+                                 fillsPath:(BOOL)fills;
 
-- (id)initWithDrawFunction:(drawfunction *)f name:(NSString *)n;
+- (id)initWithDrawFunction:(drawfunction *)f name:(NSString *)n fillsPath:(BOOL)fills;
 
 - (drawfunction *)function;
 - (NSString *)name;
+- (BOOL)fillsPath;
 
 @end
 

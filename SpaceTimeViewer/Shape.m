@@ -747,19 +747,19 @@ NSDictionary *drawFunctionsDictionary;
 
 + (void)initialize
 {
-#define FUNCTION(n) [self drawFunctionWithFunction:n name:@#n], @#n
+#define FUNCTION(n, f) [self drawFunctionWithFunction:n name:@#n fillsPath:f], @#n
     drawFunctionsDictionary = [[NSDictionary dictionaryWithObjectsAndKeys:
-        FUNCTION(PSFill),
-        FUNCTION(PSFrame),
-        FUNCTION(PSFillAndFrame),
-        FUNCTION(PSDashedStroke),
-        FUNCTION(PSFillAndFrameBlack),
-        FUNCTION(PSFillAndFrameGray),
-        FUNCTION(PSFillAndFrameWhite),
-        FUNCTION(PSFrameWhite),
-        FUNCTION(PSFillAndDashedStrokeBlack),
-        FUNCTION(PS3DStroke),
-        FUNCTION(PS3DFill),
+        FUNCTION(PSFill, YES),
+        FUNCTION(PSFrame, NO),
+        FUNCTION(PSFillAndFrame, YES),
+        FUNCTION(PSDashedStroke, NO),
+        FUNCTION(PSFillAndFrameBlack, YES),
+        FUNCTION(PSFillAndFrameGray, YES),
+        FUNCTION(PSFillAndFrameWhite, YES),
+        FUNCTION(PSFrameWhite, NO),
+        FUNCTION(PSFillAndDashedStrokeBlack, YES),
+        FUNCTION(PS3DStroke, NO),
+        FUNCTION(PS3DFill, YES),
         nil] retain];
 #undef FUNCTION
 }
@@ -779,16 +779,17 @@ NSDictionary *drawFunctionsDictionary;
     return [drawFunctionsDictionary allValues];
 }
 
-+ (DrawFunction *)drawFunctionWithFunction:(drawfunction *)f name:(NSString *)n
++ (DrawFunction *)drawFunctionWithFunction:(drawfunction *)f name:(NSString *)n fillsPath:(BOOL)fills
 {
-    return [[[self alloc] initWithDrawFunction:f name:n] autorelease];
+    return [[[self alloc] initWithDrawFunction:f name:n fillsPath:fills] autorelease];
 }
 
-- (id)initWithDrawFunction:(drawfunction *)f name:(NSString *)n
+- (id)initWithDrawFunction:(drawfunction *)f name:(NSString *)n fillsPath:(BOOL)fills
 {
     self = [super init];
     function = f;
     name = [n retain];
+    fillsPath = fills;
     return self;
 }
 
@@ -800,5 +801,10 @@ NSDictionary *drawFunctionsDictionary;
 - (NSString *)name
 {
     return name;
+}
+
+- (BOOL)fillsPath
+{
+    return fillsPath;
 }
 @end

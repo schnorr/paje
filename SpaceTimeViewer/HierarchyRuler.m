@@ -500,7 +500,7 @@ r.size.width = NSMaxX([self bounds]) - r.origin.x - 1;
                         [[NSColor whiteColor] set];
                         NSRectFill(r);
                     }
-                    [cell setStringValue:[instance description]];
+                    [cell setStringValue:[instance name/*descriptino*/]];
                     [cell drawWithFrame:NSInsetRect(r, -.5, -.5) inView:self];
                 }
             }

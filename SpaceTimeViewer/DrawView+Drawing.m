@@ -31,7 +31,7 @@
 
 @implementation DrawView (Drawing)
 
-- (void)addToHighlightPath:(NSBezierPath *)path
+- (void)addToHighlightPath:(NSBezierPath *)path fillPath:(BOOL)fill
 {
     if ([path isEmpty]) return;
 
@@ -55,7 +55,9 @@
     [highlightMask lockFocus];
     [[NSColor blackColor] set];
     [hp stroke];
-    [hp fill];
+    if (fill) {
+        [hp fill];
+    }
     [highlightMask unlockFocus];
 
     // stroke the path in various widths and transparencies in highlightImage
@@ -169,7 +171,7 @@
             }
 
             if ([filter isSelectedEntity:entity]) {
-                [self addToHighlightPath:path];
+                [self addToHighlightPath:path fillPath:[[layout drawFunction] fillsPath]];
             }
             [[NSColor blackColor] set];
             [path stroke];
@@ -180,7 +182,7 @@
 
             pathFunction(path, NSMakeRect(x, y, w, h));
             if ([filter isSelectedEntity:entity]) {
-                [self addToHighlightPath:path];
+                [self addToHighlightPath:path fillPath:[[layout drawFunction] fillsPath]];
             }
             drawFunction(path, color);
 
@@ -308,7 +310,7 @@ do { \
 
         if ([filter isAggregateEntity:entity]) {
             if ([filter isSelectedEntity:entity]) {
-                [self addToHighlightPath:path];
+                [self addToHighlightPath:path fillPath:[[layout drawFunction] fillsPath]];
             }
             [path moveToPoint:NSMakePoint(x, y)];
             [path lineToPoint:NSMakePoint(x+w, y+newHeight)];
@@ -330,7 +332,7 @@ do { \
             drawFunction(path, nil);// REVER
         } else { // !aggregate
             if ([filter isSelectedEntity:entity]) {
-                [self addToHighlightPath:path];
+                [self addToHighlightPath:path fillPath:[[layout drawFunction] fillsPath]];
             }
 
             color = [filter colorForEntity:entity];
@@ -443,15 +445,16 @@ static void addToMinMaxPath(NSBezierPath *path,
         yvMax = [filter maxValueForEntity:entity] * yScale + yOffset;
 
         if (first) {
+            yOld = y;
             [valuePath moveToPoint:NSMakePoint(xEnd, y)];
             if (showMinMax) {
                 [minPath moveToPoint:NSMakePoint(xEnd, y)];
                 [maxPath moveToPoint:NSMakePoint(xEnd, y)];
             }
             first = NO;
-        } else {
+        } //else {
             pathFunction(valuePath, NSMakeRect(xStart, y, xEnd-xStart, 0));
-        }
+        //}
         if ([filter isSelectedEntity:entity]) {
             [selectedPath moveToPoint:NSMakePoint(xEnd, yOld)];
             pathFunction(selectedPath, NSMakeRect(xStart, y, xEnd-xStart, 0));
@@ -478,7 +481,8 @@ static void addToMinMaxPath(NSBezierPath *path,
     }
 
     if (hasHighlight) {
-        [self addToHighlightPath:selectedPath];
+        [selectedPath setLineWidth:[layout lineWidth]];
+        [self addToHighlightPath:selectedPath fillPath:[[layout drawFunction] fillsPath]];
     }
     color = [filter colorForEntityType:entityType];
     [valuePath setLineWidth:[layout lineWidth]];
@@ -552,7 +556,7 @@ static void addToMinMaxPath(NSBezierPath *path,
             pathFunction(path, NSMakeRect(x1, y1, x2-x1, y2-y1));
         }
         if ([filter isSelectedEntity:entity]) {
-            [self addToHighlightPath:path];
+            [self addToHighlightPath:path fillPath:[[layout drawFunction] fillsPath]];
         }
         drawFunction(path, color);
     }

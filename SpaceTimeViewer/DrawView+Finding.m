@@ -395,7 +395,7 @@ if (![entity isKindOfClass:[PajeEntity class]]) return YES;
                 scale = 1;
             }
             offset = [layoutDescriptor yInContainer:[filter containerForEntity:entity]] + 2 - max * scale;
-            y1 = [filter doubleValueForEntity:entity] * scale + offset;
+            y1 = max/*[filter doubleValueForEntity:entity]*/ * scale + offset;
             y2 = min * scale + offset;
             rect.origin.x = x1;
             rect.size.width = (x2 - x1);
@@ -440,7 +440,7 @@ if (![entity isKindOfClass:[PajeEntity class]]) return YES;
 {
     NSRect rect;
     rect = positiveRect([self rectForEntity:entity]);
-    rect = NSInsetRect(rect, -10, -10);
+    rect = NSInsetRect(rect, -13, -13); // should be 10+lineWidth
     return rect;
 }
 @end
