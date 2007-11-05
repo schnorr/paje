@@ -500,7 +500,7 @@ r.size.width = NSMaxX([self bounds]) - r.origin.x - 1;
                         [[NSColor whiteColor] set];
                         NSRectFill(r);
                     }
-                    [cell setStringValue:[instance name/*descriptino*/]];
+                    [cell setStringValue:[instance name/*description*/]];
                     [cell drawWithFrame:NSInsetRect(r, -.5, -.5) inView:self];
                 }
             }
@@ -863,7 +863,8 @@ r.size.width = NSMaxX([self bounds]) - r.origin.x - 1;
         while ((orgContainer = [contEnum nextObject]) != nil) {
             if ([orgContainer isEqual:containerBeingDragged]) {
                 continue;
-            } else if ([orgContainer isEqual:droppedInstance]) {                                 if (!before) [order addObject:orgContainer];
+            } else if ([orgContainer isEqual:droppedInstance]) {
+                if (!before) [order addObject:orgContainer];
                 [order addObject:containerBeingDragged];
                 if (before) [order addObject:orgContainer];
             } else {

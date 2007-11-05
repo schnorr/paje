@@ -1,3 +1,6 @@
+2007-11-05  Benhur Stein <benhur@inf.ufsm.br>
+    * SpaceTimeViewer/HierarchyRuler.m: correct typo/missing line break
+
 2007-11-03  Benhur Stein <benhur@inf.ufsm.br>
     * better drawing code for variables
 
