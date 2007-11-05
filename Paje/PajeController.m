@@ -116,7 +116,6 @@ static PajeController *uniqueController;
     pathEnumerator = [bundlePaths objectEnumerator];
     while ((path = [pathEnumerator nextObject]) != nil) {
         bundlePath = [path stringByAppendingPathComponent:bundleName];
-NSLog(@"path:%@", bundlePath);
         bundle = [NSBundle bundleWithPath:bundlePath];
         if ([bundle load]) {
             [bundles setObject:bundle forKey:name];

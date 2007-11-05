@@ -1,3 +1,6 @@
+2007-11-06  Benhur Stein <benhur@inf.ufsm.br>
+    * remove a log message
+
 2007-11-05  Benhur Stein <benhur@inf.ufsm.br>
     * SpaceTimeViewer/HierarchyRuler.m: correct typo/missing line break
 
