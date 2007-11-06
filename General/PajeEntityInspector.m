@@ -266,7 +266,10 @@ static NSMutableArray *allInstances;
     box = [NSUnarchiver unarchiveObjectWithData:archivedBox];
     field1 = [NSUnarchiver unarchiveObjectWithData:archivedTitleField];
     leftMargin = NSMinX([field1 frame]);
-    curY = NSMinY([field1 frame]) - 4;
+    curY = NSMinY([field1 frame]);
+#ifdef __APPLE__
+    curY -= 4;
+#endif
     deltaHeight = NSHeight([box frame]) - NSMaxY([field1 frame]);
 
     [box setTitle:boxTitle];

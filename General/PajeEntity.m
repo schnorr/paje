@@ -251,7 +251,7 @@
 - (NSArray *)fieldNames
 {
     return [NSMutableArray arrayWithObjects:
-        @"EntityType", @"Name", @"Value", @"Container",
+        @"EntityType", /*@"Name",*/ @"Value", @"Container",
         @"StartTime", @"EndTime", @"Duration",
         nil];
 }
@@ -260,8 +260,8 @@
 {
     if ([fieldName isEqualToString:@"EntityType"]) {
         return [self entityType];
-    } else if ([fieldName isEqualToString:@"Name"]) {
-        return [self name];
+    //} else if ([fieldName isEqualToString:@"Name"]) {
+    //    return [self name];
     } else if ([fieldName isEqualToString:@"Value"]) {
         return [self value];
     } else if ([fieldName isEqualToString:@"Container"]) {

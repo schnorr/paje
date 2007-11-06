@@ -70,6 +70,7 @@
     Assign(extraFields, [e extraFields]);
     if (![entityType isKnownEventType:[e cStringForFieldId:PajeEventIdFieldId]]) {
         [entityType addFieldNames:[e fieldNames]];
+        [entityType addFieldNames:[self fieldNames]];
     }
     Assign(time, [e time]);
 }
@@ -83,7 +84,7 @@
 {
     NSArray *fieldNames;
     fieldNames = [super fieldNames];
-    fieldNames = [fieldNames arrayByAddingObject:@"Time"];
+    //fieldNames = [fieldNames arrayByAddingObject:@"Time"];
     if (extraFields != nil) {
         fieldNames = [fieldNames arrayByAddingObjectsFromArray:[extraFields allKeys]];
     }
