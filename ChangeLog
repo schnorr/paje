@@ -1,4 +1,8 @@
 2007-11-06  Benhur Stein <benhur@inf.ufsm.br>
+    * FieldFilter/FieldFilter.m, ImbricationFilter/InsetLimit.m: add
+      missing method enumeratorOfCompleteEntitiesTyped:...
+
+2007-11-06  Benhur Stein <benhur@inf.ufsm.br>
     * remove a log message
 
 2007-11-05  Benhur Stein <benhur@inf.ufsm.br>

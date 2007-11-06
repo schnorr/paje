@@ -367,6 +367,33 @@
                                                 maxValue:max];
 }
 
+- (NSEnumerator *)enumeratorOfCompleteEntitiesTyped:(PajeEntityType *)entityType
+                                        inContainer:(PajeContainer *)container
+                                           fromTime:(NSDate *)start
+                                             toTime:(NSDate *)end
+                                        minDuration:(double)minDuration
+{
+    int min, max;
+    NSRange ran;
+    NSEnumerator *origEnum;
+    origEnum = [inputComponent enumeratorOfCompleteEntitiesTyped:entityType
+                                                     inContainer:container
+                                                        fromTime:start
+                                                          toTime:end
+                                                     minDuration:minDuration];
+    if (![self isFilteredEntityType:entityType]) {
+        return origEnum;
+    }
+    ran = [self rangeForEntityType:entityType];
+    min = ran.location;
+    max = ran.length;
+    return [ImbricationFilteringEnumerator
+                                enumeratorWithEnumerator:origEnum
+                                          inputComponent:inputComponent
+                                                minValue:min
+                                                maxValue:max];
+}
+
 
 - (int)imbricationLevelForEntity:(PajeEntity *)entity;
 {

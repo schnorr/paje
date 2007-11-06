@@ -308,6 +308,34 @@ withFilterDescriptor:(FieldFilterDescriptor *)fdesc
     }
 }
 
+- (NSEnumerator *)enumeratorOfCompleteEntitiesTyped:(PajeEntityType *)entityType
+                                        inContainer:(PajeContainer *)container
+                                           fromTime:(NSDate *)start
+                                             toTime:(NSDate *)end
+                                        minDuration:(double)minDuration
+{
+    NSEnumerator *origEnum;
+    FieldFilterDescriptor *fdesc;
+    
+    origEnum = [super enumeratorOfCompleteEntitiesTyped:entityType
+                                            inContainer:container
+                                               fromTime:start
+                                                 toTime:end
+                                            minDuration:minDuration];
+
+    fdesc = [filterDescriptors objectForKey:entityType];
+    if (fdesc != nil && [fdesc action] == FILTEROUT) {
+        SEL filterSelector = @selector(filterEntity:withFilterDescriptor:);
+        return [[[FilteredEnumerator alloc]
+                                     initWithEnumerator:origEnum
+                                                 filter:self
+                                               selector:filterSelector
+                                                context:fdesc] autorelease];
+    } else {
+        return origEnum;
+    }
+}
+
 - (BOOL)isSelectedEntity:(id<PajeEntity>)entity
 {
     FieldFilterDescriptor *fdesc;
