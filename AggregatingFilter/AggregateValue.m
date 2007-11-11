@@ -133,7 +133,7 @@
     return condensedEntitiesCount;
 }
 
-- (NSColor *)color
+- (NSColor *)xcolor
 {
     return [NSColor whiteColor];
 }

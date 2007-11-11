@@ -90,7 +90,7 @@
     return [NSString stringWithFormat:@"%f", [self doubleValue]];
 }
 
-- (NSColor *)color
+- (NSColor *)xcolor
 {
     // FIXME: should color be calculated from value? If so, who keeps the color limits?
     float x;

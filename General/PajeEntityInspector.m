@@ -573,6 +573,7 @@ static NSMutableArray *allInstances;
 {
     // global fields
     [nameField setStringValue:[[filter valueForEntity:inspectedEntity] stringValue]];
+    [colorField setTarget:nil];
     [colorField setColor:[filter colorForEntity:inspectedEntity]];
     [colorField setAction:@selector(colorChanged:)];
     [colorField setTarget:self];
