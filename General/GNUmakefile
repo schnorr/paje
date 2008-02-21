@@ -5,6 +5,8 @@ include $(GNUSTEP_MAKEFILES)/common.make
 
 FRAMEWORK_NAME = General
 
+LIBRARIES_DEPEND_UPON += $(FND_LIBS) $(GUI_LIBS) $(OBJC_LIBS)
+
 General_OBJC_FILES = \
 	Comparing.m \
 	FilteredEnumerator.m \

@@ -1,3 +1,7 @@
+2008-02-21  Benhur Stein <benhur@inf.ufsm.br>
+    * all GNUmakefile: clean some compiling/linking issues (patches by
+      Yavor Doganov and Vincent Danjean)
+
 2007-11-11  Benhur Stein <benhur@inf.ufsm.br>
     * correct some coloring issues
 

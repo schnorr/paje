@@ -1,7 +1,3 @@
-ifeq "$(GNUSTEP_SYSTEM_ROOT)" ""
-  include Makefile
-else
-
 BUNDLE_INSTALL_DIR=$(GNUSTEP_BUNDLES)/Paje
 
 include $(GNUSTEP_MAKEFILES)/common.make
@@ -12,9 +8,10 @@ BUNDLE_NAME = AggregatingFilter
 
 ADDITIONAL_INCLUDE_DIRS = -I../General
 ifeq ($(FOUNDATION_LIB), apple)
-LDFLAGS += -F../General -framework General
+	LDFLAGS += -F../General -framework General
 else
-#LDFLAGS += -lGeneral
+	AggregatingFilter_BUNDLE_LIBS += -lGeneral
+	ADDITIONAL_LIB_DIRS += -L../General/General.framework/Versions/Current
 endif
 
 AggregatingFilter_OBJC_FILES = \
@@ -44,4 +41,3 @@ h.template
 include $(GNUSTEP_MAKEFILES)/bundle.make
 -include GNUmakefile.postamble
 
-endif
