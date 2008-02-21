@@ -17,18 +17,17 @@
     along with Pajé; if not, write to the Free Software Foundation, Inc.,
     59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 */
+
 #include "PajeController.h"
 #include "PajeTraceController.h"
 #include "PajeCheckPoint.h"
-#if 0
-#ifndef GNUSTEP
-#include "OEObject.h"
-#endif
-#endif
 #include "../General/Protocols.h"
 #include "../General/Macros.h"
 #include "../General/PajeFilter.h"
 #include "../StorageController/Encapsulate.h"
+
+#include <locale.h>
+
 
 @interface NSMenu (RemoveAllItems)
 - (void)removeAllItems;
@@ -77,6 +76,9 @@ static PajeController *uniqueController;
         Assign(bundles, [NSMutableDictionary dictionary]);
         
         uniqueController = self;
+
+        // FIXME: find a cleaner way of reading numbers independently of locale
+        setlocale(LC_NUMERIC, "C");
     }
     return uniqueController;
 }

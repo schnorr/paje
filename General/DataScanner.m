@@ -21,8 +21,6 @@
 
 #include "DataScanner.h"
 
-#include <locale.h>
-
 @implementation DataScanner
 + (DataScanner *)scannerWithData:(NSData *)_data
 {
@@ -34,9 +32,6 @@
     if ((self = [super init])) {
         Assign(data, _data);
         position = 0;
-        
-        // FIXME: find a cleaner way of reading numbers independently of locale
-        setlocale(LC_NUMERIC, "C");
     }
     return self;
 }

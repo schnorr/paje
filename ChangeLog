@@ -1,4 +1,8 @@
 2008-02-21  Benhur Stein <benhur@inf.ufsm.br>
+    * Paje/PajeController.m General/NSDate+Additions.m: move locale
+      setting to a more global place
+
+2008-02-21  Benhur Stein <benhur@inf.ufsm.br>
     * all GNUmakefile: clean some compiling/linking issues (patches by
       Yavor Doganov and Vincent Danjean)
 
