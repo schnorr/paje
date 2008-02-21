@@ -1,4 +1,7 @@
 2008-02-21  Benhur Stein <benhur@inf.ufsm.br>
+    * SpaceTimeViewer/DrawView.m: register a default size for aggregation
+
+2008-02-21  Benhur Stein <benhur@inf.ufsm.br>
     * Paje/PajeController.m General/NSDate+Additions.m: move locale
       setting to a more global place
 

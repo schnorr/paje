@@ -134,6 +134,10 @@
     if (pointsPerSecond == 0) {
         pointsPerSecond = 10000;
     }
+    [[NSUserDefaults standardUserDefaults] registerDefaults:
+        [NSDictionary dictionaryWithObjectsAndKeys:
+            @"30", DefaultsKey(@"SmallEntityWidth"),
+            nil]];
     smallEntityWidth = [[NSUserDefaults standardUserDefaults]
                               integerForKey:DefaultsKey(@"SmallEntityWidth")];
     hasZoomed = NO;
