@@ -29,7 +29,7 @@
 #include <Foundation/Foundation.h>
 #include <AppKit/AppKit.h>
 
-#include "../General/Protocols.h"
+#include "Protocols.h"
 
 #define PE_MAX_NFIELDS 20
 

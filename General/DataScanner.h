@@ -27,7 +27,7 @@
 //
 
 #include <Foundation/Foundation.h>
-#include "../General/Macros.h"
+#include "Macros.h"
 
 @interface DataScanner : NSObject
 {

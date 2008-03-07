@@ -1,3 +1,6 @@
+2008-03-07  Benhur Stein <benhur@inf.ufsm.br>
+    * General/: correct some #includes
+
 2008-02-21  Benhur Stein <benhur@inf.ufsm.br>
     * SpaceTimeViewer/DrawView.m: register a default size for aggregation
 

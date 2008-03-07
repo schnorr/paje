@@ -25,7 +25,7 @@
 // change description of dates to only show seconds,
 
 #include <Foundation/NSDate.h>
-#include "../General/Comparing.h"
+#include "Comparing.h"
 
 @interface NSDate (Comparision)
 - (BOOL)isEarlierThanDate:(NSDate *)otherDate;

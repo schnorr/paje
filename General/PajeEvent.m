@@ -24,12 +24,12 @@
  */
 
 #include "PajeEvent.h"
-#include "../General/NSUserDefaults+Additions.h"
-#include "../General/NSColor+Additions.h"
-#include "../General/UniqueString.h"
-#include "../General/Protocols.h"
-#include "../General/PajeType.h"
-#include "../General/Macros.h"
+#include "NSUserDefaults+Additions.h"
+#include "NSColor+Additions.h"
+#include "UniqueString.h"
+#include "Protocols.h"
+#include "PajeType.h"
+#include "Macros.h"
 
 
 // must follow PajeEventId definition

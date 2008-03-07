@@ -18,8 +18,8 @@
     59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 */
 #include "SourceTextController.h"
-#include "../General/NSString+Additions.h"
-#include "../General/Macros.h"
+#include "NSString+Additions.h"
+#include "Macros.h"
 
 @implementation SourceTextController
 

@@ -28,7 +28,7 @@
 #include "Macros.h"
 #include "NSUserDefaults+Additions.h"
 #include "PajeContainer.h"
-#include "../General/CStringCallBacks.h"
+#include "CStringCallBacks.h"
 
 @implementation PajeEntityType
 
