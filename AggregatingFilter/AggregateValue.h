@@ -26,7 +26,7 @@
 
 - (unsigned)condensedEntitiesCount;
 
-- (NSColor *)color;
+//- (NSColor *)color;
 @end
 
 #endif

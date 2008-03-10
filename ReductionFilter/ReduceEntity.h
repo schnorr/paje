@@ -52,7 +52,7 @@
 - (NSString *)name;
 - (id)value;
 - (double)doubleValue;
-- (NSColor *)color;
+//- (NSColor *)color;
 - (NSArray *)relatedEntities;
 
 + (void)getMinValue:(double *)min
