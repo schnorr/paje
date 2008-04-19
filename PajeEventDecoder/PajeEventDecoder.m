@@ -88,7 +88,7 @@ char *break_line(char *s, line *line)
     self = [super initWithController:c];
 
     if (self != nil) {
-        status = OUT_DEF;
+        defStatus = OUT_DEF;
 
         eventDefinitions = NSCreateMapTable(CStringMapKeyCallBacks,
                                             NSObjectMapValueCallBacks, 50);
@@ -109,7 +109,8 @@ char *break_line(char *s, line *line)
 
 - (void)startChunk:(int)chunkNumber
 {
-    if (chunkNumber != currentChunk) {
+    rereadingChunk = (chunkNumber + 1 < [chunkInfo count]);
+    if (rereadingChunk) {
         if (chunkNumber >= [chunkInfo count]) {
             // cannot position in an unread place
             [self raise:@"Cannot start unknown chunk"];
@@ -130,12 +131,6 @@ char *break_line(char *s, line *line)
                 [NSNumber numberWithInt:lineCount], nil]];
 
         }
-    }
-    if (status != EVENTS && chunkNumber+1 < [chunkInfo count]) {
-        // attempt to reread a chunk with only definitions
-        ignoringChunk = YES;
-    } else {
-        ignoringChunk = NO;
     }
 
     // keep the ball rolling (tell other components)
@@ -181,9 +176,6 @@ char *break_line(char *s, line *line)
 
 - (void)inputEntity:(id)data
 {
-    if (ignoringChunk) {
-        return;
-    }
     if (![data isKindOfClass:[NSData class]]) {
         [self raise:@"Internal error: incorrect data type"];
     }
@@ -203,10 +195,12 @@ char *break_line(char *s, line *line)
         if (line.word_count == 0) {
             continue;
         }
-        if (status != EVENTS) {
+        if (line.word[0][0] == '%') {
+            if (rereadingChunk) {
+                continue;
+            }
             [self scanDefinitionLine:&line];
-        }
-	if (status == EVENTS) {
+        } else {
             PajeEvent *event;
             event = [self scanEventLine:&line];
             if (event != nil) {
@@ -218,8 +212,8 @@ char *break_line(char *s, line *line)
 
 - (BOOL)canEndChunkBefore:(id)data
 {
-    if (ignoringChunk) {
-        [self raise:@"SHOULD NOT BE IGNORING WHEN THIS METHOD IS CALLED!!!"];
+    if (rereadingChunk) {
+        [self raise:@"This method should not be called when rereading!!!"];
         return YES;
     }
     if (![data isKindOfClass:[NSData class]]) {
@@ -235,46 +229,70 @@ char *break_line(char *s, line *line)
     initDataPointer = dataPointer;
 
     line line;
-    BOOL result = NO;
-    
+    BOOL canEndChunk = YES;
+
+    // it is possible to end the chunk before the received data if
+    // it can be ended before the first event in it, and there is
+    // no event definition data before that event
     while ((dataPointer - initDataPointer) < length) {
         dataPointer = break_line(dataPointer, &line);
         if (line.word_count == 0) {
             continue;
         }
-        if (status != EVENTS) {
+        if (line.word[0][0] == '%') {
             [self scanDefinitionLine:&line];
-        }
-	if (status == EVENTS) {
+            canEndChunk = NO;
+            break;
+        } else {
             PajeEvent *event;
             event = [self scanEventLine:&line];
             if (event != nil) {
-                result = [super canEndChunkBefore:event];
+                canEndChunk = [super canEndChunkBefore:event];
+                break;
             }
         }
     }
-    return result;
+    if (canEndChunk) {
+        return canEndChunk;
+    }
+    // the chunk cannot be ended -- process all remaining data
+    while ((dataPointer - initDataPointer) < length) {
+        dataPointer = break_line(dataPointer, &line);
+        if (line.word_count == 0) {
+            continue;
+        }
+        if (line.word[0][0] == '%') {
+            [self scanDefinitionLine:&line];
+        } else {
+            PajeEvent *event;
+            event = [self scanEventLine:&line];
+            if (event != nil) {
+                [self outputEntity:event];
+            }
+        }
+    }
+    return NO;
 }
 
 - (void)scanDefinitionLine:(line *)line
 {
     char *str;
     int n = 0;
+    char *eventName;
+    char *eventId;
+    char *fieldName;
+    char *fieldType;
 
     str = line->word[n++];
+    if (*str++ != '%') {
+        [self raise:@"Line should start with a '%%'"];
+    }
+    if (*str == '\0') {
+        str = line->word[n++];
+    }
 
-    switch (status) {
+    switch (defStatus) {
     case OUT_DEF:
-        if (*str++ != '%') {
-            status = EVENTS;
-            break;
-        }
-
-        char *eventName;
-        char *eventId;
-        if (*str == '\0') {
-            str = line->word[n++];
-        }
         eventName = line->word[n++];
         eventId   = line->word[n++];
         if (n != line->word_count
@@ -295,18 +313,9 @@ char *break_line(char *s, line *line)
                                 definitionWithPajeEventId:pajeEventId
                                                internalId:eventId];
         NSMapInsert(eventDefinitions, strdup(eventId), eventBeingDefined);
-        status = IN_DEF;
+        defStatus = IN_DEF;
         break;
     case IN_DEF:
-        if (*str++ != '%') {
-            [self raise:@"Line should start with a '%%'"];
-        }
-
-        char *fieldName;
-        char *fieldType;
-        if (*str == '\0') {
-            str = line->word[n++];
-        }
         fieldName = str;
 
         if (n > line->word_count) {
@@ -314,7 +323,7 @@ char *break_line(char *s, line *line)
         }
         if (strcmp(fieldName, "EndEventDef") == 0) {
             // TODO: verify if all obligatory fields are defined
-            status = OUT_DEF;
+            defStatus = OUT_DEF;
             break;
         }
 
@@ -346,7 +355,7 @@ char *break_line(char *s, line *line)
 
     eventId = line->word[0];
     if (*eventId == '%') {
-        return nil;
+        [self raise:@"Line should not start with a '%%'"];
     }
     eventDefinition = NSMapGet(eventDefinitions, eventId);
     if (eventDefinition == nil) {

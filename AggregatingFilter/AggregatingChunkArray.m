@@ -392,7 +392,6 @@
     EntityChunk *chunk;
 
     chunk = [self chunkAtIndex:chunkIndex];
-    NSAssert([chunk isZombie], @"refilling a non-empty chunk");
 
     [chunk activate];
 

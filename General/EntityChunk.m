@@ -136,7 +136,7 @@ static int count;
 
 - (BOOL)isActive
 {
-    return chunkState == active;
+    return chunkState == loading || chunkState == reloading;
 }
 
 - (BOOL)isFull
@@ -151,36 +151,36 @@ static int count;
 
 - (BOOL)canEnumerate
 {
-    return chunkState == frozen;
+    return chunkState == frozen || chunkState == loading;
 }
 
 - (BOOL)canInsert
 {
-    return chunkState == active;
+    return [self isActive];
 }
 
 // sent to a zombie to refill it
 - (void)activate
 {
-//    NSAssert(chunkState == empty, @"trying to activate a non-zombie chunk");
-    chunkState = active;
+    NSAssert([self isZombie], @"trying to activate a non-zombie chunk");
+    chunkState = reloading;
     entities = [[PSortedArray alloc] initWithSelector:@selector(endTime)];
 }
 
 // sent to an active chunk to make it full
 - (void)freeze
 {
-//    NSAssert(chunkState == active, @"trying to freeze a non-active chunk");
+    NSAssert([self isActive], @"trying to freeze a non-active chunk");
     chunkState = frozen;
 }
 
 // sent to a full chunk to empty it (make a zombie)
 - (void)empty
 {
-//    NSAssert(chunkState == frozen, @"trying to activate a non-zombie chunk");
     if ([self isZombie]) {
         return;
     }
+    NSAssert(![self isActive], @"trying to empty an active chunk");
     // do not empty it nothing would be released
     if ([entities count] == 0) {
         return;
@@ -277,6 +277,8 @@ static int count;
 {
     NSAssert([self canEnumerate], @"enumerating non-enumerable chunk");
     [isa touch:self];
+    // return all entities that finish after time (those that finish
+    // exactly at time are not returned)
     return [[self completeEntities]
                 reverseObjectEnumeratorAfterValue:(id<Comparing>)time];
 }
@@ -285,6 +287,8 @@ static int count;
 {
     NSAssert([self canEnumerate], @"enumerating non-enumerable chunk");
     [isa touch:self];
+    // return all entities that finish after time (those that finish
+    // exactly at time are not returned)
     return [[self completeEntities]
 //                reverseObjectEnumeratorNotBeforeValue:(id<Comparing>)time];
                 reverseObjectEnumeratorAfterValue:(id<Comparing>)time];

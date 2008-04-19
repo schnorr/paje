@@ -82,7 +82,7 @@
 @interface EventChunk : SimulChunk
 @end
 
-@interface StateChunk : EventChunk
+@interface StateChunk : SimulChunk
 {
     NSMutableArray *simulationStack;
     int resimulationStackLevel;
@@ -91,14 +91,13 @@
 @end
 
 
-@interface LinkChunk : StateChunk
+@interface LinkChunk : SimulChunk
 {
-//    NSMutableArray *pendingLinks;
-#define pendingLinks simulationStack
+    NSMutableArray *pendingLinks;
 }
 @end
 
-@interface VariableChunk : EventChunk
+@interface VariableChunk : SimulChunk
 {
     NSDate *currentTime;
     double currentValue;

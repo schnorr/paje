@@ -64,10 +64,30 @@
 
 // Simulation
 
+- (void)setPreviousChunkIncompleteEntities:(NSArray *)array
+{
+    NSAssert([array count] == 0, @"");
+}
+
+
+- (BOOL)isLastChunk
+{
+    return lastChunk;
+}
+
 - (void)stopWithEvent:(PajeEvent *)event
 {
-    [self _subclassResponsibility:_cmd];
+    [self setEndTime:[event time]];
+    lastChunk = YES;
 }
+
+- (void)endOfChunkWithTime:(NSDate *)time
+{
+    [super freeze];
+    // make arrays immutable?
+    if (!lastChunk) [self setEndTime:time];
+}
+
 
 // for events
 - (void)newEventEvent:(PajeEvent *)event
@@ -142,38 +162,9 @@
 }
 
 
-- (void)setPreviousChunkIncompleteEntities:(NSArray *)array
-{
-    NSAssert([array count] == 0, @"");
-}
-
-
-- (BOOL)isLastChunk
-{
-    return lastChunk;
-}
-
-- (void)endOfChunkWithTime:(NSDate *)time
-{
-    [self _subclassResponsibility:_cmd];
-}
-
 @end
 
 @implementation EventChunk
-
-- (void)stopWithEvent:(PajeEvent *)event
-{
-    [self setEndTime:[event time]];
-    lastChunk = YES;
-}
-
-- (void)endOfChunkWithTime:(NSDate *)time
-{
-    [super freeze];
-    // make arrays immutable?
-    if (!lastChunk) [self setEndTime:time];
-}
 
 - (void)newEventEvent:(PajeEvent *)event
                 value:(id)value
@@ -442,6 +433,16 @@
     // someone must setPreviousChunkIncompleteEntities, or won't work
 }
 
+- (void)endOfChunkWithTime:(NSDate *)time
+{
+    // if incompleteEntities is already set, entities in pendingLinks can be ignored
+    // (it is a resimulation, and they should be equal to incompleteEntities)
+    if (incompleteEntities == nil) {
+        [self setIncompleteEntities:pendingLinks];
+    }
+    Assign(pendingLinks, nil);;
+    [super endOfChunkWithTime:time];
+}
 @end
 
 #include "../General/Association.h"
@@ -508,28 +509,28 @@ if ([newIncompleteEntities count] == 1)
     }
     currentValue = value;
     currentTime = time;
-    if (value > maxValue) maxValue = value;
-    if (value < minValue) minValue = value;
+    if (currentValue != HUGE_VAL) {
+        if (currentValue > maxValue) maxValue = currentValue;
+        if (currentValue < minValue) minValue = currentValue;
+        [container _verifyMinMaxOfEntityType:entityType withValue:value];
+    }
 }
 
 - (void)setVariableEvent:(PajeEvent *)event
              doubleValue:(double)value
 {
-    [container _verifyMinMaxOfEntityType:entityType withValue:value];
     [self setValue:value time:[event time]];
 }
 
 - (void)addVariableEvent:(PajeEvent *)event
              doubleValue:(double)value
 {
-    [container _verifyMinMaxOfEntityType:entityType withValue:value];
     [self setValue:currentValue + value time:[event time]];
 }
 
 - (void)subVariableEvent:(PajeEvent *)event
              doubleValue:(double)value
 {
-    [container _verifyMinMaxOfEntityType:entityType withValue:value];
     [self setValue:currentValue - value time:[event time]];
 }
 
@@ -630,6 +631,9 @@ if ([newIncompleteEntities count] == 1)
 
 - (NSEnumerator *)enumeratorOfEntitiesBeforeTime:(NSDate *)time
 {
+    // variables are sorted by startTime, default enumerator does not work.
+    // Variables do not overlap in a chunk. optimize the default enumerator
+    // a bit by not filtering.
     NSEnumerator *incEnum = nil;
     NSEnumerator *compEnum = nil;
     NSEnumerator *en;

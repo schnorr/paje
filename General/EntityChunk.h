@@ -44,7 +44,7 @@
     NSDate *startTime;
     NSDate *endTime;
     
-    enum { active, frozen, empty } chunkState;
+    enum { loading, frozen, empty, reloading } chunkState;
 
     PSortedArray *entities;
     NSArray *incompleteEntities;

@@ -28,7 +28,7 @@
 
 @interface PajeEventDecoder: PajeComponent
 {
-    enum { OUT_DEF, IN_DEF, EVENTS } status;
+    enum { OUT_DEF, IN_DEF } defStatus;
     
     PajeEventDefinition *eventBeingDefined;
     NSMutableArray *valArray; /* used only while reading an event */
@@ -40,7 +40,7 @@
 
     NSMutableArray *chunkInfo;
     unsigned currentChunk;
-    BOOL ignoringChunk;
+    BOOL rereadingChunk;
 }
 
 - (id)initWithController:(PajeTraceController *)c;
