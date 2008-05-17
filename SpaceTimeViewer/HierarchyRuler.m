@@ -41,7 +41,11 @@
 
     titleSize = [aString size];
 
+#if defined __MINGW32__
+    if (YES) {
+#else
     if (NSWidth(aRect) > NSHeight(aRect)) {
+#endif
 
         if (titleSize.width < aRect.size.width) {
             newRect.origin.x = NSMidX(aRect) - titleSize.width/2;

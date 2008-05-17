@@ -1,3 +1,7 @@
+2008-05-17  Benhur Stein <benhur@inf.ufsm.br>
+    * SpaceTimeViewer/DrawView+Drawing.m,HirarchyRuler.m: small changes
+      to make it compile and work on windows
+
 2008-04-19  Benhur Stein <benhur@inf.ufsm.br>
     * AggregatingFilter/AggregatingChunkArray.m General/EntityChunk.h
       General/EntityChunk.m PajeEventDecoder/PajeEventDecoder.h
