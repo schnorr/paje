@@ -39,6 +39,7 @@
                                 alias:(NSString *)a
                             container:(PajeContainer *)c
                          creationTime:(NSDate *)time
+                                event:(PajeEvent *)event
                             simulator:(id)simul
 {
     return [[[self alloc] initWithType:type
@@ -46,6 +47,7 @@
                                  alias:a
                              container:c
                           creationTime:time
+                                 event:event
                              simulator:simul] autorelease];
 }
 
@@ -54,6 +56,7 @@
              alias:(NSString *)a
          container:(PajeContainer *)c
       creationTime:(NSDate *)time
+             event:(PajeEvent *)event
          simulator:(id)simul
 {
     self = [super initWithType:type
@@ -67,6 +70,7 @@
         Assign(userEntities, [NSMutableDictionary dictionary]);
         Assign(minValues, [NSMutableDictionary dictionary]);
         Assign(maxValues, [NSMutableDictionary dictionary]);
+        Assign(extraFields, [event extraFields]);
     }
     
     return self;
@@ -80,6 +84,7 @@
     Assign(userEntities, nil);
     Assign(minValues, nil);
     Assign(maxValues, nil);
+    Assign(extraFields, nil);
     [super dealloc];
 }
 
@@ -548,5 +553,30 @@ NS_ENDHANDLER
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [NSException raise:@"SimulContainer should not be encoded" format:nil];
+}
+
+- (NSArray *)fieldNames
+{
+    NSArray *fieldNames;
+    fieldNames = [super fieldNames];
+    if (extraFields != nil) {
+        fieldNames = [fieldNames arrayByAddingObjectsFromArray:[extraFields allKeys]];
+    }
+    return fieldNames;
+}
+
+- (id)valueOfFieldNamed:(NSString *)fieldName
+{
+    id value = nil;
+
+    if (extraFields != nil) {
+        value = [extraFields objectForKey:fieldName];
+    }
+
+    if (value == nil) {
+        value = [super valueOfFieldNamed:fieldName];
+    }
+
+    return value;
 }
 @end

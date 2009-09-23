@@ -107,6 +107,7 @@
                                                        alias:@"0"
                                                    container:nil
                                                 creationTime:[NSDate dateWithTimeIntervalSinceReferenceDate:0]
+                                                       event:nil
                                                    simulator:self];
         [rootContainerType addInstance:rootContainer id1:"0" id2:"/"];
 

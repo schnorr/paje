@@ -42,6 +42,7 @@
     NSMutableDictionary *userEntities; // key = entityType
     NSMutableDictionary *minValues; // key = entityType
     NSMutableDictionary *maxValues; // key = entityType
+    NSDictionary *extraFields;
     int logicalTime;
     BOOL isActive;
 }
@@ -51,12 +52,14 @@
                                 alias:(NSString *)a
                            container:(PajeContainer *)newcontainer
                         creationTime:(NSDate *)time
+                               event:(PajeEvent *)event
                            simulator:(id)simul;
 - (id)initWithType:(PajeEntityType *)type
               name:(NSString *)n
              alias:(NSString *)a
          container:(PajeContainer *)c
       creationTime:(NSDate *)time
+             event:(PajeEvent *)event
          simulator:(id)simul;
 
 - (NSString *)alias;
