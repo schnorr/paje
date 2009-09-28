@@ -25,8 +25,10 @@
 
 #include <sys/time.h>
 #include <stdio.h>
+#include <inttypes.h>
 
-#define ALIGN_PTR(p) ((void *)(((int)(p)+3)&(-4)))
+// Aligns pointer p to 4-byte-aligned address
+#define ALIGN_PTR(p) ((void *)(((intptr_t)(p)+(4-1))&(~(4-1))))
 
 #define RST_MAX_EVENT_SIZE 1000
 
@@ -58,7 +60,7 @@ extern pthread_key_t rst_key;
 	} while (0)
 #define RST_PUT_STR(ptr, str) 						\
 	do {                  						\
-		char *__s1 = ptr->rst_buffer_ptr;			\
+		char *__s1 = (char *)ptr->rst_buffer_ptr;		\
 		char *__s2 = str;					\
 		while ((*__s1++ = *__s2++) != '\0') 			\
 			;						\

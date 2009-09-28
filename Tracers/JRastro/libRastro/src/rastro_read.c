@@ -55,10 +55,10 @@ static char *trd_event(timestamp_t *hora_global, rst_event_t *evento, char *ptr)
 
     if (header & RST_TIME_SET) {
         long long x;
-        x = (long long) RST_GET(ptr, long);
+        x = (long long) RST_GET(ptr, u_int32_t);
         *hora_global = x * RST_CLOCK_RESOLUTION;
     }
-    evento->timestamp = (long long) RST_GET(ptr, long);
+    evento->timestamp = (long long) RST_GET(ptr, u_int32_t);
 
     evento->timestamp += *hora_global;
 
@@ -438,7 +438,7 @@ void rst_print_event(rst_event_t *event)
     if (event->ct.n_uint64 > 0) {
         fprintf (stderr, "\tu_int64_ts-> ");
         for (i = 0; i < event->ct.n_uint64; i++) {
-            fprintf (stderr, "(%lld) ", event->v_uint64[i]);
+            fprintf (stderr, "(%"PRIu64") ", event->v_uint64[i]);
         }
         fprintf (stderr, "\n");
     }

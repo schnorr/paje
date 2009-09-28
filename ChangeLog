@@ -5,6 +5,9 @@
       now has an attribute extraFields and two new methods to intercept
       queries about fields (fieldNames and valueOfFieldnamed:)
 
+2009-05-17  Benhur Stein <benhur@inf.ufsm.br>
+    * Tracers/JRastro/libRastro/many: cleanup for 64-bit compiling
+
 2008-05-17  Benhur Stein <benhur@inf.ufsm.br>
     * SpaceTimeViewer/DrawView+Drawing.m,HirarchyRuler.m: small changes
       to make it compile and work on windows

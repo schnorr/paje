@@ -29,8 +29,8 @@
 #define RST_EVENT_INIT (-1 & RST_EVENT_TYPE_MASK)
 #define RST_EVENT_STOP (-2 & RST_EVENT_TYPE_MASK)
 
-#include<sys/types.h>
-#include<pthread.h>
+#include <sys/types.h>
+#include <pthread.h>
 
 /*Se for mudar alguma letra deve-se mudar tambem no script*/
 /* ./bin/.rastro_names.sh tirando a letra mudada e colocando a nova*/
@@ -81,7 +81,7 @@ typedef struct {
 
 typedef struct {
 	counters_t ct;
-	u_int8_t v_string[RST_MAX_FIELDS_PER_TYPE][RST_MAX_STRLEN];
+	char v_string[RST_MAX_FIELDS_PER_TYPE][RST_MAX_STRLEN];
 	u_int8_t v_uint8[RST_MAX_FIELDS_PER_TYPE];
 	u_int16_t v_uint16[RST_MAX_FIELDS_PER_TYPE];
 	u_int32_t v_uint32[RST_MAX_FIELDS_PER_TYPE];

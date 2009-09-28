@@ -77,7 +77,7 @@ void break_types(char *argtypes, char *arglist, char *varlist, counters_t *ct)
             ct->n_uint64++;
 	    break;
 	case LETRA_STRING_ASPA:
-	    na += sprintf(arglist+na, ", u_int8_t *" XSTR(LETRA_STRING) "%d", ct->n_string);
+	    na += sprintf(arglist+na, ", char *" XSTR(LETRA_STRING) "%d", ct->n_string);
 	    nv += sprintf(varlist+nv, ", " XSTR(LETRA_STRING) "%d", ct->n_string);
             ct->n_string++;
 	    break;

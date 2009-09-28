@@ -2,7 +2,7 @@
 
 #include "rastro_write_functions.h"
 
-void rst_event_lls_ptr(rst_buffer_t *ptr, u_int16_t type, u_int64_t l0, u_int64_t l1, u_int8_t *s0)
+void rst_event_lls_ptr(rst_buffer_t *ptr, u_int16_t type, u_int64_t l0, u_int64_t l1, char *s0)
 {
 	rst_startevent(ptr, type<<18|0x24410);
 	RST_PUT(ptr, u_int64_t, l0);

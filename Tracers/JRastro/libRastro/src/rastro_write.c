@@ -164,7 +164,7 @@ void rst_init_ptr(rst_buffer_t *ptr, u_int64_t id1, u_int64_t id2)
     ptr->rst_buffer = malloc(ptr->rst_buffer_size);
     RST_RESET(ptr);
     
-    sprintf(fname, "rastro-%lld-%lld.rst",/* dirname,*/ id1, id2);
+    sprintf(fname, "rastro-%"PRIu64"-%"PRIu64".rst",/* dirname,*/ id1, id2);
     fd = open(fname, O_WRONLY | O_CREAT | O_TRUNC, 0666);
     if (fd == -1) {
         fprintf(stderr, "[rastro] cannot open file %s: %s\n", 

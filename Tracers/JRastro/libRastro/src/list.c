@@ -300,7 +300,7 @@ void list_rem_position (list_t * list, position_t pos)
 {
 	list_null(list);
 	
-	if(list_quantity == 0){
+	if(list_quantity(list) == 0){
 		return;
 	}
 	

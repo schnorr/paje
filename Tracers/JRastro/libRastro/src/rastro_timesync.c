@@ -163,7 +163,8 @@ int abre_conexao(int *pporta)
 int wait_connection(int sock)
 {
 	struct sockaddr_in connection;
-	int new_socket, size;
+	int new_socket;
+	socklen_t size;
 	size = sizeof(connection);
 	new_socket = accept(sock, (struct sockaddr *) &connection, &size);
 	return new_socket;
