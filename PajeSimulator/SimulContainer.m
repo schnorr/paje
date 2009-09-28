@@ -32,6 +32,53 @@
 #include "PajeSimul.h"
 #include "../General/UniqueString.h"
 
+// auxiliary class to contain the internal state of a container
+@interface SimulContainerState : NSObject
+{
+    NSDate *time;
+    int logicalTime;
+}
++ (SimulContainerState *)stateWithTime:(NSDate *)t
+                           logicalTime:(int)l;
+- (NSDate *)time;
+- (int)logicalTime;
+@end
+@implementation SimulContainerState
+- (id)initWithTime:(NSDate *)t
+       logicalTime:(int)l
+{
+    self = [super init];
+    if (self != nil) {
+        Assign(time, t);
+        logicalTime = l;
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    Assign(time, nil);
+    [super dealloc];
+}
+
++ (SimulContainerState *)stateWithTime:(NSDate *)t
+                           logicalTime:(int)l
+{
+    return [[[self alloc] initWithTime:t logicalTime:l] autorelease];
+}
+
+- (NSDate *)time
+{
+    return time;
+}
+
+- (int)logicalTime
+{
+    return logicalTime;
+}
+@end
+
+
 @implementation SimulContainer
 
 + (SimulContainer *)containerWithType:(PajeEntityType *)type
@@ -532,22 +579,15 @@ NS_ENDHANDLER
 
 - (id)chunkState
 {
-    NSMutableDictionary *state;
-    state = [NSMutableDictionary dictionary];
-
-    if (lastTime != nil) [state setObject:lastTime forKey:@"_lastTime"];
-    [state setObject:[NSNumber numberWithInt:logicalTime]
-              forKey:@"_logicalTime"];
-
-    return state;
+    return [SimulContainerState stateWithTime:lastTime logicalTime:logicalTime];
 }
 
 - (void)setChunkState:(id)obj
 {
-    NSDictionary *state = (NSDictionary *)obj;
+    SimulContainerState *state = (SimulContainerState *)obj;
 
-    [self setLastTime:[state objectForKey:@"_lastTime"]];
-    [self setLogicalTime:[[state objectForKey:@"_logicalTime"] intValue]];
+    [self setLastTime:[state time]];
+    [self setLogicalTime:[state logicalTime]];
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder

@@ -373,7 +373,7 @@
 
 //    [userNumberToContainer setObject:newContainer forKey:newContainerName];
 //    if (newContainerAlias != nil) {
-        [userNumberToContainer setObject:newContainer forKey:[NSString stringWithCString:newContainerAlias]];
+        //[userNumberToContainer setObject:newContainer forKey:[NSString stringWithCString:newContainerAlias]];
 //    }
     [(PajeFilter *)outputComponent hierarchyChanged];
 }

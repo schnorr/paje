@@ -45,7 +45,7 @@
 
     /* PajeContainers mapped by name and alias (used only when containerType is
        not known, like in old PajeDestroyContainer events */
-    NSMutableDictionary *userNumberToContainer;
+    //NSMutableDictionary *userNumberToContainer;
 
     NSDate *startTime;
     NSDate *endTime;
@@ -127,6 +127,9 @@
 
 - (void)pajeStartLink:(PajeEvent *)event;
 - (void)pajeEndLink:(PajeEvent *)event;
+
+- (id)containerForId:(const char *)containerId
+                type:(PajeContainerType *)containerType;
 @end
 
 #endif

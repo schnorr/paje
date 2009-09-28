@@ -115,10 +115,10 @@
         [self setType:rootContainerType forId:"/"];
         [self setType:rootContainerType forId:"File"];
 
-        [userNumberToContainer setObject:rootContainer forKey:@"0"];
-        [userNumberToContainer setObject:rootContainer forKey:@"/"];
-        [userNumberToContainer setObject:rootContainer
-                                  forKey:rootContainerName];
+        //[userNumberToContainer setObject:rootContainer forKey:@"0"];
+        //[userNumberToContainer setObject:rootContainer forKey:@"/"];
+        //[userNumberToContainer setObject:rootContainer
+        //                          forKey:rootContainerName];
     }
     return rootContainer;
 }
@@ -311,8 +311,8 @@
 
 - (void)_resetContainers
 {
-    [[userNumberToContainer allValues]
-        makeObjectsPerformSelector:@selector(reset)];
+    //[[userNumberToContainer allValues]
+    //    makeObjectsPerformSelector:@selector(reset)];
 }
 
 - (void)addRelatedEntity:(id)entity toKey:(id)key
@@ -399,10 +399,23 @@ if (replaying) return;
     }
 }
 
+- (void)addStateOfContainer:(SimulContainer *)container toDict:(NSMutableDictionary *)dict
+{
+    NSEnumerator *subContainerEnumerator;
+    SimulContainer *subContainer;
+
+    [dict setObject:[container chunkState] forKey:[container alias]];
+    
+    subContainerEnumerator = [[container subContainers] objectEnumerator];
+    while ((subContainer = [subContainerEnumerator nextObject]) != nil) {
+        [self addStateOfContainer:subContainer toDict:dict];
+    }
+}
+
 - (id)chunkState
 {
-    NSEnumerator *containerEnum;
-    SimulContainer *container;
+    //NSEnumerator *containerEnum;
+    //SimulContainer *container;
     NSMutableDictionary *state;
 
     state = [NSMutableDictionary dictionary];
@@ -411,13 +424,14 @@ if (replaying) return;
     [state setObject:[NSNumber numberWithInt:eventCount] forKey:@"_eventCount"];
 
     // FIXME: should be saved by type
-    containerEnum = [[userNumberToContainer allValues] objectEnumerator];
-    while ((container = [containerEnum nextObject]) != nil) {
-        id key = [container alias];
-        if (nil == [state objectForKey:key]) {
-            [state setObject:[container chunkState] forKey:key];
-        }
-    }
+    //containerEnum = [[userNumberToContainer allValues] objectEnumerator];
+    //while ((container = [containerEnum nextObject]) != nil) {
+    //    id key = [container alias];
+    //    if (nil == [state objectForKey:key]) {
+    //        [state setObject:[container chunkState] forKey:key];
+    //    }
+    //}
+    [self addStateOfContainer:(SimulContainer *)[self rootContainer] toDict:state];
     
     return state;
 }
@@ -436,7 +450,8 @@ if (replaying) return;
     keyEnum = [state keyEnumerator];
     while ((key = [keyEnum nextObject]) != nil) {
         SimulContainer *container;
-        container = [userNumberToContainer objectForKey:key];
+        //container = [userNumberToContainer objectForKey:key];
+	container = [self containerForId:[key cString] type:nil];
         if (container == nil) {
             if (![key isEqual:@"_currentTime"]
                 && ![key isEqual:@"_eventCount"]) {

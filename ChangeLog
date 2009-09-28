@@ -6,6 +6,11 @@
       queries about fields (fieldNames and valueOfFieldnamed:)
 
 2009-05-17  Benhur Stein <benhur@inf.ufsm.br>
+    * PajeSimul/SimulContainer.m: create (and use) auxiliary class to keep
+      container state in chunks
+    * PajeSimulator/PajeSimul: remove userNumberToContainer variable
+
+2009-05-17  Benhur Stein <benhur@inf.ufsm.br>
     * Tracers/JRastro/libRastro/many: cleanup for 64-bit compiling
 
 2008-05-17  Benhur Stein <benhur@inf.ufsm.br>
