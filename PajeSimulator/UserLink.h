@@ -77,6 +77,8 @@
 - (void)setEndLogicalTime:(int)t;
 - (int)startLogicalTime;
 - (int)endLogicalTime;
+
+- (id) key;
 @end
 
 #endif

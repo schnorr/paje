@@ -218,4 +218,9 @@
 {
     return endLogicalTime;
 }
+
+- (id) key
+{
+    return key;
+}
 @end

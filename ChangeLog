@@ -1,3 +1,8 @@
+2009-10-09 Lucas M. Schnorr <schnorr@gmail.com>
+    * PajeSimulator/UserLink.[mh]: new method "key" for UserLink class so other
+      objects are allowed to obtain the key used for the link and specified in
+      the tracefile
+
 2009-09-23 Lucas M. Schnorr <schnorr@gmail.com>
     * PajeSimulator/PajeSimul+Events.m,PajeSimul.m,SimulContainer.[h|m]:
       changes to make containers keep extra fields when specified in
