@@ -29,3 +29,4 @@
 grep [a-z,A-Z,0-9] > .tmp.rastro
 ./bin/rastro_generate .tmp.rastro rastro.c rastro.h
 rm -f .tmp.rastro
+

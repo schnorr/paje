@@ -66,3 +66,4 @@ $CC -E $CFLAGS $SRCS -I./include/ 2>/dev/null | ./bin/rastro_names.sh > $1
 rm -f $1
 echo "Inclua nos arquivos \"$SRCS\" a linha abaixo."
 echo "#include \"$1.h\""
+
