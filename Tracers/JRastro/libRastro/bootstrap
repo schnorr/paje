@@ -1,0 +1,7 @@
+#! /bin/sh
+
+aclocal
+libtoolize
+autoreconf -v -i -s
+automake --gnu --add-missing
+autoconf

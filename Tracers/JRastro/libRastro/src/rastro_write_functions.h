@@ -6,7 +6,5 @@
 #include "rastro_public.h"
 #include "rastro_private.h"
 
-void rst_event_lls_ptr(rst_buffer_t *ptr, u_int16_t type, u_int64_t l0, u_int64_t l1, char *s0);
-#define rst_event_lls(type, l0, l1, s0) rst_event_lls_ptr(RST_PTR, type, l0, l1, s0)
 
 #endif

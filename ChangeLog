@@ -1,3 +1,7 @@
+2009-12-23 Lucas M. Schnorr <schnorr@gmail.com>
+    * Tracers/JRastro/libRastro/*: using autotools (automake, ...) to create a
+      configuration environment for libRastro
+
 2009-10-09 Lucas M. Schnorr <schnorr@gmail.com>
     * PajeSimulator/UserLink.[mh]: new method "key" for UserLink class so other
       objects are allowed to obtain the key used for the link and specified in
