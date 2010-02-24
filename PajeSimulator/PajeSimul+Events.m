@@ -356,6 +356,7 @@
                                                alias:[NSString stringWithCString:newContainerAlias]
                                            container:container
                                         creationTime:[event time]
+                                               event: event
                                            simulator:self];
     [container addSubContainer:newContainer];
     [typeOfNewContainer addInstance:newContainer
