@@ -65,9 +65,10 @@
 
 - (void)pajeDefineContainerType:(PajeEvent *)event
 {
-    const char *newContainerTypeAlias;
     const char *containerTypeId;
     const char *newContainerTypeName;
+    const char *newContainerTypeAlias;
+    const char *newContainerTypeId;
 
     PajeContainerType *containerType;
     PajeContainerType *newContainerType;
@@ -92,16 +93,16 @@
         [self error:@"Unknown container type" inEvent:event];
     }
 
-    // new type should not exist (but may, if replaying)
-    if ([self typeForId:newContainerTypeName] != nil) {
-        NSWarnLog(@"Redefining container type %s with event %@",
-                  newContainerTypeName, event);
-        return;
+    // if there is no alias, new type will be referenced by name
+    if (newContainerTypeAlias != NULL) {
+        newContainerTypeId = newContainerTypeAlias;
+    } else {
+        newContainerTypeId = newContainerTypeName;
     }
-    if (newContainerTypeAlias != NULL 
-        && [self typeForId:newContainerTypeAlias] != nil) {
-        NSWarnLog(@"Redefining container type alias %s with event %@",
-                  newContainerTypeAlias, event);
+    // new type should not exist (but may, if replaying)
+    if ([self typeForId:newContainerTypeId] != nil) {
+        NSWarnLog(@"Redefining container type '%s' with event %@",
+                  newContainerTypeId, event);
         return;
     }
 
@@ -111,20 +112,18 @@
     newContainerType = [PajeContainerType typeWithName:newContainerTypeNameO
                                          containerType:containerType
                                                  event:event];
-    [self setType:newContainerType forId:newContainerTypeName];
-    if (newContainerTypeAlias != NULL) {
-        [self setType:newContainerType forId:newContainerTypeAlias];
-    }
+    [self setType:newContainerType forId:newContainerTypeId];
     [(PajeFilter *)outputComponent hierarchyChanged];
 }
 
 - (void)pajeDefineLinkType:(PajeEvent *)event
 {
-    const char *newEntityTypeAlias;
-    const char  *containerTypeId;
+    const char *containerTypeId;
     const char *sourceContainerTypeId;
     const char *destContainerTypeId;
     const char *newEntityTypeName;
+    const char *newEntityTypeAlias;
+    const char *newEntityTypeId;
 
     PajeContainerType *containerType;
     PajeContainerType *sourceContainerType;
@@ -155,16 +154,16 @@
         [self error:@"Unknown dest container type" inEvent:event];
     }
 
-    // new type should not exist
-    if ([self typeForId:newEntityTypeName] != nil) {
-        //NSWarnLog(@"Redefining entity type %@ with event %@",
-        //          newEntityTypeName, event);
-        return;
+    // if there is no alias, new type will be referenced by name
+    if (newEntityTypeAlias != NULL) {
+        newEntityTypeId = newEntityTypeAlias;
+    } else {
+        newEntityTypeId = newEntityTypeName;
     }
-    if (newEntityTypeAlias != NULL 
-        && [self typeForId:newEntityTypeAlias] != nil) {
-        //NSWarnLog(@"Redefining entity type alias %@ with event %@",
-        //          newEntityTypeAlias, event);
+    // new type should not exist
+    if ([self typeForId:newEntityTypeId] != nil) {
+        NSWarnLog(@"Redefining entity type id '%s' with event %@",
+                  newEntityTypeId, event);
         return;
     }
 
@@ -175,19 +174,18 @@
                            sourceContainerType:sourceContainerType
                              destContainerType:destContainerType
                                          event:event];
-    [self setType:newEntityType forId:newEntityTypeName];
-    if (newEntityTypeAlias != NULL) {
-        [self setType:newEntityType forId:newEntityTypeAlias];
-    }
+    [self setType:newEntityType forId:newEntityTypeId];
+
     [(PajeFilter *)outputComponent hierarchyChanged];
 }
 
 - (void)_defineUserEntityType:(PajeEvent *)event
                   drawingType:(PajeDrawingType)drawingType
 {
-    const char *newEntityTypeAlias;
     const char *containerTypeId;
     const char *newEntityTypeName;
+    const char *newEntityTypeAlias;
+    const char *newEntityTypeId;
 
     PajeContainerType *containerType;
     PajeEntityType *newEntityType;
@@ -199,16 +197,16 @@
     newEntityTypeAlias = [event cStringForFieldId:PajeAliasFieldId];
     containerTypeId    = [event cStringForFieldId:PajeTypeFieldId];
 
-    // new type should not exist
-    if ([self typeForId:newEntityTypeName] != nil) {
-        NSWarnLog(@"Redefining entity type %s with event %@",
-                  newEntityTypeName, event);
-        return;
+    // if there is no alias, new type will be referenced by name
+    if (newEntityTypeAlias != NULL) {
+        newEntityTypeId = newEntityTypeAlias;
+    } else {
+        newEntityTypeId = newEntityTypeName;
     }
-    if (newEntityTypeAlias != NULL
-        && [self typeForId:newEntityTypeAlias] != nil) {
-        NSWarnLog(@"Redefining entity type alias %s with event %@",
-                  newEntityTypeAlias, event);
+    // new type should not exist
+    if ([self typeForId:newEntityTypeId] != nil) {
+        NSWarnLog(@"Redefining entity type id '%s' with event %@",
+                  newEntityTypeId, event);
         return;
     }
 
@@ -240,10 +238,8 @@
             inEvent:event];
     }
 
-    [self setType:newEntityType forId:newEntityTypeName];
-    if (newEntityTypeAlias != NULL) {
-        [self setType:newEntityType forId:newEntityTypeAlias];
-    }
+    [self setType:newEntityType forId:newEntityTypeId];
+
     [(PajeFilter *)outputComponent hierarchyChanged];
 }
 
@@ -304,10 +300,11 @@
 
 - (void)pajeCreateContainer:(PajeEvent *)event
 {
-    const char *newContainerAlias;
     const char *newContainerTypeId;
     const char *containerId;
     const char *newContainerName;
+    const char *newContainerAlias;
+    const char *newContainerId;
 
     PajeContainerType *typeOfNewContainer;
     PajeContainer *container;
@@ -335,22 +332,16 @@
     if (!typeOfNewContainer) {
         [self error:@"Unknown container type" inEvent:event];
     }
-    
-    if ([self containerForId:newContainerName 
-                        type:typeOfNewContainer] != nil) {
-        NSWarnLog(@"Redefining container %s in event %@",
-                  newContainerName, event);
-        return;
-    }
 
-    if (newContainerAlias == NULL) {
-        newContainerAlias      = newContainerName;
+    if (newContainerAlias != NULL) {
+        newContainerId = newContainerAlias;
+    } else {
+        newContainerId = newContainerName;
     }
-    if (newContainerAlias != NULL 
-        && [self containerForId:newContainerAlias 
-                           type:typeOfNewContainer] != nil) {
-        NSWarnLog(@"Redefining container alias %s in event %@",
-                  newContainerAlias, event);
+    if ([self containerForId:newContainerId
+                        type:typeOfNewContainer] != nil) {
+        NSWarnLog(@"Redefining container id '%s' in event %@",
+                  newContainerId, event);
         return;
     }
 
@@ -365,16 +356,11 @@
                                                alias:[NSString stringWithCString:newContainerAlias]
                                            container:container
                                         creationTime:[event time]
-                                               event:event
                                            simulator:self];
     [container addSubContainer:newContainer];
     [typeOfNewContainer addInstance:newContainer
-                                id1:newContainerName id2:newContainerAlias];
+                                id1:newContainerId id2:NULL];
 
-//    [userNumberToContainer setObject:newContainer forKey:newContainerName];
-//    if (newContainerAlias != nil) {
-        //[userNumberToContainer setObject:newContainer forKey:[NSString stringWithCString:newContainerAlias]];
-//    }
     [(PajeFilter *)outputComponent hierarchyChanged];
 }
 

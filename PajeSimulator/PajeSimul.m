@@ -107,7 +107,6 @@
                                                        alias:@"0"
                                                    container:nil
                                                 creationTime:[NSDate dateWithTimeIntervalSinceReferenceDate:0]
-                                                       event:nil
                                                    simulator:self];
         [rootContainerType addInstance:rootContainer id1:"0" id2:"/"];
 
@@ -115,10 +114,6 @@
         [self setType:rootContainerType forId:"/"];
         [self setType:rootContainerType forId:"File"];
 
-        //[userNumberToContainer setObject:rootContainer forKey:@"0"];
-        //[userNumberToContainer setObject:rootContainer forKey:@"/"];
-        //[userNumberToContainer setObject:rootContainer
-        //                          forKey:rootContainerName];
     }
     return rootContainer;
 }
@@ -238,45 +233,26 @@
 
     [self rootContainer];
 
-{
+#ifdef SUPPORT_FOR_SOURCE_REFERENCES
+    // set event's filename -- not supported
     NSString *filename;
-        // set event's filename
-//    file = [event objectForKey:@"File"];
-//    if (file)
-//        filename = [fileToFilename objectForKey:file];
-//    else
-//OLDEVENT        filename = [event objectForKey:@"FileName"];
-        filename = [event stringForFieldId:PajeFileFieldId];
-    if (filename) {
-//OLDEVENT        id line;
+    filename = [event stringForFieldId:PajeFileFieldId];
+    if (filename != nil) {
         int lineNumber;
         SourceCodeReference *sourceRef;
-//        NSMutableDictionary *refToEvents;
 
-//OLDEVENT        line = [event objectForKey:@"Line"];
-//OLDEVENT        if (line == nil)
-//OLDEVENT            line = [event objectForKey:@"LineNumber"];
-//OLDEVENT            line = [event objectForKey:@"LineNumber"];
-//OLDEVENT        lineNumber = [line intValue];
         lineNumber = [event intForFieldId:PajeLineFieldId];
         sourceRef = [SourceCodeReference referenceToFilename:filename
                                                   lineNumber:lineNumber];
-//        refToEvents = [filenameToReferences objectForKey:filename];
-//        [refToEvents addObject:event forKey:sourceRef];
-//OLDEVENT        [event removeObjectForKey:@"File"];
-//OLDEVENT        [event removeObjectForKey:@"FileName"];
-//OLDEVENT        [event removeObjectForKey:@"Line"];
-//OLDEVENT        [event removeObjectForKey:@"LineNumber"];
-//OLDEVENT FIXME        [event setObject:sourceRef forKey:@"FileReference"];
     }
-
-}
+#endif
 
     // set the current time, if event has one
     time = [event time];
     if (time != nil) {
         [self setCurrentTime:time];
     }
+
     // invoke the method that simulates this event
     int eventId;
     eventId = [event pajeEventId];
@@ -300,7 +276,10 @@
     id time;
 
     time = [event time];
-    if (time != nil && [currentTime isLaterThanDate:[NSDate distantPast]] && [currentTime isLaterThanDate:[NSDate dateWithTimeIntervalSinceReferenceDate:0]] && [time isLaterThanDate:currentTime]) {
+    if (time != nil 
+          && [currentTime isLaterThanDate:[NSDate distantPast]]
+          && [currentTime isLaterThanDate:[NSDate dateWithTimeIntervalSinceReferenceDate:0]] 
+          && [time isLaterThanDate:currentTime]) {
         return YES;
     }
 
@@ -351,7 +330,9 @@
 
 - (void)outputChunk:(id)entity
 {
-if (replaying) return;
+    if (replaying) {
+        return;
+    }
     [super outputEntity:entity];
 }
 
@@ -369,7 +350,8 @@ if (replaying) return;
     }
 }
 
-- (void)endOfChunkInContainer:(SimulContainer *)container last:(BOOL)last
+- (void)endOfChunkInContainer:(SimulContainer *)container
+                         last:(BOOL)last
 {
     NSEnumerator *subContainerEnumerator;
     SimulContainer *subContainer;
@@ -386,7 +368,8 @@ if (replaying) return;
     }
 }
 
-- (void)emptyChunk:(int)chunkNumber inContainer:(SimulContainer *)container
+- (void)emptyChunk:(int)chunkNumber
+       inContainer:(SimulContainer *)container
 {
     NSEnumerator *subContainerEnumerator;
     SimulContainer *subContainer;
@@ -399,7 +382,8 @@ if (replaying) return;
     }
 }
 
-- (void)addStateOfContainer:(SimulContainer *)container toDict:(NSMutableDictionary *)dict
+- (void)addStateOfContainer:(SimulContainer *)container
+                     toDict:(NSMutableDictionary *)dict
 {
     NSEnumerator *subContainerEnumerator;
     SimulContainer *subContainer;
@@ -431,7 +415,8 @@ if (replaying) return;
     //        [state setObject:[container chunkState] forKey:key];
     //    }
     //}
-    [self addStateOfContainer:(SimulContainer *)[self rootContainer] toDict:state];
+    [self addStateOfContainer:(SimulContainer *)[self rootContainer]
+                       toDict:state];
     
     return state;
 }
@@ -451,7 +436,7 @@ if (replaying) return;
     while ((key = [keyEnum nextObject]) != nil) {
         SimulContainer *container;
         //container = [userNumberToContainer objectForKey:key];
-	container = [self containerForId:[key cString] type:nil];
+        container = [self containerForId:[key cString] type:nil];
         if (container == nil) {
             if (![key isEqual:@"_currentTime"]
                 && ![key isEqual:@"_eventCount"]) {

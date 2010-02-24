@@ -1,3 +1,10 @@
+2010-02-23  Benhur Stein <benhur@inf.ufsm.br>
+    * Documentation/lang-paje/typeevent.tex, PajeSimulator/PajeSimul+Events.m,
+      PajeSimulator/PajeSimul.m: some code cleanup; change the way aliases
+      work: now, if an alias is defined, all references must be to the alias,
+      they cannot be to the name anymore. This allows for different entities
+      to have the same name when in a different container.
+
 2009-12-23 Lucas M. Schnorr <schnorr@gmail.com>
     * Tracers/JRastro/libRastro/*: using autotools (automake, ...) to create a
       configuration environment for libRastro

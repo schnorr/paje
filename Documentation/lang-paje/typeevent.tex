@@ -281,7 +281,10 @@ the top of the container hierarchy).
 Optionally this event can contain a field ``Alias'' with an alias name to be
 used to identify this container. Aliases are usually short strings used when the
 container name is too big and its use throughout the trace file would increase
-its size.
+the file's size.
+When an alias is used in a definition, it must also be used in later references to the container type being defined.
+When an alias is not used, a container type must be later referenced by its name.
+The use of aliases allows for the definition of more than one container with the same name (and different aliases).
 
 \begin{figure}[htbp]
 \begin{center}
@@ -358,7 +361,7 @@ PajeDefineContainerType event. The field ``Container'' must have a value
 corresponding to the ``Name'' or ``Alias''
 of a previous PajeCreateContainer event (or ``0'' or ``/'', if on top of the hierarchy).
 This new container can be referenced in future events by the value of its
-``Name'' or ``Alias'' (if it has one) field.
+``Name'' or, if it has an ``Alias'' field, by it alias.
 
 \begin{figure}[htbp]
 \begin{center}
