@@ -446,14 +446,14 @@
                 doubleValue:value];
 }
 
-- (NSNumber *)minValueForEntityType:(PajeEntityType *)type
+- (double)minValueForEntityType:(PajeEntityType *)type
 {
-    return [minValues objectForKey:type];
+    return [[minValues objectForKey:type] doubleValue];
 }
 
-- (NSNumber *)maxValueForEntityType:(PajeEntityType *)type
+- (double)maxValueForEntityType:(PajeEntityType *)type
 {
-    return [maxValues objectForKey:type];
+    return [[maxValues objectForKey:type] doubleValue];
 }
 
 

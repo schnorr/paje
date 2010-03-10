@@ -1,3 +1,8 @@
+2010-03-10  Lucas M. Schnorr <schnorr@gmail.com>
+    * PajeSimulator/SimulContainer.[mh]: maxValueForEntityType and
+      minValueForEntityType were returning NSNumber* instead of double (as
+      defined by the PajeFilter protocol).
+
 2010-02-23  Benhur Stein <benhur@inf.ufsm.br>
     * Documentation/lang-paje/typeevent.tex, PajeSimulator/PajeSimul+Events.m,
       PajeSimulator/PajeSimul.m: some code cleanup; change the way aliases

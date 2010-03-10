@@ -110,8 +110,8 @@
                       key:(id)key
                 withEvent:(PajeEvent*)event;
 
-- (NSNumber *)minValueForEntityType:(PajeEntityType *)entityType;
-- (NSNumber *)maxValueForEntityType:(PajeEntityType *)entityType;
+- (double)minValueForEntityType:(PajeEntityType *)entityType;
+- (double)maxValueForEntityType:(PajeEntityType *)entityType;
 
 - (int)logicalTime;
 - (void)setLogicalTime:(int)lt;
