@@ -43,7 +43,7 @@
 
 - (NSComparisonResult)inverseDoubleValueComparison:(Association *)other;
 
-- (unsigned int)hash;
+- (NSUInteger)hash;
 - (BOOL)isEqual:(id)anObj;
 @end
 #endif

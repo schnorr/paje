@@ -141,7 +141,7 @@
 
 - (PajeEntity *)aggregate
 {
-    PajeEntity *entity;
+    PajeEntity *entity = nil;
     unsigned count;
     
     if (earliestStartTime == nil) {

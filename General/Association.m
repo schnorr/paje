@@ -73,7 +73,7 @@
     return [(NSNumber *)object compare:[other objectValue]];
 }
 
-- (unsigned int)hash
+- (NSUInteger)hash
 {
     return [object hash];
 }

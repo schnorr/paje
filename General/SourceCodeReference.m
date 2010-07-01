@@ -74,7 +74,7 @@ NSMutableSet *allReferences;
     return filename;
 }
 
-- (int)lineNumber
+- (NSInteger)lineNumber
 {
     return lineNumber;
 }

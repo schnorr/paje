@@ -187,8 +187,8 @@
     const char *newEntityTypeAlias;
     const char *newEntityTypeId;
 
-    PajeContainerType *containerType;
-    PajeEntityType *newEntityType;
+    PajeContainerType *containerType = nil;
+    PajeEntityType *newEntityType = nil;
 
     if (replaying) return;
 

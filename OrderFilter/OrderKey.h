@@ -46,7 +46,7 @@
 - (id)entityType;
 
 - (BOOL)isEqual:(id)other;
-- (unsigned)hash;
+- (NSUInteger)hash;
 @end
 
 #endif

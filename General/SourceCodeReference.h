@@ -44,7 +44,7 @@
 //
 
 - (NSString *)filename;
-- (int)lineNumber;
+- (NSInteger)lineNumber;
 
 //
 // it can be hashed (NSObject protocol)

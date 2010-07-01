@@ -71,7 +71,7 @@
         && [container isEqual:[(OrderKey *)other container]];
 }
 
-- (unsigned)hash
+- (NSUInteger)hash
 {
     return [entityType hash] ^ [container hash];
 }
