@@ -194,8 +194,8 @@ ofContainersTyped:(PajeEntityType *)containerType
 // Array of types that are directly under given type in hierarchy
 - (NSArray *)containedTypesForContainerType:(PajeEntityType *)containerType;
 
-// The type that contains the given type
-- (PajeEntityType *)containerTypeForType:(PajeEntityType *)entityType;
+// The container type that contains the given type
+- (PajeContainerType *)containerTypeForType:(PajeEntityType *)entityType;
 
 // All entities of a given type that are in a container in a certain
 // time interval. minDuration is a hint to the minimum duration of an

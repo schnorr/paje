@@ -1,3 +1,8 @@
+2010-07-01  Lucas M. Schnorr <schnorr@gmail.com>
+    * General/PajeFilter.[hm], StorageController/AnchorFilter.m: fixing the
+      return type for the protocol method containerTypeForType (it was
+      PajeEntityType, but it always return PajeContainerType).
+
 2010-03-10  Lucas M. Schnorr <schnorr@gmail.com>
     * PajeSimulator/SimulContainer.[mh]: maxValueForEntityType and
       minValueForEntityType were returning NSNumber* instead of double (as

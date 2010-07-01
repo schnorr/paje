@@ -105,7 +105,7 @@ ofContainersTyped:(PajeEntityType *)containerType
     }
 }
 
-- (PajeEntityType *)containerTypeForType:(PajeEntityType *)entityType
+- (PajeContainerType *)containerTypeForType:(PajeEntityType *)entityType
 {
     return [entityType containerType];
 }

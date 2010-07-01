@@ -381,7 +381,7 @@ ofContainersTyped:(PajeEntityType *)containerType
     return [inputComponent containedTypesForContainerType:containerType];
 }
 
-- (PajeEntityType *)containerTypeForType:(PajeEntityType *)entityType
+- (PajeContainerType *)containerTypeForType:(PajeEntityType *)entityType
 {
     return [inputComponent containerTypeForType:entityType];
 }
