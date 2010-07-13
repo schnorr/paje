@@ -126,6 +126,12 @@
     return inputFilename;
 }
 
+- (double) readingPorcentage
+{
+  return (double)[inputFile offsetInFile]/(double)sizeOfFile;
+}
+
+
 - (void)setInputFilename:(NSString *)filename
 {
     if (inputFilename != nil) {
@@ -133,6 +139,10 @@
     }
     Assign(inputFilename, filename);
     Assign(inputFile, [NSFileHandle fileHandleForReadingAtPath:filename]);
+
+    //defining the size of the file
+    sizeOfFile = [inputFile seekToEndOfFile];
+    [inputFile seekToFileOffset: 0];
 
     if (inputFile == nil) {
         [self raise:@"Couldn't open file"];

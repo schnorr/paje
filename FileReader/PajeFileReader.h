@@ -34,6 +34,8 @@
 
     NSMutableArray *chunkInfo;
     unsigned currentChunk;
+
+    unsigned long long sizeOfFile;
 }
 
 - (id)initWithController:(PajeTraceController *)c;
@@ -47,5 +49,7 @@
 - (void)endOfChunkLast:(BOOL)last;
 
 - (void)raise:(NSString *)reason;
+
+- (double) readingPorcentage;
 @end
 #endif
