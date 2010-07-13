@@ -34,6 +34,7 @@
         chunkInfo = [[NSMutableArray alloc] init];
         currentChunk = 0;
         hasMoreData = NO;
+        userChunkSize = CHUNK_SIZE;
     }
 
     return self;
@@ -229,9 +230,9 @@
         // first time reading this chunk.
         // must determine its correct size (must end in a line boundary
         // and in a date-changing event).
-        data = (NSMutableData *)[inputFile readDataOfLength:CHUNK_SIZE];
+        data = (NSMutableData *)[inputFile readDataOfLength:userChunkSize];
         length = [data length];
-        if (length < CHUNK_SIZE) {
+        if (length < userChunkSize) {
             hasMoreData = NO;
         } else {
             char *bytes;
@@ -262,5 +263,10 @@
 - (BOOL)hasMoreData
 {
     return hasMoreData;
+}
+
+- (void) setUserChunkSize: (unsigned long long)cs
+{
+    userChunkSize = cs;
 }
 @end

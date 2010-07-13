@@ -155,6 +155,7 @@ typedef enum {
 - (void)readNextChunk;
 - (void)endOfChunkLast:(BOOL)last;
 - (BOOL)hasMoreData;
+- (void)setUserChunkSize:(unsigned long long)cs;
 @end
 
 @protocol PajeSimulator

@@ -36,6 +36,7 @@
     unsigned currentChunk;
 
     unsigned long long sizeOfFile;
+    unsigned long long userChunkSize;
 }
 
 - (id)initWithController:(PajeTraceController *)c;
@@ -51,5 +52,7 @@
 - (void)raise:(NSString *)reason;
 
 - (double) readingPorcentage;
+
+- (void) setUserChunkSize: (unsigned long long)cs;
 @end
 #endif

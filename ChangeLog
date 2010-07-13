@@ -1,3 +1,7 @@
+2010-07-13  Lucas M. Schnorr <schnorr@gmail.com>
+    * FileReader/PajeFileReader.[hm], General/Protocols.h: let the user
+      specify the chunk size used during the reading of a trace file.
+
 2010-07-01  Lucas M. Schnorr <schnorr@gmail.com>
     * General/PajeFilter.[hm], StorageController/AnchorFilter.m: fixing the
       return type for the protocol method containerTypeForType (it was
