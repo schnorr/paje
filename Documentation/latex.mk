@@ -5,6 +5,9 @@ LATEX_MASTER?=$(LATEX_FILES)
 
 all: $(LATEX_MASTER:%.tex=%.ps)
 
+%.pdf: %.dvi
+	dvipdf $*
+
 %.ps: %.dvi
 	dvips $* -o
 
