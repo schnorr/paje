@@ -51,7 +51,7 @@
 
 - (void)raise:(NSString *)reason;
 
-- (double) readingPorcentage;
+- (NSNumber*) readingPorcentage;
 
 - (void) setUserChunkSize: (unsigned long long)cs;
 @end

@@ -127,9 +127,12 @@
     return inputFilename;
 }
 
-- (double) readingPorcentage
+- (NSNumber *) readingPorcentage
 {
-  return (double)[inputFile offsetInFile]/(double)sizeOfFile;
+  double size = (double)sizeOfFile;
+  double current = (double)[inputFile offsetInFile];
+  double porcentage = current/size;
+  return [NSNumber numberWithDouble: porcentage];
 }
 
 

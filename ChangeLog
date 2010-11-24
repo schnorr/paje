@@ -1,3 +1,7 @@
+2010-11-24  Lucas M. Schnorr <schnorr@gmail.com>
+    * FileReader/PajeFileReader.[hm]: method to obtain the porcentage
+      of the trace file that has already been read.
+
 2010-07-13  Lucas M. Schnorr <schnorr@gmail.com>
     * FileReader/PajeFileReader.[hm], General/Protocols.h: let the user
       specify the chunk size used during the reading of a trace file.
