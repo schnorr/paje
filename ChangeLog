@@ -1,3 +1,7 @@
+2010-12-15  Lucas M. Schnorr <schnorr@gmail.com>
+    * Paje/Paje.gorm/*: bugfix, changing the selected filter on popup updates
+      the current filter of the "Filter" window
+
 2010-11-24  Lucas M. Schnorr <schnorr@gmail.com>
     * FileReader/PajeFileReader.[hm]: method to obtain the porcentage
       of the trace file that has already been read.
