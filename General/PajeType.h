@@ -35,6 +35,7 @@
 @interface PajeEntityType : NSObject <NSCoding>
 {
     NSString *name;
+    NSString *uniqueAlias;
     PajeContainerType *containerType;
     NSColor *color;
     NSMutableSet *fieldNames;
@@ -42,15 +43,18 @@
 }
 
 + (PajeEntityType *)typeWithName:(NSString *)n
+                       withAlias:(NSString *)a
                    containerType:(PajeContainerType *)type
                            event:(PajeEvent *)e;
 - (id)initWithName:(NSString *)n
+         withAlias:(NSString *)a
      containerType:(PajeContainerType *)type
              event:(PajeEvent *)e;
 
 - (BOOL)isContainer;
 
 - (NSString *)name;
+- (NSString *)alias;
 - (PajeContainerType *)containerType;
 
 - (PajeDrawingType)drawingType;
@@ -82,6 +86,7 @@
 }
 
 + (PajeContainerType *)typeWithName:(NSString *)n
+                          withAlias:(NSString *)a
                       containerType:(PajeContainerType *)type
                               event:(PajeEvent *)e;
 
@@ -146,11 +151,13 @@
 }
 
 + (PajeLinkType *)typeWithName:(id)n
+                     withAlias:(id)a
                  containerType:(PajeContainerType *)type
            sourceContainerType:(PajeContainerType *)sourceType
              destContainerType:(PajeContainerType *)destType
                          event:(PajeEvent *)e;
 -    (id)initWithName:(id)n
+            withAlias:(id)a
         containerType:(PajeContainerType *)type
   sourceContainerType:(PajeContainerType *)sourceType
     destContainerType:(PajeContainerType *)destType

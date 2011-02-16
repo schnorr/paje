@@ -107,9 +107,11 @@
     }
 
     // create the new container type
-    NSString *newContainerTypeNameO;
+    NSString *newContainerTypeNameO, *newContainerTypeIdO;
     newContainerTypeNameO = [NSString stringWithCString:newContainerTypeName];
+    newContainerTypeIdO = [NSString stringWithCString:newContainerTypeId];
     newContainerType = [PajeContainerType typeWithName:newContainerTypeNameO
+                                             withAlias:newContainerTypeIdO
                                          containerType:containerType
                                                  event:event];
     [self setType:newContainerType forId:newContainerTypeId];
@@ -167,9 +169,11 @@
         return;
     }
 
-    NSString *newEntityTypeNameO;
+    NSString *newEntityTypeNameO, *newEntityTypeIdO;
     newEntityTypeNameO = [NSString stringWithCString:newEntityTypeName];
+    newEntityTypeIdO = [NSString stringWithCString:newEntityTypeId];
     newEntityType = [PajeLinkType typeWithName:newEntityTypeNameO
+                                     withAlias:newEntityTypeIdO
                                  containerType:containerType
                            sourceContainerType:sourceContainerType
                              destContainerType:destContainerType
@@ -215,21 +219,25 @@
         [self error:@"Unknown container type" inEvent:event];
     }
 
-    NSString *newEntityTypeNameO;
+    NSString *newEntityTypeNameO, *newEntityTypeIdO;
     newEntityTypeNameO = [NSString stringWithCString:newEntityTypeName];
+    newEntityTypeIdO = [NSString stringWithCString:newEntityTypeId];
     switch (drawingType) {
     case PajeEventDrawingType:
         newEntityType = [PajeEventType typeWithName:newEntityTypeNameO
+                                          withAlias:newEntityTypeIdO
                                       containerType:containerType
                                               event:event];
         break;
     case PajeStateDrawingType:
         newEntityType = [PajeStateType typeWithName:newEntityTypeNameO
+                                          withAlias:newEntityTypeIdO
                                       containerType:containerType
                                               event:event];
         break;
     case PajeVariableDrawingType:
         newEntityType = [PajeVariableType typeWithName:newEntityTypeNameO
+                                             withAlias:newEntityTypeIdO
                                          containerType:containerType
                                                  event:event];
         break;

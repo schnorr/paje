@@ -100,6 +100,7 @@
         }
 
         rootContainerType = [PajeContainerType typeWithName:@"File"
+                                                  withAlias:@"File"
                                               containerType:nil
                                                       event:nil];
         rootContainer = [[SimulContainer alloc] initWithType:rootContainerType

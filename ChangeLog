@@ -1,3 +1,15 @@
+2011-02-16  Lucas M. Schnorr <schnorr@gmail.com>
+    * General/PajeType.[mh],
+      PajeSimulator/PajeSimul+Events.m
+      PajeSimulator/PajeSimul.m: bugfix, multiple types with same name
+      are correctly managed by the simulator. Types were used as keys
+      in the userEntities dictionary, but their hashes were the name,
+      and not the unique identifier of the type (an optional alias).
+      This commit addresses this issue by creating a new attribute to
+      the PajeType that corresponds to the alias defined in the trace
+      or the name (if alias not present). PajeTypes' hash is based
+      on this new attribute.
+
 2010-12-15  Lucas M. Schnorr <schnorr@gmail.com>
     * Paje/Paje.gorm/*: bugfix, changing the selected filter on popup updates
       the current filter of the "Filter" window
