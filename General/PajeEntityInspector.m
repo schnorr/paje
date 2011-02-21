@@ -404,10 +404,10 @@ static NSMutableArray *allInstances;
     fieldValues = [NSMutableArray array];
     fieldObjects = [NSMutableArray array];
     while ([container container] != nil && ![container isEqual:upto]) {
-        [fieldTitles insertObject:[[container entityType] name] atIndex:0];
-        [fieldValues insertObject:[container name] atIndex:0];
-        [fieldObjects insertObject:container atIndex:0];
-        container = [container container];
+      [fieldTitles insertObject:[[container entityType] description] atIndex:0];
+      [fieldValues insertObject:[container name] atIndex:0];
+      [fieldObjects insertObject:container atIndex:0];
+      container = [container container];
     }
 
     box = [self boxWithTitle:title

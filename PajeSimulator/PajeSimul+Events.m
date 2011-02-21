@@ -110,10 +110,10 @@
     NSString *newContainerTypeNameO, *newContainerTypeIdO;
     newContainerTypeNameO = [NSString stringWithCString:newContainerTypeName];
     newContainerTypeIdO = [NSString stringWithCString:newContainerTypeId];
-    newContainerType = [PajeContainerType typeWithName:newContainerTypeNameO
-                                             withAlias:newContainerTypeIdO
-                                         containerType:containerType
-                                                 event:event];
+    newContainerType = [PajeContainerType typeWithId:newContainerTypeIdO
+                                         description:newContainerTypeNameO
+                                       containerType:containerType
+                                               event:event];
     [self setType:newContainerType forId:newContainerTypeId];
     [(PajeFilter *)outputComponent hierarchyChanged];
 }
@@ -172,12 +172,12 @@
     NSString *newEntityTypeNameO, *newEntityTypeIdO;
     newEntityTypeNameO = [NSString stringWithCString:newEntityTypeName];
     newEntityTypeIdO = [NSString stringWithCString:newEntityTypeId];
-    newEntityType = [PajeLinkType typeWithName:newEntityTypeNameO
-                                     withAlias:newEntityTypeIdO
-                                 containerType:containerType
-                           sourceContainerType:sourceContainerType
-                             destContainerType:destContainerType
-                                         event:event];
+    newEntityType = [PajeLinkType typeWithId:newEntityTypeIdO
+                                 description:newEntityTypeNameO
+                               containerType:containerType
+                         sourceContainerType:sourceContainerType
+                           destContainerType:destContainerType
+                                       event:event];
     [self setType:newEntityType forId:newEntityTypeId];
 
     [(PajeFilter *)outputComponent hierarchyChanged];
@@ -224,22 +224,22 @@
     newEntityTypeIdO = [NSString stringWithCString:newEntityTypeId];
     switch (drawingType) {
     case PajeEventDrawingType:
-        newEntityType = [PajeEventType typeWithName:newEntityTypeNameO
-                                          withAlias:newEntityTypeIdO
-                                      containerType:containerType
-                                              event:event];
+        newEntityType = [PajeEventType typeWithId:newEntityTypeIdO
+                                      description:newEntityTypeNameO
+                                    containerType:containerType
+                                            event:event];
         break;
     case PajeStateDrawingType:
-        newEntityType = [PajeStateType typeWithName:newEntityTypeNameO
-                                          withAlias:newEntityTypeIdO
-                                      containerType:containerType
-                                              event:event];
+        newEntityType = [PajeStateType typeWithId:newEntityTypeIdO
+                                      description:newEntityTypeNameO
+                                    containerType:containerType
+                                            event:event];
         break;
     case PajeVariableDrawingType:
-        newEntityType = [PajeVariableType typeWithName:newEntityTypeNameO
-                                             withAlias:newEntityTypeIdO
-                                         containerType:containerType
-                                                 event:event];
+        newEntityType = [PajeVariableType typeWithId:newEntityTypeIdO
+                                         description:newEntityTypeNameO
+                                       containerType:containerType
+                                               event:event];
         break;
     default:
         [self error:@"Internal simulator error: unknown drawing type"

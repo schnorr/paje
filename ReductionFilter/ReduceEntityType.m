@@ -86,7 +86,7 @@
     // super adds self as a subtype of containertype.
     // call init with nil as containerType so as to not do that;
     // initialize containerType after it.
-    self = [super initWithName:n containerType:nil event:nil];
+    self = [super initWithId:n description:n containerType:nil event:nil];
     if (self != nil) {
         containerType = type;
         component = comp;
@@ -111,17 +111,17 @@
 - (NSDictionary *)dictionaryForDefaults
 {
     return [NSDictionary dictionaryWithObjectsAndKeys:
-        [self name], @"EntityName",
-        [[self containerType] name], @"ContainerType",
-        [[self entityTypeToReduce] name], @"EntityTypeToReduce",
+        [self description], @"EntityName",
+        [[self containerType] description], @"ContainerType",
+        [[self entityTypeToReduce] description], @"EntityTypeToReduce",
         [filterValues allObjects], @"ValuesToFilter",
         NSStringFromClass(entityClass), @"ReductionClass",
         nil];
 }
 
-- (void)setName:(NSString *)n
+- (void)setDescription:(NSString *)n
 {
-    Assign(name, n);
+    Assign(description, n);
 }
 
 - (void)setContainerType:(PajeContainerType *)newContainerType
@@ -130,8 +130,8 @@
 
     Assign(containerType, newContainerType);
 
-    defaultName = [[self name] stringByAppendingString:@"ContainerType"];
-    [[NSUserDefaults standardUserDefaults] setObject:[containerType name]
+    defaultName = [[self description] stringByAppendingString:@"ContainerType"];
+    [[NSUserDefaults standardUserDefaults] setObject:[containerType description]
                                               forKey:defaultName];
 
     minValue = HUGE_VAL;

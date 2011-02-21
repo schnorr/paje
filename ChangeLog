@@ -1,3 +1,13 @@
+2011-02-21  Lucas M. Schnorr <schnorr@gmail.com>
+    * General/PajeType.[mh], General/HierarchyBrowser.m,
+      General/PajeEntityInspector.m, PajeSimulator/PajeSimul+Events.m
+      PajeSimulator/PajeSimul.m, ReductionFilter/BusyNode.m,
+      ReductionFilter/ReduceEntityType.[mh]: types have an ident (its unique
+      identification, usually the alias) and a description (usually its name).
+      Old attributes (name, uniqueAlias) are removed to reflect this new layout.
+      The -name method is removed, objects should call description on type to
+      get its name.
+
 2011-02-16  Lucas M. Schnorr <schnorr@gmail.com>
     * General/PajeType.[mh],
       PajeSimulator/PajeSimul+Events.m

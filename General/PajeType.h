@@ -34,27 +34,26 @@
 
 @interface PajeEntityType : NSObject <NSCoding>
 {
-    NSString *name;
-    NSString *uniqueAlias;
+    NSString *ident; /* unique identification of this type */
+    NSString *description; /* description of the type, usually the name */
     PajeContainerType *containerType;
     NSColor *color;
     NSMutableSet *fieldNames;
     NSHashTable *knownEventTypes;
 }
 
-+ (PajeEntityType *)typeWithName:(NSString *)n
-                       withAlias:(NSString *)a
-                   containerType:(PajeContainerType *)type
-                           event:(PajeEvent *)e;
-- (id)initWithName:(NSString *)n
-         withAlias:(NSString *)a
-     containerType:(PajeContainerType *)type
-             event:(PajeEvent *)e;
++ (PajeEntityType *)typeWithId:(NSString *)i
+                   description:(NSString *)d
+                 containerType:(PajeContainerType *)type
+                         event:(PajeEvent *)e;
+- (id)initWithId:(NSString *)i
+     description:(NSString *)d
+   containerType:(PajeContainerType *)type
+           event:(PajeEvent *)e;
 
 - (BOOL)isContainer;
 
-- (NSString *)name;
-- (NSString *)alias;
+- (NSString *)ident;
 - (PajeContainerType *)containerType;
 
 - (PajeDrawingType)drawingType;
@@ -85,10 +84,10 @@
     NSMutableArray *containedTypes;
 }
 
-+ (PajeContainerType *)typeWithName:(NSString *)n
-                          withAlias:(NSString *)a
-                      containerType:(PajeContainerType *)type
-                              event:(PajeEvent *)e;
++ (PajeContainerType *)typeWithId:(NSString *)i
+                      description:(NSString *)d
+                    containerType:(PajeContainerType *)type
+                            event:(PajeEvent *)e;
 
 - (void)addInstance:(PajeContainer *)container
                 id1:(const char *)id1
@@ -150,18 +149,18 @@
     PajeContainerType *destContainerType;   // not retained
 }
 
-+ (PajeLinkType *)typeWithName:(id)n
-                     withAlias:(id)a
-                 containerType:(PajeContainerType *)type
-           sourceContainerType:(PajeContainerType *)sourceType
-             destContainerType:(PajeContainerType *)destType
++ (PajeLinkType *)typeWithId:(id)i
+                 description:(id)d
+               containerType:(PajeContainerType *)type
+         sourceContainerType:(PajeContainerType *)sourceType
+           destContainerType:(PajeContainerType *)destType
                          event:(PajeEvent *)e;
--    (id)initWithName:(id)n
-            withAlias:(id)a
-        containerType:(PajeContainerType *)type
-  sourceContainerType:(PajeContainerType *)sourceType
-    destContainerType:(PajeContainerType *)destType
-                event:(PajeEvent *)e;
+-    (id)initWithId:(id)i
+        description:(id)d
+      containerType:(PajeContainerType *)type
+sourceContainerType:(PajeContainerType *)sourceType
+  destContainerType:(PajeContainerType *)destType
+              event:(PajeEvent *)e;
 - (PajeContainerType *)sourceContainerType;
 - (PajeContainerType *)destContainerType;
 - (PajeDrawingType)drawingType;

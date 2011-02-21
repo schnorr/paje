@@ -283,7 +283,7 @@
         [matrix renewRows:rows columns:1];
         cell = [matrix cellAtRow:rows-1 column:0];
         [cell setRepresentedObject:entityType];
-        [cell setStringValue:[entityType name]];
+        [cell setStringValue:[entityType description]];
         // FIXME: if containersOnly, containers that do not contain containers
         //        should be leaves
         [cell setLeaf:!isContainer];

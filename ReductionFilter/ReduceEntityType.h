@@ -45,7 +45,7 @@
 - (NSDictionary *)dictionaryForDefaults;
 - (PajeFilter *)component;
 
-- (void)setName:(NSString *)n;
+- (void)setDescription:(NSString *)n;
 
 - (void)setContainerType:(PajeContainerType *)newContainerType;
 

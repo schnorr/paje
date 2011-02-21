@@ -32,30 +32,30 @@
 
 @implementation PajeEntityType
 
-+ (PajeEntityType *)typeWithName:(NSString *)n
-                       withAlias:(NSString *)a
-                   containerType:(PajeContainerType *)type
-                           event:(PajeEvent *)e
++ (PajeEntityType *)typeWithId:(NSString *)i
+                   description:(NSString *)d
+                 containerType:(PajeContainerType *)type
+                         event:(PajeEvent *)e
 {
-    return [[[self alloc] initWithName:n
-                             withAlias:a
-                         containerType:type
-                                 event:e] autorelease];
+    return [[[self alloc] initWithId:i
+                         description:d
+                       containerType:type
+                               event:e] autorelease];
 }
 
-- (id)initWithName:(NSString *)n
-         withAlias:(NSString *)a
-     containerType:(PajeContainerType *)type
-             event:(PajeEvent *)e
+- (id)initWithId:(NSString *)i
+     description:(NSString *)d
+   containerType:(PajeContainerType *)type
+           event:(PajeEvent *)e
 {
     if (self == [super init]) {
         NSColor *c;
-        Assign(name, n);
-        Assign(uniqueAlias, a);
+        Assign(ident, i);
+        Assign(description, d);
         containerType = type;
-	[containerType addContainedType:self];
+        [containerType addContainedType:self];
         c = [[NSUserDefaults standardUserDefaults]
-                         colorForKey:[name stringByAppendingString:@" Color"]];
+                   colorForKey:[description stringByAppendingString:@" Color"]];
         if (c == nil) {
             c = [e colorForFieldId:PajeColorFieldId];
         }
@@ -72,8 +72,8 @@
 
 - (void)dealloc
 {
-    Assign(name, nil);
-    Assign(uniqueAlias, nil);
+    Assign(ident, nil);
+    Assign(description, nil);
     containerType = nil;
     Assign(color, nil);
     Assign(fieldNames, nil);
@@ -91,14 +91,9 @@
     return [NSArray array];
 }
 
-- (NSString *)name
+- (NSString *)ident
 {
-    return name;
-}
-
-- (NSString *)alias
-{
-    return uniqueAlias;
+    return ident;
 }
 
 - (PajeContainerType *)containerType
@@ -121,7 +116,7 @@
 
 - (NSString *)description
 {
-    return [name description];
+    return description;
 }
 
 - (NSColor *)colorForValue:(id)value
@@ -143,7 +138,8 @@
 {
     Assign(color, c);
     [[NSUserDefaults standardUserDefaults]
-            setColor:color forKey:[name stringByAppendingString:@" Color"]];
+            setColor:color
+              forKey:[description stringByAppendingString:@" Color"]];
 }
 
 - (id)valueOfFieldNamed:(NSString *)n
@@ -185,13 +181,13 @@
 
 - (unsigned)hash
 {
-    return [uniqueAlias hash];
+    return [ident hash];
 }
 
 - (BOOL)isEqual:(id)other
 {
     if ([other isKindOfClass:[PajeEntityType class]]) {
-      return [uniqueAlias isEqualToString: [(PajeEntityType *)other alias]];
+      return [ident isEqualToString: [(PajeEntityType *)other ident]];
     }else{
       return NO;
     }
@@ -200,7 +196,7 @@
 - (NSComparisonResult)compare:(id)other
 {
     if ([other isKindOfClass:[PajeEntityType class]]) {
-      return [uniqueAlias compare: [(PajeEntityType *)other alias]];
+      return [ident compare: [(PajeEntityType *)other ident]];
     }else{
       return NSOrderedSame;
     }
@@ -209,8 +205,8 @@
 // NSCoding protocol
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:name];
-    [coder encodeObject:uniqueAlias];
+    [coder encodeObject:ident];
+    [coder encodeObject:description];
     [coder encodeObject:containerType];
     [coder encodeObject:fieldNames];
     // FIXME: save other fields (from creation event, see -init)
@@ -219,15 +215,15 @@
 - (id)initWithCoder:(NSCoder *)coder
 {
     id o1;
-    id o1a;
     id o2;
+    id o3;
     o1 = [coder decodeObject];
-    o1a = [coder decodeObject];
     o2 = [coder decodeObject];
-    self = [self initWithName:o1
-                    withAlias:o1a
-                containerType:o2
-                        event:nil];
+    o3 = [coder decodeObject];
+    self = [self initWithId:o1
+                description:o2
+              containerType:o3
+                      event:nil];
     Assign(fieldNames, [coder decodeObject]);
     return self;
 }
@@ -235,23 +231,23 @@
 
 
 @implementation PajeContainerType
-+ (PajeContainerType *)typeWithName:(NSString *)n
-                          withAlias:(NSString *)a
-                      containerType:(PajeContainerType *)type
-                              event:(PajeEvent *)e
++ (PajeContainerType *)typeWithId:(NSString *)i
+                      description:(NSString *)d
+                    containerType:(PajeContainerType *)type
+                            event:(PajeEvent *)e
 {
-    return [[[self alloc] initWithName:n
-                             withAlias:a
-                         containerType:type
-                                 event:e] autorelease];
+    return [[[self alloc] initWithId:i
+                         description:d
+                       containerType:type
+                               event:e] autorelease];
 }
 
-- (id)initWithName:(NSString *)n
-         withAlias:(NSString *)a
-     containerType:(PajeContainerType *)type
-             event:(PajeEvent *)e
+- (id)initWithId:(NSString *)i
+     description:(NSString *)d
+   containerType:(PajeContainerType *)type
+           event:(PajeEvent *)e
 {
-    self = [super initWithName:n withAlias: a containerType:type event:e];
+    self = [super initWithId:i description: d containerType:type event:e];
     if (self != nil) {
         allInstances = [[NSMutableArray alloc] init];
         idToInstance = NSCreateMapTable(CStringMapKeyCallBacks,
@@ -341,12 +337,12 @@
 
 
 @implementation PajeCategorizedEntityType
-- (id)initWithName:(NSString *)n
-         withAlias:(NSString *)a
-     containerType:(PajeContainerType *)type
-             event:(PajeEvent *)e
+- (id)initWithId:(NSString *)i
+     description:(NSString *)d
+   containerType:(PajeContainerType *)type
+           event:(PajeEvent *)e
 {
-    self = [super initWithName:n withAlias:a containerType:type event:e];
+    self = [super initWithId:i description:d containerType:type event:e];
     if (self != nil) {
         aliasToValue = NSCreateMapTable(CStringMapKeyCallBacks,
                                         NSObjectMapValueCallBacks, 50);
@@ -412,7 +408,7 @@
     [valueToColor setObject:colorForValue forKey:value];
     [[NSUserDefaults standardUserDefaults]
         setColorDictionary:valueToColor
-                    forKey:[name stringByAppendingString:@" Colors"]];
+                    forKey:[description stringByAppendingString:@" Colors"]];
 }
 
 - (void)readDefaultColors
@@ -420,7 +416,7 @@
     id defaultColors;
     NSMutableDictionary *dict;
     defaultColors = [[NSUserDefaults standardUserDefaults]
-        colorDictionaryForKey:[name stringByAppendingString:@" Colors"]];
+        colorDictionaryForKey:[description stringByAppendingString:@" Colors"]];
     if (defaultColors != nil) {
         dict = [[defaultColors mutableCopy] autorelease];
     } else {
@@ -466,15 +462,15 @@
 #include <math.h>
 
 @implementation PajeVariableType
-- (id)initWithName:(NSString *)n
-         withAlias:(NSString *)a
-     containerType:(PajeContainerType *)type
-             event:(PajeEvent *)e
+- (id)initWithId:(NSString *)i
+     description:(NSString *)d
+   containerType:(PajeContainerType *)type
+           event:(PajeEvent *)e
 {
-    self = [super initWithName:n
-                     withAlias:a
-                 containerType:type
-                         event:e];
+    self = [super initWithId:i
+                 description:d
+               containerType:type
+                       event:e];
     if (self != nil) {
         minValue = HUGE_VAL;
         maxValue = -HUGE_VAL;
@@ -543,29 +539,29 @@
 
 @implementation PajeLinkType
 
-+ (PajeLinkType *)typeWithName:(id)n
-                     withAlias:(id)a
-                 containerType:(PajeContainerType *)type
-           sourceContainerType:(PajeContainerType *)sourceType
-             destContainerType:(PajeContainerType *)destType
++ (PajeLinkType *)typeWithId:(id)i
+                 description:(id)d
+               containerType:(PajeContainerType *)type
+         sourceContainerType:(PajeContainerType *)sourceType
+           destContainerType:(PajeContainerType *)destType
                          event:(PajeEvent *)e
 {
-    return [[[self alloc] initWithName:n
-                             withAlias:a
-                         containerType:type
-                   sourceContainerType:sourceType
-                     destContainerType:destType
-                                 event:e] autorelease];
+    return [[[self alloc] initWithId:i
+                         description:d
+                       containerType:type
+                 sourceContainerType:sourceType
+                   destContainerType:destType
+                               event:e] autorelease];
 }
 
--    (id)initWithName:(id)n
-            withAlias:(id)a
-        containerType:(PajeContainerType *)type
-  sourceContainerType:(PajeContainerType *)sourceType
-    destContainerType:(PajeContainerType *)destType
-                event:(PajeEvent *)e
+-    (id)initWithId:(id)i
+        description:(id)d
+      containerType:(PajeContainerType *)type
+sourceContainerType:(PajeContainerType *)sourceType
+  destContainerType:(PajeContainerType *)destType
+              event:(PajeEvent *)e
 {
-    self = [super initWithName:n withAlias:a containerType:type event:e];
+    self = [super initWithId:i description:d containerType:type event:e];
     sourceContainerType = sourceType;
     destContainerType = destType;
     return self;

@@ -150,8 +150,9 @@
     [entityNamePopUp removeAllItems];
     typeEnumerator = [reduceEntityTypes objectEnumerator];
     while ((type = [typeEnumerator nextObject]) != nil) {
-        [entityNamePopUp addItemWithTitle:[type name]];
-        [[entityNamePopUp itemWithTitle:[type name]] setRepresentedObject:type];
+        [entityNamePopUp addItemWithTitle:[type description]];
+        [[entityNamePopUp itemWithTitle:[type description]]
+                                    setRepresentedObject:type];
 	ct++;
     }
     if (ct == 0) {
@@ -161,7 +162,7 @@
         [entityNamePopUp setEnabled:YES];
     }
     if (selectedType != nil)
-        [entityNamePopUp selectItemWithTitle:[selectedType name]];
+        [entityNamePopUp selectItemWithTitle:[selectedType description]];
     if ([entityNamePopUp selectedItem] == nil
         && [entityNamePopUp numberOfItems] > 0)
         [entityNamePopUp selectItemAtIndex:0];
@@ -340,12 +341,12 @@
     }
     [reduceEntityTypes addObject:newEntityType];
     [entityTypesDictionary setObject:[newEntityType dictionaryForDefaults]
-                              forKey:[newEntityType name]];
+                              forKey:[newEntityType description]];
     [self registerDefaults];
     [self addToHierarchy:newEntityType];
 
     [self calcEntityNamePopUp];
-    [entityNamePopUp selectItemWithTitle:[newEntityType name]];
+    [entityNamePopUp selectItemWithTitle:[newEntityType description]];
     [self entityNamePopUpChanged:self];
     [super hierarchyChanged];
 }
@@ -358,7 +359,7 @@
         NSBeep();
         return;
     }
-    [entityTypesDictionary removeObjectForKey:[entityType name]];
+    [entityTypesDictionary removeObjectForKey:[entityType description]];
     [reduceEntityTypes removeObject:entityType];
     [self calcHierarchy];
     [self registerDefaults];
@@ -371,14 +372,14 @@
     NSString *oldName;
     NSString *newName;
     entityType = [[entityNamePopUp selectedItem] representedObject];
-    oldName = [entityType name];
+    oldName = [entityType description];
     newName = [entityNameField stringValue];
     if ((oldName == nil) || (newName == nil) || [newName isEqual:oldName]) {
         NSBeep();
         return;
     }
     [reduceEntityTypes removeObject:entityType];
-    [entityType setName:newName];
+    [entityType setDescription:newName];
     [reduceEntityTypes addObject:entityType];
     [entityTypesDictionary removeObjectForKey:oldName];
     [entityTypesDictionary setObject:[entityType dictionaryForDefaults]
@@ -412,7 +413,7 @@
     if (![[type entityTypeToReduce] isEqual:newEntityTypeToReduce]) {
         [type setEntityTypeToReduce:newEntityTypeToReduce];
         [entityTypesDictionary setObject:[type dictionaryForDefaults]
-                                  forKey:[type name]];
+                                  forKey:[type description]];
         [self registerDefaults];
         [self calcGroupPopUp];
         [self refreshMatrix];
@@ -434,7 +435,7 @@
     if (![newContainerType isEqual:[type containerType]]) {
         [type setContainerType:newContainerType];
         [entityTypesDictionary setObject:[type dictionaryForDefaults]
-                                  forKey:[type name]];
+                                  forKey:[type description]];
         [self registerDefaults];
         [self refreshMatrix];
         [self calcHierarchy];
@@ -459,7 +460,7 @@
     [type setEntityClass:entityClass];
     
     [entityTypesDictionary setObject:[type dictionaryForDefaults]
-                              forKey:[type name]];
+                              forKey:[type description]];
     [self registerDefaults];
 
     [super dataChangedForEntityType:type];
@@ -487,7 +488,7 @@
         [type addValueToFilter:[cell representedObject]];
     }
     [entityTypesDictionary setObject:[type dictionaryForDefaults]
-                              forKey:[type name]];
+                              forKey:[type description]];
     [self registerDefaults];
 
     [super dataChangedForEntityType:type];
