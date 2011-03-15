@@ -394,8 +394,13 @@
 
 - (NSColor *)colorForValue:(id)value
 {
+    NSAssert([value isKindOfClass: [NSString class]], 
+             @"key must be of NSString class");
+    NSString *key = [value stringByTrimmingCharactersInSet:
+                        [NSCharacterSet whitespaceAndNewlineCharacterSet]];
+
     NSColor *colorForValue;
-    colorForValue = [valueToColor objectForKey:value];
+    colorForValue = [valueToColor objectForKey:key];
     if (colorForValue == nil) {
         colorForValue = [NSColor whiteColor];
     }
@@ -405,7 +410,11 @@
 - (void)setColor:(NSColor*)colorForValue
         forValue:(id)value
 {
-    [valueToColor setObject:colorForValue forKey:value];
+    NSAssert([value isKindOfClass: [NSString class]], 
+             @"key must be of NSString class");
+    NSString *key = [value stringByTrimmingCharactersInSet:
+                        [NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    [valueToColor setObject:colorForValue forKey:key];
     [[NSUserDefaults standardUserDefaults]
         setColorDictionary:valueToColor
                     forKey:[description stringByAppendingString:@" Colors"]];

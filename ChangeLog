@@ -1,3 +1,8 @@
+2011-03-15  Lucas M. Schnorr <schnorr@gmail.com>
+    * General/PajeType.[mh]: color dictionaries must not have keys with white
+      spaces in the beginning. If values for states start with white spaces,
+      we trimm them out before registering the colors.
+
 2011-02-21  Lucas M. Schnorr <schnorr@gmail.com>
     * General/PajeType.[mh], General/HierarchyBrowser.m,
       General/PajeEntityInspector.m, PajeSimulator/PajeSimul+Events.m
