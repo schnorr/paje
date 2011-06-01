@@ -6,82 +6,86 @@
 	change benefits only the reading of un-ordered trace files.
 
 2011-03-15  Lucas M. Schnorr <schnorr@gmail.com>
-    * General/PajeType.[mh]: color dictionaries must not have keys with white
-      spaces in the beginning. If values for states start with white spaces,
-      we trimm them out before registering the colors.
+	* General/PajeType.[mh]: color dictionaries must not have keys
+	with white spaces in the beginning. If values for states start
+	with white spaces, we trimm them out before registering the
+	colors.
 
 2011-02-21  Lucas M. Schnorr <schnorr@gmail.com>
-    * General/PajeType.[mh], General/HierarchyBrowser.m,
-      General/PajeEntityInspector.m, PajeSimulator/PajeSimul+Events.m
-      PajeSimulator/PajeSimul.m, ReductionFilter/BusyNode.m,
-      ReductionFilter/ReduceEntityType.[mh]: types have an ident (its unique
-      identification, usually the alias) and a description (usually its name).
-      Old attributes (name, uniqueAlias) are removed to reflect this new layout.
-      The -name method is removed, objects should call description on type to
-      get its name.
+	* General/PajeType.[mh], General/HierarchyBrowser.m,
+	General/PajeEntityInspector.m, PajeSimulator/PajeSimul+Events.m
+	PajeSimulator/PajeSimul.m, ReductionFilter/BusyNode.m,
+	ReductionFilter/ReduceEntityType.[mh]: types have an ident (its
+	unique identification, usually the alias) and a
+	description (usually its name).  Old attributes (name,
+	uniqueAlias) are removed to reflect this new layout.  The -name
+	method is removed, objects should call description on type to get
+	its name.
 
 2011-02-16  Lucas M. Schnorr <schnorr@gmail.com>
-    * General/PajeType.[mh],
-      PajeSimulator/PajeSimul+Events.m
-      PajeSimulator/PajeSimul.m: bugfix, multiple types with same name
-      are correctly managed by the simulator. Types were used as keys
-      in the userEntities dictionary, but their hashes were the name,
-      and not the unique identifier of the type (an optional alias).
-      This commit addresses this issue by creating a new attribute to
-      the PajeType that corresponds to the alias defined in the trace
-      or the name (if alias not present). PajeTypes' hash is based
-      on this new attribute.
+	* General/PajeType.[mh], PajeSimulator/PajeSimul+Events.m
+	PajeSimulator/PajeSimul.m: bugfix, multiple types with same name
+	are correctly managed by the simulator. Types were used as keys in
+	the userEntities dictionary, but their hashes were the name, and
+	not the unique identifier of the type (an optional alias).  This
+	commit addresses this issue by creating a new attribute to the
+	PajeType that corresponds to the alias defined in the trace or the
+	name (if alias not present). PajeTypes' hash is based on this new
+	attribute.
 
 2010-12-15  Lucas M. Schnorr <schnorr@gmail.com>
-    * Paje/Paje.gorm/*: bugfix, changing the selected filter on popup updates
-      the current filter of the "Filter" window
+	* Paje/Paje.gorm/*: bugfix, changing the selected filter on popup
+	updates the current filter of the "Filter" window
 
 2010-11-24  Lucas M. Schnorr <schnorr@gmail.com>
-    * FileReader/PajeFileReader.[hm]: method to obtain the porcentage
-      of the trace file that has already been read.
+	* FileReader/PajeFileReader.[hm]: method to obtain the porcentage
+	of the trace file that has already been read.
 
 2010-07-13  Lucas M. Schnorr <schnorr@gmail.com>
-    * FileReader/PajeFileReader.[hm], General/Protocols.h: let the user
-      specify the chunk size used during the reading of a trace file.
+	* FileReader/PajeFileReader.[hm], General/Protocols.h: let the
+	user specify the chunk size used during the reading of a trace
+	file.
 
 2010-07-01  Lucas M. Schnorr <schnorr@gmail.com>
-    * General/PajeFilter.[hm], StorageController/AnchorFilter.m: fixing the
-      return type for the protocol method containerTypeForType (it was
-      PajeEntityType, but it always return PajeContainerType).
-    * Removed some compilation warnings
+	* General/PajeFilter.[hm], StorageController/AnchorFilter.m:
+	fixing the return type for the protocol method
+	containerTypeForType (it was PajeEntityType, but it always return
+	PajeContainerType).
+	* Removed some compilation warnings
 
 2010-03-10  Lucas M. Schnorr <schnorr@gmail.com>
-    * PajeSimulator/SimulContainer.[mh]: maxValueForEntityType and
-      minValueForEntityType were returning NSNumber* instead of double (as
-      defined by the PajeFilter protocol).
+	* PajeSimulator/SimulContainer.[mh]: maxValueForEntityType and
+	minValueForEntityType were returning NSNumber* instead of
+	double (as defined by the PajeFilter protocol).
 
 2010-02-23  Benhur Stein <benhur@inf.ufsm.br>
-    * Documentation/lang-paje/typeevent.tex, PajeSimulator/PajeSimul+Events.m,
-      PajeSimulator/PajeSimul.m: some code cleanup; change the way aliases
-      work: now, if an alias is defined, all references must be to the alias,
-      they cannot be to the name anymore. This allows for different entities
-      to have the same name when in a different container.
+	* Documentation/lang-paje/typeevent.tex,
+	PajeSimulator/PajeSimul+Events.m, PajeSimulator/PajeSimul.m: some
+	code cleanup; change the way aliases work: now, if an alias is
+	defined, all references must be to the alias, they cannot be to
+	the name anymore. This allows for different entities to have the
+	same name when in a different container.
 
 2009-12-23 Lucas M. Schnorr <schnorr@gmail.com>
-    * Tracers/JRastro/libRastro/*: using autotools (automake, ...) to create a
-      configuration environment for libRastro
+	* Tracers/JRastro/libRastro/*: using autotools (automake, ...) to
+	create a configuration environment for libRastro
 
 2009-10-09 Lucas M. Schnorr <schnorr@gmail.com>
-    * PajeSimulator/UserLink.[mh]: new method "key" for UserLink class so other
-      objects are allowed to obtain the key used for the link and specified in
-      the tracefile
+	* PajeSimulator/UserLink.[mh]: new method "key" for UserLink class
+	so other objects are allowed to obtain the key used for the link
+	and specified in the tracefile
 
 2009-09-23 Lucas M. Schnorr <schnorr@gmail.com>
-    * PajeSimulator/PajeSimul+Events.m,PajeSimul.m,SimulContainer.[h|m]:
-      changes to make containers keep extra fields when specified in
-      PajeCreateContainer events in the trace file. The SimulContainer class
-      now has an attribute extraFields and two new methods to intercept
-      queries about fields (fieldNames and valueOfFieldnamed:)
+	* PajeSimulator/PajeSimul+Events.m,PajeSimul.m,SimulContainer.[h|m]:
+	changes to make containers keep extra fields when specified in
+	PajeCreateContainer events in the trace file. The SimulContainer
+	class now has an attribute extraFields and two new methods to
+	intercept queries about fields (fieldNames and valueOfFieldnamed:)
 
 2009-05-17  Benhur Stein <benhur@inf.ufsm.br>
-    * PajeSimul/SimulContainer.m: create (and use) auxiliary class to keep
-      container state in chunks
-    * PajeSimulator/PajeSimul: remove userNumberToContainer variable
+	* PajeSimul/SimulContainer.m: create (and use) auxiliary class to
+	keep container state in chunks
+	* PajeSimulator/PajeSimul: remove userNumberToContainer variable
 
 2009-05-17  Benhur Stein <benhur@inf.ufsm.br>
     * Tracers/JRastro/libRastro/many: cleanup for 64-bit compiling
