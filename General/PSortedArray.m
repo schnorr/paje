@@ -123,6 +123,43 @@
     [array removeAllObjects];
 }
 
+- (void)addObject:(id)obj 
+        withValue:(id<Comparing>)objValue 
+             left:(int)left
+            right:(int)right
+            pivot:(int)pivot
+{
+  int size = right-left;
+  if (size == 0){
+    [array insertObject:obj atIndex:pivot];
+    return;
+  }
+
+  id<Comparing> pivotValue = [[array objectAtIndex:pivot]
+                              performSelector: valueSelector];
+  NSComparisonResult comp = [pivotValue compare:objValue];
+
+  //check if size is 1
+  if (size == 1){
+    if (comp == NSOrderedDescending){
+      [array insertObject:obj atIndex:pivot];
+    }else{
+      [array insertObject:obj atIndex:pivot+1];
+    }
+    return;
+  }
+
+  //recurse normally
+  if (comp == NSOrderedAscending){
+    [self addObject:obj withValue:objValue
+               left:pivot right:right pivot:pivot+(right-pivot)/2];
+  }else if(comp == NSOrderedDescending){
+    [self addObject:obj withValue:objValue
+               left:left right:pivot pivot:left+(pivot-left)/2];
+  }else{
+    [array insertObject:obj atIndex:pivot+1];
+  }
+}
 
 - (void)addObject:(id)obj
 {
@@ -136,13 +173,9 @@
         [array addObject:obj];
     } else {
         // find the place to insert
-        pos-=2;    // no need to retest the last one.
-        while (pos >= 0
-               && [value compare:[[array objectAtIndex:pos]
-                  performSelector:valueSelector]] == NSOrderedAscending)
-                  // obj < array[pos]
-            pos--;
-        [array insertObject:obj atIndex:++pos];
+        int left = 0, right = [array count];
+        int pivot = [array count]/2;
+        [self addObject:obj withValue:value left:left right:right pivot:pivot];
     }
 }
 

@@ -1,3 +1,10 @@
+2011-06-01  Lucas M. Schnorr <schnorr@gmail.com>
+	* General/PSortedArray.[mh]: performance optimization in array
+	insertion by using a smarter algorithm; if the object is to be
+	inserted in an empty array or in the last position of the array,
+	just add it to the end; otherwise, do a binary insertion. This
+	change benefits only the reading of un-ordered trace files.
+
 2011-03-15  Lucas M. Schnorr <schnorr@gmail.com>
     * General/PajeType.[mh]: color dictionaries must not have keys with white
       spaces in the beginning. If values for states start with white spaces,

@@ -37,6 +37,11 @@
 
 - (unsigned)count;
 - (id)objectAtIndex:(unsigned)index;
+- (void)addObject:(id)obj 
+        withValue:(id<Comparing>)objValue 
+             left:(int)left
+            right:(int)right
+            pivot:(int)pivot;
 - (void)addObject:(id)obj;
 - (id)lastObject;
 
