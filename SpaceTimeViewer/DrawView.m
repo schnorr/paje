@@ -238,7 +238,7 @@
     } else if (pointsPerSecond > 300000) {
         timeUnitDivisor = 1000000;
         unitName = @"microseconds";
-        unitAbbreviation = @"\xb5s";
+        unitAbbreviation = @"Mus";
     } else if (pointsPerSecond > 300) {
         timeUnitDivisor = 1000;
         unitName = @"milliseconds";
