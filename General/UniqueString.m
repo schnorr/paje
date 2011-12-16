@@ -110,7 +110,7 @@ int C1, C2, C3, C4;
 - (id)retain { return self; }
 - (oneway void)release { }
 - (id)autorelease { return self; }
-- (unsigned)retainCount { return 1; }
+- (NSUInteger)retainCount { return 1; }
 
 - (id)copyWithZone:(NSZone *)z { C4++; return self; }
 

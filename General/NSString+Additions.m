@@ -57,8 +57,8 @@
 // Adapted from Mike Ferris' TextExtras
 - (NSRange)rangeForLineNumber:(unsigned)lineNumber
 {
-    unsigned curLineNum = 1;
-    unsigned startCharIndex = NSNotFound;
+    NSUInteger curLineNum = 1;
+    NSUInteger startCharIndex = NSNotFound;
     unichar buff[UNICHAR_BUFF_SIZE];
     unsigned i = 0, buffCount = 0;
     NSRange searchRange = NSMakeRange(0, [self length]);

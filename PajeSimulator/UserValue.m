@@ -111,7 +111,7 @@
     return value;
 }
 
-- (int)condensedEntitiesCount
+- (NSUInteger)condensedEntitiesCount
 {
     return 1;
 }

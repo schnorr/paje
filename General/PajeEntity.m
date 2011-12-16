@@ -167,27 +167,27 @@
     return NO;
 }
 
-- (unsigned)subCount
+- (NSUInteger)subCount
 {
     return 0;
 }
 
-- (id)subValueAtIndex:(unsigned)index
+- (id)subValueAtIndex:(NSUInteger)index
 {
     return [self value];
 }
 
-- (NSColor *)subColorAtIndex:(unsigned)index
+- (NSColor *)subColorAtIndex:(NSUInteger)index
 {
     return [self color];
 }
 
-- (double)subDurationAtIndex:(unsigned)index
+- (double)subDurationAtIndex:(NSUInteger)index
 {
     return [self duration];
 }
 
-- (unsigned)subCountAtIndex:(unsigned)index
+- (NSUInteger)subCountAtIndex:(unsigned)index
 {
     return 1;
 }
@@ -197,7 +197,7 @@
     return nil;
 }
 
-- (unsigned)condensedEntitiesCount
+- (NSUInteger)condensedEntitiesCount
 {
     return 0;
 }
@@ -282,7 +282,7 @@
     return [[self name] compare:[(PajeEntity *)other name]];
 }
 
-- (unsigned)hash
+- (NSUInteger)hash
 {
     return [name hash];
 }

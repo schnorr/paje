@@ -211,9 +211,9 @@
     }
 }
 
-- (float) rulerView: (NSRulerView *)aRulerView
+- (CGFloat) rulerView: (NSRulerView *)aRulerView
      willMoveMarker:(NSRulerMarker *)marker
-         toLocation: (float)location
+         toLocation: (CGFloat)location
 {
     NSLog(@"moving marker %@ to location %f", marker, location);
     return ((int)location/5) * 5;

@@ -407,7 +407,7 @@
 
 - (void)recacheAll
 {
-    int i, count, x;
+    NSInteger i, count, x;
 
     [shapeMatrix getNumberOfRows:&x columns:&count];
     for (i=0; i<count; i++)

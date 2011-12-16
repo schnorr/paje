@@ -214,7 +214,7 @@
     NSMutableArray *containerArray;
     NSArray *selectedContainers;
     PajeContainer *firstSelectedContainer;
-    unsigned index, maxIndex;
+    NSUInteger index, maxIndex;
 
     selectedContainers = [[self selectedContainers] allObjects];
     if ((selectedContainers == nil) || ([selectedContainers count] == 0)) {

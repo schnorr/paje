@@ -62,8 +62,8 @@
 - (NSEnumerator *)enumeratorOfEntitiesFromTime:(NSDate *)startTime
                                         toTime:(NSDate *)endTime
 {
-    unsigned startIndex;
-    unsigned endIndex;
+    NSUInteger startIndex;
+    NSUInteger endIndex;
     int index;
     MultiEnumerator *multiEnum;
     EntityChunk *chunk;
@@ -135,8 +135,8 @@
 - (NSEnumerator *)enumeratorOfCompleteEntitiesFromTime:(NSDate *)startTime
                                              untilTime:(NSDate *)endTime
 {
-    unsigned startIndex;
-    unsigned endIndex;
+    NSUInteger startIndex;
+    NSUInteger endIndex;
     int index;
     MultiEnumerator *multiEnum;
     EntityChunk *chunk;

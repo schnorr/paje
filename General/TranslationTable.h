@@ -44,12 +44,12 @@
 - (id)init;
 
 // Querying
-- (unsigned)count;
-- (unsigned)indexOfValue:(id)value;
-- (id)valueAtIndex:(unsigned)index;
+- (NSUInteger)count;
+- (NSUInteger)indexOfValue:(id)value;
+- (id)valueAtIndex:(NSUInteger)index;
 
 // Adding Elements
-- (unsigned)addValue:(id)value;    // returns index of element
+- (NSUInteger)addValue:(id)value;    // returns index of element
                                     // doesn't insert if already exists
 
 // NSCoding Protocol

@@ -258,7 +258,7 @@
 
 - (IBAction)graphTypeSelectorChanged:(id)sender
 {
-    int rows, cols;
+    NSInteger rows, cols;
     PieCell *cell;
     int i;
 

@@ -179,7 +179,7 @@
     return NO;
 }
 
-- (unsigned)hash
+- (NSUInteger)hash
 {
     return [ident hash];
 }

@@ -79,13 +79,13 @@
 
 // When the entity has subentities
 - (BOOL)isAggregate;
-- (unsigned)subCount;
-- (id)subValueAtIndex:(unsigned)index;
-- (NSColor *)subColorAtIndex:(unsigned)index;
-- (double)subDurationAtIndex:(unsigned)index;
-- (unsigned)subCountAtIndex:(unsigned)index;
+- (NSUInteger)subCount;
+- (id)subValueAtIndex:(NSUInteger)index;
+- (NSColor *)subColorAtIndex:(NSUInteger)index;
+- (double)subDurationAtIndex:(NSUInteger)index;
+- (NSUInteger)subCountAtIndex:(unsigned)index;
 - (CondensedEntitiesArray *)condensedEntities;
-- (unsigned)condensedEntitiesCount;
+- (NSUInteger)condensedEntitiesCount;
 
 - (NSArray *)fieldNames;
 - (id)valueOfFieldNamed:(NSString *)fieldName;

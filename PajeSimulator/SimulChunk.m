@@ -572,10 +572,10 @@ if ([newIncompleteEntities count] == 1)
     NSEnumerator *incEnum = nil;
     NSEnumerator *compEnum = nil;
     NSEnumerator *en;
-    int firstIndex;
-    int lastIndex;
+    NSUInteger firstIndex;
+    NSUInteger lastIndex;
     NSRange range;
-    int count;
+    NSUInteger count;
     BOOL mayHaveIncomplete = YES;
     
     [EntityChunk touch:self];
@@ -643,13 +643,13 @@ if ([newIncompleteEntities count] == 1)
     [EntityChunk touch:self];
     count = [entities count];
     if (count > 0) {
-        unsigned lastIndex = [entities indexOfLastObjectBeforeValue:time];
+        NSUInteger lastIndex = [entities indexOfLastObjectBeforeValue:time];
         if (lastIndex != NSNotFound) {
             unsigned firstIndex = 0;
             if (lastIndex != count - 1) {
                 mayHaveIncomplete = NO;
             }
-            int numEntities = lastIndex - firstIndex + 1;
+            NSUInteger numEntities = lastIndex - firstIndex + 1;
             if (numEntities > 0) {
                 NSRange range;
                 range = NSMakeRange(firstIndex, numEntities);

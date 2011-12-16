@@ -229,7 +229,7 @@
                                    toTime:(NSDate *)t2
 {
     BusyArrayEnumerator *enumerator;
-    unsigned i1, i2;
+    NSUInteger i1, i2;
     i1 = [self indexOfLastObjectNotAfterValue:t1];
     if (i1 == NSNotFound) {
         i1 = 0;
@@ -247,7 +247,7 @@
                                            toTime:(NSDate *)t2
 {
     BusyArrayEnumerator *enumerator;
-    unsigned i1, i2;
+    NSUInteger i1, i2;
     i1 = [self indexOfFirstObjectNotBeforeValue:t1];
     i2 = [self indexOfLastObjectNotAfterValue:t2];
     if (i2 != NSNotFound && i2 != 0) {
@@ -273,7 +273,7 @@
                                           toTime:(NSDate *)t2
 {
     BusyArrayEnumerator *enumerator;
-    unsigned i1, i2;
+    NSUInteger i1, i2;
     i1 = [self indexOfLastObjectNotAfterValue:t1];
     if (i1 == NSNotFound) {
         i1 = 0;

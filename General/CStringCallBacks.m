@@ -3,7 +3,7 @@
 #include <string.h> // for strcmp
 #include <stdlib.h> // for free
 
-static unsigned cstring_hash(NSMapTable *t, const void *p)
+static NSUInteger cstring_hash(NSMapTable *t, const void *p)
 {
     const char *s = p;
     unsigned h = 0;
@@ -36,6 +36,31 @@ static NSString *cstring_describe(NSMapTable *t, const void *p)
     return [NSString stringWithCString:s];
 }
 
+static NSUInteger cstring_hash2 (NSHashTable *t, const void *p)
+{
+    return cstring_hash ((NSMapTable*)t, p);
+}
+
+static BOOL cstring_isEqual2(NSHashTable *t, const void *p1, const void *p2)
+{
+    return cstring_isEqual((NSMapTable*)t, p1, p2);
+}
+
+static void cstring_retain2(NSHashTable *t, const void *p)
+{
+    cstring_retain((NSMapTable*)t, p);
+}
+
+static void cstring_release2(NSHashTable *t, void *p)
+{
+    cstring_release((NSMapTable*)t, p);
+}
+
+static NSString *cstring_describe2(NSHashTable *t, const void *p)
+{
+    return cstring_describe((NSMapTable*)t, p);
+}
+
 NSMapTableKeyCallBacks CStringMapKeyCallBacks = {
     cstring_hash,
     cstring_isEqual,
@@ -45,9 +70,9 @@ NSMapTableKeyCallBacks CStringMapKeyCallBacks = {
 };
 
 NSHashTableCallBacks CStringHashCallBacks = {
-    cstring_hash,
-    cstring_isEqual,
-    cstring_retain,
-    cstring_release,
-    cstring_describe
+    cstring_hash2,
+    cstring_isEqual2,
+    cstring_retain2,
+    cstring_release2,
+    cstring_describe2
 };

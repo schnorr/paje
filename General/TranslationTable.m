@@ -53,12 +53,12 @@
  * Querying
  */
  
-- (unsigned) count
+- (NSUInteger) count
 {
     return [table count];
 }
 
-- (unsigned)indexOfValue:(id)value
+- (NSUInteger)indexOfValue:(id)value
 {
     id obj = [map objectForKey:value];
 
@@ -68,7 +68,7 @@
         return NSNotFound;
 }
 
-- (id)valueAtIndex:(unsigned)index
+- (id)valueAtIndex:(NSUInteger)index
 {
     return [table objectAtIndex:index];
 }
@@ -77,9 +77,9 @@
 /*
  * Adding Elements
  */
-- (unsigned)addValue:(id)value
+- (NSUInteger)addValue:(id)value
 {
-    unsigned index;
+    NSUInteger index;
     index = [self indexOfValue:value];
     if (index == NSNotFound) {
         [table addObject:value];

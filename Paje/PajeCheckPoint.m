@@ -54,7 +54,7 @@
     return fileName;
 }
 
-- (unsigned int)hash
+- (NSUInteger)hash
 {
     return [time hash];
 }

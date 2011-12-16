@@ -125,9 +125,9 @@
 - (NSEnumerator *)enumeratorOfEntitiesFromTime:(NSDate *)startTime
                                         toTime:(NSDate *)endTime
 {
-    unsigned startIndex;
-    unsigned endIndex;
-    unsigned index;
+    NSUInteger startIndex;
+    NSUInteger endIndex;
+    NSUInteger index;
     MultiEnumerator *multiEnum;
     EntityChunk *chunk;
     int chunkCount;
@@ -139,7 +139,7 @@
     if (![self aggregationFinished]
         && (lastTime == nil || [endTime isLaterThanDate:lastTime])) {
         [self aggregateEntitiesUntilTime:
-                [endTime addTimeInterval:2*aggregationDuration]];
+               [endTime addTimeInterval:2*aggregationDuration]];
     }
 
     chunkCount = [chunks count];
@@ -200,9 +200,9 @@
 - (NSEnumerator *)enumeratorOfCompleteEntitiesFromTime:(NSDate *)startTime
                                              untilTime:(NSDate *)endTime
 {
-    unsigned startIndex;
-    unsigned endIndex;
-    unsigned index;
+    NSUInteger startIndex;
+    NSUInteger endIndex;
+    NSUInteger index;
     MultiEnumerator *multiEnum;
     EntityChunk *chunk;
     int chunkCount;

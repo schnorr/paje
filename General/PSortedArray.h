@@ -35,8 +35,8 @@
 - (id)initWithSelector:(SEL)sel;
 - (void)setSelector:(SEL)sel;
 
-- (unsigned)count;
-- (id)objectAtIndex:(unsigned)index;
+- (NSUInteger)count;
+- (id)objectAtIndex:(NSUInteger)index;
 - (void)addObject:(id)obj 
         withValue:(id<Comparing>)objValue 
              left:(int)left
@@ -45,7 +45,7 @@
 - (void)addObject:(id)obj;
 - (id)lastObject;
 
-- (void)removeObjectAtIndex:(unsigned)index;
+- (void)removeObjectAtIndex:(NSUInteger)index;
 - (void)removeObjectsInRange:(NSRange)aRange;
 - (void)removeObject:(id)obj;
 - (void)removeObjectIdenticalTo:(id)obj;
@@ -67,12 +67,12 @@
 - (NSEnumerator *)reverseObjectEnumeratorAfterValue:(id<Comparing>)value;
 - (NSEnumerator *)reverseObjectEnumeratorNotBeforeValue:(id<Comparing>)value;
 
-- (unsigned)indexOfFirstObjectNotBeforeValue:(id<Comparing>)value; // 0--count
-- (unsigned)indexOfFirstObjectAfterValue:(id<Comparing>)value; // 0--count
-- (unsigned)indexOfLastObjectNotAfterValue:(id<Comparing>)value; // 0--count-1  may return NSNotFound
-- (unsigned)indexOfLastObjectBeforeValue:(id<Comparing>)value; // 0--count-1  may return NSNotFound
-- (unsigned)indexOfObjectWithValue:(id<Comparing>)value; // 0--count-1  may return NSNotFound
-- (unsigned)indexOfObject:(id)obj; // 0--count-1  may return NSNotFound
+- (NSUInteger)indexOfFirstObjectNotBeforeValue:(id<Comparing>)value; // 0--count
+- (NSUInteger)indexOfFirstObjectAfterValue:(id<Comparing>)value; // 0--count
+- (NSUInteger)indexOfLastObjectNotAfterValue:(id<Comparing>)value; // 0--count-1  may return NSNotFound
+- (NSUInteger)indexOfLastObjectBeforeValue:(id<Comparing>)value; // 0--count-1  may return NSNotFound
+- (NSUInteger)indexOfObjectWithValue:(id<Comparing>)value; // 0--count-1  may return NSNotFound
+- (NSUInteger)indexOfObject:(id)obj; // 0--count-1  may return NSNotFound
 
 - (NSEnumerator *)reverseObjectEnumeratorWithRange:(NSRange)range;
 

@@ -84,7 +84,7 @@
 @implementation NSMatrix (Additions)
 - (id)cellAtPoint:(NSPoint)p
 {
-    int row, column;
+    NSInteger row, column;
 
     if ([self getRow:&row column:&column forPoint:p])
         return [self cellAtRow:row column:column];

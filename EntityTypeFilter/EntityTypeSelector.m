@@ -497,7 +497,7 @@
 
 - (void)highlightCell:(id)cell inMatrix:(NSMatrix *)m
 {
-    int r, c;
+    NSInteger r, c;
     static id highlightedCell; // the last cell that has been highlighted
     
     if (highlightedCell && ![highlightedCell isEqual:cell]) {

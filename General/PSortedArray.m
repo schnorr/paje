@@ -53,12 +53,12 @@
     [super dealloc];
 }
 
-- (unsigned)count
+- (NSUInteger)count
 {
     return [array count];
 }
 
-- (id)objectAtIndex:(unsigned)index
+- (id)objectAtIndex:(NSUInteger)index
 {
     return [array objectAtIndex:index];
 }
@@ -73,7 +73,7 @@
     [array removeLastObject];
 }
 
-- (void)removeObjectAtIndex:(unsigned)index
+- (void)removeObjectAtIndex:(NSUInteger)index
 {
     [array removeObjectAtIndex:index];
 }
@@ -232,7 +232,7 @@ int delta_d_tctr;
 double delta_d_time;
 double delta_d_time0;
 NSDate *delta_d_t0;
-- (unsigned)indexOfFirstObjectNotBeforeValue:(id<Comparing>)value
+- (NSUInteger)indexOfFirstObjectNotBeforeValue:(id<Comparing>)value
 {
     int lo, hi, pivot, cnt;
     lo = 0;
@@ -264,7 +264,7 @@ NSDate *delta_d_t0;
         return lo;
 }
 
-- (unsigned)indexOfFirstObjectAfterValue:(id<Comparing>)value
+- (NSUInteger)indexOfFirstObjectAfterValue:(id<Comparing>)value
 {
     if (value == nil) {
         return 0;
@@ -282,7 +282,7 @@ NSDate *delta_d_t0;
     return index;
 }
 
-- (unsigned)indexOfLastObjectBeforeValue:(id<Comparing>)value;
+- (NSUInteger)indexOfLastObjectBeforeValue:(id<Comparing>)value;
 {
     if (value == nil) {
         return 0;
@@ -303,7 +303,7 @@ NSDate *delta_d_t0;
     return index;
 }
 
-- (unsigned)indexOfLastObjectNotAfterValue:(id<Comparing>)value
+- (NSUInteger)indexOfLastObjectNotAfterValue:(id<Comparing>)value
 {
     int index = [self indexOfFirstObjectAfterValue:value];
 
@@ -313,7 +313,7 @@ NSDate *delta_d_t0;
     return index - 1;
 }
 
-- (unsigned)indexOfObjectWithValue:(id<Comparing>)value
+- (NSUInteger)indexOfObjectWithValue:(id<Comparing>)value
 {
     unsigned index = [self indexOfFirstObjectNotBeforeValue:value];
 
@@ -327,7 +327,7 @@ NSDate *delta_d_t0;
     return NSNotFound;
 }
 
-- (unsigned)indexOfObject:(id)anObject
+- (NSUInteger)indexOfObject:(id)anObject
 {
     return [self indexOfObjectWithValue:[anObject performSelector:valueSelector]];
 }
@@ -380,8 +380,8 @@ NSDate *delta_d_t0;
 - (NSEnumerator *)objectEnumeratorNotBeforeValue:(id<Comparing>)value1
                                    notAfterValue:(id<Comparing>)value2
 {
-    unsigned firstIndex;
-    unsigned lastIndex;
+    NSUInteger firstIndex;
+    NSUInteger lastIndex;
     NSRange range;
 
     lastIndex = [self indexOfLastObjectNotAfterValue:value2];
@@ -396,8 +396,8 @@ NSDate *delta_d_t0;
 - (NSEnumerator *)objectEnumeratorAfterValue:(id<Comparing>)value1
                                notAfterValue:(id<Comparing>)value2
 {
-    unsigned firstIndex;
-    unsigned lastIndex;
+    NSUInteger firstIndex;
+    NSUInteger lastIndex;
     NSRange range;
 
     lastIndex = [self indexOfLastObjectNotAfterValue:value2];

@@ -452,7 +452,7 @@ static void PSFillAndFrame(NSBezierPath *path, NSColor *color)
 
 static void PSDashedStroke(NSBezierPath *path, NSColor *color)
 {
-    float dash[] = {5, 3};
+    CGFloat dash[] = {5, 3};
     [path setLineDash:dash count:2 phase:0];
     if (color == nil){
         color = [NSColor blackColor];
@@ -501,7 +501,7 @@ static void PSFrameWhite(NSBezierPath *path, NSColor *color)
 
 static void PSFillAndDashedStrokeBlack(NSBezierPath *path, NSColor *color)
 {
-    float dash[] = {5, 3};
+    CGFloat dash[] = {5, 3};
     [path setLineDash:dash count:2 phase:0];
     if (color != nil) {
         [color set];

@@ -748,7 +748,7 @@ rect = NSInsetRect(rect, -10, -10);
  * ------------------------------------------------------------------------
  */
 
-- (unsigned int)draggingUpdated:(id <NSDraggingInfo>)sender
+- (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender
 {
     NSPoint point = [self convertPoint:[sender draggingLocation] fromView:nil];
 
