@@ -174,7 +174,9 @@
         return YES;
     }
     offsetInFile = [inputFile offsetInFile];
-    data = (NSMutableData *)[inputFile readDataOfLength:LINE_SIZE];
+    // need to create a NSMutableData from a NSData
+    NSData *dataRead = [inputFile readDataOfLength:LINE_SIZE];
+    data = [NSMutableData dataWithData: dataRead];
     length = [data length];
     if (length < LINE_SIZE) {
         hasMoreData = NO;
@@ -223,7 +225,9 @@
         nextChunkPosition = [[chunkInfo objectAtIndex:nextChunk] longLongValue];
         unsigned long /*long*/ chunkSize;
         chunkSize = nextChunkPosition - [inputFile offsetInFile];
-        data = (NSMutableData *)[inputFile readDataOfLength:chunkSize];
+	// need to create a NSMutableData from a NSData
+	NSData *dataRead = [inputFile readDataOfLength:chunkSize];
+	data = [NSMutableData dataWithData: dataRead];
         length = [data length];
         if (length != chunkSize) {
             [self raise:@"Cannot reread chunk! Has file been altered?"];
@@ -233,7 +237,9 @@
         // first time reading this chunk.
         // must determine its correct size (must end in a line boundary
         // and in a date-changing event).
-        data = (NSMutableData *)[inputFile readDataOfLength:userChunkSize];
+	// need to create a NSMutableData from a NSData
+	NSData *dataRead = [inputFile readDataOfLength:userChunkSize];
+	data = [NSMutableData dataWithData: dataRead];
         length = [data length];
         if (length < userChunkSize) {
             hasMoreData = NO;
