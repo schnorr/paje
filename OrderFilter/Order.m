@@ -243,9 +243,6 @@
                     format:@"Container Not Found: %@", firstSelectedContainer];
     }
     index += moveAmount;
-    if (index < 0) {
-        index = 0;
-    }
     maxIndex = [containerArray count] - [selectedContainers count];
     if (index > maxIndex) {
         index = maxIndex;
