@@ -60,7 +60,7 @@
     if (chunkNumber != currentChunk) {
         if (chunkNumber >= [chunkInfo count]) {
             // cannot position in an unread place
-            NSLog(@"Chunk after end: %d (%d)", chunkNumber, [chunkInfo count]);
+            NSLog(@"Chunk after end: %d (%lu)", chunkNumber, [chunkInfo count]);
             [self raise:@"Cannot start unknown chunk"];
         }
 
