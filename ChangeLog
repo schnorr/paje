@@ -1,3 +1,15 @@
+2011-12-18  Lucas M. Schnorr <schnorr@gmail.com>
+	* General/NSColor+Additions.m: bug fix, correctly parsing RGB
+	colors from trace using a NSScanner. The fix considers that a RGB
+	color in the trace file is defined as three values from 0 to 1
+	that defines the red, green and blue components. This is defined
+	in the Paje trace file format description.
+	* FileReader/PajeFileReader.m: bug fix, was casting NSData to a
+	NSMutableData, causing an exception when running with the Cocoa's
+	NSFileHandle implementation. In Linux, the used method to read
+	from the file returned a NSMutableData, hiding the bug.
+	* fixing several compilation warnings
+
 2011-06-01  Lucas M. Schnorr <schnorr@gmail.com>
 	* General/PSortedArray.[mh]: performance optimization in array
 	insertion by using a smarter algorithm; if the object is to be
