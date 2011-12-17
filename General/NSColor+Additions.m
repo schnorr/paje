@@ -45,37 +45,14 @@
 {
     if ([value isKindOfClass:[NSString class]]) {
         NSScanner *scanner = [NSScanner scannerWithString:value];
-        NSString *colorSpaceName;
-        NSString *s1, *s2;
-        float a, b, c, d, e;
-
-        if ([scanner scanUpToString:@" " intoString:&colorSpaceName]) {
-            if ([colorSpaceName isEqual:NSDeviceCMYKColorSpace]) {
-                if (   [scanner scanFloat:&a] && [scanner scanFloat:&b]
-                       && [scanner scanFloat:&c] && [scanner scanFloat:&d]
-                       && [scanner scanFloat:&e])
-                    return [NSColor colorWithDeviceCyan:a magenta:b yellow:c black:d alpha:e];
-            } else if ([colorSpaceName isEqual:NSDeviceWhiteColorSpace]) {
-                if ([scanner scanFloat:&a] && [scanner scanFloat:&b])
-                    return [NSColor colorWithDeviceWhite:a alpha:b];
-            } else if ([colorSpaceName isEqual:NSCalibratedWhiteColorSpace]) {
-                if ([scanner scanFloat:&a] && [scanner scanFloat:&b])
-                    return [NSColor colorWithCalibratedWhite:a alpha:b];
-            } else if ([colorSpaceName isEqual:NSDeviceRGBColorSpace]) {
-                if (   [scanner scanFloat:&a] && [scanner scanFloat:&b]
-                       && [scanner scanFloat:&c] && [scanner scanFloat:&d])
-                    return [NSColor colorWithDeviceRed:a green:b blue:c alpha:d];
-            } else if ([colorSpaceName isEqual:NSCalibratedRGBColorSpace]) {
-                if (   [scanner scanFloat:&a] && [scanner scanFloat:&b]
-                       && [scanner scanFloat:&c] && [scanner scanFloat:&d])
-                    return [NSColor colorWithCalibratedRed:a green:b blue:c alpha:d];
-            } else if ([colorSpaceName isEqual:NSNamedColorSpace]) {
-                if (   [scanner scanUpToString:@" " intoString:&s1]
-                       && [scanner scanUpToString:@" " intoString:&s2])
-                    return [NSColor colorWithCatalogName:s1 colorName:s2];
-            }
+	float r, g, b;
+	if ([scanner scanFloat: &r] &&
+            [scanner scanFloat: &g] &&
+            [scanner scanFloat: &b]){
+		return [NSColor colorWithDeviceRed:r green:g blue:b alpha:1];
         }
     }
+	NSLog (@"input=%@ output=%@", value, nil);
     return nil;
 }
 @end
