@@ -102,7 +102,7 @@
 
 - (BOOL)isContainedBy:(PajeContainer *)cont
 {
-    if ((container == nil)) {
+    if (container == nil) {
         return NO;
     }
 
