@@ -124,7 +124,7 @@
     return @"Space Time Diagram";
 }
 
-- (void)setInputComponent:(PajeComponent *)filter
+- (void)setInputComponent:(PajeFilter *)filter
 {
     [super setInputComponent:filter];
     [drawView setFilter:self/*(PajeFilter *)filter*/];
