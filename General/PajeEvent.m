@@ -233,7 +233,7 @@ PajeFieldType pajeFieldTypeFromName(const char *name)
     if (strcmp(name, "double") == 0) return PajeDoubleFieldType;
     if (strcmp(name, "string") == 0) return PajeStringFieldType;
     if (strcmp(name, "color")  == 0) return PajeColorFieldType;
-    return -1;
+    return PajeUnknownFieldType;
 }
 
 @implementation PajeEventDefinition

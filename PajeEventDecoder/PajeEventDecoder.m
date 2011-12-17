@@ -337,7 +337,7 @@ char *break_line(char *s, line *line)
 
         PajeFieldType fieldTypeId;
         fieldTypeId = pajeFieldTypeFromName(fieldType);
-        if (fieldTypeId < 0) {
+        if (fieldTypeId == PajeUnknownFieldType) {
             [self raise:@"Unrecognised field type '%s'", fieldType];
         }
         [eventBeingDefined addFieldId:fieldId fieldType:fieldTypeId];

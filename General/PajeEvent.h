@@ -68,7 +68,8 @@ typedef enum {
     PajeDateFieldType,
     PajeDoubleFieldType,
     PajeStringFieldType,
-    PajeColorFieldType
+    PajeColorFieldType,
+    PajeUnknownFieldType
 } PajeFieldType;
     
 typedef enum {
