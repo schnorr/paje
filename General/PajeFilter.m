@@ -60,12 +60,12 @@
     [self setOutputComponent:nil];
 }
 
-- (void)setInputComponent:(PajeComponent *)component
+- (void)setInputComponent:(PajeFilter *)component
 {
-    inputComponent = (id)component;
+    inputComponent = component;
 }
 
-- (void)setOutputComponent:(PajeComponent *)component
+- (void)setOutputComponent:(PajeFilter *)component
 {
     if (component == nil) {
         Assign(outputComponent, component);
@@ -79,7 +79,7 @@
             outputComponent = [[NSMutableArray arrayWithObjects:outputComponent, component, nil] retain];
         }
     } else {
-        outputComponent = [component retain];
+      outputComponent = [component retain];
     }
 }
 

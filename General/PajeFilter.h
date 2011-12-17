@@ -49,8 +49,8 @@
 + (PajeComponent *)componentWithController:(PajeTraceController *)c;
 - (id)initWithController:(PajeTraceController *)c;
 
-- (void)setInputComponent:(PajeComponent *)component;
-- (void)setOutputComponent:(PajeComponent *)component;
+- (void)setInputComponent:(PajeFilter *)component;
+- (void)setOutputComponent:(PajeFilter *)component;
 
 - (void)disconnectComponent;
 
