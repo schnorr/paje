@@ -54,6 +54,10 @@
 
 - (double)minValueForEntityType:(PajeEntityType *)type;
 - (double)maxValueForEntityType:(PajeEntityType *)type;
+
+
+- (void)verifyMinMaxOfEntityType:(PajeEntityType *)type
+                        withValue:(double)value;
 @end
 
 #endif

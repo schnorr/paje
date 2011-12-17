@@ -388,11 +388,12 @@
     [chunk popStateEvent:event];
 }
 
-- (void)_verifyMinMaxOfEntityType:(PajeVariableType *)type
-                        withValue:(double)value
+- (void)verifyMinMaxOfEntityType:(PajeEntityType *)t
+                       withValue:(double)value
 {
     NSNumber *oldMin;
     NSNumber *oldMax;
+    id type = t;
     oldMin = [minValues objectForKey:type];
     oldMax = [maxValues objectForKey:type];
 

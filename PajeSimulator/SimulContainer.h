@@ -125,7 +125,6 @@
 
 - (id)chunkState;
 - (void)setChunkState:(id)state;
-
 @end
 
 #endif

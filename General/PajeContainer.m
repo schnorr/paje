@@ -132,4 +132,11 @@
 {
     return 0.0;
 }
+
+
+- (void)verifyMinMaxOfEntityType:(PajeEntityType *)type
+                       withValue:(double)value
+{
+  return;
+}
 @end

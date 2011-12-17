@@ -512,7 +512,7 @@ if ([newIncompleteEntities count] == 1)
     if (currentValue != HUGE_VAL) {
         if (currentValue > maxValue) maxValue = currentValue;
         if (currentValue < minValue) minValue = currentValue;
-        [container _verifyMinMaxOfEntityType:entityType withValue:value];
+        [container verifyMinMaxOfEntityType:entityType withValue:value];
     }
 }
 
