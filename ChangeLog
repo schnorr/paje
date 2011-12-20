@@ -10,6 +10,10 @@
 	from the file returned a NSMutableData, hiding the bug.
 	* fixing several compilation warnings
 
+2011-12-17  Lucas M. Schnorr <schnorr@gmail.com>
+	* many: Fix several compilation warnings detected by gcc, clang
+	and gcc by Apple.
+
 2011-06-01  Lucas M. Schnorr <schnorr@gmail.com>
 	* General/PSortedArray.[mh]: performance optimization in array
 	insertion by using a smarter algorithm; if the object is to be
