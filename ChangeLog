@@ -1,3 +1,6 @@
+2011-12-20  (1.98) Lucas M. Schnorr <schnorr@gmail.com>
+	* New release. Second RC before 2.0.
+
 2011-12-18  Lucas M. Schnorr <schnorr@gmail.com>
 	* General/NSColor+Additions.m: bug fix, correctly parsing RGB
 	colors from trace using a NSScanner. The fix considers that a RGB

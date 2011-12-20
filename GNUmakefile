@@ -1,7 +1,7 @@
 include $(GNUSTEP_MAKEFILES)/common.make
 
 PACKAGE_NAME = Paje
-VERSION = 1.97
+VERSION = 1.98
 
 AGGREGATE_NAME = Paje
 
