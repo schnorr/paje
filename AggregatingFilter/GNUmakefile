@@ -8,10 +8,10 @@ BUNDLE_NAME = AggregatingFilter
 
 ADDITIONAL_INCLUDE_DIRS = -I../General
 ifeq ($(FOUNDATION_LIB), apple)
-	LDFLAGS += -F../General -framework General
+	LDFLAGS += -F../General -framework PajeGeneral
 else
-	AggregatingFilter_BUNDLE_LIBS += -lGeneral
-	ADDITIONAL_LIB_DIRS += -L../General/General.framework/Versions/Current
+	AggregatingFilter_BUNDLE_LIBS += -lPajeGeneral
+	ADDITIONAL_LIB_DIRS += -L../General/PajeGeneral.framework/Versions/Current
 endif
 
 AggregatingFilter_OBJC_FILES = \

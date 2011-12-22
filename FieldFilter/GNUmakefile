@@ -7,10 +7,10 @@ FieldFilter_PRINCIPAL_CLASS = FieldFilter
 
 ADDITIONAL_INCLUDE_DIRS = -I../General.bproj
 ifeq ($(FOUNDATION_LIB), apple)
-	LDFLAGS += -F../General -framework General
+	LDFLAGS += -F../General -framework PajeGeneral
 else
-	FieldFilter_BUNDLE_LIBS += -lGeneral
-	ADDITIONAL_LIB_DIRS += -L../General/General.framework/Versions/Current
+	FieldFilter_BUNDLE_LIBS += -lPajeGeneral
+	ADDITIONAL_LIB_DIRS += -L../General/PajeGeneral.framework/Versions/Current
 endif
 
 FieldFilter_RESOURCE_FILES = \

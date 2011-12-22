@@ -2,11 +2,11 @@
 
 include $(GNUSTEP_MAKEFILES)/common.make
 
-FRAMEWORK_NAME = General
+FRAMEWORK_NAME = PajeGeneral
 
 LIBRARIES_DEPEND_UPON += $(FND_LIBS) $(GUI_LIBS) $(OBJC_LIBS)
 
-General_OBJC_FILES = \
+PajeGeneral_OBJC_FILES = \
 	Comparing.m \
 	FilteredEnumerator.m \
 	PSortedArray.m \
@@ -40,7 +40,7 @@ General_OBJC_FILES = \
 	ChunkArray.m \
 	CStringCallBacks.m
 
-General_HEADER_FILES = \
+PajeGeneral_HEADER_FILES = \
 	Comparing.h \
 	FilteredEnumerator.h \
 	Protocols.h \
@@ -76,7 +76,7 @@ General_HEADER_FILES = \
 	ChunkArray.h\
 	CStringCallBacks.h
 
-General_RESOURCE_FILES = \
+PajeGeneral_RESOURCE_FILES = \
 	HierarchyBrowser.gorm \
 	HierarchyBrowser.nib \
 	PajeEntityInspector.gorm \

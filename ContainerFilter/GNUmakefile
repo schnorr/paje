@@ -7,10 +7,10 @@ ContainerFilter_PRINCIPAL_CLASS = ContainerSelector
 
 ADDITIONAL_INCLUDE_DIRS = -I../General
 ifeq ($(FOUNDATION_LIB), apple)
-	LDFLAGS += -F../General -framework General
+	LDFLAGS += -F../General -framework PajeGeneral
 else
-	ContainerFilter_BUNDLE_LIBS += -lGeneral
-	ADDITIONAL_LIB_DIRS += -L../General/General.framework/Versions/Current
+	ContainerFilter_BUNDLE_LIBS += -lPajeGeneral
+	ADDITIONAL_LIB_DIRS += -L../General/PajeGeneral.framework/Versions/Current
 endif
 
 ContainerFilter_RESOURCE_FILES = \

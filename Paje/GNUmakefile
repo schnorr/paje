@@ -8,9 +8,9 @@ Paje_DOCICONS = traceFilePaje.tiff
 
 ADDITIONAL_INCLUDE_DIRS = -I../General
 ifeq ($(FOUNDATION_LIB), apple)
-LDFLAGS += -F../General -framework General
+LDFLAGS += -F../General -framework PajeGeneral
 else
-LDFLAGS += -L../General/General.framework -lGeneral
+LDFLAGS += -L../General/PajeGeneral.framework -lPajeGeneral
 endif
 
 Paje_MAIN_MODEL_FILE = Paje.gorm

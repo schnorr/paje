@@ -8,10 +8,10 @@ ReductionFilter_PRINCIPAL_CLASS = BusyNode
 
 ADDITIONAL_INCLUDE_DIRS = -I../General
 ifeq ($(FOUNDATION_LIB), apple)
-	LDFLAGS += -F../General -framework General
+	LDFLAGS += -F../General -framework PajeGeneral
 else
-	ReductionFilter_BUNDLE_LIBS += -lGeneral
-	ADDITIONAL_LIB_DIRS += -L../General/General.framework/Versions/Current
+	ReductionFilter_BUNDLE_LIBS += -lPajeGeneral
+	ADDITIONAL_LIB_DIRS += -L../General/PajeGeneral.framework/Versions/Current
 endif
 
 ReductionFilter_RESOURCE_FILES = \

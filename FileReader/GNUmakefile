@@ -33,10 +33,10 @@ FileReader_PRINCIPAL_CLASS=PajeFileReader
 #
 
 ifeq ($(FOUNDATION_LIB), apple)
-	LDFLAGS += -F../General -framework General
+	LDFLAGS += -F../General -framework PajeGeneral
 else
-	FileReader_BUNDLE_LIBS += -lGeneral
-	ADDITIONAL_LIB_DIRS += -L../General/General.framework/Versions/Current
+	FileReader_BUNDLE_LIBS += -lPajeGeneral
+	ADDITIONAL_LIB_DIRS += -L../General/PajeGeneral.framework/Versions/Current
 endif
 
 #
