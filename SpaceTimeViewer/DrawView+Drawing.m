@@ -22,11 +22,8 @@
 // methods for drawing entities in DrawView.
 
 #include "DrawView.h"
-#ifdef GNUSTEP
-#include <values.h>
-#endif
 #ifndef MAXFLOAT
-#define MAXFLOAT 3.402823466e+38F
+#define MAXFLOAT ((float)3.402823466e+38F)
 #endif
 
 #include "../General/Association.h"
