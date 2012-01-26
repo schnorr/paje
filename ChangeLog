@@ -1,3 +1,8 @@
+2012-01-26  Lucas M. Schnorr <schnorr@gmail.com>
+	* General/PajeEntity.*, PajeSimulator/UserEvent.*: exposing
+	extraFields dictionary, so filters has a direct access to
+	user-defined fields defined in the trace file.
+
 2011-12-22  Lucas M. Schnorr <schnorr@gmail.com>
 	* many/GNUmakefile: renaming General to PajeGeneral. It gets
 	easier to later identify common files shared by all Paje bundles.

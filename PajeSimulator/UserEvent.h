@@ -50,6 +50,7 @@
 
 - (void)setEvent:(PajeEvent *)e;
 - (NSDate *)time;
+- (NSDictionary*) extraFields;
 @end
 
 #endif

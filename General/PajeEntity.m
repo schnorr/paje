@@ -277,6 +277,11 @@
     }
 }
 
+- (NSDictionary*) extraFields
+{
+  return nil;
+}
+
 - (NSComparisonResult)compare:(id)other
 {
     return [[self name] compare:[(PajeEntity *)other name]];

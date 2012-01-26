@@ -89,6 +89,7 @@
 
 - (NSArray *)fieldNames;
 - (id)valueOfFieldNamed:(NSString *)fieldName;
+- (NSDictionary*) extraFields;
 @end
 
 #endif

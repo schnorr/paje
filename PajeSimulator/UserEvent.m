@@ -108,6 +108,11 @@
     return value;
 }
 
+- (NSDictionary*) extraFields
+{
+  return extraFields;
+}
+
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];
