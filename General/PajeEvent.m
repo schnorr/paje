@@ -383,9 +383,15 @@ PajeFieldType pajeFieldTypeFromName(const char *name)
                     line:(line *)line
 {
     if (line->word_count != [definition fieldCount]) {
-        NSLog(@"Field count (%d) does not match definition (%d)",
-                        line->word_count, [definition fieldCount]);
-        return nil;
+      int i;
+      NSMutableString *str = [NSMutableString string];
+      for (i = 0; i < line->word_count; i++){
+        [str appendString: [NSString stringWithFormat: @"%s ", line->word[i]]];
+      }
+      NSLog(@"Field count (%d) does not match definition (%d) at line: [%@].",
+            line->word_count, [definition fieldCount], str);
+      NSLog(@"Continuing without taking into account this wrong event.");
+      return nil;
     } 
     self = [super init];
     if (self != nil) {
