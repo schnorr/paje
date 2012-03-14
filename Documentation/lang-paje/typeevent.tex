@@ -1,9 +1,9 @@
 %*
 %   Copyright 1998, 1999, 2000, 2001, 2003, 2004 Benhur Stein
 %   
-%   This file is part of Pajé.
+%   This file is part of PajÃ©.
 %
-%   Pajé is free software; you can redistribute it and/or modify
+%   PajÃ© is free software; you can redistribute it and/or modify
 %   it under the terms of the GNU General Public License as published by
 %   the Free Software Foundation; either version 2 of the License, or
 %   (at your option) any later version.
@@ -31,11 +31,11 @@
 \section{Introduction}
 \label{sec:traceintro}
 
-A visualization constructed by Pajé is composed of objects organized
+A visualization constructed by PajÃ© is composed of objects organized
 according to a tree type hierarchy whose nodes are called
 \emph{containers}\index{container} and leaves
 \emph{entities}\index{entity}% (see \S\ref{sec:genericity})
-. The Pajé
+. The PajÃ©
 data format is self-defined, although it does not comply with the
 SDDF\index{SDDF} format used by Pablo \cite{sddf}. There exists a
 ``meta-format'' used to define:
@@ -54,21 +54,21 @@ capture a new definition as a ``user-defined'' event.% (see for example
 Using these definitions, it is possible to define a hierarchy of
 containers and entities adapted for a given programming model or
 language. Definitions of type hierarchies as well as instructions and
-events formats constitute a specialisation of the ``generic'' Pajé
+events formats constitute a specialisation of the ``generic'' PajÃ©
 visualization tool: it has been used so far to visualize distributed
 applications written in Java \cite{OttogaliOSCV:2001} or help to
 perform system monitoring on large sized clusters
 \cite{GuilloudCAS:2001}. 
 
 The organization of this chapter is the following. The next section
-defines the meta format of Pajé used to define the format of type
+defines the meta format of PajÃ© used to define the format of type
 definition instructions and events. The following sections describe
 how containers and entities are defined and created. The next section
 is dedicated to the trace events: self definition, recording. The last
-section of this chapter contains a complete example of use of the Pajé
+section of this chapter contains a complete example of use of the PajÃ©
 data format.
 
-\section{Meta format of Pajé}
+\section{Meta format of PajÃ©}
 \label{sec:file}
 
 A trace file is composed of events.
@@ -112,13 +112,13 @@ LineNumber    & integer   & 98          \\
 \label{f:event:table}
 \end{figure}
 
-A Pajé trace file is self defined, meaning that the event definition information is put inside the trace file itself, much like the SDDF file format used by the Pablo visualization tool \cite{sddf}.
+A PajÃ© trace file is self defined, meaning that the event definition information is put inside the trace file itself, much like the SDDF file format used by the Pablo visualization tool \cite{sddf}.
 The file is constituted of two parts: the definition of the events at the beginning of the file followed by the events themselves.
 The definition of events contains the name of each event type and the names and types of each field.
 The second part of the trace file contains the events, with the values associated to each field, in the same order as in the definition.
 The correspondence of an event with its definition is made by means of a number, that must be unique for each event description; this number appears in an event definition and at the beginning of each event contained in the trace file.
 
-The event definition part of a Pajé trace file follows the following format:
+The event definition part of a PajÃ© trace file follows the following format:
 \begin{itemize}
 \item all the lines start with a `\%' character;
 \item each event definition starts with a \%EventDef\index{EventDef}
@@ -208,26 +208,26 @@ For example, the two events of figure~\ref{f:event:table} are shown in figure~\r
 \label{f:event}
 \end{figure}
 
-In Pajé, event numbers are used only as a means to find the definition
+In PajÃ©, event numbers are used only as a means to find the definition
 of an event; they are discarded as soon as an event is read.
 After being read, events are identified by their names.
 Two different definitions can have the same name (and different numbers), making it possible to have, in the same trace file, two events of the same type containing different fields.
 We use this feature to optionally include the source file identification in some
 events. The ``UnblockProcess'' event in the examples above could also be defined without the fields FileName and LineNumber, for use in places where this information is not known or not necessary.
 
-\section{Events treated by the Pajé simulator} %{Pajé "generic" events}
+\section{Events treated by the PajÃ© simulator} %{PajÃ© "generic" events}
 \label{sec:generic}
 
-A Pajé visualization is best described as a typed hierarchy of objects
+A PajÃ© visualization is best described as a typed hierarchy of objects
 organized as a tree. Elementary objects are the leaves of the tree and
 called ``entities'' while intermediate nodes of the tree are named
 ``containers''. 
-Entities are the objects that can be visualized in Pajé's space-time diagram,
+Entities are the objects that can be visualized in PajÃ©'s space-time diagram,
 while containers organize the space where those entities are displayed.
 
-Pajé includes a simulator module which builds this hierarchical data
+PajÃ© includes a simulator module which builds this hierarchical data
 structure from the elementary event records of the trace files. 
-Pajé has no
+PajÃ© has no
 predefined containers or entities. 
 Before an entity can be created and visualized, a hierarchy of container and
 entity types must be defined, and containers must be instantiated.
@@ -247,7 +247,7 @@ State'', by means of events that represent changes in state, contained
 either in ``Thread 1'' or ``Thread 2''.
 
 
-The events that the Pajé simulator understands can be divided into four classes:
+The events that the PajÃ© simulator understands can be divided into four classes:
 \begin{itemize}
 
 \item events to define types of containers;
@@ -486,15 +486,15 @@ Type          & T\\
 \subsection{Definitions of types of entities}
 \label{sec:entypedef}
 
-Entities are the leaves of the type hierarchy tree of a Pajé
+Entities are the leaves of the type hierarchy tree of a PajÃ©
 specialization. There exist four types of entities:
 \begin{itemize}
 \item \textbf{events}\index{event}, used to represent an event that happened in a
-certain point in time, usually displayed as triangles in Pajé's space-time
+certain point in time, usually displayed as triangles in PajÃ©'s space-time
 diagram;
 \item \textbf{states}\index{state}, used to represent the fact that a certain
 container was in a determined state during a certain amount of time, usually
-displayed as rectangles in Pajé's space-time diagram;
+displayed as rectangles in PajÃ©'s space-time diagram;
 \item \textbf{links}\index{link}, used to represent a relation between two
 containers that started in a certain time and finished in a possibly different
 time (for example, a communication between two nodes), usually displayed as arrows; and
@@ -507,7 +507,7 @@ graphs in the space-time diagram.
 An event of type event, state or link can have a value associated with it, and
 all possible values must be defined before an event with this value can be
 created.
-There are four different events to create an entity type in Pajé,
+There are four different events to create an entity type in PajÃ©,
 ``PajeDefineEventType'', ``PajeDefineStateType'', ``PajeDefineLinkType'' and
 ``PajeDefineVariableType'' and one event to define a possible value of an
 entity, ``PajeDefineEntityValue''.
@@ -720,7 +720,7 @@ Color         & "0.9 0 0.1"\\
 
 There are different events to create entities of each possible type
 (states, events, variables or links).
-In events that create entities, the optional fields named "FileName" and "LineNumber" can be used to relate the created event to a position in a file, that can be obtained in Pajé during the inspection of the entity.
+In events that create entities, the optional fields named "FileName" and "LineNumber" can be used to relate the created event to a position in a file, that can be obtained in PajÃ© during the inspection of the entity.
 These events can also have the optional field named "RelationKey", to group entities that are somehow related to each other. All entities with the same key are highlighted in the space-time diagram when the mouse cursor is over one of them.
 
 \subsubsection{States}
@@ -984,16 +984,16 @@ The whole trace file of the example would be:
 \section{Visualisation of the activity of the processors of a cluster}
 \label{sec:admin}
 
-The genericity of Pajé made it possible to visualize the system
+The genericity of PajÃ© made it possible to visualize the system
 activity of the processors of a large-sized (200 PEs) cluster of
 personal computers \cite{GuilloudCAS:2001}. Several visualizations
 were built from the system information available in the \texttt{/proc}
 pseudo-directory of each PE. It was thus possible to represent the
 processor and memory load of each PE, the most time consuming process
-of each PE., etc. Pajé was also used to visualize the reservations of
+of each PE., etc. PajÃ© was also used to visualize the reservations of
 PEs by the users of the cluster, the reservations being done using the
 PBS system \cite{PBS} (see figure~\ref{fig:pbs}). The main bits of the
-Pajé trace file analyzed to produce this figure are given below.
+PajÃ© trace file analyzed to produce this figure are given below.
 
 \begin{figure}[ht]
 \epsfxsize=\linewidth
