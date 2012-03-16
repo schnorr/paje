@@ -1,5 +1,4 @@
 \documentclass[12pt]{article}
-\usepackage{fullpage}
 \usepackage{epsfig}
 \usepackage{xspace}
 \usepackage{times}
@@ -14,6 +13,7 @@
 \usepackage{tabularx}
 \usepackage{listings}
 \usepackage{multicol}
+\usepackage[margin=2cm,left=3cm,top=3cm]{geometry}
 
 \newcommand{\Paje}{\textsc{Paj\'e}\xspace}
 \newcommand{\PajeField}[1]{\emph{#1}\xspace}
@@ -76,6 +76,14 @@
                    \setlength{\itemsep}{0pt}%
                    \setlength{\parskip}{0pt}}%
                {\end{description}}
+
+% page style (for footer and header)
+\newpagestyle{paje}[\small\sffamily]
+  {\headrule
+    \sethead[\textsl{}][][]%
+            {\textsl{\footnotesize \Paje \hfill Trace File Format }}{}{}
+    \setfoot[][\usepage][]{}{-- \usepage~--}{}
+  }
 
 
 %Change the name of table of contents
@@ -148,7 +156,9 @@ Jacques Chassin de Kergommeaux (INPG)
 %{\bf ChangeLog} (see details in Section~\ref{ChangeLog}) \\
 More information about \Paje at \url{http://paje.sf.net}.
 
+\thispagestyle{empty}
 \newpage
+\pagestyle{paje}
 
 \section{Introduction and overview}
 \label{s.Introduction}
