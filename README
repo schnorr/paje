@@ -7,7 +7,6 @@ How to install:
 On Linux (and other platforms where GNUstep works):
 
 - First, install GNUstep (www.gnustep.org)
-  There is a good installation manual on www.made-it.com
 
 - Be sure to source the GNUstep environment setting script
   (source /path-to-gnustep/System/Library/Makefiles/GNUstep.[c]sh
