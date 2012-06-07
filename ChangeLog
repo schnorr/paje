@@ -1,3 +1,10 @@
+2012-06-07 Lucas M. Schnorr <schnorr@gmail.com>
+	* PajeSimulator/SimulChunk.m: Fix the simulation of SetState, stack
+	should be cleared according to the Paje file format specification.
+	* PajeSimulator/*, PajeEventDecoder/*: Extend the Paje file format
+	by adding a new event type called PajeResetState, which clears the
+	state stack without pushing a new value to it.
+
 2012-01-26  Lucas M. Schnorr <schnorr@gmail.com>
 	* General/PajeEntity.*, PajeSimulator/UserEvent.*: exposing
 	extraFields dictionary, so filters has a direct access to
