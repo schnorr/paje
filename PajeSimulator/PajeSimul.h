@@ -120,6 +120,7 @@
 - (void)pajeSetState:(PajeEvent *)event;
 - (void)pajePushState:(PajeEvent *)event;
 - (void)pajePopState:(PajeEvent *)event;
+- (void)pajeResetState:(PajeEvent *)event;
 
 - (void)pajeSetVariable:(PajeEvent *)event;
 - (void)pajeAddVariable:(PajeEvent *)event;

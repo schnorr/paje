@@ -119,6 +119,11 @@
         event);
 }
 
+- (void)resetStateEvent:(PajeEvent *)event
+{
+    NSLog(@"Ignoring 'resetState' event for non state entity type. Event: %@",
+        event);
+}
 
 // for links
 - (void)startLinkEvent:(PajeEvent *)event
@@ -201,9 +206,7 @@
 - (void)setStateEvent:(PajeEvent *)event
                 value:(id)value
 {
-    while ([simulationStack count] > 0) {
-        [self popStateEvent:event];
-    }
+    [self resetStateEvent:event];
     [self pushStateEvent:event
                    value:value];
 }
@@ -259,6 +262,13 @@
         }
     } else {
         NSWarnMLog(@"No user state to pop with event %@", event);
+    }
+}
+
+- (void)resetStateEvent:(PajeEvent *)event
+{
+    while ([simulationStack count] > 0) {
+        [self popStateEvent:event];
     }
 }
 

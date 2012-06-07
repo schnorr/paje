@@ -88,6 +88,8 @@
                   withEvent:(PajeEvent *)event;
 - (void)popUserStateOfType:(PajeEntityType *)entityType
                  withEvent:(PajeEvent *)event;
+- (void)resetUserStateOfType:(PajeEntityType *)entityType
+                 withEvent:(PajeEvent *)event;
 
 - (void)setUserVariableOfType:(PajeVariableType *)entityType
                 toDoubleValue:(double)value

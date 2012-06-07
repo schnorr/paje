@@ -53,6 +53,7 @@ typedef enum {
     PajeSetStateEventId,
     PajePushStateEventId,
     PajePopStateEventId,
+    PajeResetStateEventId,
     PajeSetVariableEventId,
     PajeAddVariableEventId,
     PajeSubVariableEventId,

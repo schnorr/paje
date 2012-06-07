@@ -510,6 +510,20 @@
                         withEvent:event];
 }
 
+- (void)pajeResetState:(PajeEvent *)event
+{
+    PajeStateType *entityType;
+    SimulContainer *container;
+
+    [self _getEntityType:&entityType
+                   value:NULL
+               container:&container
+               fromEvent:event];
+
+    [container resetUserStateOfType:entityType
+                          withEvent:event];
+}
+
 - (void)pajeSetVariable:(PajeEvent *)event
 {
     PajeVariableType *entityType;

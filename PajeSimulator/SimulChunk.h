@@ -52,6 +52,7 @@
 - (void)pushStateEvent:(PajeEvent *)event
                  value:(id)value;
 - (void)popStateEvent:(PajeEvent *)event;
+- (void)resetStateEvent:(PajeEvent *)event;
 
 // for links
 - (void)startLinkEvent:(PajeEvent *)event

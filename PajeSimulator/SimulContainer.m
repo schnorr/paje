@@ -388,6 +388,17 @@
     [chunk popStateEvent:event];
 }
 
+- (void)resetUserStateOfType:(PajeEntityType *)type
+                   withEvent:(PajeEvent *)event
+{
+    SimulChunk *chunk;
+
+    chunk = [self chunkOfType:type];
+    if (![chunk isActive]) return;
+
+    [chunk resetStateEvent:event];
+}
+
 - (void)verifyMinMaxOfEntityType:(PajeEntityType *)t
                        withValue:(double)value
 {

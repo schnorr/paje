@@ -147,6 +147,7 @@
     ADD_INVOCATION(SetState);
     ADD_INVOCATION(PushState);
     ADD_INVOCATION(PopState);
+    ADD_INVOCATION(ResetState);
     ADD_INVOCATION(SetVariable);
     ADD_INVOCATION(AddVariable);
     ADD_INVOCATION(SubVariable);
