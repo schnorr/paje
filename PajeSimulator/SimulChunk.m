@@ -201,7 +201,7 @@
 - (void)setStateEvent:(PajeEvent *)event
                 value:(id)value
 {
-    if ([simulationStack count] > 0) {
+    while ([simulationStack count] > 0) {
         [self popStateEvent:event];
     }
     [self pushStateEvent:event
