@@ -156,6 +156,9 @@
     	[inputFile useCompression];
 #endif
     }
+
+    //define the chunkSize to be the size of the file
+    [self setUserChunkSize: sizeOfFile+1];
     hasMoreData = YES;
 }
 
