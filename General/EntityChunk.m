@@ -24,6 +24,7 @@
 #include "FilteredEnumerator.h"
 
 #define CHUNKS_TO_KEEP 3000
+#undef ENABLE_EMPTY_OF_CHUNKS
 
 @implementation EntityChunk
 
@@ -35,6 +36,7 @@ static int count;
 
 + (void)emptyLeastRecentlyUsedChunks
 {
+#ifdef ENABLE_EMPTY_OF_CHUNKS
     int i;
     EntityChunk *chunk;
     chunk = last;
@@ -42,6 +44,7 @@ static int count;
         [chunk empty];
         chunk = chunk->prev;
     }
+#endif
 }
 
 + (void)remove:(EntityChunk *)chunk
