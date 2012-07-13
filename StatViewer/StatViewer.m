@@ -73,7 +73,10 @@
     [entityTypeSelector removeAllItems];
     [[matrix cells] makeObjectsPerformSelector:@selector(setRepresentedObject:)
                                     withObject:nil];
-    [matrix removeFromSuperview];
+//commenting next line fix the bug #3465562. Does it create a memory leak?
+//anyways, the memory leak is not that big because StatViewer is allocated and
+//deallocated only once per Paje execution
+//    [matrix removeFromSuperview];
     [window release];
     [super dealloc];
 }
